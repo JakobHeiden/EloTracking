@@ -15,7 +15,7 @@ public class DiscordBot {
         this.gatewayDiscordClient = gatewayDiscordClient;
     }
 
-    public void doSomething(){}
+    //hier Funktionen
 
 
 
