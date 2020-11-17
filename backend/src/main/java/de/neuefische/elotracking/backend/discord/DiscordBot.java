@@ -12,7 +12,9 @@ public class DiscordBot {
 
     @Autowired
     public DiscordBot(GatewayDiscordClient gatewayDiscordClient) {
+
         this.gatewayDiscordClient = gatewayDiscordClient;
+        System.out.println("discrodbot§");
     }
 
     //hier Funktionen
