@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class DiscordBotConfig {
 
     @Bean
-    public GatewayDiscordClient createClient() throws Exception {
+    public GatewayDiscordClient createClient() {
         GatewayDiscordClient client = DiscordClientBuilder
                 .create(System.getenv("DISCORD_BOT_TOKEN"))
                 .build()
