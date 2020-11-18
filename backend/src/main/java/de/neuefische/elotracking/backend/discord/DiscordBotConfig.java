@@ -15,7 +15,6 @@ public class DiscordBotConfig {
                 .build()
                 .login()
                 .block();
-        client.onDisconnect().block();
         return client;
     }
 }
