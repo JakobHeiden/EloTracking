@@ -16,9 +16,6 @@ public class DiscordBotConfig {
                 .build()
                 .login()
                 .block();
-        client.onDisconnect().block();
-        System.err.println("config");
-        throw new Exception("oh no");
-        //return client;
+        return client;
     }
 }

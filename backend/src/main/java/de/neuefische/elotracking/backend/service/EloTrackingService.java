@@ -15,7 +15,5 @@ public class EloTrackingService {
     public EloTrackingService(DiscordBot discordBot, MongoDbDao mongoDbDao) {
         this.discordBot = discordBot;
         this.mongoDbDao = mongoDbDao;
-        mongoDbDao.save(new Dummy("hallo"));
-        System.out.println("hallo?");
     }
 }
