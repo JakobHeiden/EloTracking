@@ -16,4 +16,9 @@ public class EloTrackingService {
         this.discordBot = discordBot;
         this.mongoDbDao = mongoDbDao;
     }
+
+    //TODO remove later on
+    public Dummy ping(String data) {
+        return mongoDbDao.save(new Dummy(data));
+    }
 }
