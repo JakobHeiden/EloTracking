@@ -16,7 +16,4 @@ public class DiscordBot {
     }
 
     //hier Funktionen
-
-
-
 }
