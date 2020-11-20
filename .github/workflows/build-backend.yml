@@ -14,4 +14,6 @@ jobs:
         with:
           java-version: 15
       - name: Build with Maven
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
         run: mvn -B package --file backend/pom.xml
