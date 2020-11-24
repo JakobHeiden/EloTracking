@@ -38,7 +38,6 @@ public class DiscordBot {
         User admin = client.getUserById(Snowflake.of(service.getConfig()
                 .getProperty("ADMIN_DISCORD_ID"))).block();
         adminDm = admin.getPrivateChannel().block();
-        //dann: logger extenden...
         Logger.info("Private channel to admin established");
         adminDm.createMessage("I am logged in and ready").subscribe();
     }
