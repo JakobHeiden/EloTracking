@@ -8,9 +8,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
-import discord4j.discordjson.json.DMCreateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
 
