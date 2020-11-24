@@ -39,6 +39,10 @@ public class DiscordBot {
                 .getProperty("ADMIN_DISCORD_ID"))).block();
         adminDm = admin.getPrivateChannel().block();
         Logger.info("Private channel to admin established");
-        adminDm.createMessage("I am logged in and ready").subscribe();
+        sendToAdmin("I am logged in and ready");
+    }
+
+    public void sendToAdmin(String text) {
+        adminDm.createMessage(text).subscribe();
     }
 }
