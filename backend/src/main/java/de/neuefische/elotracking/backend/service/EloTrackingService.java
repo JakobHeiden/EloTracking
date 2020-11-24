@@ -6,6 +6,7 @@ import de.neuefische.elotracking.backend.model.Dummy;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
 
@@ -20,14 +21,12 @@ public class EloTrackingService {
     private final MongoDbDao mongoDbDao;
     @Getter
     private Properties config = new Properties();
-    private PrivateChannel adminDm;
 
     @Autowired
-    public EloTrackingService(DiscordBot discordBot, MongoDbDao mongoDbDao) throws IOException {
+    public EloTrackingService(@Lazy DiscordBot discordBot, MongoDbDao mongoDbDao) throws IOException {
         this.discordBot = discordBot;
         this.mongoDbDao = mongoDbDao;
         config.load(new FileReader("backend/src/main/resources/config.txt"));
-        Logger.info(config.getProperty("ADMIN_DISCORD_ID"));
     }
 
     //TODO remove later on
