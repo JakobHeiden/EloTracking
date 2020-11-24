@@ -42,7 +42,6 @@ public class DiscordBot {
         adminDm = admin.getPrivateChannel().block();
         //dann: logger extenden...
         Logger.info("Private channel to admin established");
-        //log levels in die config
         adminDm.createMessage("I am logged in and ready").subscribe();
     }
 }
