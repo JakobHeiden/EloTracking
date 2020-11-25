@@ -12,6 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "game")
 public class Game {
     @Id
-    private String channel;
+    private String channelId;
     private String name;
 }
