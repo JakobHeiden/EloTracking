@@ -14,12 +14,12 @@ import org.tinylog.Logger;
 
 @Component
 public class DiscordBot {
-    private final GatewayDiscordClient gatewayDiscordClient;
+    private final GatewayDiscordClient client;
     private PrivateChannel adminDm;
 
     @Autowired
-    public DiscordBot(GatewayDiscordClient client, EloTrackingService service) {
-        this.gatewayDiscordClient = client;
+    public DiscordBot(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service) {
+        this.client = gatewayDiscordClient;
 
         //ping the mongodb. TODO remove later on
         client.getEventDispatcher().on(MessageCreateEvent.class)

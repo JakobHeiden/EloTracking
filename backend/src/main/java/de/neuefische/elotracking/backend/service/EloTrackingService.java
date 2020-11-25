@@ -14,14 +14,14 @@ import java.util.Properties;
 
 @Service
 public class EloTrackingService {
-    private final DiscordBot discordBot;
+    private final DiscordBot bot;
     private final MongoDbDao mongoDbDao;
     @Getter
     private Properties config = new Properties();
 
     @Autowired
     public EloTrackingService(@Lazy DiscordBot discordBot, MongoDbDao mongoDbDao) throws IOException {
-        this.discordBot = discordBot;
+        this.bot = discordBot;
         this.mongoDbDao = mongoDbDao;
         config.load(new FileReader("backend/src/main/resources/config.txt"));
     }
