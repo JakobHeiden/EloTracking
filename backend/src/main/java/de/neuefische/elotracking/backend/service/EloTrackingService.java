@@ -2,6 +2,7 @@ package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
+import de.neuefische.elotracking.backend.model.Challenge;
 import de.neuefische.elotracking.backend.model.Game;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,10 +37,29 @@ public class EloTrackingService {
         Game newGame = gameDao.insert(new Game(channelId, name));
         if (newGame == null) {
             Logger.error("Insert name Game to db failed: %s %s", channelId, name);
-            bot.sendToAdmin(String.format("Insert name Game to db failed: %s %s", channelId, name));
+            bot.sendToAdmin(String.format("Insert new Game to db failed: %s %s", channelId, name));
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
 
         return String.format(String.format("New game created. You can now %schallenge another player", bot.getPrefix()));
+    }
+
+    public String challenge(String channelId, String challengerId, String otherPlayerId) {
+        if (!gameDao.existsByChannelId(channelId)) {
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getPrefix());
+        }
+        if (challengeDao.existsById(channelId + "-" + challengerId + "-" + otherPlayerId)) {
+            return String.format("You already have an existing challenge towards that player. He needs to %saccept it" +
+                    " before you can issue another", bot.getPrefix());
+        }
+
+        Challenge newChallenge = challengeDao.insert(new Challenge(channelId, challengerId, otherPlayerId));
+        if (newChallenge == null) {
+            Logger.error("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId);
+            bot.sendToAdmin(String.format("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId));
+            return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
+        }
+
+        return String.format("Challenge issued. Your opponent can now %saccept", bot.getPrefix());
     }
 }
