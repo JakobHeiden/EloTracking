@@ -5,6 +5,8 @@ import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.model.Challenge;
 import de.neuefische.elotracking.backend.model.Game;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.MessageChannel;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -13,6 +15,7 @@ import org.tinylog.Logger;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Properties;
 
 @Service
@@ -64,5 +67,26 @@ public class EloTrackingService {
         }
 
         return String.format("Challenge issued. Your opponent can now %saccept", bot.getPrefix());
+    }
+
+    public String accept(String channelId, String acceptingPlayerId, String challengerId) {
+        if (!gameDao.existsByChannelId(channelId)) {
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getPrefix());
+        }
+
+        Optional<Challenge> challenge = challengeDao.findById(String.format("%s-%s-%s", channelId, challengerId, acceptingPlayerId));
+        if (challenge.isEmpty()) {
+            return "No unanswered challenge by that player";
+        } else {
+            challenge.get().accept();
+            Challenge updatedChallenge = challengeDao.save(challenge.get());
+            if (updatedChallenge == null) {
+                Logger.error("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId);
+                bot.sendToAdmin(String.format("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId));
+                return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
+            }
+
+            return String.format("Challenge accepted! Come back and %sreport when your game is finished.", bot.getPrefix());
+        }
     }
 }
