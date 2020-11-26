@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.service;
 
+import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.model.Challenge;
@@ -18,13 +19,15 @@ import java.util.Properties;
 public class EloTrackingService {
     private final DiscordBot bot;
     private final GameDao gameDao;
+    private final ChallengeDao challengeDao;
     @Getter
     private Properties config = new Properties();
 
     @Autowired
-    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao) throws IOException {
+    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao, ChallengeDao challengeDao) throws IOException {
         this.bot = discordBot;
         this.gameDao = gameDao;
+        this.challengeDao = challengeDao;
         this.config.load(new FileReader("backend/src/main/resources/config.txt"));
     }
 
