@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.Optional;
@@ -14,6 +15,12 @@ import java.util.Optional;
 @NoArgsConstructor
 @Document(collection = "challenge")
 public class Challenge {
+    public enum ReportStatus {
+        NOT_YET_REPORTED,
+        WIN,
+        LOSS
+    }
+
     @Id
     private String id;
     private String channelId;
@@ -21,6 +28,8 @@ public class Challenge {
     private String otherPlayerId;
     private Date issuedWhen;
     private Optional<Date> acceptedWhen;
+    private ReportStatus challengerReported;
+    private ReportStatus otherPlayerReported;
 
     public Challenge(String channelId, String challengerId, String otherPlayerId) {
         this.channelId = channelId;
@@ -29,9 +38,19 @@ public class Challenge {
         this.id = channelId + "-" + challengerId + "-" + otherPlayerId;
         this.issuedWhen = new Date();
         this.acceptedWhen = Optional.empty();
+        this.challengerReported = ReportStatus.NOT_YET_REPORTED;
+        this.otherPlayerReported = ReportStatus.NOT_YET_REPORTED;
     }
 
     public void accept() {
         this.acceptedWhen = Optional.of(new Date());
+    }
+
+    public void report(boolean isChallengerReport, boolean isWin) {
+        if (isChallengerReport) {
+            challengerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
+        } else {
+            otherPlayerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
+        }
     }
 }
