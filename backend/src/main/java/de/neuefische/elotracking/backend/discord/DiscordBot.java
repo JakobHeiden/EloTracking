@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
 
-import java.util.Set;
-
 @Component
 public class DiscordBot {
     private final GatewayDiscordClient client;
@@ -61,14 +59,32 @@ public class DiscordBot {
                 register(msg, parts, channel);
                 break;
             case "challenge":
-                challenge(msg, parts, channel);
+                challenge(msg, channel);
+                break;
+            case "accept":
+                accept(msg, channel);
                 break;
                 default:
                     channel.createMessage("Unknown command " + parts[0]).subscribe();
         }
     }
 
-    private void challenge(Message msg, String[] parts, MessageChannel channel) {
+    private void accept(Message msg, MessageChannel channel) {
+        if (msg.getUserMentionIds().size() != 1) {
+            channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
+                    "e.g. %saccept @somebody", prefix)).subscribe();
+            return;
+        }
+
+        String challengerId = msg.getUserMentionIds().iterator().next().asString();
+        String replyFromService = service.accept(
+                channel.getId().asString(),
+                msg.getAuthor().get().getId().asString(),
+                challengerId);
+        channel.createMessage(replyFromService).subscribe();
+    }
+
+    private void challenge(Message msg, MessageChannel channel) {
         if (msg.getUserMentionIds().size() != 1) {
             channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
                     "e.g. %schallenge @somebody", prefix)).subscribe();
