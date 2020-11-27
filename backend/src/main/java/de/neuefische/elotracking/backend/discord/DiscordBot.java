@@ -10,6 +10,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
@@ -87,7 +88,9 @@ public class DiscordBot {
                 msg.getAuthor().get().getId().asString(),
                 msg.getUserMentionIds().iterator().next().asString(),
                 isWin);
-        channel.createMessage(replyFromService).subscribe();
+        String winnerMention = isWin ? msg.getAuthor().get().getMention() : msg.getUserMentions().blockFirst().getMention();
+        String loserMention = !isWin ? msg.getAuthor().get().getMention() : msg.getUserMentions().blockFirst().getMention();
+        channel.createMessage(String.format(replyFromService, winnerMention, loserMention)).subscribe();
     }
 
     private void accept(Message msg, MessageChannel channel) {

@@ -136,27 +136,34 @@ public class EloTrackingService {
                 if (isReportedWin) {
                     return "Both players reported a win. Please contact your game admin";
                 } else {
-                    Match newMatch = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
+                    Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
                             reportedOnPlayerId, reportingPlayerId, false, false));
-                    if (newMatch == null) {
+                    if (match == null) {
                         Logger.error("Insert Match to db failed");
                         bot.sendToAdmin("Insert Match to db failed");
                         return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
                     }
+
+                    double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
-                    return updateRatings(newMatch);
+                    return String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
+                            "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
                 }
             case LOSS:
                 if (isReportedWin) {
-                    Match newMatch = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
+                    Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
                         reportingPlayerId, reportedOnPlayerId, false, false));
-                    if (newMatch == null) {
+                    if (match == null) {
                         Logger.error("Insert Match to db failed");
                         bot.sendToAdmin("Insert Match to db failed");
                         return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
                     }
+
+                    double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
-                    return updateRatings(newMatch);
+                    return String.format("%s old rating %n, new rating %n. %s old rating %n, new rating %n",
+                            "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
+
                 } else {
                     return "Both players reported a loss. Please contact your game admin";
                 }
@@ -167,14 +174,16 @@ public class EloTrackingService {
     }
 
     private double[] updateRatings(Match match) {
-        Player winner = playerDao.findById(match.getWinner()).get();
-        Player loser = playerDao.findById(match.getLoser()).get();
-        double[] newRatings = calculateElo(winner.getRating(), loser.getRating(),
+        Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
+        Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
+        double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
                 match.isDraw() ? 0.5 : 1,
                 Float.parseFloat(config.getProperty("K")));
-        winner.setRating(newRatings[0]);
-        loser.setRating(newRatings[1]);
-        return newRatings;
+        winner.setRating(ratings[2]);
+        playerDao.save(winner);
+        loser.setRating(ratings[3]);
+        playerDao.save(loser);
+        return ratings;
     }
 
     private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
@@ -183,6 +192,6 @@ public class EloTrackingService {
         double expectedResult2 = 1 / (1 + Math.pow(10, (rating1-rating2)/400));
         double newRating1 = rating1 + k * (player1Result - expectedResult1);
         double newRating2 = rating2 + k * (player2Result - expectedResult2);
-        return new double[] {newRating1, newRating2};
+        return new double[] {rating1, rating2, newRating1, newRating2};
     }
 }
