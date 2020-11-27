@@ -46,11 +46,13 @@ public class Challenge {
         this.acceptedWhen = Optional.of(new Date());
     }
 
-    public void report(boolean isChallengerReport, boolean isWin) {
+    public ReportStatus report(boolean isChallengerReport, boolean isWin) {
         if (isChallengerReport) {
             challengerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
+            return otherPlayerReported;
         } else {
             otherPlayerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
+            return challengerReported;
         }
     }
 
