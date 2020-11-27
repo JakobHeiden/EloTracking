@@ -166,7 +166,8 @@ public class EloTrackingService {
     }
 
     private String updateRatings(Match match) {
-        return "TODO";
+        Player challenger = PlayerDao.ge
+        double[] newRatings = calculateElo()
     }
 
     private static double[] calculateElo(double rating1, double rating2, float player1Result, float k) {
