@@ -152,4 +152,13 @@ public class EloTrackingService {
         //TODO implement
         return "TODO";
     }
+
+    private static double[] calculateElo(double rating1, double rating2, float player1Result, float k) {
+        float player2Result = 1 - player1Result;
+        double expectedResult1 = 1 / (1 + Math.pow(10, (rating2-rating1)/400));
+        double expectedResult2 = 1 / (1 + Math.pow(10, (rating1-rating2)/400));
+        double newRating1 = rating1 + k * (player1Result - expectedResult1);
+        double newRating2 = rating2 + k * (player2Result - expectedResult2);
+        return new double[] {newRating1, newRating2};
+    }
 }
