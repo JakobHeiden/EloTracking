@@ -21,4 +21,5 @@ public class Match {
     private String winner;
     private String loser;
     private boolean isDraw;
+    private boolean hasUpdatedPlayerRatings;
 }
