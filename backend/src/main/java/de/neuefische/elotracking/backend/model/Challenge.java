@@ -35,7 +35,7 @@ public class Challenge {
         this.channelId = channelId;
         this.challengerId = challengerId;
         this.otherPlayerId = otherPlayerId;
-        this.id = channelId + "-" + challengerId + "-" + otherPlayerId;
+        this.id = generateId(channelId, challengerId, otherPlayerId);
         this.issuedWhen = new Date();
         this.acceptedWhen = Optional.empty();
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
@@ -52,5 +52,11 @@ public class Challenge {
         } else {
             otherPlayerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
         }
+    }
+
+    public static String generateId(String channelId, String playerId1, String playerId2) {
+        return playerId1.compareTo(playerId2) < 0 ?
+                String.format("%s-%s-%s", channelId, playerId1, playerId2) :
+                String.format("%s-%s-%s", channelId, playerId2, playerId1);
     }
 }
