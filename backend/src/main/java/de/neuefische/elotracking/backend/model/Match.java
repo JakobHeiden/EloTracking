@@ -7,6 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -14,7 +15,7 @@ import java.util.Date;
 @Document(collection = "match")
 public class Match {
     @Id
-    private String id;
+    private UUID id;
     private String channel;
     private Date date;
     private String winner;
