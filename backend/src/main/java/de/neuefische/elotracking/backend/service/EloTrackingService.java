@@ -90,6 +90,7 @@ public class EloTrackingService {
             return "No unanswered challenge by that player";
         } else {
             addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
+
             challenge.get().accept();
             Challenge updatedChallenge = challengeDao.save(challenge.get());
             if (updatedChallenge == null) {
@@ -103,8 +104,8 @@ public class EloTrackingService {
     }
 
     private boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
-        if (!playerDao.existsById(playerId)) {
-            playerDao.insert(new Player(playerId, channelId,
+        if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
+            playerDao.insert(new Player(channelId, playerId,
                     Float.parseFloat(config.getProperty("INITIAL_RATING"))));
             return true;
         }
@@ -165,13 +166,19 @@ public class EloTrackingService {
         }
     }
 
-    private String updateRatings(Match match) {
-        Player challenger = PlayerDao.ge
-        double[] newRatings = calculateElo()
+    private double[] updateRatings(Match match) {
+        Player winner = playerDao.findById(match.getWinner()).get();
+        Player loser = playerDao.findById(match.getLoser()).get();
+        double[] newRatings = calculateElo(winner.getRating(), loser.getRating(),
+                match.isDraw() ? 0.5 : 1,
+                Float.parseFloat(config.getProperty("K")));
+        winner.setRating(newRatings[0]);
+        loser.setRating(newRatings[1]);
+        return newRatings;
     }
 
-    private static double[] calculateElo(double rating1, double rating2, float player1Result, float k) {
-        float player2Result = 1 - player1Result;
+    private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
+        double player2Result = 1 - player1Result;
         double expectedResult1 = 1 / (1 + Math.pow(10, (rating2-rating1)/400));
         double expectedResult2 = 1 / (1 + Math.pow(10, (rating1-rating2)/400));
         double newRating1 = rating1 + k * (player1Result - expectedResult1);
