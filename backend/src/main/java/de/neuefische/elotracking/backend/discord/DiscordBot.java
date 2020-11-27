@@ -64,9 +64,30 @@ public class DiscordBot {
             case "accept":
                 accept(msg, channel);
                 break;
+            case "win":
+                report(msg, channel, true);
+                break;
+            case "lose":
+                report(msg, channel, false);
+                break;
                 default:
                     channel.createMessage("Unknown command " + parts[0]).subscribe();
         }
+    }
+
+    private void report(Message msg, MessageChannel channel, boolean isWin) {
+        if (msg.getUserMentionIds().size() != 1) {
+            channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
+                    "e.g. %s%s @somebody", prefix, isWin ? "win" : "lose")).subscribe();
+            return;
+        }
+
+        String replyFromService = service.report(
+                channel.getId().asString(),
+                msg.getAuthor().get().getId().asString(),
+                msg.getUserMentionIds().iterator().next().asString(),
+                isWin);
+        channel.createMessage(replyFromService).subscribe();
     }
 
     private void accept(Message msg, MessageChannel channel) {
