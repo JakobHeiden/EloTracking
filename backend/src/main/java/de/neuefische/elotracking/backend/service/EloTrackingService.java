@@ -165,6 +165,8 @@ public class EloTrackingService {
         playerDao.save(winner);
         loser.setRating(ratings[3]);
         playerDao.save(loser);
+        match.setHasUpdatedPlayerRatings(true);
+        matchDao.save(match);
         return ratings;
     }
 
