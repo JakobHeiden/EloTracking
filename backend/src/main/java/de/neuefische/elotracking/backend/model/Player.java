@@ -13,6 +13,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Player {
     @Id
     private String id;
-    private String channel;
+    private String discordUserId;
+    private String channelId;
     private double rating;
+
+    public Player(String channelId, String discordUserId, double rating) {
+        this.id = generateId(channelId, discordUserId);
+        this.discordUserId = discordUserId;
+        this.channelId = channelId;
+        this.rating = rating;
+    }
+
+    public static String generateId(String channelId, String discordUserId) {
+        return String.format("%s-%s", channelId, discordUserId);
+    }
 }
