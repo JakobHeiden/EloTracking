@@ -1,14 +1,8 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.dao.ChallengeDao;
-import de.neuefische.elotracking.backend.dao.GameDao;
-import de.neuefische.elotracking.backend.dao.MatchDao;
-import de.neuefische.elotracking.backend.dao.PlayerDao;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
-import de.neuefische.elotracking.backend.model.Challenge;
-import de.neuefische.elotracking.backend.model.Game;
-import de.neuefische.elotracking.backend.model.Match;
-import de.neuefische.elotracking.backend.model.Player;
+import de.neuefische.elotracking.backend.dao.*;
+import de.neuefische.elotracking.backend.model.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -138,12 +132,6 @@ public class EloTrackingService {
                 } else {
                     Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
                             reportedOnPlayerId, reportingPlayerId, false, false));
-                    if (match == null) {
-                        Logger.error("Insert Match to db failed");
-                        bot.sendToAdmin("Insert Match to db failed");
-                        return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-                    }
-
                     double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
                     return String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
@@ -153,12 +141,6 @@ public class EloTrackingService {
                 if (isReportedWin) {
                     Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
                         reportingPlayerId, reportedOnPlayerId, false, false));
-                    if (match == null) {
-                        Logger.error("Insert Match to db failed");
-                        bot.sendToAdmin("Insert Match to db failed");
-                        return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-                    }
-
                     double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
                     return String.format("%s old rating %n, new rating %n. %s old rating %n, new rating %n",
