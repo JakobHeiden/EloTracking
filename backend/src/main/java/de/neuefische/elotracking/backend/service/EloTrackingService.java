@@ -106,20 +106,13 @@ public class EloTrackingService {
         if (challenge.getAcceptedWhen().isEmpty()) {
             return "This challenge has not been accepted yet and cannot be reported as a win";
         }
-        bot.sendToAdmin(reportingPlayerId);
-        bot.sendToAdmin(challenge.getChallengerId());
 
-        Challenge.ReportStatus reportedOnPlayerReportStatus;
-        if (reportingPlayerId.equals(challenge.getChallengerId())) {
-            challenge.setChallengerReported(isReportedWin ? Challenge.ReportStatus.WIN : Challenge.ReportStatus.LOSS);
-            reportedOnPlayerReportStatus = challenge.getOtherPlayerReported();
-        } else {
-            challenge.setOtherPlayerReported(isReportedWin ? Challenge.ReportStatus.WIN : Challenge.ReportStatus.LOSS);
-            reportedOnPlayerReportStatus = challenge.getChallengerReported();
-        }
+        //do the actual reporting
+        Challenge.ReportStatus reportedOnPlayerReportStatus =
+                challenge.report(reportingPlayerId.equals(challenge.getChallengerId()), isReportedWin);
         challengeDao.save(challenge);
 
-        //check if the challenge can be resolved
+        //check if the challenge can be resolved into a match
         switch (reportedOnPlayerReportStatus) {
             case WIN:
                 if (isReportedWin) {
