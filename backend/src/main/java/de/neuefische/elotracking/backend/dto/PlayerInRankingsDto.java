@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.dto;
 
-import de.neuefische.elotracking.backend.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerLeaderboardDto implements Comparable<PlayerLeaderboardDto> {
+public class PlayerInRankingsDto implements Comparable<PlayerInRankingsDto> {
     private String name;
     private double rating;
 
     @Override
-    public int compareTo(PlayerLeaderboardDto otherPlayer) {
+    public int compareTo(PlayerInRankingsDto otherPlayer) {
         return (int) (otherPlayer.getRating() - this.rating);
     }
 }

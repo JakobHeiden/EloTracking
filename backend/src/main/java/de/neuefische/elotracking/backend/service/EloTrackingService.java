@@ -2,7 +2,7 @@ package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.dao.*;
-import de.neuefische.elotracking.backend.dto.PlayerLeaderboardDto;
+import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,10 +178,10 @@ public class EloTrackingService {
         return new double[] {rating1, rating2, newRating1, newRating2};
     }
 
-    public List<PlayerLeaderboardDto> getRankings(String channelId) {
+    public List<PlayerInRankingsDto> getRankings(String channelId) {
         List<Player> allPlayers = playerDao.findAllByChannelId(channelId);
-        List<PlayerLeaderboardDto> allPlayersAsDto = allPlayers.stream()
-                .map(player -> new PlayerLeaderboardDto(bot.getPlayerName(player.getDiscordUserId()), player.getRating()))
+        List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
+                .map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getDiscordUserId()), player.getRating()))
                 .collect(Collectors.toList());
         Collections.sort(allPlayersAsDto);
         return allPlayersAsDto;
