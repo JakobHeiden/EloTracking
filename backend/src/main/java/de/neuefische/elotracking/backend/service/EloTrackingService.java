@@ -186,4 +186,8 @@ public class EloTrackingService {
         Collections.sort(allPlayersAsDto);
         return allPlayersAsDto;
     }
+
+    public Game getGameData(String channelId) {
+        return gameDao.findByChannelId(channelId);
+    }
 }
