@@ -32,7 +32,7 @@ public class DiscordBot {
     public DiscordBot(GatewayDiscordClient gatewayDiscordClient, EloTrackingService eloTrackingService) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
-        this.prefix = service.getConfig().getProperty("COMMAND_PREFIX");
+        this.prefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
 
         String adminId = service.getConfig().getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
