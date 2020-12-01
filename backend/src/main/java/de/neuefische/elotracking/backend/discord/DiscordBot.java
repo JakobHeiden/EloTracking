@@ -9,10 +9,14 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.TextChannelEditSpec;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
+
+import java.util.function.Consumer;
 
 @Component
 public class DiscordBot {
@@ -143,9 +147,16 @@ public class DiscordBot {
             return;
         }
 
-        String name = msg.getContent().substring(10);
+        String name = msg.getContent().substring("register".length() + prefix.length());
         String replyFromService = service.register(channel.getId().asString(), name);
         channel.createMessage(replyFromService).subscribe();
+
+        Consumer<TextChannelEditSpec> edit =
+                textChannelEditSpec -> textChannelEditSpec.setTopic(
+                        String.format("Leaderboard: http://%s/%s",
+                                service.getConfig().getProperty("BASE_URL"),
+                                channel.getId().asString()));
+        ((TextChannel) channel).edit(edit).subscribe(System.out::println);
     }
 
     public String getPlayerName(String playerId) {
