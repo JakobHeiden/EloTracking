@@ -202,4 +202,12 @@ public class EloTrackingService {
         gameDao.save(game);
         return String.format("Command prefix changed to %s", newPrefix);
     }
+
+    public boolean isCommand(String channelId, String firstCharacter) {
+        if (!gameDao.existsByChannelId(channelId)) {
+            return (firstCharacter.equals(bot.getDefaultPrefix()));
+        } else {
+            return (firstCharacter.equals(gameDao.findByChannelId(channelId).getCommandPrefix()));
+        }
+    }
 }

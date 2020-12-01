@@ -14,4 +14,9 @@ public class Game {
     @Id
     private String channelId;
     private String name;
+    private String commandPrefix;
+
+    public Game(String channelId, String name) {
+        this(channelId, name, "!");
+    }
 }
