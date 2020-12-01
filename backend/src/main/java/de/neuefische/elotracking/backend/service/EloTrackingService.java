@@ -49,16 +49,16 @@ public class EloTrackingService {
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
 
-        return String.format(String.format("New game created. You can now %schallenge another player", bot.getPrefix()));
+        return String.format(String.format("New game created. You can now %schallenge another player", bot.getDefaultPrefix()));
     }
 
     public String challenge(String channelId, String challengerId, String otherPlayerId) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getPrefix());
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());
         }
         if (challengeDao.existsById(channelId + "-" + challengerId + "-" + otherPlayerId)) {
             return String.format("You already have an existing challenge towards that player. He needs to %saccept it" +
-                    " before you can issue another", bot.getPrefix());
+                    " before you can issue another", bot.getDefaultPrefix());
         }
 
         addNewPlayerIfPlayerNotPresent(channelId, challengerId);
@@ -70,12 +70,12 @@ public class EloTrackingService {
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
 
-        return String.format("Challenge issued. Your opponent can now %saccept", bot.getPrefix());
+        return String.format("Challenge issued. Your opponent can now %saccept", bot.getDefaultPrefix());
     }
 
     public String accept(String channelId, String acceptingPlayerId, String challengerId) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getPrefix());
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());
         }
 
         Optional<Challenge> challenge = challengeDao.findById(Challenge.generateId(channelId, challengerId, acceptingPlayerId));
@@ -92,7 +92,7 @@ public class EloTrackingService {
                 return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
             }
 
-            return String.format("Challenge accepted! Come back and %sreport when your game is finished.", bot.getPrefix());
+            return String.format("Challenge accepted! Come back and %sreport when your game is finished.", bot.getDefaultPrefix());
         }
     }
 
@@ -107,11 +107,11 @@ public class EloTrackingService {
 
     public String report(String channelId, String reportingPlayerId, String reportedOnPlayerId, boolean isReportedWin) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getPrefix());
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());
         }
         String challengeId = Challenge.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
         if (!challengeDao.existsById(challengeId)) {
-            return String.format("No challenge exists towards that player. Use %schallenge to issue one", bot.getPrefix());
+            return String.format("No challenge exists towards that player. Use %schallenge to issue one", bot.getDefaultPrefix());
         }
         Challenge challenge = challengeDao.findById(challengeId).get();
         if (challenge.getAcceptedWhen().isEmpty()) {
@@ -189,5 +189,17 @@ public class EloTrackingService {
 
     public Game getGameData(String channelId) {
         return gameDao.findByChannelId(channelId);
+    }
+
+    public String setprefix(String channelId, String newPrefix) {
+        if (!gameDao.existsByChannelId(channelId)) {
+            return String.format("No game is associated with this channel. Use %sregister to register" +
+                    " a new game", bot.getDefaultPrefix());
+        }
+
+        Game game = gameDao.findByChannelId(channelId);
+        game.setCommandPrefix(newPrefix);
+        gameDao.save(game);
+        return String.format("Command prefix changed to %s", newPrefix);
     }
 }

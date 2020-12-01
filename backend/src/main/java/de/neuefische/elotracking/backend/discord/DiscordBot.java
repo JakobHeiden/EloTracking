@@ -26,13 +26,13 @@ public class DiscordBot {
     @Getter
     private final String adminMentionAsString;
     @Getter
-    private final String prefix;
+    private final String defaultPrefix;
 
     @Autowired
     public DiscordBot(GatewayDiscordClient gatewayDiscordClient, EloTrackingService eloTrackingService) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
-        this.prefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
+        this.defaultPrefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
 
         String adminId = service.getConfig().getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
@@ -44,7 +44,7 @@ public class DiscordBot {
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(MessageCreateEvent::getMessage)
                 .filter(message -> message.getAuthor().map(user -> !user.isBot()).orElse(false))
-                .filter(message -> message.getContent().startsWith(prefix))
+                .filter(message -> message.getContent().startsWith(defaultPrefix))
                 .subscribe(this::parseCommand);
 
         client.getEventDispatcher().on(Event.class)
@@ -56,7 +56,7 @@ public class DiscordBot {
     }
 
     private void parseCommand(Message msg) {
-        String[] parts = msg.getContent().substring(prefix.length()).split(" ");
+        String[] parts = msg.getContent().substring(defaultPrefix.length()).split(" ");
         MessageChannel channel = msg.getChannel().block();
         switch(parts[0]) {
             case "register":
@@ -77,9 +77,23 @@ public class DiscordBot {
             case "help":
                 help(msg, channel);
                 break;
+            case "setprefix":
+                setprefix(msg, channel, parts);
+                break;
                 default:
                     channel.createMessage("Unknown command " + parts[0]).subscribe();
         }
+    }
+
+    private void setprefix(Message msg, MessageChannel channel, String[] parts) {
+        if (parts.length == 1) {
+            channel.createMessage("Please specify a special character (or any string of characters)")
+                    .subscribe();
+            return;
+        }
+
+        String replyFromService = service.setprefix(channel.getId().asString(), parts[1]);
+        channel.createMessage(replyFromService);
     }
 
     private void help(Message msg, MessageChannel channel) {
@@ -90,14 +104,14 @@ public class DiscordBot {
                         "%1$saccept\t\t Accept a challenge\n" +
                         "%1$swin\t\t\t Declare a win over another player\n" +
                         "%1$slose\t\t\tDeclare a loss to another player\n" +
-                        "%1$shelp\t\t\t Obviously.", prefix))
+                        "%1$shelp\t\t\t Obviously.", defaultPrefix))
                 .subscribe();//TODO formatting
     }
 
     private void report(Message msg, MessageChannel channel, boolean isWin) {
         if (msg.getUserMentionIds().size() != 1) {
             channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
-                    "e.g. %s%s @somebody", prefix, isWin ? "win" : "lose")).subscribe();
+                    "e.g. %s%s @somebody", defaultPrefix, isWin ? "win" : "lose")).subscribe();
             return;
         }
 
@@ -114,7 +128,7 @@ public class DiscordBot {
     private void accept(Message msg, MessageChannel channel) {
         if (msg.getUserMentionIds().size() != 1) {
             channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
-                    "e.g. %saccept @somebody", prefix)).subscribe();
+                    "e.g. %saccept @somebody", defaultPrefix)).subscribe();
             return;
         }
 
@@ -129,7 +143,7 @@ public class DiscordBot {
     private void challenge(Message msg, MessageChannel channel) {
         if (msg.getUserMentionIds().size() != 1) {
             channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
-                    "e.g. %schallenge @somebody", prefix)).subscribe();
+                    "e.g. %schallenge @somebody", defaultPrefix)).subscribe();
             return;
         }
 
@@ -143,11 +157,11 @@ public class DiscordBot {
 
     private void register(Message msg, String[] parts, MessageChannel channel) {
         if (parts.length < 2) {
-            channel.createMessage(String.format("Usage: %sregister <name of your game>", prefix)).subscribe();
+            channel.createMessage(String.format("Usage: %sregister <name of your game>", defaultPrefix)).subscribe();
             return;
         }
 
-        String name = msg.getContent().substring("register".length() + prefix.length());
+        String name = msg.getContent().substring("register".length() + defaultPrefix.length());
         String replyFromService = service.register(channel.getId().asString(), name);
         channel.createMessage(replyFromService).subscribe();
 
