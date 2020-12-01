@@ -87,7 +87,9 @@ public class DiscordBot {
                 msg.getAuthor().get().getId().asString(),
                 msg.getUserMentionIds().iterator().next().asString(),
                 isWin);
-        channel.createMessage(replyFromService).subscribe();
+        String winnerMention = isWin ? msg.getAuthor().get().getMention() : msg.getUserMentions().blockFirst().getMention();
+        String loserMention = !isWin ? msg.getAuthor().get().getMention() : msg.getUserMentions().blockFirst().getMention();
+        channel.createMessage(String.format(replyFromService, winnerMention, loserMention)).subscribe();
     }
 
     private void accept(Message msg, MessageChannel channel) {

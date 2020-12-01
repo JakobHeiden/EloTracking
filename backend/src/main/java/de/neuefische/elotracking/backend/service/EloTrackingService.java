@@ -1,12 +1,8 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.dao.ChallengeDao;
-import de.neuefische.elotracking.backend.dao.GameDao;
-import de.neuefische.elotracking.backend.dao.MatchDao;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
-import de.neuefische.elotracking.backend.model.Challenge;
-import de.neuefische.elotracking.backend.model.Game;
-import de.neuefische.elotracking.backend.model.Match;
+import de.neuefische.elotracking.backend.dao.*;
+import de.neuefische.elotracking.backend.model.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -26,15 +22,18 @@ public class EloTrackingService {
     private final GameDao gameDao;
     private final ChallengeDao challengeDao;
     private final MatchDao matchDao;
+    private PlayerDao playerDao;
     @Getter
     private Properties config = new Properties();
 
     @Autowired
-    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao) throws IOException {
+    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao, ChallengeDao challengeDao,
+                              MatchDao matchDao, PlayerDao playerDao) throws IOException {
         this.bot = discordBot;
         this.gameDao = gameDao;
         this.challengeDao = challengeDao;
         this.matchDao = matchDao;
+        this.playerDao = playerDao;
         this.config.load(new FileReader("backend/src/main/resources/config.txt"));
     }
 
@@ -63,6 +62,8 @@ public class EloTrackingService {
                     " before you can issue another", bot.getPrefix());
         }
 
+        addNewPlayerIfPlayerNotPresent(channelId, challengerId);
+
         Challenge newChallenge = challengeDao.insert(new Challenge(channelId, challengerId, otherPlayerId));
         if (newChallenge == null) {
             Logger.error("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId);
@@ -82,6 +83,8 @@ public class EloTrackingService {
         if (challenge.isEmpty()) {
             return "No unanswered challenge by that player";
         } else {
+            addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
+
             challenge.get().accept();
             Challenge updatedChallenge = challengeDao.save(challenge.get());
             if (updatedChallenge == null) {
@@ -92,6 +95,15 @@ public class EloTrackingService {
 
             return String.format("Challenge accepted! Come back and %sreport when your game is finished.", bot.getPrefix());
         }
+    }
+
+    private boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
+        if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
+            playerDao.insert(new Player(channelId, playerId,
+                    Float.parseFloat(config.getProperty("INITIAL_RATING"))));
+            return true;
+        }
+        return false;
     }
 
     public String report(String channelId, String reportingPlayerId, String reportedOnPlayerId, boolean isReportedWin) {
@@ -118,27 +130,22 @@ public class EloTrackingService {
                 if (isReportedWin) {
                     return "Both players reported a win. Please contact your game admin";
                 } else {
-                    Match newMatch = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
-                            reportedOnPlayerId, reportingPlayerId, false));
-                    if (newMatch == null) {
-                        Logger.error("Insert Match to db failed");
-                        bot.sendToAdmin("Insert Match to db failed");
-                        return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-                    }
+                    Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
+                            reportedOnPlayerId, reportingPlayerId, false, false));
+                    double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
-                    return updateRatings(reportedOnPlayerId, reportingPlayerId, false);
+                    return String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
+                            "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
                 }
             case LOSS:
                 if (isReportedWin) {
-                    Match newMatch = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
-                        reportingPlayerId, reportedOnPlayerId, false));
-                    if (newMatch == null) {
-                        Logger.error("Insert Match to db failed");
-                        bot.sendToAdmin("Insert Match to db failed");
-                        return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-                    }
+                    Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
+                        reportingPlayerId, reportedOnPlayerId, false, false));
+                    double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
-                    return updateRatings(reportingPlayerId, reportedOnPlayerId, false);
+                    return String.format("%s old rating %n, new rating %n. %s old rating %n, new rating %n",
+                            "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
+
                 } else {
                     return "Both players reported a loss. Please contact your game admin";
                 }
@@ -148,8 +155,27 @@ public class EloTrackingService {
         }
     }
 
-    private String updateRatings(String reportedOnPlayerId, String reportingPlayerId, boolean b) {
-        //TODO implement
-        return "TODO";
+    private double[] updateRatings(Match match) {
+        Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
+        Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
+        double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
+                match.isDraw() ? 0.5 : 1,
+                Float.parseFloat(config.getProperty("K")));
+        winner.setRating(ratings[2]);
+        playerDao.save(winner);
+        loser.setRating(ratings[3]);
+        playerDao.save(loser);
+        match.setHasUpdatedPlayerRatings(true);
+        matchDao.save(match);
+        return ratings;
+    }
+
+    private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
+        double player2Result = 1 - player1Result;
+        double expectedResult1 = 1 / (1 + Math.pow(10, (rating2-rating1)/400));
+        double expectedResult2 = 1 / (1 + Math.pow(10, (rating1-rating2)/400));
+        double newRating1 = rating1 + k * (player1Result - expectedResult1);
+        double newRating2 = rating2 + k * (player2Result - expectedResult2);
+        return new double[] {rating1, rating2, newRating1, newRating2};
     }
 }
