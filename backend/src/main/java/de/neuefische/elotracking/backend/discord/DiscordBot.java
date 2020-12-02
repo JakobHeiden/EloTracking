@@ -9,10 +9,14 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.TextChannelEditSpec;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tinylog.Logger;
+
+import java.util.function.Consumer;
 
 @Component
 public class DiscordBot {
@@ -70,9 +74,24 @@ public class DiscordBot {
             case "lose":
                 report(msg, channel, false);
                 break;
+            case "help":
+                help(msg, channel);
+                break;
                 default:
                     channel.createMessage("Unknown command " + parts[0]).subscribe();
         }
+    }
+
+    private void help(Message msg, MessageChannel channel) {
+        channel.createMessage(String.format(
+                "Commands are:\n" +
+                        "%1$sregister\t\tRegister a new game, binding it to this channel\n" +
+                        "%1$schallenge\tChallenge another player to a match\n" +
+                        "%1$saccept\t\t Accept a challenge\n" +
+                        "%1$swin\t\t\t Declare a win over another player\n" +
+                        "%1$slose\t\t\tDeclare a loss to another player\n" +
+                        "%1$shelp\t\t\t Obviously.", prefix))
+                .subscribe();//TODO formatting
     }
 
     private void report(Message msg, MessageChannel channel, boolean isWin) {
@@ -128,9 +147,16 @@ public class DiscordBot {
             return;
         }
 
-        String name = msg.getContent().substring(10);
+        String name = msg.getContent().substring("register".length() + prefix.length());
         String replyFromService = service.register(channel.getId().asString(), name);
         channel.createMessage(replyFromService).subscribe();
+
+        Consumer<TextChannelEditSpec> edit =
+                textChannelEditSpec -> textChannelEditSpec.setTopic(
+                        String.format("Leaderboard: http://%s/%s",
+                                service.getConfig().getProperty("BASE_URL"),
+                                channel.getId().asString()));
+        ((TextChannel) channel).edit(edit).subscribe(System.out::println);
     }
 
     public String getPlayerName(String playerId) {
