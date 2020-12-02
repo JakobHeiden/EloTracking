@@ -1,10 +1,12 @@
+import React from 'react';
+import {Route, Switch, useParams} from 'react-router-dom';
+import Leaderboard from "./leaderboard/Leaderboard";
 
-function App() {
+export default function App() {
   return (
-    <div>
-      hallo
-    </div>
+     <Switch>
+         <Route path="/:channelid" component={Leaderboard} />
+     </Switch>
   );
-}
+};
 
-export default App;

@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.controller;
 
-import de.neuefische.elotracking.backend.dto.PlayerLeaderboardDto;
+import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
+import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,8 +19,13 @@ public class Controller {
         this.service = eloTrackingService;
     }
 
-    @GetMapping("{channelId}")
-    public List<PlayerLeaderboardDto> getRankings(@PathVariable String channelId) {
+    @GetMapping("rankings/{channelId}")
+    public List<PlayerInRankingsDto> getRankings(@PathVariable String channelId) {
         return service.getRankings(channelId);
+    }
+
+    @GetMapping("gamedata/{channelId}")
+    public Game getGameData(@PathVariable String channelId) {
+        return service.getGameData(channelId);
     }
 }

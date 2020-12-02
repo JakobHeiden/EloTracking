@@ -13,6 +13,6 @@ public class PlayerInRankingsDto implements Comparable<PlayerInRankingsDto> {
 
     @Override
     public int compareTo(PlayerInRankingsDto otherPlayer) {
-        return (int) (otherPlayer.getRating() - this.rating);
+        return (int) (1000 * (otherPlayer.getRating() - rating));
     }
 }
