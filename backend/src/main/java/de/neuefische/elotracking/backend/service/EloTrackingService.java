@@ -107,6 +107,15 @@ public class EloTrackingService {
         return false;
     }
 
+    private boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
+        if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
+            playerDao.insert(new Player(channelId, playerId,
+                    Float.parseFloat(config.getProperty("INITIAL_RATING"))));
+            return true;
+        }
+        return false;
+    }
+
     public String report(String channelId, String reportingPlayerId, String reportedOnPlayerId, boolean isReportedWin) {
         if (!gameDao.existsByChannelId(channelId)) {
             return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());

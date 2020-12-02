@@ -184,4 +184,8 @@ public class DiscordBot {
     public String getPlayerName(String playerId) {
         return client.getUserById(Snowflake.of(playerId)).block().getTag();
     }
+
+    public String getPlayerName(String playerId) {
+        return client.getUserById(Snowflake.of(playerId)).block().getTag();
+    }
 }
