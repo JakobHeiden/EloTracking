@@ -33,7 +33,9 @@ public class EloTrackingService {
         this.challengeDao = challengeDao;
         this.matchDao = matchDao;
         this.playerDao = playerDao;
-        this.config.load(new FileReader("backend/src/main/resources/config.txt"));
+        this.config.load(new FileReader(EloTrackingService.class.getClassLoader()
+                .getResource("config.txt").getPath()
+                .replaceAll("%20", " ")));
     }
 
     public String register(String channelId, String name) {
