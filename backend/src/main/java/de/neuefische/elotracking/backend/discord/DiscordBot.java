@@ -83,18 +83,14 @@ public class DiscordBot {
             case "help":
                 help(msg, channel);
                 break;
-<<<<<<< HEAD
             case "setprefix":
                 setprefix(msg, channel, parts);
                 break;
-=======
->>>>>>> develop
                 default:
                     channel.createMessage("Unknown command " + parts[0]).subscribe();
         }
     }
 
-<<<<<<< HEAD
     private void setprefix(Message msg, MessageChannel channel, String[] parts) {
         if (parts.length == 1 || parts[1].length() > 1) {
             channel.createMessage("Please specify a single special character (or any single character)")
@@ -106,8 +102,6 @@ public class DiscordBot {
         channel.createMessage(replyFromService).subscribe();
     }
 
-=======
->>>>>>> develop
     private void help(Message msg, MessageChannel channel) {
         channel.createMessage(String.format(
                 "Commands are:\n" +
