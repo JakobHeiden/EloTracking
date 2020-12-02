@@ -2,6 +2,7 @@ package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.dao.*;
+import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,8 @@ import org.tinylog.Logger;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Date;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EloTrackingService {
@@ -143,7 +142,7 @@ public class EloTrackingService {
                         reportingPlayerId, reportedOnPlayerId, false, false));
                     double[] ratings = updateRatings(match);
                     challengeDao.delete(challenge);
-                    return String.format("%s old rating %n, new rating %n. %s old rating %n, new rating %n",
+                    return String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
                             "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
 
                 } else {
@@ -162,8 +161,8 @@ public class EloTrackingService {
                 match.isDraw() ? 0.5 : 1,
                 Float.parseFloat(config.getProperty("K")));
         winner.setRating(ratings[2]);
-        playerDao.save(winner);
         loser.setRating(ratings[3]);
+        playerDao.save(winner);
         playerDao.save(loser);
         match.setHasUpdatedPlayerRatings(true);
         matchDao.save(match);
@@ -177,5 +176,14 @@ public class EloTrackingService {
         double newRating1 = rating1 + k * (player1Result - expectedResult1);
         double newRating2 = rating2 + k * (player2Result - expectedResult2);
         return new double[] {rating1, rating2, newRating1, newRating2};
+    }
+
+    public List<PlayerInRankingsDto> getRankings(String channelId) {
+        List<Player> allPlayers = playerDao.findAllByChannelId(channelId);
+        List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
+                .map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getDiscordUserId()), player.getRating()))
+                .collect(Collectors.toList());
+        Collections.sort(allPlayersAsDto);
+        return allPlayersAsDto;
     }
 }

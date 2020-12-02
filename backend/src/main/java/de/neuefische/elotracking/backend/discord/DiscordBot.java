@@ -132,4 +132,8 @@ public class DiscordBot {
         String replyFromService = service.register(channel.getId().asString(), name);
         channel.createMessage(replyFromService).subscribe();
     }
+
+    public String getPlayerName(String playerId) {
+        return client.getUserById(Snowflake.of(playerId)).block().getTag();
+    }
 }
