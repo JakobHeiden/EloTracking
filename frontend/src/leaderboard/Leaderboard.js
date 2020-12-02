@@ -12,7 +12,7 @@ export default function Leaderboard() {
     useEffect(() => {
         getGameData(channelId).then(setGameData);
         getRankings(channelId).then(setRankings);
-    }, []);
+    }, [channelId]);
 
     return (
         <>
