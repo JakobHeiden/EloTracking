@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.discord;
 
+import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -25,16 +26,17 @@ public class DiscordBot {
     private final PrivateChannel adminDm;
     @Getter
     private final String adminMentionAsString;
-    @Getter
-    private final String defaultPrefix;
+    private final ApplicationPropertiesLoader config;
 
     @Autowired
-    public DiscordBot(GatewayDiscordClient gatewayDiscordClient, EloTrackingService eloTrackingService) {
+    public DiscordBot(GatewayDiscordClient gatewayDiscordClient,
+                      EloTrackingService eloTrackingService,
+                      ApplicationPropertiesLoader applicationPropertiesLoader) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
-        this.defaultPrefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
+        this.config = applicationPropertiesLoader;
 
-        String adminId = service.getConfig().getProperty("ADMIN_DISCORD_ID");
+        String adminId = config.getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
         User admin = client.getUserById(Snowflake.of(adminId)).block();
         this.adminDm = admin.getPrivateChannel().block();
@@ -176,7 +178,7 @@ public class DiscordBot {
         Consumer<TextChannelEditSpec> edit =
                 textChannelEditSpec -> textChannelEditSpec.setTopic(
                         String.format("Leaderboard: http://%s/%s",
-                                service.getConfig().getProperty("BASE_URL"),
+                                config.getProperty("BASE_URL"),
                                 channel.getId().asString()));
         ((TextChannel) channel).edit(edit).subscribe(System.out::println);
     }
