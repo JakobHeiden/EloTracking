@@ -67,6 +67,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>EloTracking</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
