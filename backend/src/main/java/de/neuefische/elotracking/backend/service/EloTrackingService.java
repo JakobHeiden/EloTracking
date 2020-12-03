@@ -1,16 +1,15 @@
 package de.neuefische.elotracking.backend.service;
 
+import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.dao.*;
 import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,20 +21,24 @@ public class EloTrackingService {
     private final ChallengeDao challengeDao;
     private final MatchDao matchDao;
     private PlayerDao playerDao;
-    @Getter
-    private Properties config = new Properties();
+    //@Getter
+    //private Properties config = new Properties();
+    private final ApplicationPropertiesLoader config;
 
     @Autowired
-    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao, ChallengeDao challengeDao,
-                              MatchDao matchDao, PlayerDao playerDao) throws IOException {
+    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao,
+                              ChallengeDao challengeDao, MatchDao matchDao,
+                              PlayerDao playerDao,
+                              ApplicationPropertiesLoader applicationPropertiesLoader) {
         this.bot = discordBot;
         this.gameDao = gameDao;
         this.challengeDao = challengeDao;
         this.matchDao = matchDao;
         this.playerDao = playerDao;
-        this.config.load(new FileReader(EloTrackingService.class.getClassLoader()
-                .getResource("config.txt").getPath()
-                .replaceAll("%20", " ")));
+        this.config = applicationPropertiesLoader;
+        //this.config.load(new FileReader(EloTrackingService.class.getClassLoader()
+          //      .getResource("config.txt").getPath()
+            //    .replaceAll("%20", " ")));
     }
 
     public String register(String channelId, String name) {
@@ -51,16 +54,16 @@ public class EloTrackingService {
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
 
-        return String.format(String.format("New game created. You can now %schallenge another player", bot.getDefaultPrefix()));
+        return String.format(String.format("New game created. You can now %schallenge another player", config.getProperty("DEFAULT_PREFIX")));
     }
 
     public String challenge(String channelId, String challengerId, String otherPlayerId) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_PREFIX"));
         }
         if (challengeDao.existsById(channelId + "-" + challengerId + "-" + otherPlayerId)) {
             return String.format("You already have an existing challenge towards that player. He needs to %saccept it" +
-                    " before you can issue another", bot.getDefaultPrefix());
+                    " before you can issue another", config.getProperty("INITIAL_RATING"));
         }
 
         addNewPlayerIfPlayerNotPresent(channelId, challengerId);
@@ -72,12 +75,12 @@ public class EloTrackingService {
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
 
-        return String.format("Challenge issued. Your opponent can now %saccept", bot.getDefaultPrefix());
+        return String.format("Challenge issued. Your opponent can now %saccept", config.getProperty("DEFAULT_PREFIX"));
     }
 
     public String accept(String channelId, String acceptingPlayerId, String challengerId) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_PREFIX"));
         }
 
         Optional<Challenge> challenge = challengeDao.findById(Challenge.generateId(channelId, challengerId, acceptingPlayerId));
@@ -94,7 +97,7 @@ public class EloTrackingService {
                 return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
             }
 
-            return String.format("Challenge accepted! Come back and %sreport when your game is finished.", bot.getDefaultPrefix());
+            return String.format("Challenge accepted! Come back and %sreport when your game is finished.", config.getProperty("DEFAULT_PREFIX"));
         }
     }
 
@@ -109,11 +112,11 @@ public class EloTrackingService {
 
     public String report(String channelId, String reportingPlayerId, String reportedOnPlayerId, boolean isReportedWin) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", bot.getDefaultPrefix());
+            return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_PREFIX"));
         }
         String challengeId = Challenge.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
         if (!challengeDao.existsById(challengeId)) {
-            return String.format("No challenge exists towards that player. Use %schallenge to issue one", bot.getDefaultPrefix());
+            return String.format("No challenge exists towards that player. Use %schallenge to issue one", config.getProperty("DEFAULT_PREFIX"));
         }
         Challenge challenge = challengeDao.findById(challengeId).get();
         if (challenge.getAcceptedWhen().isEmpty()) {
@@ -196,7 +199,7 @@ public class EloTrackingService {
     public String setprefix(String channelId, String newPrefix) {
         if (!gameDao.existsByChannelId(channelId)) {
             return String.format("No game is associated with this channel. Use %sregister to register" +
-                    " a new game", bot.getDefaultPrefix());
+                    " a new game", config.getProperty("DEFAULT_PREFIX"));
         }
 
         Game game = gameDao.findByChannelId(channelId);
@@ -207,7 +210,7 @@ public class EloTrackingService {
 
     public boolean isCommand(String channelId, String firstCharacter) {
         if (!gameDao.existsByChannelId(channelId)) {
-            return (firstCharacter.equals(bot.getDefaultPrefix()));
+            return (firstCharacter.equals(config.getProperty("DEFAULT_PREFIX")));
         } else {
             return (firstCharacter.equals(gameDao.findByChannelId(channelId).getCommandPrefix()));
         }
