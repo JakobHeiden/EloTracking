@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.tinylog.Logger;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,9 +19,7 @@ public class EloTrackingService {
     private final GameDao gameDao;
     private final ChallengeDao challengeDao;
     private final MatchDao matchDao;
-    private PlayerDao playerDao;
-    //@Getter
-    //private Properties config = new Properties();
+    private final PlayerDao playerDao;
     private final ApplicationPropertiesLoader config;
 
     @Autowired
@@ -36,9 +33,6 @@ public class EloTrackingService {
         this.matchDao = matchDao;
         this.playerDao = playerDao;
         this.config = applicationPropertiesLoader;
-        //this.config.load(new FileReader(EloTrackingService.class.getClassLoader()
-          //      .getResource("config.txt").getPath()
-            //    .replaceAll("%20", " ")));
     }
 
     public String register(String channelId, String name) {
