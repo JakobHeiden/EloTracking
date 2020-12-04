@@ -50,7 +50,7 @@ public class DiscordBot {
                 .subscribe(this::parseCommand);
 
         client.getEventDispatcher().on(Event.class)
-                .subscribe(Logger::trace);
+                .subscribe(Logger::info);
     }
 
     public void sendToAdmin(String text) {
@@ -110,8 +110,9 @@ public class DiscordBot {
                         "%1$sregister\t\tRegister a new game, binding it to this channel\n" +
                         "%1$schallenge\tChallenge another player to a match\n" +
                         "%1$saccept\t\t Accept a challenge\n" +
-                        "%1$swin\t\t\t Declare a win over another player\n" +
-                        "%1$slose\t\t\tDeclare a loss to another player\n" +
+                        "%1$swin\t\t\t  Declare a win over another player\n" +
+                        "%1$slose\t\t\t Declare a loss to another player\n" +
+                        "%1ssetprefix\tChange the command prefix for the bot\n" +
                         "%1$shelp\t\t\t Show this message", msg.getContent().charAt(0)))
                 .subscribe();//TODO formatting
     }
