@@ -16,9 +16,9 @@ export default function Leaderboard() {
 
     return (
         <>
-            <HeaderStyled>
-                <h1>Leaderboard: {gameData.name}</h1>
-            </HeaderStyled>
+            <header>
+                <H1Styled>Leaderboard: {gameData.name}</H1Styled>
+            </header>
             <TableStyled>
                 <tbody>
                 <tr>
@@ -46,6 +46,9 @@ width: 100%;
 font-size: 200%;
 `
 
-const HeaderStyled = styled.header `
-p:{background-color: lavender};
+const H1Styled = styled.h1 `
+background-color: lavender;
+text-align: center;
+margin: 0 2px;
+height: 200%;
 `
