@@ -16,4 +16,5 @@ jobs:
       - name: Build with Maven
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DATABASE: test
         run: mvn -B package --file backend/pom.xml
