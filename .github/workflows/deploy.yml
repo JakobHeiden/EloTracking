@@ -42,7 +42,7 @@ jobs:
         run: mvn -B package -DskipTests --file backend/pom.xml
       - uses: actions/upload-artifact@v2 # das Backend-Build wird anschließend (so wie zuvor das Frontend-Build) via der Upload Action hochgeladen und steht weiteren Actions somit zur Verfügung
         with:
-          name: backend-build.jar
+          name: elotracking.jar
           path: backend/target/elotracking.jar
 
   deploy:
