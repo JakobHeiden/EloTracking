@@ -1,9 +1,7 @@
 name: Deploy EloTracking
 
 on:
-  push:
-    branches:
-      - master
+  push
 
 jobs:
   build-frontend: # hier folgt der Build-Prozess für das Frontend
