@@ -12,6 +12,7 @@ import org.tinylog.Logger;
 public class DiscordBotConfig {
     @Bean
     public GatewayDiscordClient createClient() {
+        Logger.warn(System.getenv("DISCORD_BOT_TOKEN"));
         GatewayDiscordClient client = DiscordClientBuilder
                 .create(System.getenv("DISCORD_BOT_TOKEN"))
                 .build()
