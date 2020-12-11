@@ -13,4 +13,5 @@ export default function RankingsEntry({player}) {
 
 const RowStyled = styled.tr `
 td {text-align: center};
+font-family: "Roboto Light",sans-serif;
 `
