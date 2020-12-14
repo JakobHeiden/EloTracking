@@ -21,11 +21,11 @@ export default function Leaderboard() {
             </header>
             <TableStyled>
                 <tbody>
-                <tr>
+                <TopRowStyled>
                     <th>Rank</th>
                     <th>Name</th>
                     <th>Rating</th>
-                </tr>
+                </TopRowStyled>
                 {rankings.map(player => (
                     <RankingsEntry player={player}/>))}
                 </tbody>
@@ -47,8 +47,13 @@ font-size: 200%;
 `
 
 const H1Styled = styled.h1 `
+font-family: "Roboto Light",sans-serif;
 background-color: lavender;
 text-align: center;
 margin: 0 2px;
 height: 200%;
+`
+
+const TopRowStyled = styled.tr `
+font-family: "Roboto Light",sans-serif;
 `

@@ -17,4 +17,5 @@ jobs:
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           DATABASE: test
+          PORT: 8080
         run: mvn -B package --file backend/pom.xml
