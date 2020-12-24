@@ -13,12 +13,14 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.TextChannelEditSpec;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tinylog.Logger;
 
 import java.util.function.Consumer;
 
+
+@Slf4j
 @Component
 public class DiscordBot {
     private final GatewayDiscordClient client;
@@ -40,7 +42,7 @@ public class DiscordBot {
         this.adminMentionAsString = String.format("<@%s>", adminId);
         User admin = client.getUserById(Snowflake.of(adminId)).block();
         this.adminDm = admin.getPrivateChannel().block();
-        Logger.info("Private channel to admin established");
+        log.info("Private channel to admin established");
         sendToAdmin("I am logged in and ready");
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -50,7 +52,7 @@ public class DiscordBot {
                 .subscribe(this::parseCommand);
 
         client.getEventDispatcher().on(Event.class)
-                .subscribe(Logger::info);
+                .subscribe(logs -> log.info(logs.toString()));
     }
 
     public void sendToAdmin(String text) {
