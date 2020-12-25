@@ -5,14 +5,15 @@ import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.dao.*;
 import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class EloTrackingService {
     private final DiscordBot bot;
@@ -43,7 +44,7 @@ public class EloTrackingService {
 
         Game newGame = gameDao.insert(new Game(channelId, name));
         if (newGame == null) {
-            Logger.error("Insert name Game to db failed: %s %s", channelId, name);
+            log.error("Insert name Game to db failed: %s %s", channelId, name);
             bot.sendToAdmin(String.format("Insert new Game to db failed: %s %s", channelId, name));
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
@@ -64,7 +65,7 @@ public class EloTrackingService {
 
         Challenge newChallenge = challengeDao.insert(new Challenge(channelId, challengerId, otherPlayerId));
         if (newChallenge == null) {
-            Logger.error("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId);
+            log.error("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId);
             bot.sendToAdmin(String.format("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId));
             return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
         }
@@ -86,7 +87,7 @@ public class EloTrackingService {
             challenge.get().accept();
             Challenge updatedChallenge = challengeDao.save(challenge.get());
             if (updatedChallenge == null) {
-                Logger.error("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId);
+                log.error("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId);
                 bot.sendToAdmin(String.format("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId));
                 return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
             }
