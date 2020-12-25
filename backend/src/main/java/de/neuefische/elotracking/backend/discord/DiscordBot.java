@@ -46,13 +46,17 @@ public class DiscordBot {
         sendToAdmin("I am logged in and ready");
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
-                .map(MessageCreateEvent::getMessage)
+                .map(msgEvent -> {
+                    log.trace(msgEvent.toString());
+                    log.debug("Incoming message: " + msgEvent.getMessage().getContent());
+                    return msgEvent.getMessage();
+                })
                 .filter(message -> message.getAuthor().map(user -> !user.isBot()).orElse(false))
                 .filter(this::isCommand)
                 .subscribe(this::parseCommand);
 
         client.getEventDispatcher().on(Event.class)
-                .subscribe(logs -> log.info(logs.toString()));
+                .subscribe(logs -> log.trace(logs.toString()));
     }
 
     public void sendToAdmin(String text) {
@@ -66,6 +70,7 @@ public class DiscordBot {
     }
 
     private void parseCommand(Message msg) {
+        log.debug("Parsing command: " + msg.getContent());
         String[] parts = msg.getContent().substring(1).split(" ");
         MessageChannel channel = msg.getChannel().block();
         switch(parts[0]) {
@@ -152,6 +157,7 @@ public class DiscordBot {
     }
 
     private void challenge(Message msg, MessageChannel channel) {
+        log.debug("Execute command challenge");
         if (msg.getUserMentionIds().size() != 1) {
             channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
                     "e.g. %schallenge @somebody", msg.getContent().charAt(0))).subscribe();
@@ -163,6 +169,7 @@ public class DiscordBot {
                 channel.getId().asString(),
                 msg.getAuthor().get().getId().asString(),
                 otherPlayerId);
+        log.debug("replyFromService is " + replyFromService);
         channel.createMessage(replyFromService).subscribe();
     }
 

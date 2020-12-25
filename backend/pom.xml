@@ -20,16 +20,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>org.tinylog</groupId>
-			<artifactId>tinylog-api</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tinylog</groupId>
-			<artifactId>tinylog-impl</artifactId>
-			<version>2.2.0</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
