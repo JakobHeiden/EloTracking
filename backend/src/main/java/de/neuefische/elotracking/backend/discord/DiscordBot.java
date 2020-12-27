@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.discord;
 
+import de.neuefische.elotracking.backend.command.Challenge;
 import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
@@ -157,21 +158,12 @@ public class DiscordBot {
     }
 
     private void challenge(Message msg, MessageChannel channel) {
-        log.debug("Execute command challenge");
-        if (msg.getUserMentionIds().size() != 1) {
-            channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
-                    "e.g. %schallenge @somebody", msg.getContent().charAt(0))).subscribe();
-            return;
+        Challenge ch = new Challenge(this, service, msg, channel);
+        ch.execute();
+        for (String reply : ch.getBotReplies()) {
+            channel.createMessage(reply).subscribe();
         }
-
-        String otherPlayerId = msg.getUserMentionIds().iterator().next().asString();
-        String replyFromService = service.challenge(
-                channel.getId().asString(),
-                msg.getAuthor().get().getId().asString(),
-                otherPlayerId);
-        log.debug("replyFromService is " + replyFromService);
-        channel.createMessage(replyFromService).subscribe();
-    }
+   }
 
     private void register(Message msg, String[] parts, MessageChannel channel) {
         if (parts.length < 2) {

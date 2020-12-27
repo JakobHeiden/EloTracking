@@ -14,7 +14,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "challenge")
-public class Challenge {
+public class ChallengeModel {
     public enum ReportStatus {
         NOT_YET_REPORTED,
         WIN,
@@ -31,7 +31,7 @@ public class Challenge {
     private ReportStatus challengerReported;
     private ReportStatus otherPlayerReported;
 
-    public Challenge(String channelId, String challengerId, String otherPlayerId) {
+    public ChallengeModel(String channelId, String challengerId, String otherPlayerId) {
         this.channelId = channelId;
         this.challengerId = challengerId;
         this.otherPlayerId = otherPlayerId;

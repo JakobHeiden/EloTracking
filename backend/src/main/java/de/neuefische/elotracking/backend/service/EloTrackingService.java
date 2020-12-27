@@ -52,6 +52,10 @@ public class EloTrackingService {
         return String.format(String.format("New game created. You can now %schallenge another player", config.getProperty("DEFAULT_COMMAND_PREFIX")));
     }
 
+    public boolean channelHasGameRegistered(String channelId) {
+        return gameDao.existsByChannelId(channelId);
+    }
+
     public String challenge(String channelId, String challengerId, String otherPlayerId) {
         if (!gameDao.existsByChannelId(channelId)) {
             return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
@@ -63,7 +67,7 @@ public class EloTrackingService {
 
         addNewPlayerIfPlayerNotPresent(channelId, challengerId);
 
-        Challenge newChallenge = challengeDao.insert(new Challenge(channelId, challengerId, otherPlayerId));
+        ChallengeModel newChallenge = challengeDao.insert(new ChallengeModel(channelId, challengerId, otherPlayerId));
         if (newChallenge == null) {
             log.error("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId);
             bot.sendToAdmin(String.format("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId));
@@ -78,14 +82,14 @@ public class EloTrackingService {
             return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
         }
 
-        Optional<Challenge> challenge = challengeDao.findById(Challenge.generateId(channelId, challengerId, acceptingPlayerId));
+        Optional<ChallengeModel> challenge = challengeDao.findById(ChallengeModel.generateId(channelId, challengerId, acceptingPlayerId));
         if (challenge.isEmpty()) {
             return "No unanswered challenge by that player";
         } else {
             addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
 
             challenge.get().accept();
-            Challenge updatedChallenge = challengeDao.save(challenge.get());
+            ChallengeModel updatedChallenge = challengeDao.save(challenge.get());
             if (updatedChallenge == null) {
                 log.error("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId);
                 bot.sendToAdmin(String.format("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId));
@@ -109,17 +113,17 @@ public class EloTrackingService {
         if (!gameDao.existsByChannelId(channelId)) {
             return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
         }
-        String challengeId = Challenge.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
+        String challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
         if (!challengeDao.existsById(challengeId)) {
             return String.format("No challenge exists towards that player. Use %schallenge to issue one", config.getProperty("DEFAULT_COMMAND_PREFIX"));
         }
-        Challenge challenge = challengeDao.findById(challengeId).get();
+        ChallengeModel challenge = challengeDao.findById(challengeId).get();
         if (challenge.getAcceptedWhen().isEmpty()) {
             return "This challenge has not been accepted yet and cannot be reported as a win";
         }
 
         //do the actual reporting
-        Challenge.ReportStatus reportedOnPlayerReportStatus =
+        ChallengeModel.ReportStatus reportedOnPlayerReportStatus =
                 challenge.report(reportingPlayerId.equals(challenge.getChallengerId()), isReportedWin);
         challengeDao.save(challenge);
 
