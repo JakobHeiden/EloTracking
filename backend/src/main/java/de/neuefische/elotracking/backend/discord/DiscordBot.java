@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.discord;
 
+import de.neuefische.elotracking.backend.command.Accept;
 import de.neuefische.elotracking.backend.command.Challenge;
 import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -143,18 +144,11 @@ public class DiscordBot {
     }
 
     private void accept(Message msg, MessageChannel channel) {
-        if (msg.getUserMentionIds().size() != 1) {
-            channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
-                    "e.g. %saccept @somebody", msg.getContent().charAt(0))).subscribe();
-            return;
+        Accept ac = new Accept(this, service, msg, channel);
+        ac.execute();
+        for (String reply : ac.getBotReplies()) {
+            channel.createMessage(reply).subscribe();
         }
-
-        String challengerId = msg.getUserMentionIds().iterator().next().asString();
-        String replyFromService = service.accept(
-                channel.getId().asString(),
-                msg.getAuthor().get().getId().asString(),
-                challengerId);
-        channel.createMessage(replyFromService).subscribe();
     }
 
     private void challenge(Message msg, MessageChannel channel) {

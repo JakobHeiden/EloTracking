@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.discord.DiscordBot;
+import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
@@ -19,15 +20,19 @@ public class Challenge extends Command {
     }
 
     public void execute() {
-        super.determineIfCanExecute();
-        if (!canExecute) { return; }
+        if(!super.canExecute()) { return; }
 
-        String otherPlayerId = msg.getUserMentionIds().iterator().next().asString();
-        String replyFromService = service.challenge(
-                channel.getId().asString(),
-                msg.getAuthor().get().getId().asString(),
-                otherPlayerId);
-        log.debug("replyFromService is " + replyFromService);
-        botReplies.add(replyFromService);
+        String channelId = channel.getId().asString();
+        String challengerId = msg.getAuthor().get().getId().asString();
+        String recipientId = msg.getUserMentionIds().iterator().next().asString();
+
+        if (service.challengeExistsById(channelId + "-" + challengerId + "-" + recipientId)) {
+            botReplies.add("challenge already exists");
+            return;
+        }
+
+        service.addNewPlayerIfPlayerNotPresent(channelId, challengerId);
+        service.addChallenge(channelId, challengerId, recipientId);
+        botReplies.add(String.format("Challenge issued. Your opponent can now %saccept", service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
     }
 }

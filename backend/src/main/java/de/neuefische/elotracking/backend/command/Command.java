@@ -14,7 +14,6 @@ public abstract class Command {
     protected DiscordBot bot;
     protected Message msg;
     protected Channel channel;
-    protected boolean canExecute;
     @Getter
     protected List<String> botReplies;
     protected boolean needsRegisteredChannel;
@@ -26,24 +25,27 @@ public abstract class Command {
         this.channel = channel;
         this.botReplies = new LinkedList<String>();
         this.service = service;
-        this.canExecute = true;
 
         needsRegisteredChannel = false;
         needsUserTag = false;
     }
 
-    protected void determineIfCanExecute() {
+    public abstract void execute();
+
+    protected boolean canExecute() {
+        boolean canExecute = true;
         if (this.needsRegisteredChannel) {
-            if(!service.channelHasGameRegistered(channel.getId().asString())) {
-                this.canExecute = false;
+            if (!service.channelHasGameRegistered(channel.getId().asString())) {
+                canExecute = false;
                 botReplies.add("Needs register");
             }
         }
         if (this.needsUserTag) {
-            if(msg.getUserMentionIds().size() != 1) {
-                this.canExecute = false;
+            if (msg.getUserMentionIds().size() != 1) {
+                canExecute = false;
                 botReplies.add("Needs user tag");
             }
         }
+        return canExecute;
     }
 }

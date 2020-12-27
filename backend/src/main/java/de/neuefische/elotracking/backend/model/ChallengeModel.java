@@ -46,6 +46,10 @@ public class ChallengeModel {
         this.acceptedWhen = Optional.of(new Date());
     }
 
+    public boolean isAccepted() {
+        return !acceptedWhen.isEmpty();
+    }
+
     public ReportStatus report(boolean isChallengerReport, boolean isWin) {
         if (isChallengerReport) {
             challengerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;

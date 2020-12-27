@@ -5,6 +5,7 @@ import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.dao.*;
 import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +22,7 @@ public class EloTrackingService {
     private final ChallengeDao challengeDao;
     private final MatchDao matchDao;
     private final PlayerDao playerDao;
+    @Getter
     private final ApplicationPropertiesLoader config;
 
     @Autowired
@@ -56,51 +58,23 @@ public class EloTrackingService {
         return gameDao.existsByChannelId(channelId);
     }
 
-    public String challenge(String channelId, String challengerId, String otherPlayerId) {
-        if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
-        }
-        if (challengeDao.existsById(channelId + "-" + challengerId + "-" + otherPlayerId)) {
-            return String.format("You already have an existing challenge towards that player. He needs to %saccept it" +
-                    " before you can issue another", config.getProperty("INITIAL_RATING"));
-        }
+    public boolean challengeExistsById(String id) {
+        return challengeDao.existsById(id);
+    }
 
-        addNewPlayerIfPlayerNotPresent(channelId, challengerId);
-
+    public void addChallenge(String channelId, String challengerId, String otherPlayerId) {
         ChallengeModel newChallenge = challengeDao.insert(new ChallengeModel(channelId, challengerId, otherPlayerId));
-        if (newChallenge == null) {
-            log.error("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId);
-            bot.sendToAdmin(String.format("Insert new Challenge to db failed: %s-%s-%s", channelId, challengerId, otherPlayerId));
-            return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-        }
-
-        return String.format("Challenge issued. Your opponent can now %saccept", config.getProperty("DEFAULT_COMMAND_PREFIX"));
     }
 
-    public String accept(String channelId, String acceptingPlayerId, String challengerId) {
-        if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
-        }
-
-        Optional<ChallengeModel> challenge = challengeDao.findById(ChallengeModel.generateId(channelId, challengerId, acceptingPlayerId));
-        if (challenge.isEmpty()) {
-            return "No unanswered challenge by that player";
-        } else {
-            addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
-
-            challenge.get().accept();
-            ChallengeModel updatedChallenge = challengeDao.save(challenge.get());
-            if (updatedChallenge == null) {
-                log.error("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId);
-                bot.sendToAdmin(String.format("Insert updated Challenge to db failed: %s-%s-%s", channelId, challengerId, acceptingPlayerId));
-                return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-            }
-
-            return String.format("Challenge accepted! Come back and %sreport when your game is finished.", config.getProperty("DEFAULT_COMMAND_PREFIX"));
-        }
+    public Optional<ChallengeModel> findChallenge(String channelId, String challengerId, String acceptingPlayerId) {
+        return challengeDao.findById(ChallengeModel.generateId(channelId, challengerId, acceptingPlayerId));
     }
 
-    private boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
+    public void saveChallenge (ChallengeModel challenge) {
+        challengeDao.save(challenge);
+    }
+
+    public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
         if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
             playerDao.insert(new Player(channelId, playerId,
                     Float.parseFloat(config.getProperty("INITIAL_RATING"))));
