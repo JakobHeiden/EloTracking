@@ -38,28 +38,12 @@ public class EloTrackingService {
         this.config = applicationPropertiesLoader;
     }
 
-    public String register(String channelId, String name) {
-        if (gameDao.existsById(channelId)) {
-            String nameOfExistingGame = gameDao.findById(channelId).get().getName();
-            return String.format("There is already a game associated with this channel: %s", nameOfExistingGame);
-        }
-
-        Game newGame = gameDao.insert(new Game(channelId, name));
-        if (newGame == null) {
-            log.error("Insert name Game to db failed: %s %s", channelId, name);
-            bot.sendToAdmin(String.format("Insert new Game to db failed: %s %s", channelId, name));
-            return String.format("Internal database error. %s please take a look at this", bot.getAdminMentionAsString());
-        }
-
-        return String.format(String.format("New game created. You can now %schallenge another player", config.getProperty("DEFAULT_COMMAND_PREFIX")));
-    }
-
     public Optional<Game> findGameByChannelId(String channelId) {
         return gameDao.findById(channelId);
     }
 
-    public void addGame(Game game) {
-        gameDao.insert(game);
+    public void saveGame(Game game) {
+        gameDao.save(game);
     }
 
     public Game getGameData(String channelId) {
@@ -171,19 +155,6 @@ public class EloTrackingService {
                 .collect(Collectors.toList());
         Collections.sort(allPlayersAsDto);
         return allPlayersAsDto;
-    }
-
-
-    public String setprefix(String channelId, String newPrefix) {
-        if (!gameDao.existsByChannelId(channelId)) {
-            return String.format("No game is associated with this channel. Use %sregister to register" +
-                    " a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
-        }
-
-        Game game = gameDao.findByChannelId(channelId);
-        game.setCommandPrefix(newPrefix);
-        gameDao.save(game);
-        return String.format("Command prefix changed to %s", newPrefix);
     }
 
     public boolean isCommand(String channelId, String firstCharacter) {

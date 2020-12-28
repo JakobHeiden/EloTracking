@@ -37,7 +37,7 @@ public class Register extends Command {
         }
         if (!canExecute) return;
 
-        service.addGame(new Game(channelId, nameOfNewGame));
+        service.saveGame(new Game(channelId, nameOfNewGame));
         botReplies.add(String.format(String.format("New game created. You can now %schallenge another player",
                 service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX"))));
 
