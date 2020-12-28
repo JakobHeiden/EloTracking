@@ -89,8 +89,8 @@ public class DiscordBot {
                 report(msg, channel, false);
                 return;
             case "help":
-                help(msg, channel);
-                return;
+                command = new Help(this, service, msg, channel);
+                break;
             case "setprefix":
                 command = new SetPrefix(this, service, msg, channel);
                 break;
@@ -102,19 +102,6 @@ public class DiscordBot {
         for (String reply : command.getBotReplies()) {
             channel.createMessage(reply).subscribe();
         }
-    }
-
-    private void help(Message msg, MessageChannel channel) {
-        channel.createMessage(String.format(
-                "Commands are:\n" +
-                        "%1$sregister\t\tRegister a new game, binding it to this channel\n" +
-                        "%1$schallenge\tChallenge another player to a match\n" +
-                        "%1$saccept\t\t Accept a challenge\n" +
-                        "%1$swin\t\t\t  Declare a win over another player\n" +
-                        "%1$slose\t\t\t Declare a loss to another player\n" +
-                        "%1ssetprefix\tChange the command prefix for the bot\n" +
-                        "%1$shelp\t\t\t Show this message", msg.getContent().charAt(0)))
-                .subscribe();//TODO formatting
     }
 
     private void report(Message msg, MessageChannel channel, boolean isWin) {
