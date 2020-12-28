@@ -39,8 +39,8 @@ public class EloTrackingService {
     }
 
     public String register(String channelId, String name) {
-        if (gameDao.existsByChannelId(channelId)) {
-            String nameOfExistingGame = gameDao.findByChannelId(channelId).getName();
+        if (gameDao.existsById(channelId)) {
+            String nameOfExistingGame = gameDao.findById(channelId).get().getName();
             return String.format("There is already a game associated with this channel: %s", nameOfExistingGame);
         }
 
@@ -54,8 +54,16 @@ public class EloTrackingService {
         return String.format(String.format("New game created. You can now %schallenge another player", config.getProperty("DEFAULT_COMMAND_PREFIX")));
     }
 
-    public boolean channelHasGameRegistered(String channelId) {
-        return gameDao.existsByChannelId(channelId);
+    public Optional<Game> findGameByChannelId(String channelId) {
+        return gameDao.findById(channelId);
+    }
+
+    public void addGame(Game game) {
+        gameDao.insert(game);
+    }
+
+    public Game getGameData(String channelId) {
+        return gameDao.findByChannelId(channelId);
     }
 
     public boolean challengeExistsById(String id) {
@@ -84,7 +92,7 @@ public class EloTrackingService {
     }
 
     public String report(String channelId, String reportingPlayerId, String reportedOnPlayerId, boolean isReportedWin) {
-        if (!gameDao.existsByChannelId(channelId)) {
+        if (!gameDao.findById(channelId).isPresent()) {
             return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
         }
         String challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
@@ -165,9 +173,6 @@ public class EloTrackingService {
         return allPlayersAsDto;
     }
 
-    public Game getGameData(String channelId) {
-        return gameDao.findByChannelId(channelId);
-    }
 
     public String setprefix(String channelId, String newPrefix) {
         if (!gameDao.existsByChannelId(channelId)) {

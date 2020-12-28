@@ -20,16 +20,15 @@ public class Challenge extends Command {
     }
 
     public void execute() {
-        if(!super.canExecute()) { return; }
-
+        boolean canExecute = super.canExecute();
         String channelId = channel.getId().asString();
         String challengerId = msg.getAuthor().get().getId().asString();
         String recipientId = msg.getUserMentionIds().iterator().next().asString();
-
         if (service.challengeExistsById(channelId + "-" + challengerId + "-" + recipientId)) {
             botReplies.add("challenge already exists");
-            return;
+            canExecute = false;
         }
+        if (!canExecute) return;
 
         service.addNewPlayerIfPlayerNotPresent(channelId, challengerId);
         service.addChallenge(channelId, challengerId, recipientId);

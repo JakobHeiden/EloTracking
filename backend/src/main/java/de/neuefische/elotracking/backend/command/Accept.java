@@ -20,21 +20,20 @@ public class Accept extends Command {
     }
 
     public void execute() {
-        if(!super.canExecute()) { return; }
-
+        boolean canExecute = super.canExecute();
         String channelId = channel.getId().asString();
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
         String challengerId = msg.getUserMentionIds().iterator().next().asString();
-
         Optional<ChallengeModel> challenge = service.findChallenge(channelId, challengerId, acceptingPlayerId);
         if (challenge.isEmpty()) {
             botReplies.add("No unanswered challenge by that player");
-            return;
+            canExecute = false;
         }
         if (challenge.get().isAccepted()) {
             botReplies.add("already accepted");
-            return;
+            canExecute = false;
         }
+        if (!canExecute) return;
 
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
 

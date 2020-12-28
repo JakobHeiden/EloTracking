@@ -35,7 +35,7 @@ public abstract class Command {
     protected boolean canExecute() {
         boolean canExecute = true;
         if (this.needsRegisteredChannel) {
-            if (!service.channelHasGameRegistered(channel.getId().asString())) {
+            if (service.findGameByChannelId(channel.getId().asString()).isEmpty()) {
                 canExecute = false;
                 botReplies.add("Needs register");
             }

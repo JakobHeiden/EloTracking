@@ -3,6 +3,7 @@ package de.neuefische.elotracking.backend.discord;
 import de.neuefische.elotracking.backend.command.Accept;
 import de.neuefische.elotracking.backend.command.Challenge;
 import de.neuefische.elotracking.backend.command.Command;
+import de.neuefische.elotracking.backend.command.Register;
 import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
@@ -79,8 +80,8 @@ public class DiscordBot {
         Command command;
         switch(parts[0]) {
             case "register":
-                register(msg, parts, channel);
-                return;
+                command = new Register(this, service, msg, channel);
+                break;
             case "challenge":
                 command = new Challenge(this, service, msg, channel);
                 break;

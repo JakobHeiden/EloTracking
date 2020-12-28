@@ -17,6 +17,6 @@ public class Game {
     private String commandPrefix;
 
     public Game(String channelId, String name) {
-        this(channelId, name, "!");
+        this(channelId, name, "!");//TODO
     }
 }
