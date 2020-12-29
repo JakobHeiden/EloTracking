@@ -2,6 +2,7 @@ package de.neuefische.elotracking.backend.discord;
 
 import de.neuefische.elotracking.backend.command.*;
 import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
+import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -83,11 +84,11 @@ public class DiscordBot {
                 command = new Accept(this, service, msg, channel);
                 break;
             case "win":
-                report(msg, channel, true);
-                return;
+                command = new Report(this, service, msg, channel, ChallengeModel.ReportStatus.WIN);
+                break;
             case "lose":
-                report(msg, channel, false);
-                return;
+                command = new Report(this, service, msg, channel, ChallengeModel.ReportStatus.LOSS);
+                break;
             case "help":
                 command = new Help(this, service, msg, channel);
                 break;
@@ -102,23 +103,6 @@ public class DiscordBot {
         for (String reply : command.getBotReplies()) {
             channel.createMessage(reply).subscribe();
         }
-    }
-
-    private void report(Message msg, MessageChannel channel, boolean isWin) {
-        if (msg.getUserMentionIds().size() != 1) {
-            channel.createMessage(String.format("You need to tag one and only one Discord user with this command, " +
-                    "e.g. %s%s @somebody", msg.getContent().charAt(0), isWin ? "win" : "lose")).subscribe();
-            return;
-        }
-
-        String replyFromService = service.report(
-                channel.getId().asString(),
-                msg.getAuthor().get().getId().asString(),
-                msg.getUserMentionIds().iterator().next().asString(),
-                isWin);
-        String winnerMention = isWin ? msg.getAuthor().get().getMention() : msg.getUserMentions().blockFirst().getMention();
-        String loserMention = !isWin ? msg.getAuthor().get().getMention() : msg.getUserMentions().blockFirst().getMention();
-        channel.createMessage(String.format(replyFromService, winnerMention, loserMention)).subscribe();
     }
 
     public String getPlayerName(String playerId) {

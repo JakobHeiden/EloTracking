@@ -24,7 +24,7 @@ public class Accept extends Command {
         String channelId = channel.getId().asString();
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
         String challengerId = msg.getUserMentionIds().iterator().next().asString();
-        Optional<ChallengeModel> challenge = service.findChallenge(channelId, challengerId, acceptingPlayerId);
+        Optional<ChallengeModel> challenge = service.findChallenge(ChallengeModel.generateId(channelId, challengerId, acceptingPlayerId));
         if (challenge.isEmpty()) {
             botReplies.add("No unanswered challenge by that player");
             canExecute = false;

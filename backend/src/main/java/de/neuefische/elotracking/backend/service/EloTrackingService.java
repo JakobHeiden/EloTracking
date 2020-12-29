@@ -58,12 +58,20 @@ public class EloTrackingService {
         ChallengeModel newChallenge = challengeDao.insert(new ChallengeModel(channelId, challengerId, otherPlayerId));
     }
 
-    public Optional<ChallengeModel> findChallenge(String channelId, String challengerId, String acceptingPlayerId) {
-        return challengeDao.findById(ChallengeModel.generateId(channelId, challengerId, acceptingPlayerId));
+    public Optional<ChallengeModel> findChallenge(String challengeId) {
+        return challengeDao.findById(challengeId);
     }
 
-    public void saveChallenge (ChallengeModel challenge) {
+    public void saveChallenge(ChallengeModel challenge) {
         challengeDao.save(challenge);
+    }
+
+    public void deleteChallenge(ChallengeModel challengeModel) {
+        challengeDao.delete(challengeModel);
+    }
+
+    public void saveMatch(Match match) {
+        matchDao.save(match);
     }
 
     public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
@@ -75,56 +83,7 @@ public class EloTrackingService {
         return false;
     }
 
-    public String report(String channelId, String reportingPlayerId, String reportedOnPlayerId, boolean isReportedWin) {
-        if (!gameDao.findById(channelId).isPresent()) {
-            return String.format("No game is associated with this channel. Use %sregister to register a new game", config.getProperty("DEFAULT_COMMAND_PREFIX"));
-        }
-        String challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
-        if (!challengeDao.existsById(challengeId)) {
-            return String.format("No challenge exists towards that player. Use %schallenge to issue one", config.getProperty("DEFAULT_COMMAND_PREFIX"));
-        }
-        ChallengeModel challenge = challengeDao.findById(challengeId).get();
-        if (challenge.getAcceptedWhen().isEmpty()) {
-            return "This challenge has not been accepted yet and cannot be reported as a win";
-        }
-
-        //do the actual reporting
-        ChallengeModel.ReportStatus reportedOnPlayerReportStatus =
-                challenge.report(reportingPlayerId.equals(challenge.getChallengerId()), isReportedWin);
-        challengeDao.save(challenge);
-
-        //check if the challenge can be resolved into a match
-        switch (reportedOnPlayerReportStatus) {
-            case WIN:
-                if (isReportedWin) {
-                    return "Both players reported a win. Please contact your game admin";
-                } else {
-                    Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
-                            reportedOnPlayerId, reportingPlayerId, false, false));
-                    double[] ratings = updateRatings(match);
-                    challengeDao.delete(challenge);
-                    return String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
-                            "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
-                }
-            case LOSS:
-                if (isReportedWin) {
-                    Match match = matchDao.insert(new Match(UUID.randomUUID(), channelId, new Date(),
-                            reportingPlayerId, reportedOnPlayerId, false, false));
-                    double[] ratings = updateRatings(match);
-                    challengeDao.delete(challenge);
-                    return String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
-                            "%s", (int) ratings[0], (int) ratings[2], "%s", (int) ratings[1], (int) ratings[3]);
-
-                } else {
-                    return "Both players reported a loss. Please contact your game admin";
-                }
-            default:
-                return String.format("%s reported. The other player needs to report as well so the match " +
-                        "can be processed", isReportedWin ? "Win" : "Loss");
-        }
-    }
-
-    private double[] updateRatings(Match match) {
+    public double[] updateRatings(Match match) {
         Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
         Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
         double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
@@ -157,7 +116,7 @@ public class EloTrackingService {
         return allPlayersAsDto;
     }
 
-    public boolean isCommand(String channelId, String firstCharacter) {
+    public boolean isCommand(String channelId, String firstCharacter) {//TODO?
         if (!gameDao.existsByChannelId(channelId)) {
             return (firstCharacter.equals(config.getProperty("DEFAULT_COMMAND_PREFIX")));
         } else {

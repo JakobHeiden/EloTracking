@@ -2,10 +2,10 @@ package de.neuefische.elotracking.backend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class ChallengeModel {
     private Date issuedWhen;
     private Optional<Date> acceptedWhen;
     private ReportStatus challengerReported;
-    private ReportStatus otherPlayerReported;
+    private ReportStatus recipientReported;
 
     public ChallengeModel(String channelId, String challengerId, String otherPlayerId) {
         this.channelId = channelId;
@@ -39,7 +39,7 @@ public class ChallengeModel {
         this.issuedWhen = new Date();
         this.acceptedWhen = Optional.empty();
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
-        this.otherPlayerReported = ReportStatus.NOT_YET_REPORTED;
+        this.recipientReported = ReportStatus.NOT_YET_REPORTED;
     }
 
     public void accept() {
@@ -53,9 +53,9 @@ public class ChallengeModel {
     public ReportStatus report(boolean isChallengerReport, boolean isWin) {
         if (isChallengerReport) {
             challengerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
-            return otherPlayerReported;
+            return recipientReported;
         } else {
-            otherPlayerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
+            recipientReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
             return challengerReported;
         }
     }
