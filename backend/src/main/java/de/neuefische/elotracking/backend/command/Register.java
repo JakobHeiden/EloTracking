@@ -14,12 +14,12 @@ import java.util.function.Consumer;
 
 @Slf4j
 public class Register extends Command {
-    public static String getDescription() {
-        return "Register command";
-    }
-
     public Register(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
         super(bot, service, msg, channel);
+    }
+
+    public static String getDescription() {
+        return "!register NameOfGame - Register a new leaderboard, linking it to this channel";
     }
 
     public void execute() {

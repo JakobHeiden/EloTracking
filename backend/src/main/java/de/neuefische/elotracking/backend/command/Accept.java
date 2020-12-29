@@ -9,14 +9,14 @@ import discord4j.core.object.entity.channel.Channel;
 import java.util.Optional;
 
 public class Accept extends Command {
-    public static String getDescription() {
-        return "accept command";
-    }
-
     public Accept(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
         super(bot, service, msg, channel);
         this.needsRegisteredChannel = true;
         this.needsUserTag = true;
+    }
+
+    public static String getDescription() {
+        return "!accept [@player] - accept an open challenge";
     }
 
     public void execute() {

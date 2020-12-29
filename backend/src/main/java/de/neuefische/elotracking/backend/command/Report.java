@@ -22,7 +22,10 @@ public class Report extends Command {
     }
 
     public static String getDescription() {
-        return "Report command";
+        return "!win [@player] - Report a win over another player";
+    }
+    public static String getDescription2() {
+        return "!lose [@player] - Report a loss to another player";
     }
 
     public void execute() {

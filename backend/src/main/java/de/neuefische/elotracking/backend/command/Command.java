@@ -26,8 +26,8 @@ public abstract class Command {
         this.botReplies = new LinkedList<String>();
         this.service = service;
 
-        needsRegisteredChannel = false;
-        needsUserTag = false;
+        this.needsRegisteredChannel = false;
+        this.needsUserTag = false;
     }
 
     public abstract void execute();

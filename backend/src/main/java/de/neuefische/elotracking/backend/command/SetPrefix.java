@@ -8,7 +8,7 @@ import discord4j.core.object.entity.channel.Channel;
 
 public class SetPrefix extends Command {
     public static String getDescription() {
-        return "Setprefix command";
+        return "!setprefix x - Change the command prefix for the bot. Only applies to this channel";
     }
 
     public SetPrefix(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {

@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Challenge extends Command {
     public static String getDescription() {
-        return "challenge command";
+        return "!challenge @player - challenge another player to a match";
     }
 
     public Challenge(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
