@@ -97,6 +97,7 @@ public class DiscordBot {
                     channel.createMessage("Unknown command " + commandString).subscribe();
                     return;
         }
+        log.warn(command.toString());
         command.execute();
         for (String reply : command.getBotReplies()) {
             channel.createMessage(reply).subscribe();
