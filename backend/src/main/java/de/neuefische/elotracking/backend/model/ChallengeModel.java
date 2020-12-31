@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.Optional;
@@ -14,7 +13,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "challenge")
-public class Challenge {
+public class ChallengeModel {
     public enum ReportStatus {
         NOT_YET_REPORTED,
         WIN,
@@ -25,33 +24,37 @@ public class Challenge {
     private String id;
     private String channelId;
     private String challengerId;
-    private String otherPlayerId;
+    private String recipientId;
     private Date issuedWhen;
     private Optional<Date> acceptedWhen;
     private ReportStatus challengerReported;
-    private ReportStatus otherPlayerReported;
+    private ReportStatus recipientReported;
 
-    public Challenge(String channelId, String challengerId, String otherPlayerId) {
+    public ChallengeModel(String channelId, String challengerId, String recipientId) {
         this.channelId = channelId;
         this.challengerId = challengerId;
-        this.otherPlayerId = otherPlayerId;
-        this.id = generateId(channelId, challengerId, otherPlayerId);
+        this.recipientId = recipientId;
+        this.id = generateId(channelId, challengerId, recipientId);
         this.issuedWhen = new Date();
         this.acceptedWhen = Optional.empty();
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
-        this.otherPlayerReported = ReportStatus.NOT_YET_REPORTED;
+        this.recipientReported = ReportStatus.NOT_YET_REPORTED;
     }
 
     public void accept() {
         this.acceptedWhen = Optional.of(new Date());
     }
 
+    public boolean isAccepted() {
+        return !acceptedWhen.isEmpty();
+    }
+
     public ReportStatus report(boolean isChallengerReport, boolean isWin) {
         if (isChallengerReport) {
             challengerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
-            return otherPlayerReported;
+            return recipientReported;
         } else {
-            otherPlayerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
+            recipientReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
             return challengerReported;
         }
     }
