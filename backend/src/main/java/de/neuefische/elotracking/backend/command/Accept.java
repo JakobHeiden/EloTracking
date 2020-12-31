@@ -72,7 +72,8 @@ public class Accept extends Command {
             canInfer = false;
         }
         if (numMentions == 0 && challenges.size() > 1) {
-            botReplies.add("There are several challenges present against you. Please specify which you want to accept:");//TODO
+            botReplies.add("There are several open challenges present against you. Please specify which you want to accept: " +
+                    getChallengerNames(challenges));
             canInfer = false;
         }
         if (!canInfer) return Optional.empty();
@@ -87,12 +88,23 @@ public class Accept extends Command {
                 }
             }
             if (challengeMatchingMention.isEmpty()) {
-                botReplies.add("No challenge present from that player. There are open challenges from:");//TODO
+                botReplies.add("No challenge present from that player. There are open challenges from: " +
+                        getChallengerNames(challenges));
             }
             return challengeMatchingMention;
         }
 
         //only possible state left is 1 challenge, 0 mentions
         return Optional.of(challenges.iterator().next());
+    }
+
+    private String getChallengerNames(List<ChallengeModel> challenges) {
+        if (challenges.isEmpty()) return "";
+
+        String returnString = "";
+        for (ChallengeModel challenge : challenges) {//TODO make requests run parralel
+            returnString += String.format("%s, ", bot.getPlayerName(challenge.getChallengerId()));
+        }
+        return returnString.substring(0, returnString.length() - 2);
     }
 }
