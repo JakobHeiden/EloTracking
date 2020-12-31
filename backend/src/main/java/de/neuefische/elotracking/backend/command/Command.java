@@ -10,12 +10,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Command {
-    protected EloTrackingService service;
-    protected DiscordBot bot;
-    protected Message msg;
-    protected Channel channel;
+    protected final EloTrackingService service;
+    protected final DiscordBot bot;
+    protected final Message msg;
+    protected final Channel channel;
     @Getter
-    protected List<String> botReplies;
+    protected final List<String> botReplies;
     protected boolean needsRegisteredChannel;
     protected boolean needsUserTag;
 

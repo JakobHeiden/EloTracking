@@ -2,7 +2,6 @@ package de.neuefische.elotracking.backend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -25,17 +24,17 @@ public class ChallengeModel {
     private String id;
     private String channelId;
     private String challengerId;
-    private String otherPlayerId;
+    private String recipientId;
     private Date issuedWhen;
     private Optional<Date> acceptedWhen;
     private ReportStatus challengerReported;
     private ReportStatus recipientReported;
 
-    public ChallengeModel(String channelId, String challengerId, String otherPlayerId) {
+    public ChallengeModel(String channelId, String challengerId, String recipientId) {
         this.channelId = channelId;
         this.challengerId = challengerId;
-        this.otherPlayerId = otherPlayerId;
-        this.id = generateId(channelId, challengerId, otherPlayerId);
+        this.recipientId = recipientId;
+        this.id = generateId(channelId, challengerId, recipientId);
         this.issuedWhen = new Date();
         this.acceptedWhen = Optional.empty();
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;

@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Report extends Command {
-    private boolean isWin;
+    private final boolean isWin;
 
     public Report(DiscordBot bot, EloTrackingService service, Message msg, Channel channel, ChallengeModel.ReportStatus reportStatus) {
         super(bot, service, msg, channel);

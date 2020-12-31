@@ -68,9 +68,9 @@ public class DiscordBot {
 
     private void parseCommand(Message msg) {
         log.debug("Parsing command: " + msg.getContent());
-        String commandString = msg.getContent().substring(1).split(" ")[0];
+        String commandString = msg.getContent().substring(1).split(" ")[0].toLowerCase();
         MessageChannel channel = msg.getChannel().block();
-        Command command;
+        Command command = null;
         switch(commandString) {
             case "register":
                 command = new Register(this, service, msg, channel);
@@ -78,13 +78,13 @@ public class DiscordBot {
             case "challenge":
                 command = new Challenge(this, service, msg, channel);
                 break;
-            case "accept":
+            case "accept", "ac":
                 command = new Accept(this, service, msg, channel);
                 break;
             case "win":
                 command = new Report(this, service, msg, channel, ChallengeModel.ReportStatus.WIN);
                 break;
-            case "lose":
+            case "lose", "loss":
                 command = new Report(this, service, msg, channel, ChallengeModel.ReportStatus.LOSS);
                 break;
             case "help":

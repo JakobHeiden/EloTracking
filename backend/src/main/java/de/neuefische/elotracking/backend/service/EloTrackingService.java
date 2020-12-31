@@ -70,6 +70,14 @@ public class EloTrackingService {
         challengeDao.delete(challengeModel);
     }
 
+    public List<ChallengeModel> findChallengesOfPlayerForChannel(String playerId, String channelId) {
+        List<ChallengeModel> allChallenges = challengeDao.findAllByRecipientId(playerId);
+        List<ChallengeModel> filteredByChannel = allChallenges.stream().
+                filter(challenge -> challenge.getChannelId().equals(channelId))
+                .collect(Collectors.toList());
+        return filteredByChannel;
+    }
+
     public void saveMatch(Match match) {
         matchDao.save(match);
     }
