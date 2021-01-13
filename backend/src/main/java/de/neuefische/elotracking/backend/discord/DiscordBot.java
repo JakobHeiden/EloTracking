@@ -75,7 +75,7 @@ public class DiscordBot {
             case "register":
                 command = new Register(this, service, msg, channel);
                 break;
-            case "challenge":
+            case "challenge", "ch":
                 command = new Challenge(this, service, msg, channel);
                 break;
             case "accept", "ac":
