@@ -11,18 +11,24 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.LinkedList;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AcceptTest {
     //arrange
     @Mock DiscordBot bot;
-    @Mock EloTrackingService service;
-    final Message msg = mock(Message.class);
+    final EloTrackingService service = mock(EloTrackingService.class);
+    @Mock Message msg;// = mock(Message.class);
     final User author = mock(User.class);
     final Snowflake authorSnowflake = mock(Snowflake.class);
     final Channel channel = mock(Channel.class);
@@ -35,10 +41,10 @@ public class AcceptTest {
     @BeforeEach
     void setupMockup() {
         when(msg.getAuthor()).thenReturn(Optional.of(author));
-        when(author.getId()).thenReturn(authorSnowflake);
-        when(authorSnowflake.asString()).thenReturn(authorId);
+        //when(author.getId()).thenReturn(authorSnowflake);
+        //when(authorSnowflake.asString()).thenReturn(authorId);
         when(channel.getId()).thenReturn(channelSnowflake);
-        when(channelSnowflake.asString()).thenReturn(channelId);
+        //when(channelSnowflake.asString()).thenReturn(channelId);
     }
 
     @Test

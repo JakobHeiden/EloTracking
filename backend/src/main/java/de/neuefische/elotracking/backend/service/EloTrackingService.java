@@ -5,6 +5,7 @@ import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.dao.*;
 import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
+import discord4j.core.object.entity.Message;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -122,13 +123,5 @@ public class EloTrackingService {
                 .collect(Collectors.toList());
         Collections.sort(allPlayersAsDto);
         return allPlayersAsDto;
-    }
-
-    public boolean isCommand(String channelId, String firstCharacter) {//TODO?
-        if (!gameDao.existsByChannelId(channelId)) {
-            return (firstCharacter.equals(config.getProperty("DEFAULT_COMMAND_PREFIX")));
-        } else {
-            return (firstCharacter.equals(gameDao.findByChannelId(channelId).getCommandPrefix()));
-        }
     }
 }

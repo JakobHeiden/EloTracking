@@ -3,6 +3,7 @@ package de.neuefische.elotracking.backend.discord;
 import de.neuefische.elotracking.backend.command.*;
 import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -16,6 +17,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -48,7 +51,7 @@ public class DiscordBot {
                     log.debug("Incoming message: " + msgEvent.getMessage().getContent());
                     return msgEvent.getMessage();
                 })
-                .filter(message -> message.getAuthor().map(user -> !user.isBot()).orElse(false))
+                .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
                 .filter(this::isCommand)
                 .subscribe(this::parseCommand);
 
@@ -60,10 +63,16 @@ public class DiscordBot {
         adminDm.createMessage(text).subscribe();
     }
 
-    private boolean isCommand(Message msg) {
-        return service.isCommand(
-                msg.getChannel().block().getId().asString(),
-                msg.getContent().substring(0,1));
+    public boolean isCommand(Message msg) {
+        String necessaryPrefix;
+        Optional<Game> game = service.findGameByChannelId(msg.getChannelId().asString());
+        if (game.isPresent()) {
+            necessaryPrefix = game.get().getCommandPrefix();
+        } else {
+            necessaryPrefix = config.getProperty("DEFAULT_COMMAND_PREFIX");
+        }
+        if (msg.getContent().startsWith(necessaryPrefix)) return true;
+        else return false;
     }
 
     private void parseCommand(Message msg) {
