@@ -7,13 +7,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
@@ -22,13 +18,12 @@ import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class AcceptTest {
     //arrange
-    @Mock DiscordBot bot;
+    final DiscordBot bot = mock(DiscordBot.class);
     final EloTrackingService service = mock(EloTrackingService.class);
-    @Mock Message msg;// = mock(Message.class);
+    final Message msg = mock(Message.class);
     final User author = mock(User.class);
     final Snowflake authorSnowflake = mock(Snowflake.class);
     final Channel channel = mock(Channel.class);
