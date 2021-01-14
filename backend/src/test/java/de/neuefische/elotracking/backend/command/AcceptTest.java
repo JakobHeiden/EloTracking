@@ -7,22 +7,22 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.LinkedList;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AcceptTest {
     //arrange
-    @Mock DiscordBot bot;
-    @Mock EloTrackingService service;
+    final DiscordBot bot = mock(DiscordBot.class);
+    final EloTrackingService service = mock(EloTrackingService.class);
     final Message msg = mock(Message.class);
     final User author = mock(User.class);
     final Snowflake authorSnowflake = mock(Snowflake.class);
@@ -33,17 +33,17 @@ public class AcceptTest {
     final String authorId = "1";
     final String channelId = "2";
 
-    //@BeforeEach
+    @BeforeEach
     void setupMockup() {
         when(msg.getAuthor()).thenReturn(Optional.of(author));
-        when(author.getId()).thenReturn(authorSnowflake);
-        when(authorSnowflake.asString()).thenReturn(authorId);
+        //when(author.getId()).thenReturn(authorSnowflake);
+        //when(authorSnowflake.asString()).thenReturn(authorId);
         when(channel.getId()).thenReturn(channelSnowflake);
-        when(channelSnowflake.asString()).thenReturn(channelId);
+        //when(channelSnowflake.asString()).thenReturn(channelId);
     }
 
-    //@Test
-    //@DisplayName("Accepting when no open challenge is present should not lead to function calls")
+    @Test
+    @DisplayName("Accepting when no open challenge is present should not lead to function calls")
     void noOpenChallenge() {
         when(service.findChallengesOfPlayerForChannel(authorId, channelId))
                 .thenReturn(new LinkedList<ChallengeModel>());
