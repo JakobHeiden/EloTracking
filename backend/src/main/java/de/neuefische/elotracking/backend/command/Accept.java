@@ -67,10 +67,6 @@ public class Accept extends Command {
             botReplies.add("No open challenge present against you");
             canInfer = false;
         }
-        if (numMentions > 1) {
-            botReplies.add("This command requires at most one player tag");
-            canInfer = false;
-        }
         if (numMentions == 0 && challenges.size() > 1) {
             botReplies.add("There are several open challenges present against you. Please specify which you want to accept: " +
                     getChallengerNames(challenges));
