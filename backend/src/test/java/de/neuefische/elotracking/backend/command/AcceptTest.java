@@ -8,15 +8,14 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 
@@ -27,32 +26,41 @@ public class AcceptTest {
     final EloTrackingService service = mock(EloTrackingService.class);
     final Message msg = mock(Message.class);
     final User author = mock(User.class);
-    final Snowflake authorSnowflake = mock(Snowflake.class);
     final Channel channel = mock(Channel.class);
-    final Snowflake channelSnowflake = mock(Snowflake.class);
 
     final String authorId = "1";
-    final String channelId = "2";
-    final String challengerId = "3";
+    final String challengerId = "2";
+    final String channelId = "3";
+    final Snowflake authorSnowflake = Snowflake.of(authorId);
+    final Snowflake challengerSnowflake = Snowflake.of(challengerId);
+    final Snowflake channelSnowflake = Snowflake.of(channelId);
     final Game game = new Game(channelId, "testgame");
+    ChallengeModel challenge = new ChallengeModel(channelId, challengerId, authorId);
+    List<ChallengeModel> challenges = new LinkedList<ChallengeModel>();
+    Set<Snowflake> mentionIdsThatIncludeChallenger = Set.of(challengerSnowflake);
     final Command accept = new Accept(bot, service, msg, channel);
 
     @BeforeEach
-    void setupMockup() {
+    void setupMockBehavior() {
         when(service.findGameByChannelId(channelId)).thenReturn(Optional.of(game));
         when(msg.getAuthor()).thenReturn(Optional.of(author));
         when(author.getId()).thenReturn(authorSnowflake);
-        when(authorSnowflake.asString()).thenReturn(authorId);
         when(channel.getId()).thenReturn(channelSnowflake);
-        when(channelSnowflake.asString()).thenReturn(channelId);
+        when(service.findChallengesOfPlayerForChannel(authorId, channelId)).thenReturn(challenges);
+    }
+
+    @AfterEach
+    void printBotReplies() {
+        for (String botReply : accept.botReplies) {
+            System.out.println(botReply);
+        }
     }
 
     @Test
-    @DisplayName("Accepting when no open challenge is present should not lead to function calls")
-    void noOpenChallengePresent() {
+    @DisplayName("Accepting with a mention when no open challenge is present should not result in function calls")
+    void mentionButNoChallengePresent() {
         //arrange
-        when(service.findChallengesOfPlayerForChannel(authorId, channelId))
-                .thenReturn(new LinkedList<ChallengeModel>());
+        when(msg.getUserMentionIds()).thenReturn(mentionIdsThatIncludeChallenger);
 
         //act
         accept.execute();
@@ -63,14 +71,11 @@ public class AcceptTest {
     }
 
     @Test
-    @DisplayName("Accepting an open challenge should lead to function calls")
-    void openChallengePresent() {
+    @DisplayName("Accepting with a mention and an open challenge should result in function calls")
+    void mentionAndChallengePresent() {
         //arrange
-        List listOfChallenges = new LinkedList<ChallengeModel>();
-        ChallengeModel challenge = new ChallengeModel(channelId, challengerId, authorId);
-        listOfChallenges.add(challenge);
-        when(service.findChallengesOfPlayerForChannel(authorId, channelId))
-                .thenReturn(listOfChallenges);
+        when(msg.getUserMentionIds()).thenReturn(mentionIdsThatIncludeChallenger);
+        challenges.add(challenge);
 
         //act
         accept.execute();
@@ -80,5 +85,49 @@ public class AcceptTest {
         verify(service).saveChallenge(challenge);
     }
 
+    //Tests without a mention in command
+    @Test
+    @DisplayName("No mention and no challenge should not result in function calls")
+    void neitherMentionNorChallengePresent() {
+        //arrange
+        when(msg.getUserMentionIds()).thenReturn(Set.of());
 
+        //act
+        accept.execute();
+
+        //assert
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service, never()).saveChallenge(any(ChallengeModel.class));
+    }
+
+    @Test
+    @DisplayName("No mention and one challenge should result in function calls")
+    void noMentionButOneChallengePresent() {
+        //arrange
+        when(msg.getUserMentionIds()).thenReturn(Set.of());
+        challenges.add(challenge);
+
+        //act
+        accept.execute();
+
+        //assert
+        verify(service).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service).saveChallenge(challenge);
+    }
+
+    @Test
+    @DisplayName("No mention and several challenges should not result in function calls")
+    void noMentionButSeveralChallengesPresent() {
+        //arrange
+        when(msg.getUserMentionIds()).thenReturn(Set.of());
+        challenges.add(challenge);
+        challenges.add(new ChallengeModel(channelId, "4", authorId));
+
+        //act
+        accept.execute();
+
+        //assert
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service, never()).saveChallenge(any(ChallengeModel.class));
+    }
 }
