@@ -46,7 +46,7 @@ public class Accept extends Command {
 
     private Optional<ChallengeModel> inferRelevantChallenge(Set<Snowflake> mentions, String acceptingPlayerId, String channelId) {
         boolean canInfer = true;
-        List<ChallengeModel> challenges = service.findChallengesOfPlayerForChannel(acceptingPlayerId, channelId);
+        List<ChallengeModel> challenges = service.findAllChallengesOfPlayerForChannel(acceptingPlayerId, channelId);
         int numMentions = mentions.size();
 
         //check if the challenge was already accepted

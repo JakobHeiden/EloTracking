@@ -30,6 +30,7 @@ public class Report extends Command {
 
     public void execute() {
         boolean canExecute = super.canExecute();
+        if (!canExecute) return;
 
         String channelId = channel.getId().asString();
         String reportingPlayerId = msg.getAuthor().get().getId().asString();
@@ -38,14 +39,14 @@ public class Report extends Command {
         Optional<ChallengeModel> challenge = service.findChallenge(challengeId);
 
         if (challenge.isEmpty()) {
-            canExecute = false;
             botReplies.add(String.format("No challenge exists towards that player. Use %schallenge to issue one",
                     service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
+            return;
         }
         if (challenge.isPresent()) {
             if (challenge.get().getAcceptedWhen().isEmpty()) {
-                canExecute = false;
                 botReplies.add("This challenge has not been accepted yet and cannot be reported as a win");
+                return;
             }
         }
 
@@ -55,14 +56,13 @@ public class Report extends Command {
                 challenge.get().getRecipientReported()
                 : challenge.get().getChallengerReported();
         if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
-            canExecute = false;
             botReplies.add("Both reported win");
+            return;
         }
         if (!this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.LOSS) {
-            canExecute = false;
             botReplies.add("Both reported loss");
+            return;
         }
-        if (!canExecute) return;
 
         //set report status
         if (isChallengerReport) {
