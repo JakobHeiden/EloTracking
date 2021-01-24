@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -35,8 +36,8 @@ public class ReportTest {
     final String reportingPlayerId = "1";
     final String reportedOnPlayerId = "2";
     final String channelId = "3";
-    final Snowflake reportingPlayerSnowflake = Snowflake.of(reportedOnPlayerId);
-    final Snowflake reportedOnPlayerSnowflake = Snowflake.of(reportingPlayerId);
+    final Snowflake reportingPlayerSnowflake = Snowflake.of(reportingPlayerId);
+    final Snowflake reportedOnPlayerSnowflake = Snowflake.of(reportedOnPlayerId);
     final Snowflake channelSnowflake = Snowflake.of(channelId);
     final Game game = new Game(channelId, "testgame");
     final ApplicationPropertiesLoader applicationPropertiesLoader = mock(ApplicationPropertiesLoader.class);
@@ -117,7 +118,7 @@ public class ReportTest {
                 //arrange
                 when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
                 ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
-                challenge.accept();
+                challenge.setAcceptedWhen(Optional.of(new Date()));
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.of(challenge));
                 report = new Report(bot, service, msg, channel, winOrLoss);
@@ -138,7 +139,7 @@ public class ReportTest {
                 //arrange
                 when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
                 ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
-                challenge.accept();
+                challenge.setAcceptedWhen(Optional.of(new Date()));
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.of(challenge));
                 Message otherPlayerMessage = mock(Message.class);
@@ -166,21 +167,17 @@ public class ReportTest {
                 verify(service).updateRatings(any());
             }
 
-            //@ParameterizedTest
-            //@EnumSource(names = {"WIN", "LOSS"})
-            //@DisplayName("Reporting a win or loss with the other player having reported a conflicting result should not result in function calls")
+            @ParameterizedTest
+            @EnumSource(names = {"WIN", "LOSS"})
+            @DisplayName("Reporting a win or loss with the other player having reported a conflicting result should not result in function calls")
             void acceptedChallengePresentAndOtherPlayerReportedIncorrectly(ChallengeModel.ReportStatus winOrLoss) {
                 //arrange
                 when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
                 ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
-                challenge.accept();
+                challenge.setAcceptedWhen(Optional.of(new Date()));
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.of(challenge));
-                if (winOrLoss == ChallengeModel.ReportStatus.WIN) {
-                    //TODO
-                } else {
-
-                }
+                challenge.setRecipientReported(winOrLoss);
                 report = new Report(bot, service, msg, channel, winOrLoss);
 
                 //act
