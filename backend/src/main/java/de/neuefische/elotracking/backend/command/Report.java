@@ -56,10 +56,12 @@ public class Report extends Command {
                 : challenge.get().getChallengerReported();
         if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
             botReplies.add("Both reported win");
+            service.saveChallenge(challenge.get());
             return;
         }
         if (!this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.LOSS) {
             botReplies.add("Both reported loss");
+            service.saveChallenge(challenge.get());
             return;
         }
 
