@@ -5,7 +5,6 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.Channel;
 
 import java.util.Date;
 import java.util.Optional;
@@ -14,8 +13,8 @@ import java.util.UUID;
 public class Report extends Command {
     private final boolean isWin;
 
-    public Report(DiscordBot bot, EloTrackingService service, Message msg, Channel channel, ChallengeModel.ReportStatus reportStatus) {
-        super(bot, service, msg, channel);
+    public Report(DiscordBot bot, EloTrackingService service, Message msg, ChallengeModel.ReportStatus reportStatus) {
+        super(bot, service, msg);
         this.needsRegisteredChannel = true;
         this.needsUserTag = true;
         this.isWin = (reportStatus == ChallengeModel.ReportStatus.WIN);
@@ -32,7 +31,6 @@ public class Report extends Command {
         boolean canExecute = super.canExecute();
         if (!canExecute) return;
 
-        String channelId = channel.getId().asString();
         String reportingPlayerId = msg.getAuthor().get().getId().asString();
         String reportedOnPlayerId = msg.getUserMentionIds().iterator().next().asString();
         String challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -78,36 +79,36 @@ public class DiscordBot {
     private void parseCommand(Message msg) {
         log.debug("Parsing command: " + msg.getContent());
         String commandString = msg.getContent().substring(1).split(" ")[0].toLowerCase();
-        MessageChannel channel = msg.getChannel().block();
+        Mono<MessageChannel> channelMono = msg.getChannel();
         Command command = null;
         switch(commandString) {
             case "register":
-                command = new Register(this, service, msg, channel);
+                command = new Register(this, service, msg, channelMono);
                 break;
             case "challenge", "ch":
-                command = new Challenge(this, service, msg, channel);
+                command = new Challenge(this, service, msg);
                 break;
             case "accept", "ac":
-                command = new Accept(this, service, msg, channel);
+                command = new Accept(this, service, msg);
                 break;
             case "win":
-                command = new Report(this, service, msg, channel, ChallengeModel.ReportStatus.WIN);
+                command = new Report(this, service, msg, ChallengeModel.ReportStatus.WIN);
                 break;
             case "lose", "loss":
-                command = new Report(this, service, msg, channel, ChallengeModel.ReportStatus.LOSS);
+                command = new Report(this, service, msg, ChallengeModel.ReportStatus.LOSS);
                 break;
             case "help":
-                command = new Help(this, service, msg, channel);
+                command = new Help(this, service, msg);
                 break;
             case "setprefix":
-                command = new SetPrefix(this, service, msg, channel);
+                command = new SetPrefix(this, service, msg);
                 break;
             default:
-                    channel.createMessage("Unknown command " + commandString).subscribe();
+                    channelMono.block().createMessage("Unknown command " + commandString).subscribe();
                     return;
         }
-        log.warn(command.toString());
         command.execute();
+        MessageChannel channel = channelMono.block();
         for (String reply : command.getBotReplies()) {
             channel.createMessage(reply).subscribe();
         }

@@ -35,7 +35,7 @@ public class AcceptTest {
     ChallengeModel challenge = new ChallengeModel(channelId, challengerId, recipientId);
     List<ChallengeModel> challenges = new LinkedList<ChallengeModel>();
     Set<Snowflake> mentionIdsThatIncludeChallenger = Set.of(challengerSnowflake);
-    final Command accept = new Accept(bot, service, msg, channel);
+    final Command accept = new Accept(bot, service, msg);
 
     @BeforeEach
     void setupMockBehavior() {

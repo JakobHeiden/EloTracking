@@ -3,7 +3,6 @@ package de.neuefische.elotracking.backend.command;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.Channel;
 import lombok.Getter;
 
 import java.util.LinkedList;
@@ -13,16 +12,16 @@ public abstract class Command {
     protected final EloTrackingService service;
     protected final DiscordBot bot;
     protected final Message msg;
-    protected final Channel channel;
+    protected final String channelId;
     @Getter
     protected final List<String> botReplies;
     protected boolean needsRegisteredChannel;
     protected boolean needsUserTag;
 
-    protected Command(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
+    protected Command(DiscordBot bot, EloTrackingService service, Message msg) {
         this.bot = bot;
         this.msg = msg;
-        this.channel = channel;
+        this.channelId = msg.getChannelId().asString();
         this.botReplies = new LinkedList<String>();
         this.service = service;
 
@@ -35,7 +34,7 @@ public abstract class Command {
     protected boolean canExecute() {
         boolean canExecute = true;
         if (this.needsRegisteredChannel) {
-            if (service.findGameByChannelId(channel.getId().asString()).isEmpty()) {
+            if (service.findGameByChannelId(channelId).isEmpty()) {
                 canExecute = false;
                 botReplies.add("Needs register");
             }

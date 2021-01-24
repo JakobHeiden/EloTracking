@@ -4,13 +4,12 @@ import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.Channel;
 
 import java.util.Optional;
 
 public class Help extends Command {
-    public Help(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
-        super(bot, service, msg, channel);
+    public Help(DiscordBot bot, EloTrackingService service, Message msg) {
+        super(bot, service, msg);
     }
 
     public static String getDescription() {
@@ -21,7 +20,7 @@ public class Help extends Command {
         boolean canExecute = super.canExecute();
         if (!canExecute) return;
 
-        Optional<Game> game = service.findGameByChannelId(channel.getId().asString());
+        Optional<Game> game = service.findGameByChannelId(this.channelId);
         String prefix = game.isPresent() ? game.get().getCommandPrefix() : service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
         botReplies.add(String.format("Bot commands are: ([] denotes something is optional)\n" +
                         "%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n%s%s",

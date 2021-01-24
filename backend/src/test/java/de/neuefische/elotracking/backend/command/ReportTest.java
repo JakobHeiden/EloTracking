@@ -48,9 +48,9 @@ public class ReportTest {
     void setupMockBehavior() {
         when(service.findGameByChannelId(channelId)).thenReturn(Optional.of(game));
         when(msg.getAuthor()).thenReturn(Optional.of(reportingPlayer));
+        when(msg.getChannelId()).thenReturn(Snowflake.of(channelId));
         when(reportingPlayer.getId()).thenReturn(reportingPlayerSnowflake);
         when(channel.getId()).thenReturn(channelSnowflake);
-        //when(service.findAllChallengesOfPlayerForChannel(reportingPlayerId, channelId)).thenReturn(challenges);
         when(service.getConfig()).thenReturn(applicationPropertiesLoader);
         when(applicationPropertiesLoader.getProperty("DEFAULT_COMMAND_PREFIX")).thenReturn("!");
     }
@@ -76,7 +76,7 @@ public class ReportTest {
                 when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.empty());
-                report = new Report(bot, service, msg, channel, winOrLoss);
+                report = new Report(bot, service, msg, winOrLoss);
 
                 //act
                 report.execute();
@@ -96,7 +96,7 @@ public class ReportTest {
                 ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.of(challenge));
-                report = new Report(bot, service, msg, channel, winOrLoss);
+                report = new Report(bot, service, msg, winOrLoss);
 
                 //act
                 report.execute();
@@ -121,7 +121,7 @@ public class ReportTest {
                 challenge.setAcceptedWhen(Optional.of(new Date()));
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.of(challenge));
-                report = new Report(bot, service, msg, channel, winOrLoss);
+                report = new Report(bot, service, msg, winOrLoss);
 
                 //act
                 report.execute();
@@ -144,17 +144,18 @@ public class ReportTest {
                         .thenReturn(Optional.of(challenge));
                 Message otherPlayerMessage = mock(Message.class);
                 when(otherPlayerMessage.getUserMentionIds()).thenReturn(Set.of(reportingPlayerSnowflake));
+                when(otherPlayerMessage.getChannelId()).thenReturn(Snowflake.of(channelId));
                 final User reportedOnPlayer = mock(User.class);
                 when(otherPlayerMessage.getAuthor()).thenReturn(Optional.of(reportedOnPlayer));
                 when(reportedOnPlayer.getId()).thenReturn(reportedOnPlayerSnowflake);
                 Report otherPlayerReport;
                 if (winOrLoss == ChallengeModel.ReportStatus.LOSS) {
-                    otherPlayerReport = new Report(bot, service, otherPlayerMessage, channel, ChallengeModel.ReportStatus.WIN);
+                    otherPlayerReport = new Report(bot, service, otherPlayerMessage, ChallengeModel.ReportStatus.WIN);
                 } else {
-                    otherPlayerReport = new Report(bot, service, otherPlayerMessage, channel, ChallengeModel.ReportStatus.LOSS);
+                    otherPlayerReport = new Report(bot, service, otherPlayerMessage, ChallengeModel.ReportStatus.LOSS);
                 }
                 when(service.updateRatings(any())).thenReturn(new double[]{1, 2, 3, 4});
-                report = new Report(bot, service, msg, channel, winOrLoss);
+                report = new Report(bot, service, msg, winOrLoss);
 
                 //act
                 otherPlayerReport.execute();
@@ -178,7 +179,7 @@ public class ReportTest {
                 when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
                         .thenReturn(Optional.of(challenge));
                 challenge.setRecipientReported(winOrLoss);
-                report = new Report(bot, service, msg, channel, winOrLoss);
+                report = new Report(bot, service, msg, winOrLoss);
 
                 //act
                 report.execute();
