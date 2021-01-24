@@ -12,30 +12,27 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.util.*;
 
 import static org.mockito.Mockito.*;
 
-@MockitoSettings(strictness = Strictness.LENIENT)
 public class AcceptTest {
     //arrange
     final DiscordBot bot = mock(DiscordBot.class);
     final EloTrackingService service = mock(EloTrackingService.class);
     final Message msg = mock(Message.class);
-    final User author = mock(User.class);
+    final User recipient = mock(User.class);
     final Channel channel = mock(Channel.class);
 
-    final String authorId = "1";
+    final String recipientId = "1";
     final String challengerId = "2";
     final String channelId = "3";
-    final Snowflake authorSnowflake = Snowflake.of(authorId);
+    final Snowflake authorSnowflake = Snowflake.of(recipientId);
     final Snowflake challengerSnowflake = Snowflake.of(challengerId);
     final Snowflake channelSnowflake = Snowflake.of(channelId);
     final Game game = new Game(channelId, "testgame");
-    ChallengeModel challenge = new ChallengeModel(channelId, challengerId, authorId);
+    ChallengeModel challenge = new ChallengeModel(channelId, challengerId, recipientId);
     List<ChallengeModel> challenges = new LinkedList<ChallengeModel>();
     Set<Snowflake> mentionIdsThatIncludeChallenger = Set.of(challengerSnowflake);
     final Command accept = new Accept(bot, service, msg, channel);
@@ -43,10 +40,10 @@ public class AcceptTest {
     @BeforeEach
     void setupMockBehavior() {
         when(service.findGameByChannelId(channelId)).thenReturn(Optional.of(game));
-        when(msg.getAuthor()).thenReturn(Optional.of(author));
-        when(author.getId()).thenReturn(authorSnowflake);
+        when(msg.getAuthor()).thenReturn(Optional.of(recipient));
+        when(recipient.getId()).thenReturn(authorSnowflake);
         when(channel.getId()).thenReturn(channelSnowflake);
-        when(service.findChallengesOfPlayerForChannel(authorId, channelId)).thenReturn(challenges);
+        when(service.findAllChallengesOfPlayerForChannel(recipientId, channelId)).thenReturn(challenges);
     }
 
     @AfterEach
@@ -66,7 +63,7 @@ public class AcceptTest {
         accept.execute();
 
         //assert
-        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, recipientId);
         verify(service, never()).saveChallenge(any(ChallengeModel.class));
     }
 
@@ -81,7 +78,7 @@ public class AcceptTest {
         accept.execute();
 
         //assert
-        verify(service).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service).addNewPlayerIfPlayerNotPresent(channelId, recipientId);
         verify(service).saveChallenge(challenge);
     }
 
@@ -96,7 +93,7 @@ public class AcceptTest {
         accept.execute();
 
         //assert
-        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, recipientId);
         verify(service, never()).saveChallenge(any(ChallengeModel.class));
     }
 
@@ -111,7 +108,7 @@ public class AcceptTest {
         accept.execute();
 
         //assert
-        verify(service).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service).addNewPlayerIfPlayerNotPresent(channelId, recipientId);
         verify(service).saveChallenge(challenge);
     }
 
@@ -121,13 +118,13 @@ public class AcceptTest {
         //arrange
         when(msg.getUserMentionIds()).thenReturn(Set.of());
         challenges.add(challenge);
-        challenges.add(new ChallengeModel(channelId, "4", authorId));
+        challenges.add(new ChallengeModel(channelId, "4", recipientId));
 
         //act
         accept.execute();
 
         //assert
-        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, authorId);
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(channelId, recipientId);
         verify(service, never()).saveChallenge(any(ChallengeModel.class));
     }
 }
