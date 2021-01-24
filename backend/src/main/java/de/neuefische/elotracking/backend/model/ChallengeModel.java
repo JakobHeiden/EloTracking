@@ -41,25 +41,11 @@ public class ChallengeModel {
         this.recipientReported = ReportStatus.NOT_YET_REPORTED;
     }
 
-    public void accept() {
-        this.acceptedWhen = Optional.of(new Date());
-    }
-
     public boolean isAccepted() {
         return !acceptedWhen.isEmpty();
     }
 
-    public ReportStatus report(boolean isChallengerReport, boolean isWin) {
-        if (isChallengerReport) {
-            challengerReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
-            return recipientReported;
-        } else {
-            recipientReported = isWin ? ReportStatus.WIN : ReportStatus.LOSS;
-            return challengerReported;
-        }
-    }
-
-    public static String generateId(String channelId, String playerId1, String playerId2) {
+   public static String generateId(String channelId, String playerId1, String playerId2) {
         return playerId1.compareTo(playerId2) < 0 ?
                 String.format("%s-%s-%s", channelId, playerId1, playerId2) :
                 String.format("%s-%s-%s", channelId, playerId2, playerId1);
