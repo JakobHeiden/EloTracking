@@ -3,13 +3,12 @@ package de.neuefische.elotracking.backend.command;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Challenge extends Command {
-    public Challenge(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
-        super(bot, service, msg, channel);
+    public Challenge(DiscordBot bot, EloTrackingService service, Message msg) {
+        super(bot, service, msg);
         needsRegisteredChannel = true;
         needsUserTag = true;
     }
@@ -20,7 +19,6 @@ public class Challenge extends Command {
 
     public void execute() {
         boolean canExecute = super.canExecute();
-        String channelId = channel.getId().asString();
         String challengerId = msg.getAuthor().get().getId().asString();
         String recipientId = msg.getUserMentionIds().iterator().next().asString();
         if (service.challengeExistsById(channelId + "-" + challengerId + "-" + recipientId)) {

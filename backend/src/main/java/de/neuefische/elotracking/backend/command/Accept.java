@@ -5,7 +5,6 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
@@ -15,8 +14,8 @@ import java.util.Set;
 
 @Slf4j
 public class Accept extends Command {
-    public Accept(DiscordBot bot, EloTrackingService service, Message msg, Channel channel) {
-        super(bot, service, msg, channel);
+    public Accept(DiscordBot bot, EloTrackingService service, Message msg) {
+        super(bot, service, msg);
         this.needsRegisteredChannel = true;
     }
 
@@ -29,7 +28,6 @@ public class Accept extends Command {
         if (!canExecute) return;
 
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
-        String channelId = channel.getId().asString();
 
         Optional<ChallengeModel> inferredChallenge = inferRelevantChallenge(msg.getUserMentionIds(), acceptingPlayerId, channelId);
         if (inferredChallenge.isEmpty()) {
