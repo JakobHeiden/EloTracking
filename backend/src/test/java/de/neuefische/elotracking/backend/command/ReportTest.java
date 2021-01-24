@@ -9,10 +9,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -64,24 +61,136 @@ public class ReportTest {
         }
     }
 
-    @ParameterizedTest
-    @EnumSource(names = {"WIN", "LOSS"})
-    @DisplayName("Reporting a win or loss with a mention and no open challenge should not result in function calls")
-    void mentionButNoMatchPresent(ChallengeModel.ReportStatus winOrLoss) {
-        //arrange
-        when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
-        when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
-                .thenReturn(Optional.empty());
-        report = new Report(bot, service, msg, channel, winOrLoss);
+    @Nested
+    class withAMention {
 
-        //act
-        report.execute();
+        @Nested
+        class noAcceptedChallenge {
 
-        //assert
-        verify(service, never()).saveChallenge(any());
-        verify(service, never()).saveMatch(any());
-        verify(service, never()).deleteChallenge(any());
+            @ParameterizedTest
+            @EnumSource(names = {"WIN", "LOSS"})
+            @DisplayName("Reporting a win or loss with no challenge should not result in function calls")
+            void noChallengePresent(ChallengeModel.ReportStatus winOrLoss) {
+                //arrange
+                when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
+                when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
+                        .thenReturn(Optional.empty());
+                report = new Report(bot, service, msg, channel, winOrLoss);
+
+                //act
+                report.execute();
+
+                //assert
+                verify(service, never()).saveChallenge(any());
+                verify(service, never()).saveMatch(any());
+                verify(service, never()).deleteChallenge(any());
+            }
+
+            @ParameterizedTest
+            @EnumSource(names = {"WIN", "LOSS"})
+            @DisplayName("Reporting a win or loss with an open but not accepted challenge, should not result in function calls")
+            void challengePresentButNotYetAccepted(ChallengeModel.ReportStatus winOrLoss) {
+                //arrange
+                when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
+                ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
+                when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
+                        .thenReturn(Optional.of(challenge));
+                report = new Report(bot, service, msg, channel, winOrLoss);
+
+                //act
+                report.execute();
+
+                //assert
+                verify(service, never()).saveChallenge(challenge);
+                verify(service, never()).saveMatch(any());
+                verify(service, never()).deleteChallenge(any());
+            }
+        }
+
+        @Nested
+        class acceptedChallengePresent {
+
+            @ParameterizedTest
+            @EnumSource(names = {"WIN", "LOSS"})
+            @DisplayName("Reporting a win or loss with the other player not having reported yet, should result in function calls")
+            void acceptedChallengePresent(ChallengeModel.ReportStatus winOrLoss) {
+                //arrange
+                when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
+                ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
+                challenge.accept();
+                when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
+                        .thenReturn(Optional.of(challenge));
+                report = new Report(bot, service, msg, channel, winOrLoss);
+
+                //act
+                report.execute();
+
+                //assert
+                verify(service).saveChallenge(challenge);
+                verify(service, never()).saveMatch(any());
+                verify(service, never()).deleteChallenge(any());
+            }
+
+            @ParameterizedTest
+            @EnumSource(names = {"WIN", "LOSS"})
+            @DisplayName("Reporting a win or loss with the other player having reported correctly, should result in function calls")
+            void acceptedChallengePresentAndOtherPlayerReportedCorrectly(ChallengeModel.ReportStatus winOrLoss) {
+                //arrange
+                when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
+                ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
+                challenge.accept();
+                when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
+                        .thenReturn(Optional.of(challenge));
+                Message otherPlayerMessage = mock(Message.class);
+                when(otherPlayerMessage.getUserMentionIds()).thenReturn(Set.of(reportingPlayerSnowflake));
+                final User reportedOnPlayer = mock(User.class);
+                when(otherPlayerMessage.getAuthor()).thenReturn(Optional.of(reportedOnPlayer));
+                when(reportedOnPlayer.getId()).thenReturn(reportedOnPlayerSnowflake);
+                Report otherPlayerReport;
+                if (winOrLoss == ChallengeModel.ReportStatus.LOSS) {
+                    otherPlayerReport = new Report(bot, service, otherPlayerMessage, channel, ChallengeModel.ReportStatus.WIN);
+                } else {
+                    otherPlayerReport = new Report(bot, service, otherPlayerMessage, channel, ChallengeModel.ReportStatus.LOSS);
+                }
+                when(service.updateRatings(any())).thenReturn(new double[]{1, 2, 3, 4});
+                report = new Report(bot, service, msg, channel, winOrLoss);
+
+                //act
+                otherPlayerReport.execute();
+                report.execute();
+
+                //assert
+                verify(service, times(2)).saveChallenge(challenge);
+                verify(service).saveMatch(any());
+                verify(service).deleteChallenge(challenge);
+                verify(service).updateRatings(any());
+            }
+
+            //@ParameterizedTest
+            //@EnumSource(names = {"WIN", "LOSS"})
+            //@DisplayName("Reporting a win or loss with the other player having reported a conflicting result should not result in function calls")
+            void acceptedChallengePresentAndOtherPlayerReportedIncorrectly(ChallengeModel.ReportStatus winOrLoss) {
+                //arrange
+                when(msg.getUserMentionIds()).thenReturn(Set.of(reportedOnPlayerSnowflake));
+                ChallengeModel challenge = new ChallengeModel(channelId, reportingPlayerId, reportedOnPlayerId);
+                challenge.accept();
+                when(service.findChallenge(ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId)))
+                        .thenReturn(Optional.of(challenge));
+                if (winOrLoss == ChallengeModel.ReportStatus.WIN) {
+                    //TODO
+                } else {
+
+                }
+                report = new Report(bot, service, msg, channel, winOrLoss);
+
+                //act
+                report.execute();
+
+                //assert
+                verify(service).saveChallenge(challenge);
+                verify(service, never()).saveMatch(any());
+                verify(service, never()).deleteChallenge(any());
+            }
+        }
     }
-
-
 }

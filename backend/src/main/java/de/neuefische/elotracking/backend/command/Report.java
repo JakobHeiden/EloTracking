@@ -42,8 +42,7 @@ public class Report extends Command {
             botReplies.add(String.format("No challenge exists towards that player. Use %schallenge to issue one",
                     service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
             return;
-        }
-        if (challenge.isPresent()) {
+        } else {
             if (challenge.get().getAcceptedWhen().isEmpty()) {
                 botReplies.add("This challenge has not been accepted yet and cannot be reported as a win");
                 return;
