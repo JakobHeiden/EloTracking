@@ -8,6 +8,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,7 +39,7 @@ public class Accept extends Command {
 
         //Challenger is determined and the challenge not yet accepted, so proceed
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
-        challenge.accept();
+        challenge.setAcceptedWhen(Optional.of(new Date()));
         service.saveChallenge(challenge);
         botReplies.add(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
                 service.findGameByChannelId(channelId).get().getCommandPrefix()));
