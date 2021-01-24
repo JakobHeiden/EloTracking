@@ -7,7 +7,6 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Channel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +22,6 @@ public class AcceptTest {
     final EloTrackingService service = mock(EloTrackingService.class);
     final Message msg = mock(Message.class);
     final User recipient = mock(User.class);
-    final Channel channel = mock(Channel.class);
 
     final String recipientId = "1";
     final String challengerId = "2";
@@ -35,15 +33,16 @@ public class AcceptTest {
     ChallengeModel challenge = new ChallengeModel(channelId, challengerId, recipientId);
     List<ChallengeModel> challenges = new LinkedList<ChallengeModel>();
     Set<Snowflake> mentionIdsThatIncludeChallenger = Set.of(challengerSnowflake);
-    final Command accept = new Accept(bot, service, msg);
+    Command accept;
 
     @BeforeEach
     void setupMockBehavior() {
         when(service.findGameByChannelId(channelId)).thenReturn(Optional.of(game));
         when(msg.getAuthor()).thenReturn(Optional.of(recipient));
+        when(msg.getChannelId()).thenReturn(channelSnowflake);
         when(recipient.getId()).thenReturn(authorSnowflake);
-        when(channel.getId()).thenReturn(channelSnowflake);
         when(service.findAllChallengesOfPlayerForChannel(recipientId, channelId)).thenReturn(challenges);
+        accept = new Accept(bot, service, msg);
     }
 
     @AfterEach
