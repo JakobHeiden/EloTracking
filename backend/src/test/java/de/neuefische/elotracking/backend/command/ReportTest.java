@@ -12,11 +12,9 @@ import discord4j.core.object.entity.channel.Channel;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +29,6 @@ public class ReportTest {
     final EloTrackingService service = mock(EloTrackingService.class);
     final Message msg = mock(Message.class);
     final User reportingPlayer = mock(User.class);
-    final Channel channel = mock(Channel.class);
 
     final String reportingPlayerId = "1";
     final String reportedOnPlayerId = "2";
@@ -50,7 +47,6 @@ public class ReportTest {
         when(msg.getAuthor()).thenReturn(Optional.of(reportingPlayer));
         when(msg.getChannelId()).thenReturn(Snowflake.of(channelId));
         when(reportingPlayer.getId()).thenReturn(reportingPlayerSnowflake);
-        when(channel.getId()).thenReturn(channelSnowflake);
         when(service.getConfig()).thenReturn(applicationPropertiesLoader);
         when(applicationPropertiesLoader.getProperty("DEFAULT_COMMAND_PREFIX")).thenReturn("!");
     }
