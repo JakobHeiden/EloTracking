@@ -1,14 +1,13 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.discord.DiscordBot;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Challenge extends Command {
-    public Challenge(DiscordBot bot, EloTrackingService service, Message msg) {
-        super(bot, service, msg);
+
+    public Challenge(Message msg) {
+        super(msg);
         needsRegisteredChannel = true;
         needsUserTag = true;
     }

@@ -1,10 +1,7 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.model.Game;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.TextChannelEditSpec;
@@ -16,10 +13,9 @@ import java.util.function.Consumer;
 
 @Slf4j
 public class Register extends Command {
-    private static Mono<MessageChannel> channelMono;
-    public Register(DiscordBot bot, EloTrackingService service, Message msg, Mono<MessageChannel> channelMono) {
-        super(bot, service, msg);
-        this.channelMono = channelMono;
+
+    public Register(Message msg) {
+        super(msg);
     }
 
     public static String getDescription() {
@@ -40,6 +36,8 @@ public class Register extends Command {
         }
         if (!canExecute) return;
 
+        Mono<MessageChannel> channelMono = msg.getChannel();
+
         service.saveGame(new Game(this.channelId, nameOfNewGame));
         botReplies.add(String.format(String.format("New game created. You can now %schallenge another player",
                 service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX"))));
@@ -50,8 +48,7 @@ public class Register extends Command {
                         String.format("Leaderboard: http://%s/%s",
                                 service.getConfig().getProperty("BASE_URL"),
                                 this.channelId));
-        Channel channel = channelMono.block();
-        ((TextChannel) channel).edit(editConsumer).subscribe();
+        ((TextChannel) channelMono.block()).edit(editConsumer).subscribe();
         botReplies.add("I updated the channel description.");
     }
 }

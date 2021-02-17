@@ -2,7 +2,6 @@ package de.neuefische.elotracking.backend.discord;
 
 import de.neuefische.elotracking.backend.command.*;
 import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
-import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
@@ -20,12 +19,14 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 @Slf4j
 @Component
 public class DiscordBot {
     private final GatewayDiscordClient client;
     private final EloTrackingService service;
+    private final Function<Message, Command> commandFactory;
     private final PrivateChannel adminDm;
     @Getter
     private final String adminMentionAsString;
@@ -34,10 +35,12 @@ public class DiscordBot {
     @Autowired
     public DiscordBot(GatewayDiscordClient gatewayDiscordClient,
                       EloTrackingService eloTrackingService,
-                      ApplicationPropertiesLoader applicationPropertiesLoader) {
+                      ApplicationPropertiesLoader applicationPropertiesLoader,
+                      Function<Message, Command> commandFactory) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
         this.config = applicationPropertiesLoader;
+        this.commandFactory = commandFactory;
 
         String adminId = config.getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
@@ -78,35 +81,8 @@ public class DiscordBot {
 
     private void parseCommand(Message msg) {
         log.debug("Parsing command: " + msg.getContent());
-        String commandString = msg.getContent().substring(1).split(" ")[0].toLowerCase();
         Mono<MessageChannel> channelMono = msg.getChannel();
-        Command command = null;
-        switch(commandString) {
-            case "register":
-                command = new Register(this, service, msg, channelMono);
-                break;
-            case "challenge", "ch":
-                command = new Challenge(this, service, msg);
-                break;
-            case "accept", "ac":
-                command = new Accept(this, service, msg);
-                break;
-            case "win":
-                command = new Report(this, service, msg, ChallengeModel.ReportStatus.WIN);
-                break;
-            case "lose", "loss":
-                command = new Report(this, service, msg, ChallengeModel.ReportStatus.LOSS);
-                break;
-            case "help":
-                command = new Help(this, service, msg);
-                break;
-            case "setprefix":
-                command = new SetPrefix(this, service, msg);
-                break;
-            default:
-                    channelMono.block().createMessage("Unknown command " + commandString).subscribe();
-                    return;
-        }
+        Command command = commandFactory.apply(msg);
         command.execute();
         MessageChannel channel = channelMono.block();
         for (String reply : command.getBotReplies()) {

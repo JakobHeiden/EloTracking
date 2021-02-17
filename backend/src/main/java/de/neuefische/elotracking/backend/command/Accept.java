@@ -1,8 +1,6 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -14,8 +12,9 @@ import java.util.Set;
 
 @Slf4j
 public class Accept extends Command {
-    public Accept(DiscordBot bot, EloTrackingService service, Message msg) {
-        super(bot, service, msg);
+
+    public Accept(Message msg) {
+        super(msg);
         this.needsRegisteredChannel = true;
     }
 
