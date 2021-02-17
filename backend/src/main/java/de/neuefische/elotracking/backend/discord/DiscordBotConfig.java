@@ -1,12 +1,17 @@
 package de.neuefische.elotracking.backend.discord;
 
+import de.neuefische.elotracking.backend.command.Command;
+import de.neuefische.elotracking.backend.command.Unknown;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import java.util.function.Function;
 
 @Slf4j
 @Configuration
@@ -27,5 +32,29 @@ public class DiscordBotConfig {
                 });
 
         return client;
+    }
+
+    @Bean
+    @Scope("prototype")
+    public Command createCommand(Message message) {
+        String commandString = message.getContent().split(" ")[0];
+        commandString = commandString.substring(1,2).toUpperCase() + commandString.substring(2).toLowerCase();
+        try {
+            return (Command) Class.forName("de.neuefische.elotracking.backend.command." + commandString)
+                    .getConstructor(Message.class)
+                    .newInstance(message);
+        } catch (Exception e) {//TODO
+            if (e.getClass().equals(ClassNotFoundException.class) || e.getClass().equals(NoSuchMethodException.class)) {
+                return new Unknown(message);
+            } else {
+                e.printStackTrace();//TODO
+                return null;
+            }
+        }
+    }
+
+    @Bean
+    public Function<Message, Command> commandFactory() {
+        return message -> createCommand(message);
     }
 }

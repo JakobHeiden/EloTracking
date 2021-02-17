@@ -1,20 +1,19 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Report extends Command {
+public abstract class Report extends Command {
+
     private final boolean isWin;
 
-    public Report(DiscordBot bot, EloTrackingService service, Message msg, ChallengeModel.ReportStatus reportStatus) {
-        super(bot, service, msg);
+    protected Report(Message msg, ChallengeModel.ReportStatus reportStatus) {
+        super(msg);
         this.needsRegisteredChannel = true;
         this.needsUserTag = true;
         this.isWin = (reportStatus == ChallengeModel.ReportStatus.WIN);

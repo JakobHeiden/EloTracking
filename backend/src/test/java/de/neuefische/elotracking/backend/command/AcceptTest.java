@@ -11,11 +11,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
-
 import static org.mockito.Mockito.*;
 
+//@ContextConfiguration(classes = de.neuefische.elotracking.backend.discord.DiscordBotConfig.class)
 public class AcceptTest {
     //arrange
     final DiscordBot bot = mock(DiscordBot.class);
@@ -42,7 +43,7 @@ public class AcceptTest {
         when(msg.getChannelId()).thenReturn(channelSnowflake);
         when(recipient.getId()).thenReturn(authorSnowflake);
         when(service.findAllChallengesOfPlayerForChannel(recipientId, channelId)).thenReturn(challenges);
-        accept = new Accept(bot, service, msg);
+        accept = new Accept(msg);
     }
 
     @AfterEach

@@ -4,13 +4,17 @@ import de.neuefische.elotracking.backend.discord.DiscordBot;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Command {
-    protected final EloTrackingService service;
-    protected final DiscordBot bot;
+
+    @Autowired
+    protected EloTrackingService service;
+    @Autowired
+    protected DiscordBot bot;
     protected final Message msg;
     protected final String channelId;
     @Getter
@@ -18,12 +22,10 @@ public abstract class Command {
     protected boolean needsRegisteredChannel;
     protected boolean needsUserTag;
 
-    protected Command(DiscordBot bot, EloTrackingService service, Message msg) {
-        this.bot = bot;
+    protected Command(Message msg) {
         this.msg = msg;
         this.channelId = msg.getChannelId().asString();
         this.botReplies = new LinkedList<String>();
-        this.service = service;
 
         this.needsRegisteredChannel = false;
         this.needsUserTag = false;
