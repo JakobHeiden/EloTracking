@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.utils;
+package de.neuefische.elotracking.backend.parser;
 
 import de.neuefische.elotracking.backend.command.Command;
 import de.neuefische.elotracking.backend.model.Game;
