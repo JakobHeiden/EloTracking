@@ -16,7 +16,7 @@ public class ApplicationPropertiesLoader {
     @Value("${base.url}")
     private String BASE_URL;
 
-    public String getProperty(String name) {
+    public String getProperty(String name) {//TODO
         switch (name) {
             case "ADMIN_DISCORD_ID":
                 return ADMIN_DISCORD_ID;

@@ -85,6 +85,7 @@ public class DiscordBot {
         Command command = commandFactory.apply(msg);
         command.execute();
         MessageChannel channel = channelMono.block();
+        //command.getBotReplies().forEach(channel::createMessage); TODO
         for (String reply : command.getBotReplies()) {
             channel.createMessage(reply).subscribe();
         }

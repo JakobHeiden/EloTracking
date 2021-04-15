@@ -18,6 +18,8 @@ public class Challenge extends Command {
 
     public void execute() {
         boolean canExecute = super.canExecute();
+        if (!canExecute) return;
+
         String challengerId = msg.getAuthor().get().getId().asString();
         String recipientId = msg.getUserMentionIds().iterator().next().asString();
         if (service.challengeExistsById(channelId + "-" + challengerId + "-" + recipientId)) {

@@ -1,6 +1,11 @@
 package de.neuefische.elotracking.backend.command;
 
+import de.neuefische.elotracking.backend.dao.ChallengeDao;
+import de.neuefische.elotracking.backend.dao.GameDao;
+import de.neuefische.elotracking.backend.dao.MatchDao;
+import de.neuefische.elotracking.backend.dao.PlayerDao;
 import de.neuefische.elotracking.backend.discord.DiscordBot;
+import de.neuefische.elotracking.backend.discord.DiscordBotConfig;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -11,16 +16,36 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 import static org.mockito.Mockito.*;
 
-//@ContextConfiguration(classes = de.neuefische.elotracking.backend.discord.DiscordBotConfig.class)
+@SpringBootTest
+//@ContextConfiguration(classes = {DiscordBot.class, DiscordBotConfig.class, EloTrackingService.class})
+//@AutoConfigureDataMongo
+@ComponentScan("de.neuefische.elotracking.backend.service")
 public class AcceptTest {
     //arrange
-    final DiscordBot bot = mock(DiscordBot.class);
-    final EloTrackingService service = mock(EloTrackingService.class);
+    //@Mock
+    @MockBean
+    GameDao gameDao;
+    @MockBean
+    ChallengeDao challengeDao;
+    @MockBean
+    MatchDao matchDao;
+    @MockBean
+    PlayerDao playerDao;
+    @Autowired
+    DiscordBot bot;// = mock(DiscordBot.class);
+    //@Mock
+    @Autowired
+    private EloTrackingService service;// = mock(EloTrackingService.class);
     final Message msg = mock(Message.class);
     final User recipient = mock(User.class);
 
@@ -38,11 +63,11 @@ public class AcceptTest {
 
     @BeforeEach
     void setupMockBehavior() {
-        when(service.findGameByChannelId(channelId)).thenReturn(Optional.of(game));
+        //when(service.findGameByChannelId(channelId)).thenReturn(Optional.of(game));
         when(msg.getAuthor()).thenReturn(Optional.of(recipient));
         when(msg.getChannelId()).thenReturn(channelSnowflake);
         when(recipient.getId()).thenReturn(authorSnowflake);
-        when(service.findAllChallengesOfPlayerForChannel(recipientId, channelId)).thenReturn(challenges);
+        //when(service.findAllChallengesOfPlayerForChannel(recipientId, channelId)).thenReturn(challenges);
         accept = new Accept(msg);
     }
 
