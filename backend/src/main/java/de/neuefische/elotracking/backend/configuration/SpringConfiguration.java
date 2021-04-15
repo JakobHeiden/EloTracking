@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.discord;
+package de.neuefische.elotracking.backend.configuration;
 
 import de.neuefische.elotracking.backend.command.Command;
 import de.neuefische.elotracking.backend.command.Unknown;
@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 @Slf4j
 @Configuration
-public class DiscordBotConfig {
+public class SpringConfiguration {
     @Bean
     public GatewayDiscordClient createClient() {
         log.warn(System.getenv("DISCORD_BOT_TOKEN"));

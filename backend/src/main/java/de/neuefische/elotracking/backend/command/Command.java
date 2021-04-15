@@ -1,6 +1,6 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.discord.DiscordBot;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import lombok.Getter;
@@ -14,7 +14,7 @@ public abstract class Command {
     @Autowired
     protected EloTrackingService service;
     @Autowired
-    protected DiscordBot bot;
+    protected DiscordBotService bot;
     protected final Message msg;
     protected final String channelId;
     @Getter

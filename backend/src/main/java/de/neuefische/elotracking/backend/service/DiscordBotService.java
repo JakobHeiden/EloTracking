@@ -1,31 +1,28 @@
-package de.neuefische.elotracking.backend.discord;
+package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.command.*;
-import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
-import de.neuefische.elotracking.backend.model.Game;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.command.Command;
+import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
+import de.neuefische.elotracking.backend.utils.CommandParser;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 @Slf4j
 @Component
-public class DiscordBot {
+public class DiscordBotService {
     private final GatewayDiscordClient client;
     private final EloTrackingService service;
+    private final CommandParser commandParser;
     private final Function<Message, Command> commandFactory;
     private final PrivateChannel adminDm;
     @Getter
@@ -33,13 +30,15 @@ public class DiscordBot {
     private final ApplicationPropertiesLoader config;
 
     @Autowired
-    public DiscordBot(GatewayDiscordClient gatewayDiscordClient,
-                      EloTrackingService eloTrackingService,
-                      ApplicationPropertiesLoader applicationPropertiesLoader,
-                      Function<Message, Command> commandFactory) {
+    public DiscordBotService(GatewayDiscordClient gatewayDiscordClient,
+                             EloTrackingService eloTrackingService,
+                             ApplicationPropertiesLoader applicationPropertiesLoader,
+                             CommandParser commandParser,
+                             Function<Message, Command> commandFactory) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
         this.config = applicationPropertiesLoader;
+        this.commandParser = commandParser;
         this.commandFactory = commandFactory;
 
         String adminId = config.getProperty("ADMIN_DISCORD_ID");
@@ -56,8 +55,8 @@ public class DiscordBot {
                     return msgEvent.getMessage();
                 })
                 .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
-                .filter(this::isCommand)
-                .subscribe(this::parseCommand);
+                .filter(commandParser::isCommand)
+                .subscribe(commandParser::parseCommand);
 
         client.getEventDispatcher().on(Event.class)
                 .subscribe(logs -> log.trace(logs.toString()));
@@ -65,30 +64,6 @@ public class DiscordBot {
 
     public void sendToAdmin(String text) {
         adminDm.createMessage(text).subscribe();
-    }
-
-    public boolean isCommand(Message msg) {
-        String necessaryPrefix;
-        Optional<Game> game = service.findGameByChannelId(msg.getChannelId().asString());
-        if (game.isPresent()) {
-            necessaryPrefix = game.get().getCommandPrefix();
-        } else {
-            necessaryPrefix = config.getProperty("DEFAULT_COMMAND_PREFIX");
-        }
-        if (msg.getContent().startsWith(necessaryPrefix)) return true;
-        else return false;
-    }
-
-    private void parseCommand(Message msg) {
-        log.debug("Parsing command: " + msg.getContent());
-        Mono<MessageChannel> channelMono = msg.getChannel();
-        Command command = commandFactory.apply(msg);
-        command.execute();
-        MessageChannel channel = channelMono.block();
-        //command.getBotReplies().forEach(channel::createMessage); TODO
-        for (String reply : command.getBotReplies()) {
-            channel.createMessage(reply).subscribe();
-        }
     }
 
     public String getPlayerName(String playerId) {

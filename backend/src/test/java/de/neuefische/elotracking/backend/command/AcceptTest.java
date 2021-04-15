@@ -4,8 +4,7 @@ import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.dao.MatchDao;
 import de.neuefische.elotracking.backend.dao.PlayerDao;
-import de.neuefische.elotracking.backend.discord.DiscordBot;
-import de.neuefische.elotracking.backend.discord.DiscordBotConfig;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -17,11 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.ContextConfiguration;
 
 import java.util.*;
 import static org.mockito.Mockito.*;
@@ -42,7 +39,7 @@ public class AcceptTest {
     @MockBean
     PlayerDao playerDao;
     @Autowired
-    DiscordBot bot;// = mock(DiscordBot.class);
+    DiscordBotService bot;// = mock(DiscordBot.class);
     //@Mock
     @Autowired
     private EloTrackingService service;// = mock(EloTrackingService.class);

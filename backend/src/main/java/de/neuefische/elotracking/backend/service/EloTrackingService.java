@@ -1,11 +1,9 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.common.ApplicationPropertiesLoader;
-import de.neuefische.elotracking.backend.discord.DiscordBot;
+import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.dao.*;
 import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
 import de.neuefische.elotracking.backend.model.*;
-import discord4j.core.object.entity.Message;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class EloTrackingService {
-    private final DiscordBot bot;
+    private final DiscordBotService bot;
     private final GameDao gameDao;
     private final ChallengeDao challengeDao;
     private final MatchDao matchDao;
@@ -27,11 +25,11 @@ public class EloTrackingService {
     private final ApplicationPropertiesLoader config;
 
     @Autowired
-    public EloTrackingService(@Lazy DiscordBot discordBot, GameDao gameDao,
+    public EloTrackingService(@Lazy DiscordBotService discordBotService, GameDao gameDao,
                               ChallengeDao challengeDao, MatchDao matchDao,
                               PlayerDao playerDao,
                               ApplicationPropertiesLoader applicationPropertiesLoader) {
-        this.bot = discordBot;
+        this.bot = discordBotService;
         this.gameDao = gameDao;
         this.challengeDao = challengeDao;
         this.matchDao = matchDao;
