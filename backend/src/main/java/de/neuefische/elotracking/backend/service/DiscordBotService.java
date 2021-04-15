@@ -1,8 +1,7 @@
 package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.command.Command;
-import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
-import de.neuefische.elotracking.backend.utils.CommandParser;
+import de.neuefische.elotracking.backend.parser.CommandParser;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
