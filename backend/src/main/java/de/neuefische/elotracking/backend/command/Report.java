@@ -42,12 +42,12 @@ public abstract class Report extends Command {
         this.challenge = service.findChallenge(challengeId);
 
         if (challenge.isEmpty()) {
-            botReplies.add(String.format("No challenge exists towards that player. Use %schallenge to issue one",
+            addBotReply(String.format("No challenge exists towards that player. Use %schallenge to issue one",
                     service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
             return;
         }
         if (challenge.get().getAcceptedWhen().isEmpty()) {
-            botReplies.add("This challenge has not been accepted yet and cannot be reported as a win");
+            addBotReply("This challenge has not been accepted yet and cannot be reported as a win");
             return;
         }
 
@@ -60,7 +60,7 @@ public abstract class Report extends Command {
         //if only one player reported, send message and return
         if (challenge.get().getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
                 challenge.get().getRecipientReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
-            botReplies.add("reported.");
+            addBotReply("reported.");
             return;
         }
 
@@ -75,7 +75,7 @@ public abstract class Report extends Command {
 
         String winnerMention = this.isWin ? msg.getAuthor().get().getMention() : msg.getUserMentionIds().iterator().next().asString();
         String loserMention = this.isWin ? String.format("<@!%s>", msg.getUserMentionIds().iterator().next().asString()) : msg.getAuthor().get().getMention();
-        botReplies.add(String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
+        addBotReply(String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
                 winnerMention, (int) resolvedRatings[0], (int) resolvedRatings[2],
                 loserMention,  (int) resolvedRatings[1], (int) resolvedRatings[3]));
     }
@@ -85,12 +85,12 @@ public abstract class Report extends Command {
                 challenge.get().getRecipientReported()
                 : challenge.get().getChallengerReported();
         if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
-            botReplies.add("Both reported win");
+            addBotReply("Both reported win");
             service.saveChallenge(challenge.get());
             this.canExecute = false;
         }
         if (!this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.LOSS) {
-            botReplies.add("Both reported loss");
+            addBotReply("Both reported loss");
             service.saveChallenge(challenge.get());
             this.canExecute = false;
         }

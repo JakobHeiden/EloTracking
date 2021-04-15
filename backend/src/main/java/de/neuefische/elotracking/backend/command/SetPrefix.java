@@ -18,7 +18,7 @@ public class SetPrefix extends Command {
         boolean canExecute = super.canExecute();
         String newPrefix = msg.getContent().substring(1 + "setprefix".length()).trim();
         if (newPrefix.length() != 1 || newPrefix.matches("[a-zA-Z0-9]")) {
-            botReplies.add("Please specify a single special character");
+            addBotReply("Please specify a single special character");
             canExecute = false;
         }
         if (!canExecute) return;
@@ -26,6 +26,6 @@ public class SetPrefix extends Command {
         Game game = service.findGameByChannelId(this.channelId).get();
         game.setCommandPrefix(newPrefix);
         service.saveGame(game);
-        botReplies.add(String.format("Command prefix changed to %s", newPrefix));
+        addBotReply(String.format("Command prefix changed to %s", newPrefix));
     }
 }

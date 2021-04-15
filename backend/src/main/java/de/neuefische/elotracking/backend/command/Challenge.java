@@ -23,13 +23,13 @@ public class Challenge extends Command {
         String challengerId = msg.getAuthor().get().getId().asString();
         String recipientId = msg.getUserMentionIds().iterator().next().asString();
         if (service.challengeExistsById(channelId + "-" + challengerId + "-" + recipientId)) {
-            botReplies.add("challenge already exists");
+            addBotReply("challenge already exists");
             canExecute = false;
         }
         if (!canExecute) return;
 
         service.addNewPlayerIfPlayerNotPresent(channelId, challengerId);
         service.addChallenge(channelId, challengerId, recipientId);
-        botReplies.add(String.format("Challenge issued. Your opponent can now %saccept", service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
+        addBotReply(String.format("Challenge issued. Your opponent can now %saccept", service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
     }
 }

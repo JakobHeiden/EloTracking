@@ -18,7 +18,7 @@ public abstract class Command {
     protected final Message msg;
     protected final String channelId;
     @Getter
-    protected final List<String> botReplies;
+    private final List<String> botReplies;
     protected boolean needsRegisteredChannel;
     protected boolean needsUserTag;
 
@@ -38,15 +38,19 @@ public abstract class Command {
         if (this.needsRegisteredChannel) {
             if (service.findGameByChannelId(channelId).isEmpty()) {
                 canExecute = false;
-                botReplies.add("Needs register");
+                addBotReply("Needs register");
             }
         }
         if (this.needsUserTag) {
             if (msg.getUserMentionIds().size() != 1) {
                 canExecute = false;
-                botReplies.add("Needs user tag");
+                addBotReply("Needs user tag");
             }
         }
         return canExecute;
+    }
+
+    protected void addBotReply(String reply) {
+        botReplies.add(reply);
     }
 }

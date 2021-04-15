@@ -38,7 +38,7 @@ public class Accept extends Command {
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
         challenge.setAcceptedWhen(Optional.of(new Date()));
         service.saveChallenge(challenge);
-        botReplies.add(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
+        addBotReply(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
                 service.findGameByChannelId(channelId).get().getCommandPrefix()));
     }
 
@@ -51,7 +51,7 @@ public class Accept extends Command {
         if (numMentions == 1) {
             for (ChallengeModel challenge : challenges) {
                 if (challenge.getChallengerId().equals(mentions.iterator().next())) {
-                    botReplies.add("Challenge already accepted");
+                    addBotReply("Challenge already accepted");
                     return Optional.empty();
                 }
             }
@@ -62,11 +62,11 @@ public class Accept extends Command {
 
         //Rule out some states that won't allow for inference
         if (challenges.size() == 0) {
-            botReplies.add("No open challenge present against you");
+            addBotReply("No open challenge present against you");
             canInfer = false;
         }
         if (numMentions == 0 && challenges.size() > 1) {
-            botReplies.add("There are several open challenges present against you. Please specify which you want to accept: " +
+            addBotReply("There are several open challenges present against you. Please specify which you want to accept: " +
                     getChallengerNames(challenges));
             canInfer = false;
         }
@@ -82,7 +82,7 @@ public class Accept extends Command {
                 }
             }
             if (challengeMatchingMention.isEmpty()) {
-                botReplies.add("No challenge present from that player. There are open challenges from: " +
+                addBotReply("No challenge present from that player. There are open challenges from: " +
                         getChallengerNames(challenges));
             }
             return challengeMatchingMention;

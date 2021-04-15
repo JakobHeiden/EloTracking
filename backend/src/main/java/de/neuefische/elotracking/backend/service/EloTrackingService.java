@@ -25,9 +25,8 @@ public class EloTrackingService {
     private final ApplicationPropertiesLoader config;
 
     @Autowired
-    public EloTrackingService(@Lazy DiscordBotService discordBotService, GameDao gameDao,
-                              ChallengeDao challengeDao, MatchDao matchDao,
-                              PlayerDao playerDao,
+    public EloTrackingService(@Lazy DiscordBotService discordBotService,
+                              GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
                               ApplicationPropertiesLoader applicationPropertiesLoader) {
         this.bot = discordBotService;
         this.gameDao = gameDao;
