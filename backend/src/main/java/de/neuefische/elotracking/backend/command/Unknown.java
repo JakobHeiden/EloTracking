@@ -11,6 +11,6 @@ public class Unknown extends Command {
     @Override
     public void execute() {
         String commandString = msg.getContent().substring(1).split(" ")[0].toLowerCase();
-        this.botReplies.add(String.format("Unknown Command %s", commandString));
+        addBotReply(String.format("Unknown Command %s", commandString));
     }
 }

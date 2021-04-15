@@ -26,12 +26,12 @@ public class Register extends Command {
         boolean canExecute = super.canExecute();
         String nameOfNewGame = msg.getContent().substring(1 + "register".length()).trim();
         if (nameOfNewGame.equals("")) {
-            botReplies.add("needs name");
+            addBotReply("needs name");
             canExecute = false;
         }
         Optional<Game> existingGame = service.findGameByChannelId(this.channelId);
         if (existingGame.isPresent()) {
-            botReplies.add(String.format("There is already a game associated with this channel: %s", existingGame.get().getName()));
+            addBotReply(String.format("There is already a game associated with this channel: %s", existingGame.get().getName()));
             canExecute = false;
         }
         if (!canExecute) return;
@@ -39,7 +39,7 @@ public class Register extends Command {
         Mono<MessageChannel> channelMono = msg.getChannel();
 
         service.saveGame(new Game(this.channelId, nameOfNewGame));
-        botReplies.add(String.format(String.format("New game created. You can now %schallenge another player",
+        addBotReply(String.format(String.format("New game created. You can now %schallenge another player",
                 service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX"))));
 
         //update channel description to include the new leaderboard URL
@@ -49,6 +49,6 @@ public class Register extends Command {
                                 service.getConfig().getProperty("BASE_URL"),
                                 this.channelId));
         ((TextChannel) channelMono.block()).edit(editConsumer).subscribe();
-        botReplies.add("I updated the channel description.");
+        addBotReply("I updated the channel description.");
     }
 }

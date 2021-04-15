@@ -21,7 +21,7 @@ public class Help extends Command {
 
         Optional<Game> game = service.findGameByChannelId(this.channelId);
         String prefix = game.isPresent() ? game.get().getCommandPrefix() : service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
-        botReplies.add(String.format("Bot commands are: ([] denotes something is optional)\n" +
+        addBotReply(String.format("Bot commands are: ([] denotes something is optional)\n" +
                         "%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n%s%s",
                 prefix, Register.getDescription().substring(1),
                 prefix, Challenge.getDescription().substring(1),

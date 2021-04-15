@@ -27,21 +27,18 @@ public class DiscordBotService {
     private final PrivateChannel adminDm;
     @Getter
     private final String adminMentionAsString;
-    private final ApplicationPropertiesLoader config;
 
     @Autowired
     public DiscordBotService(GatewayDiscordClient gatewayDiscordClient,
                              EloTrackingService eloTrackingService,
-                             ApplicationPropertiesLoader applicationPropertiesLoader,
                              CommandParser commandParser,
                              Function<Message, Command> commandFactory) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
-        this.config = applicationPropertiesLoader;
         this.commandParser = commandParser;
         this.commandFactory = commandFactory;
 
-        String adminId = config.getProperty("ADMIN_DISCORD_ID");
+        String adminId = service.getConfig().getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
         User admin = client.getUserById(Snowflake.of(adminId)).block();
         this.adminDm = admin.getPrivateChannel().block();

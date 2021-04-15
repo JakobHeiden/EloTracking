@@ -70,7 +70,7 @@ public class AcceptTest {
 
     @AfterEach
     void printBotReplies() {
-        for (String botReply : accept.botReplies) {
+        for (String botReply : accept.getBotReplies()) {
             System.out.println(botReply);
         }
     }
