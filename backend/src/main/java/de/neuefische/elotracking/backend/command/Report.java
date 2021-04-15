@@ -11,6 +11,12 @@ import java.util.UUID;
 public abstract class Report extends Command {
 
     private final boolean isWin;
+    private boolean canExecute;
+    private String reportingPlayerId;
+    private String reportedOnPlayerId;
+    private String challengeId;
+    private Optional<ChallengeModel> challenge;
+    private boolean isChallengerReport;
 
     protected Report(Message msg, ChallengeModel.ReportStatus reportStatus) {
         super(msg);
@@ -27,48 +33,29 @@ public abstract class Report extends Command {
     }
 
     public void execute() {
-        boolean canExecute = super.canExecute();
+        this.canExecute = super.canExecute();
         if (!canExecute) return;
 
-        String reportingPlayerId = msg.getAuthor().get().getId().asString();
-        String reportedOnPlayerId = msg.getUserMentionIds().iterator().next().asString();
-        String challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
-        Optional<ChallengeModel> challenge = service.findChallenge(challengeId);
+        this.reportingPlayerId = msg.getAuthor().get().getId().asString();
+        this.reportedOnPlayerId = msg.getUserMentionIds().iterator().next().asString();
+        this.challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
+        this.challenge = service.findChallenge(challengeId);
 
         if (challenge.isEmpty()) {
             botReplies.add(String.format("No challenge exists towards that player. Use %schallenge to issue one",
                     service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
             return;
-        } else {
-            if (challenge.get().getAcceptedWhen().isEmpty()) {
-                botReplies.add("This challenge has not been accepted yet and cannot be reported as a win");
-                return;
-            }
         }
-
-        //check if there is inconsistent reporting
-        boolean isChallengerReport = (reportingPlayerId.equals(challenge.get().getChallengerId()));
-        ChallengeModel.ReportStatus reportedOnPlayerReported = isChallengerReport ?
-                challenge.get().getRecipientReported()
-                : challenge.get().getChallengerReported();
-        if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
-            botReplies.add("Both reported win");
-            service.saveChallenge(challenge.get());
-            return;
-        }
-        if (!this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.LOSS) {
-            botReplies.add("Both reported loss");
-            service.saveChallenge(challenge.get());
+        if (challenge.get().getAcceptedWhen().isEmpty()) {
+            botReplies.add("This challenge has not been accepted yet and cannot be reported as a win");
             return;
         }
 
-        //set report status
-        if (isChallengerReport) {
-            challenge.get().setChallengerReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
-        } else {
-            challenge.get().setRecipientReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
-        }
-        service.saveChallenge(challenge.get());
+        this.isChallengerReport = (reportingPlayerId.equals(challenge.get().getChallengerId()));
+        checkForInconsistentReporting();
+        if (!canExecute) return;
+
+        setReportStatus();
 
         //if only one player reported, send message and return
         if (challenge.get().getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
@@ -91,5 +78,30 @@ public abstract class Report extends Command {
         botReplies.add(String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
                 winnerMention, (int) resolvedRatings[0], (int) resolvedRatings[2],
                 loserMention,  (int) resolvedRatings[1], (int) resolvedRatings[3]));
+    }
+
+    private void checkForInconsistentReporting() {
+        ChallengeModel.ReportStatus reportedOnPlayerReported = this.isChallengerReport ?
+                challenge.get().getRecipientReported()
+                : challenge.get().getChallengerReported();
+        if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
+            botReplies.add("Both reported win");
+            service.saveChallenge(challenge.get());
+            this.canExecute = false;
+        }
+        if (!this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.LOSS) {
+            botReplies.add("Both reported loss");
+            service.saveChallenge(challenge.get());
+            this.canExecute = false;
+        }
+    }
+
+    private void setReportStatus() {
+        if (this.isChallengerReport) {
+            challenge.get().setChallengerReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
+        } else {
+            challenge.get().setRecipientReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
+        }
+        service.saveChallenge(challenge.get());
     }
 }

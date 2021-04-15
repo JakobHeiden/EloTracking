@@ -38,9 +38,9 @@ public class DiscordBotConfig {
     @Scope("prototype")
     public Command createCommand(Message message) {
         String commandString = message.getContent().split(" ")[0];
-        commandString = commandString.substring(1,2).toUpperCase() + commandString.substring(2).toLowerCase();
+        String commandClassName = commandString.substring(1,2).toUpperCase() + commandString.substring(2).toLowerCase();
         try {
-            return (Command) Class.forName("de.neuefische.elotracking.backend.command." + commandString)
+            return (Command) Class.forName("de.neuefische.elotracking.backend.command." + commandClassName)
                     .getConstructor(Message.class)
                     .newInstance(message);
         } catch (Exception e) {//TODO
