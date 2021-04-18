@@ -21,8 +21,6 @@ import java.util.function.Function;
 public class DiscordBotService {
     private final GatewayDiscordClient client;
     private final EloTrackingService service;
-    private final CommandParser commandParser;
-    private final Function<Message, Command> commandFactory;
     private final PrivateChannel adminDm;
     @Getter
     private final String adminMentionAsString;
@@ -30,12 +28,9 @@ public class DiscordBotService {
     @Autowired
     public DiscordBotService(GatewayDiscordClient gatewayDiscordClient,
                              EloTrackingService eloTrackingService,
-                             CommandParser commandParser,
-                             Function<Message, Command> commandFactory) {
+                             CommandParser commandParser) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
-        this.commandParser = commandParser;
-        this.commandFactory = commandFactory;
 
         String adminId = service.getConfig().getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
