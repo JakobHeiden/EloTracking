@@ -8,14 +8,16 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Slf4j
 public class Accept extends Command {
 
+    private boolean canExecute = true;
+
     public Accept(Message msg) {
         super(msg);
         this.needsRegisteredChannel = true;
+        this.cantHaveTwoUserTags = true;
     }
 
     public static String getDescription() {
@@ -23,73 +25,60 @@ public class Accept extends Command {
     }
 
     public void execute() {
-        boolean canExecute = super.canExecute();
-        if (!canExecute) return;
+        if (!super.canExecute()) return;
 
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
-
-        Optional<ChallengeModel> inferredChallenge = inferRelevantChallenge(msg.getUserMentionIds(), acceptingPlayerId, channelId);
-        if (inferredChallenge.isEmpty()) {
-            return;
+        List<ChallengeModel> challenges = service.findAllChallengesOfPlayerForChannel(acceptingPlayerId, channelId);
+        Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
+        Optional<ChallengeModel> challenge = null;
+        if (mention.isEmpty()) {
+            challenge = inferRelevantChallenge(challenges);
+        } else {
+            challenge = getRelevantChallenge(challenges, mention.get());
         }
-        ChallengeModel challenge = inferredChallenge.get();
+        if (!canExecute) return;
 
-        //Challenger is determined and the challenge not yet accepted, so proceed
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
-        challenge.setAcceptedWhen(Optional.of(new Date()));
-        service.saveChallenge(challenge);
+        challenge.get().setAcceptedWhen(Optional.of(new Date()));
+        service.saveChallenge(challenge.get());
         addBotReply(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
                 service.findGameByChannelId(channelId).get().getCommandPrefix()));
     }
 
-    private Optional<ChallengeModel> inferRelevantChallenge(Set<Snowflake> mentions, String acceptingPlayerId, String channelId) {
-        boolean canInfer = true;
-        List<ChallengeModel> challenges = service.findAllChallengesOfPlayerForChannel(acceptingPlayerId, channelId);
-        int numMentions = mentions.size();
-
-        //check if the challenge was already accepted
-        if (numMentions == 1) {
-            for (ChallengeModel challenge : challenges) {
-                if (challenge.getChallengerId().equals(mentions.iterator().next())) {
-                    addBotReply("Challenge already accepted");
-                    return Optional.empty();
-                }
-            }
-        }
-
-        //accepted challenges of other players aren't relevant anymore
-        challenges.removeIf(ChallengeModel::isAccepted);
-
-        //Rule out some states that won't allow for inference
+    private Optional<ChallengeModel> inferRelevantChallenge(List<ChallengeModel> challenges) {
+        challenges.removeIf(chlng -> chlng.isAccepted());
         if (challenges.size() == 0) {
             addBotReply("No open challenge present against you");
-            canInfer = false;
+            canExecute = false;
+            return Optional.empty();
         }
-        if (numMentions == 0 && challenges.size() > 1) {
+        if (challenges.size() > 1) {
             addBotReply("There are several open challenges present against you. Please specify which you want to accept: " +
                     getChallengerNames(challenges));
-            canInfer = false;
-        }
-        if (!canInfer) return Optional.empty();
-
-        //some possible inference scenarios
-        if (numMentions == 1) {
-            String challengerId = mentions.iterator().next().asString();
-            Optional<ChallengeModel> challengeMatchingMention = Optional.empty();
-            for (ChallengeModel challenge : challenges) {
-                if (challenge.getChallengerId().equals(challengerId)) {
-                    challengeMatchingMention = Optional.of(challenge);
-                }
-            }
-            if (challengeMatchingMention.isEmpty()) {
-                addBotReply("No challenge present from that player. There are open challenges from: " +
-                        getChallengerNames(challenges));
-            }
-            return challengeMatchingMention;
+            canExecute = false;
+            return Optional.empty();
         }
 
-        //only possible state left is 1 challenge, 0 mentions
-        return Optional.of(challenges.iterator().next());
+        return Optional.of(challenges.get(0));
+    }
+
+    private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, Snowflake mention) {
+        Optional<ChallengeModel> challenge = challenges.stream().
+                filter(chlng -> chlng.getRecipientId() == mention.asString())
+                .findAny();
+
+        if (challenge.isEmpty()) {
+            addBotReply("That player has not yet challenged you");
+            canExecute = false;
+            return challenge;
+        }
+        if (challenge.get().isAccepted()) {
+            addBotReply("You already accepted that Challenge");
+            canExecute = false;
+            return Optional.empty();
+        }
+
+        return challenge;
     }
 
     private String getChallengerNames(List<ChallengeModel> challenges) {

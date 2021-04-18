@@ -21,6 +21,7 @@ public abstract class Command {
     private final List<String> botReplies;
     protected boolean needsRegisteredChannel;
     protected boolean needsUserTag;
+    protected boolean cantHaveTwoUserTags;
 
     protected Command(Message msg) {
         this.msg = msg;
@@ -29,6 +30,7 @@ public abstract class Command {
 
         this.needsRegisteredChannel = false;
         this.needsUserTag = false;
+        this.cantHaveTwoUserTags = false;
     }
 
     public abstract void execute();
@@ -45,6 +47,12 @@ public abstract class Command {
             if (msg.getUserMentionIds().size() != 1) {
                 canExecute = false;
                 addBotReply("Needs user tag");
+            }
+        }
+        if (this.cantHaveTwoUserTags) {
+            if (msg.getUserMentionIds().size() > 1) {
+                canExecute = false;
+                addBotReply("You cannot mention more than one player with this command");
             }
         }
         return canExecute;
