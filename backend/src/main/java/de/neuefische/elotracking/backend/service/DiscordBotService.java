@@ -1,20 +1,16 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.command.Command;
 import de.neuefische.elotracking.backend.parser.CommandParser;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.function.Function;
 
 @Slf4j
 @Component
