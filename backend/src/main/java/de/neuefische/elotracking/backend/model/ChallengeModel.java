@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import java.util.Optional;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Document(collection = "challenge")
 public class ChallengeModel {
     public enum ReportStatus {
@@ -45,7 +47,7 @@ public class ChallengeModel {
         return !acceptedWhen.isEmpty();
     }
 
-   public static String generateId(String channelId, String playerId1, String playerId2) {
+    public static String generateId(String channelId, String playerId1, String playerId2) {
         return playerId1.compareTo(playerId2) < 0 ?
                 String.format("%s-%s-%s", channelId, playerId1, playerId2) :
                 String.format("%s-%s-%s", channelId, playerId2, playerId1);
