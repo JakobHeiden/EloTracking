@@ -1,6 +1,8 @@
 package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,13 @@ public class Accept extends Command {
         this.cantHaveTwoUserTags = true;
     }
 
+    // For unit testing purposes
+    Accept(Message msg, EloTrackingService service, DiscordBotService bot) {
+        this(msg);
+        this.service = service;
+        this.bot = bot;
+    }
+
     public static String getDescription() {
         return "!ac[cept] [@player] - accept an open challenge";
     }
@@ -28,9 +37,10 @@ public class Accept extends Command {
         if (!super.canExecute()) return;
 
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
-        List<ChallengeModel> challenges = service.findAllChallengesOfPlayerForChannel(acceptingPlayerId, channelId);
+        List<ChallengeModel> challenges = service.findAllChallengesOfRecipientForChannel(acceptingPlayerId, channelId);
         Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
         Optional<ChallengeModel> challenge = null;
+
         if (mention.isEmpty()) {
             challenge = inferRelevantChallenge(challenges);
         } else {
@@ -46,7 +56,7 @@ public class Accept extends Command {
     }
 
     private Optional<ChallengeModel> inferRelevantChallenge(List<ChallengeModel> challenges) {
-        challenges.removeIf(chlng -> chlng.isAccepted());
+        challenges.removeIf(ChallengeModel::isAccepted);
         if (challenges.size() == 0) {
             addBotReply("No open challenge present against you");
             canExecute = false;

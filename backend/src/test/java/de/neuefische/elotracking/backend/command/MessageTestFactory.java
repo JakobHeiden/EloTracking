@@ -2,23 +2,29 @@ package de.neuefische.elotracking.backend.command;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MessageTestFactory {
+class MessageTestFactory {
 
-    public Message createMockMessage(String text) {
+    public static Message createMock(String text, Snowflake author) {
         Message mock = mock(Message.class);
-        //text
-        when(mock.getContent()).thenReturn(text);
-        //channelid
-        when(mock.getChannelId()).thenReturn(SnowflakeTestFactory.createRandomSnowflake());
-        //mentions
+
+        User authorUser = mock(User.class);
+        when(authorUser.getId()).thenReturn(author);
+        when(mock.getAuthor()).thenReturn(Optional.of(authorUser));
+
+        //when(mock.getContent()).thenReturn(text);
+
+        when(mock.getChannelId()).thenReturn(Snowflake.of(SnowflakeTestFactory.CHANNELID));
+
         String[] words = text.split(" ");
         Set<Snowflake> mentionIds = Arrays.stream(words)
                 .filter(word -> word.startsWith("@"))
