@@ -33,7 +33,7 @@ public class CommandParser {
         else return false;
     }
 
-    public void parseCommand(Message msg) {
+    public void processCommand(Message msg) {
         log.debug("Parsing command: " + msg.getContent());
         Mono<MessageChannel> channelMono = msg.getChannel();
         Command command = commandFactory.apply(msg);

@@ -43,7 +43,7 @@ public class DiscordBotService {
                 })
                 .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
                 .filter(commandParser::isCommand)
-                .subscribe(commandParser::parseCommand);
+                .subscribe(commandParser::processCommand);
 
         client.getEventDispatcher().on(Event.class)
                 .subscribe(logs -> log.trace(logs.toString()));
