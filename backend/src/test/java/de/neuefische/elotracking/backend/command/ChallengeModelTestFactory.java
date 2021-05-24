@@ -3,6 +3,7 @@ package de.neuefische.elotracking.backend.command;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static de.neuefische.elotracking.backend.command.SnowflakeTestFactory.*;
@@ -13,13 +14,9 @@ class ChallengeModelTestFactory {
         return new ChallengeModel(CHANNELID, CHALLENGERID, RECIPIENTID);
     }
 
-    public static List<ChallengeModel> createList() {
-        return new ArrayList<ChallengeModel>();
-    }
-
-    public static List<ChallengeModel> createList(ChallengeModel challenge) {
-        List list = createList();
-        list.add(challenge);
+    public static List<ChallengeModel> createList(ChallengeModel... challenges) {
+        List<ChallengeModel> list = new ArrayList<>();
+        Arrays.stream(challenges).map(challenge -> list.add(challenge));
         return list;
     }
 }

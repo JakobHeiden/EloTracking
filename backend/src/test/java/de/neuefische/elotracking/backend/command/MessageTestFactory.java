@@ -28,8 +28,8 @@ class MessageTestFactory {
         String[] words = text.split(" ");
         Set<Snowflake> mentionIds = Arrays.stream(words)
                 .filter(word -> word.startsWith("@"))
-                .map(mentionString -> String.valueOf(Math.abs(mentionString.hashCode())))
-                .map(Snowflake::of)
+                .map(word -> word.substring(1))
+                .map(word -> Snowflake.of(word))
                 .collect(Collectors.toSet());
         when(mock.getUserMentionIds()).thenReturn(mentionIds);
 
