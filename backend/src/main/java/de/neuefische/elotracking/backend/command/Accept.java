@@ -74,7 +74,7 @@ public class Accept extends Command {
 
     private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, Snowflake mention) {
         Optional<ChallengeModel> challenge = challenges.stream().
-                filter(chlng -> chlng.getRecipientId() == mention.asString())
+                filter(chlng -> chlng.getChallengerId().equals(mention.asString()))
                 .findAny();
 
         if (challenge.isEmpty()) {

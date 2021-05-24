@@ -4,9 +4,10 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -26,6 +27,13 @@ class AcceptTest {
     @Mock private DiscordBotService bot;
     private Message msg;
     private Command accept;
+    private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
+
+    @BeforeEach
+    void initService() {
+        when(service.findGameByChannelId(CHANNELID)).thenReturn(GameTestFactory.create());
+        when(service.findAllChallengesOfRecipientForChannel(RECIPIENTID, CHANNELID)).thenReturn(challenges);
+    }
 
     @AfterEach
     void printBotReplies() {
@@ -37,9 +45,6 @@ class AcceptTest {
     @DisplayName("No open challenge should not call service")
     void noOpenChallenge(String text) {
         text = String.format(text, CHALLENGERID);
-        when(service.findGameByChannelId(CHANNELID)).thenReturn(GameTestFactory.create());
-        when(service.findAllChallengesOfRecipientForChannel(RECIPIENTID, CHANNELID))
-            .thenReturn(ChallengeModelTestFactory.createList());
         msg = MessageTestFactory.createMock(text, RECIPIENT);
         accept = new Accept(msg, service, bot);
 
@@ -52,12 +57,9 @@ class AcceptTest {
     @DisplayName("Mention present but open challenge from a different player should not call service")
     void openChallengeFromDifferentPlayer() {
         String text = String.format("!accept @%s", CHALLENGERID);
-        ChallengeModel challenge = ChallengeModelTestFactory.create();
-        challenge.setChallengerId(SnowflakeTestFactory.createId());
-        List<ChallengeModel> challenges = ChallengeModelTestFactory.createList(challenge);
-        when(service.findGameByChannelId(CHANNELID)).thenReturn(GameTestFactory.create());
-        when(service.findAllChallengesOfRecipientForChannel(RECIPIENTID, CHANNELID))
-                .thenReturn(challenges);
+        ChallengeModel challengeFromDifferentPlayer = ChallengeModelTestFactory.create();
+        challengeFromDifferentPlayer.setChallengerId(SnowflakeTestFactory.createId());
+        challenges.add(challengeFromDifferentPlayer);
         msg = MessageTestFactory.createMock(text, RECIPIENT);
         accept = new Accept(msg, service, bot);
 
@@ -68,13 +70,46 @@ class AcceptTest {
 
     @Test
     @DisplayName("No mention but two open challenges should not call service")
-    void noMentionTwoChallenges() {}
+    void noMentionTwoChallenges() {
+        String text = "!accept";
+        challenges.add(ChallengeModelTestFactory.create());
+        ChallengeModel challenge2 = ChallengeModelTestFactory.create();
+        challenge2.setChallengerId(SnowflakeTestFactory.createId());
+        challenges.add(challenge2);
+        msg = MessageTestFactory.createMock(text, RECIPIENT);
+        accept = new Accept(msg, service, bot);
+
+        accept.execute();
+
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(any(), any());
+    }
 
     @Test
     @DisplayName("One open challenge and no mention should call service")
-    void oneChallengeNoMention() {}
+    void oneChallengeNoMention() {
+        String text = "!accept";
+        challenges.add(ChallengeModelTestFactory.create());
+        msg = MessageTestFactory.createMock(text, RECIPIENT);
+        accept = new Accept(msg, service, bot);
+
+        accept.execute();
+
+        verify(service).saveChallenge(any());
+    }
 
     @Test
     @DisplayName("Open challenges and a matching mention should call service")
-    void openChallengesMatchingMention() {}
+    void openChallengesMatchingMention() {
+        String text = String.format("!accept @%s", CHALLENGERID);
+        challenges.add(ChallengeModelTestFactory.create());
+        ChallengeModel challenge2 = ChallengeModelTestFactory.create();
+        challenge2.setChallengerId(SnowflakeTestFactory.createId());
+        challenges.add(challenge2);
+        msg = MessageTestFactory.createMock(text, RECIPIENT);
+        accept = new Accept(msg, service, bot);
+
+        accept.execute();
+
+        verify(service).saveChallenge(any());
+    }
 }

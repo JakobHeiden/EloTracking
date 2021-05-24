@@ -38,7 +38,7 @@ public class SpringConfiguration {
 
     @Bean
     @Scope("prototype")
-    public Command createCommand(Message message) {
+    public static Command createCommand(Message message) {
         String commandString = message.getContent().split(" ")[0];
         String commandClassName = commandString.substring(1,2).toUpperCase() + commandString.substring(2).toLowerCase();
         try {
