@@ -1,7 +1,6 @@
 package de.neuefische.elotracking.backend.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -13,7 +12,6 @@ import java.util.Optional;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Document(collection = "challenge")
 public class ChallengeModel {
     public enum ReportStatus {
@@ -26,30 +24,45 @@ public class ChallengeModel {
     private String id;
     private String channelId;
     private String challengerId;
-    private String recipientId;
+    private String acceptorId;
     private Date issuedWhen;
     private Optional<Date> acceptedWhen;
     private ReportStatus challengerReported;
-    private ReportStatus recipientReported;
+    private ReportStatus acceptorReported;
 
-    public ChallengeModel(String channelId, String challengerId, String recipientId) {
+    public ChallengeModel(String channelId, String challengerId, String acceptorId) {
         this.channelId = channelId;
         this.challengerId = challengerId;
-        this.recipientId = recipientId;
-        this.id = generateId(channelId, challengerId, recipientId);
-        this.issuedWhen = new Date();
-        this.acceptedWhen = Optional.empty();
+        this.acceptorId = acceptorId;
+        this.id = generateId(channelId, challengerId, acceptorId);
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
-        this.recipientReported = ReportStatus.NOT_YET_REPORTED;
+        this.acceptorReported = ReportStatus.NOT_YET_REPORTED;
+        this.acceptedWhen = Optional.empty();
+        this.issuedWhen = new Date();
     }
 
     public boolean isAccepted() {
         return !acceptedWhen.isEmpty();
     }
 
-    public static String generateId(String channelId, String playerId1, String playerId2) {
-        return playerId1.compareTo(playerId2) < 0 ?
-                String.format("%s-%s-%s", channelId, playerId1, playerId2) :
-                String.format("%s-%s-%s", channelId, playerId2, playerId1);
+    public static String generateId(String channelId, String challengerId, String acceptorId) {
+        return challengerId.compareTo(acceptorId) < 0 ?
+                String.format("%s-%s-%s", channelId, challengerId, acceptorId) :
+                String.format("%s-%s-%s", channelId, acceptorId, challengerId);
+    }
+    
+    public void setChannelId(String channelId) {
+        this.channelId = channelId;
+        this.id = generateId(channelId, this.challengerId, this.acceptorId);
+    }
+    
+    public void setChallengerId(String challengerId) {
+        this.challengerId = challengerId;
+        this.id = generateId(channelId, this.challengerId, this.acceptorId);
+    }
+
+    public void setAcceptorId(String acceptorId) {
+        this.acceptorId = acceptorId;
+        this.id = generateId(channelId, this.challengerId, this.acceptorId);
     }
 }
