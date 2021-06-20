@@ -9,7 +9,8 @@ public class Challenge extends Command {
     public Challenge(Message msg) {
         super(msg);
         needsRegisteredChannel = true;
-        needsUserTag = true;
+        needsMention = true;
+        cantHaveTwoMentions = true;
     }
 
     public static String getDescription() {

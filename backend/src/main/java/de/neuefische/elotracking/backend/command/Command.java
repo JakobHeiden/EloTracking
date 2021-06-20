@@ -20,8 +20,8 @@ public abstract class Command {
     @Getter
     private final List<String> botReplies;
     protected boolean needsRegisteredChannel;
-    protected boolean needsUserTag;
-    protected boolean cantHaveTwoUserTags;
+    protected boolean needsMention;
+    protected boolean cantHaveTwoMentions;
 
     protected Command(Message msg) {
         this.msg = msg;
@@ -29,8 +29,8 @@ public abstract class Command {
         this.botReplies = new LinkedList<String>();
 
         this.needsRegisteredChannel = false;
-        this.needsUserTag = false;
-        this.cantHaveTwoUserTags = false;
+        this.needsMention = false;
+        this.cantHaveTwoMentions = false;
     }
 
     public abstract void execute();
@@ -43,13 +43,13 @@ public abstract class Command {
                 addBotReply("Needs register");
             }
         }
-        if (this.needsUserTag) {
+        if (this.needsMention) {
             if (msg.getUserMentionIds().size() != 1) {
                 canExecute = false;
                 addBotReply("Needs user tag");
             }
         }
-        if (this.cantHaveTwoUserTags) {
+        if (this.cantHaveTwoMentions) {
             if (msg.getUserMentionIds().size() > 1) {
                 canExecute = false;
                 addBotReply("You cannot mention more than one player with this command");

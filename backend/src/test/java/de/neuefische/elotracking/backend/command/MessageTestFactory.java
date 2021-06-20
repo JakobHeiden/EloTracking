@@ -23,7 +23,7 @@ class MessageTestFactory {
 
         //when(mock.getContent()).thenReturn(text);
 
-        when(mock.getChannelId()).thenReturn(Snowflake.of(SnowflakeTestFactory.CHANNELID));
+        when(mock.getChannelId()).thenReturn(Snowflake.of(SnowflakeTestFactory.CHANNEL_ID));
 
         String[] words = text.split(" ");
         Set<Snowflake> mentionIds = Arrays.stream(words)

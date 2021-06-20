@@ -19,7 +19,7 @@ public class Accept extends Command {
     public Accept(Message msg) {
         super(msg);
         this.needsRegisteredChannel = true;
-        this.cantHaveTwoUserTags = true;
+        this.cantHaveTwoMentions = true;
     }
 
     // For unit testing purposes
@@ -37,7 +37,7 @@ public class Accept extends Command {
         if (!super.canExecute()) return;
 
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
-        List<ChallengeModel> challenges = service.findAllChallengesOfRecipientForChannel(acceptingPlayerId, channelId);
+        List<ChallengeModel> challenges = service.findAllChallengesOfAcceptorForChannel(acceptingPlayerId, channelId);
         Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
         Optional<ChallengeModel> challenge = null;
 
