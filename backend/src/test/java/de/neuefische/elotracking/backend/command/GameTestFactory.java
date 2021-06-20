@@ -9,6 +9,6 @@ class GameTestFactory {
     private static final String NAME = "TestGame";
 
     public static Optional<Game> create() {
-        return Optional.of(new Game(SnowflakeTestFactory.CHANNELID, NAME));
+        return Optional.of(new Game(SnowflakeTestFactory.CHANNEL_ID, NAME));
     }
 }

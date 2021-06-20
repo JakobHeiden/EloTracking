@@ -29,20 +29,38 @@ public class ChallengeModel {
     private Optional<Date> acceptedWhen;
     private ReportStatus challengerReported;
     private ReportStatus acceptorReported;
+    private boolean challengerCalledForCancel = false;
+    private boolean acceptorCalledForCancel = false;
 
     public ChallengeModel(String channelId, String challengerId, String acceptorId) {
+        this.id = generateId(channelId, challengerId, acceptorId);
         this.channelId = channelId;
         this.challengerId = challengerId;
         this.acceptorId = acceptorId;
-        this.id = generateId(channelId, challengerId, acceptorId);
+        this.issuedWhen = new Date();
+        this.acceptedWhen = Optional.empty();
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
         this.acceptorReported = ReportStatus.NOT_YET_REPORTED;
-        this.acceptedWhen = Optional.empty();
-        this.issuedWhen = new Date();
     }
 
     public boolean isAccepted() {
         return !acceptedWhen.isEmpty();
+    }
+
+    public void callForCancel(String playerId) {
+        if (playerId.equals(challengerId)) {
+            challengerCalledForCancel = true;
+        } else {
+            acceptorCalledForCancel = true;
+        }
+    }
+
+    public boolean shouldBeDeleted() {
+        if (!isAccepted()) {
+            return challengerCalledForCancel || acceptorCalledForCancel;
+        } else {
+            return challengerCalledForCancel && acceptorCalledForCancel;
+        }
     }
 
     public static String generateId(String channelId, String challengerId, String acceptorId) {

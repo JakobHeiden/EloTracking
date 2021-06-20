@@ -6,13 +6,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 class SnowflakeTestFactory {
 
-    static final String CHANNELID = createId();
-    static final String CHALLENGERID = createId();
-    static final String RECIPIENTID = createId();
+    static final String CHANNEL_ID = "1";
+    static final String CHALLENGER_ID = "2";
+    static final String ACCEPTOR_ID = "3";
 
-    static final Snowflake CHANNEL = Snowflake.of(CHANNELID);
-    static final Snowflake CHALLENGER = Snowflake.of(CHALLENGERID);
-    static final Snowflake RECIPIENT = Snowflake.of(RECIPIENTID);
+    static final Snowflake CHANNEL = Snowflake.of(CHANNEL_ID);
+    static final Snowflake CHALLENGER = Snowflake.of(CHALLENGER_ID);
+    static final Snowflake ACCEPTOR = Snowflake.of(ACCEPTOR_ID);
 
     public static String createId() {
         // Actually Discord IDs are 64 bits unsigned int but this should suffice

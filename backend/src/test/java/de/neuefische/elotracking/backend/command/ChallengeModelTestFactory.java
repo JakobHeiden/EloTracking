@@ -11,7 +11,7 @@ import static de.neuefische.elotracking.backend.command.SnowflakeTestFactory.*;
 class ChallengeModelTestFactory {
 
     public static ChallengeModel create() {
-        return new ChallengeModel(CHANNELID, CHALLENGERID, RECIPIENTID);
+        return new ChallengeModel(CHANNEL_ID, CHALLENGER_ID, ACCEPTOR_ID);
     }
 
     public static List<ChallengeModel> createList(ChallengeModel... challenges) {

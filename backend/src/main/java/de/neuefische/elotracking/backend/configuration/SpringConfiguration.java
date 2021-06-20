@@ -2,7 +2,7 @@ package de.neuefische.elotracking.backend.configuration;
 
 import de.neuefische.elotracking.backend.command.Command;
 import de.neuefische.elotracking.backend.command.Unknown;
-import de.neuefische.elotracking.backend.parser.CommandAbbreviatonMapper;
+import de.neuefische.elotracking.backend.parser.CommandAbbreviationMapper;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -21,7 +21,7 @@ import java.util.function.Function;
 public class SpringConfiguration {
 
     @Autowired
-    CommandAbbreviatonMapper commandAbbreviatonMapper;
+    CommandAbbreviationMapper commandAbbreviationMapper;
 
     @Bean
     public GatewayDiscordClient createClient() {
@@ -50,7 +50,7 @@ public class SpringConfiguration {
     @Scope("prototype")
     public Command createCommand(Message message) {
         String commandString = message.getContent().split(" ")[0].substring(1).toLowerCase();
-        commandString = commandAbbreviatonMapper.mapIfApplicable(commandString);
+        commandString = commandAbbreviationMapper.mapIfApplicable(commandString);
         String commandClassName = commandString.substring(0,1).toUpperCase() + commandString.substring(1);
         try {
             return (Command) Class.forName("de.neuefische.elotracking.backend.command." + commandClassName)

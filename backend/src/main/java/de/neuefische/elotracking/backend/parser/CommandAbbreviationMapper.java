@@ -7,18 +7,17 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class CommandAbbreviatonMapper {
+public class CommandAbbreviationMapper {
 
     @Autowired
     CommandAbbreviationsLoader loader;
     Map<String, String> mappings;
 
-    public CommandAbbreviatonMapper() {
+    public CommandAbbreviationMapper() {
         mappings = loader.getAbbreviations();
     }
 
     public String mapIfApplicable(String in) {
-        System.out.println(in);
         if (mappings.containsKey(in)) {
             return mappings.get(in);
         } else {
