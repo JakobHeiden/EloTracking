@@ -26,14 +26,10 @@ public class LoggingAspect {
             returning = "returnValue")
     public void onFunctionCall(JoinPoint joinpoint, Object returnValue) {
         Logger log = LoggerFactory.getLogger(joinpoint.getSignature().getDeclaringType());
-        if (log.isDebugEnabled()) {
-            log.debug(String.format(FORMATTING_TEMPLATE,
-                    joinpoint.getSignature().getName(),
-                    formatParameters(joinpoint),
-                    getStringRepresentation(returnValue)));
-        } else {
-            log.info("TODO");
-        }
+        log.debug(String.format(FORMATTING_TEMPLATE,
+                joinpoint.getSignature().getName(),
+                formatParameters(joinpoint),
+                getStringRepresentation(returnValue)));
     }
 
     private static String formatParameters(JoinPoint joinPoint) {
