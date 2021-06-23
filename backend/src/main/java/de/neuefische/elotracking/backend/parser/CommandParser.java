@@ -37,6 +37,7 @@ public class CommandParser {
         log.debug("Parsing command: " + msg.getContent());
         Mono<MessageChannel> channelMono = msg.getChannel();
         Command command = commandFactory.apply(msg);
+        log.debug("new " + command.getClass().getSimpleName());
         command.execute();
         MessageChannel channel = channelMono.block();
         //command.getBotReplies().forEach(channel::createMessage); TODO
