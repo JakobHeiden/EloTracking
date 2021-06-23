@@ -18,7 +18,6 @@ import java.util.StringJoiner;
 @Slf4j
 public class LoggingAspect {
 
-
     private static final String FORMATTING_TEMPLATE = "%s(%s) => %s";
 
     @AfterReturning(pointcut = "execution(public * *(..)) "
