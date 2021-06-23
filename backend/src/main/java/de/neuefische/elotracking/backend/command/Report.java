@@ -59,7 +59,7 @@ public abstract class Report extends Command {
 
         //if only one player reported, send message and return
         if (challenge.get().getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
-                challenge.get().getRecipientReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
+                challenge.get().getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
             addBotReply("reported.");
             return;
         }
@@ -82,7 +82,7 @@ public abstract class Report extends Command {
 
     private void checkForInconsistentReporting() {
         ChallengeModel.ReportStatus reportedOnPlayerReported = this.isChallengerReport ?
-                challenge.get().getRecipientReported()
+                challenge.get().getAcceptorReported()
                 : challenge.get().getChallengerReported();
         if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
             addBotReply("Both reported win");
@@ -100,7 +100,7 @@ public abstract class Report extends Command {
         if (this.isChallengerReport) {
             challenge.get().setChallengerReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
         } else {
-            challenge.get().setRecipientReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
+            challenge.get().setAcceptorReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
         }
         service.saveChallenge(challenge.get());
     }

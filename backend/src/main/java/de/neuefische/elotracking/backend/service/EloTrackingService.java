@@ -68,8 +68,8 @@ public class EloTrackingService {
         challengeDao.delete(challengeModel);
     }
 
-    public List<ChallengeModel> findAllChallengesOfRecipientForChannel(String recipientId, String channelId) {
-        List<ChallengeModel> allChallenges = challengeDao.findAllByRecipientId(recipientId);
+    public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String recipientId, String channelId) {
+        List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(recipientId);
         List<ChallengeModel> filteredByChannel = allChallenges.stream().
                 filter(challenge -> challenge.getChannelId().equals(channelId))
                 .collect(Collectors.toList());
