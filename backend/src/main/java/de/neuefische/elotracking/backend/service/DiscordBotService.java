@@ -37,7 +37,6 @@ public class DiscordBotService {
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> {
-                    log.trace(msgEvent.toString());
                     log.debug("Incoming message: " + msgEvent.getMessage().getContent());
                     return msgEvent.getMessage();
                 })
