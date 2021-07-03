@@ -10,11 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 @Slf4j
 public class Cancel extends Command {
 
     private boolean canExecute = true;
     private Message msg;
+    private String cancelingPlayerId;
 
     public Cancel(Message msg) {
         super(msg);
@@ -23,7 +26,6 @@ public class Cancel extends Command {
         this.cantHaveTwoMentions = true;
     }
 
-    // For unit testing purposes
     Cancel(Message msg, EloTrackingService service, DiscordBotService bot) {
         this(msg);
         this.service = service;
@@ -38,16 +40,15 @@ public class Cancel extends Command {
         canExecute = super.canExecute();
         if (!canExecute) return;
 
-        String cancelingPlayerId = msg.getAuthor().get().getId().asString();
+        cancelingPlayerId = msg.getAuthor().get().getId().asString();
         List<ChallengeModel> challenges = service.findAllChallengesForPlayerForChannel(cancelingPlayerId, channelId);
         Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
 
         ChallengeModel challenge = null;
         if (mention.isEmpty()) {
-            return;
-            //challenge = inferRelevantChallenge(challenges);
+            challenge = inferRelevantChallenge(challenges);
         } else {
-           challenge = getRelevantChallenge(challenges, mention.get());
+            challenge = getRelevantChallenge(challenges, mention.get());
         }
         if (!canExecute) return;
 
@@ -65,7 +66,7 @@ public class Cancel extends Command {
 
     private ChallengeModel getRelevantChallenge(List<ChallengeModel> challenges, Snowflake mention) {
         Optional<ChallengeModel> optionalChallenge = challenges.stream().
-                filter(chlng -> chlng.getChallengerId().equals(mention.asString()))
+                filter(chlng -> chlng.getChallengerId().equals(mention.asString()) || chlng.getAcceptorId().equals(mention.asString()))
                 .findAny();
 
         if (optionalChallenge.isEmpty()) {
@@ -78,6 +79,21 @@ public class Cancel extends Command {
     }
 
     private ChallengeModel inferRelevantChallenge(List<ChallengeModel> challenges) {
-        return null;
+        List<ChallengeModel> challengesOfPlayer = challenges.stream()
+                .filter(chlng -> chlng.getChallengerId().equals(cancelingPlayerId) || chlng.getAcceptorId().equals(cancelingPlayerId))
+                .collect(toUnmodifiableList());
+
+        if (challengesOfPlayer.size() == 0) {
+            addBotReply("No challenge present that could be canceled");
+            canExecute = false;
+            return null;
+        }
+        if (challengesOfPlayer.size() > 1) {
+            addBotReply("More than one possible challenge to cancel, please specify...");
+            canExecute = false;
+            return null;
+        }
+
+        return challengesOfPlayer.get(0);
     }
 }

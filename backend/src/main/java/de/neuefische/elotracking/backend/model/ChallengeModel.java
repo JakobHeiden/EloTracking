@@ -18,6 +18,7 @@ import java.util.Optional;
 @UseToStringForLogging
 @Document(collection = "challenge")
 public class ChallengeModel {
+
     public enum ReportStatus {
         NOT_YET_REPORTED,
         WIN,
@@ -49,6 +50,10 @@ public class ChallengeModel {
 
     public boolean isAccepted() {
         return !acceptedWhen.isEmpty();
+    }
+
+    public void accept() {
+        acceptedWhen = Optional.of(new Date());
     }
 
     public void callForCancel(String playerId) {
