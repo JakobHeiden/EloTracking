@@ -68,6 +68,7 @@ public class EloTrackingService {
         challengeDao.delete(challengeModel);
     }
 
+    // TODO kann das weg?
     public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String acceptorId, String channelId) {
         List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
         List<ChallengeModel> filteredByChannel = allChallenges.stream().

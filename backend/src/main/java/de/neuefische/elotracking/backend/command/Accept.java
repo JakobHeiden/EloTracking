@@ -7,7 +7,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +48,7 @@ public class Accept extends Command {
         if (!canExecute) return;
 
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
-        challenge.get().setAcceptedWhen(Optional.of(new Date()));
+        challenge.get().accept();// TODO doppelte akzeptierung behandeln
         service.saveChallenge(challenge.get());
         addBotReply(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
                 service.findGameByChannelId(channelId).get().getCommandPrefix()));
