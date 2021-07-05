@@ -3,7 +3,6 @@ package de.neuefische.elotracking.backend.service;
 import de.neuefische.elotracking.backend.parser.CommandParser;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
@@ -33,6 +32,7 @@ public class DiscordBotService {
         User admin = client.getUserById(Snowflake.of(adminId)).block();
         this.adminDm = admin.getPrivateChannel().block();
         log.info("Private channel to admin established");
+        log.info(System.getenv("DATABASE"));
         sendToAdmin("I am logged in and ready");
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -43,9 +43,6 @@ public class DiscordBotService {
                 .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
                 .filter(commandParser::isCommand)
                 .subscribe(commandParser::processCommand);
-
-        client.getEventDispatcher().on(Event.class)
-                .subscribe(logs -> log.trace(logs.toString()));
     }
 
     public void sendToAdmin(String text) {
