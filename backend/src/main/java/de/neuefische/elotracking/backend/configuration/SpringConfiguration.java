@@ -25,7 +25,6 @@ public class SpringConfiguration {
 
     @Bean
     public GatewayDiscordClient createClient() {
-        log.warn(System.getenv("DISCORD_BOT_TOKEN"));
         GatewayDiscordClient client = DiscordClientBuilder
                 .create(System.getenv("DISCORD_BOT_TOKEN"))
                 .build()
