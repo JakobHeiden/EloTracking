@@ -37,7 +37,7 @@ public class DiscordBotService {
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> {
-                    log.debug("Incoming message: " + msgEvent.getMessage().getContent());
+                    log.trace("Incoming message: " + msgEvent.getMessage().getContent());
                     return msgEvent.getMessage();
                 })
                 .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
