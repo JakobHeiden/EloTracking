@@ -35,7 +35,7 @@ public class DiscordBotService {
         this.adminDm = admin.getPrivateChannel().block();
         log.info("Private channel to admin established");
         log.info(System.getenv("DATABASE"));//TODO
-        sendToAdmin("1I am logged in and ready");
+        sendToAdmin("I am logged in and ready");
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> {
