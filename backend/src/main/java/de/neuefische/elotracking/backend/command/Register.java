@@ -29,6 +29,10 @@ public class Register extends Command {
             addBotReply("needs name");
             canExecute = false;
         }
+        if (nameOfNewGame.equals("NULL")) {
+            addBotReply("Invalid name");
+            canExecute = false;
+        }
         Optional<Game> existingGame = service.findGameByChannelId(this.channelId);
         if (existingGame.isPresent()) {
             addBotReply(String.format("There is already a game associated with this channel: %s", existingGame.get().getName()));

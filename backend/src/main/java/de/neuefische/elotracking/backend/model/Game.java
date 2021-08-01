@@ -1,6 +1,6 @@
 package de.neuefische.elotracking.backend.model;
 
-import de.neuefische.elotracking.backend.aop.UseToStringForLogging;
+import de.neuefische.elotracking.backend.logging.UseToStringForLogging;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -4,3 +4,5 @@ error.txt
 heapdump*
 
 /bin/
+
+/backend/src/main/resources/archive/*
