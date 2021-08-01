@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 
+import java.text.SimpleDateFormat;
 import java.util.function.Function;
 
 @Slf4j
@@ -63,5 +64,10 @@ public class SpringConfiguration {
                 return null;
             }
         }
+    }
+
+    @Bean
+    public static SimpleDateFormat getDateFormat() {
+        return new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss");
     }
 }

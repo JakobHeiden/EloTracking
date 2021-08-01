@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.aop;
+package de.neuefische.elotracking.backend.logging;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -18,15 +18,13 @@ import java.util.StringJoiner;
 @Slf4j
 public class LoggingAspect {
 
-    private static final String FORMATTING_TEMPLATE = "%s(%s) => %s";
-
     @AfterReturning(pointcut = "execution(public * *(..)) "
             + "&& within(de.neuefische..*) "
             + "&& (@target(org.springframework.stereotype.Service) || @target(org.springframework.stereotype.Repository))",
             returning = "returnValue")
     public void onFunctionCall(JoinPoint joinpoint, Object returnValue) {
         Logger log = LoggerFactory.getLogger(joinpoint.getSignature().getDeclaringType());
-        log.debug(String.format(FORMATTING_TEMPLATE,
+        log.debug(String.format("%s(%s) => %s",
                 joinpoint.getSignature().getName(),
                 formatParameters(joinpoint),
                 getStringRepresentation(returnValue)));

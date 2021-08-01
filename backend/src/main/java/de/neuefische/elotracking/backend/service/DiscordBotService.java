@@ -9,11 +9,13 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class DiscordBotService {
+
     private final GatewayDiscordClient client;
     private final EloTrackingService service;
     private final PrivateChannel adminDm;
@@ -23,7 +25,7 @@ public class DiscordBotService {
     @Autowired
     public DiscordBotService(GatewayDiscordClient gatewayDiscordClient,
                              EloTrackingService eloTrackingService,
-                             CommandParser commandParser) {
+                             @Lazy CommandParser commandParser) {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
 
@@ -32,8 +34,8 @@ public class DiscordBotService {
         User admin = client.getUserById(Snowflake.of(adminId)).block();
         this.adminDm = admin.getPrivateChannel().block();
         log.info("Private channel to admin established");
-        log.info(System.getenv("DATABASE"));
-        sendToAdmin("I am logged in and ready");
+        log.info(System.getenv("DATABASE"));//TODO
+        sendToAdmin("1I am logged in and ready");
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> {
