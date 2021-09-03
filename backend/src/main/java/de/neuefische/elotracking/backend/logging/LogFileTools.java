@@ -15,8 +15,8 @@ public class LogFileTools {
 
 	public static void archiveOldLogFile() {
 		try {
+			if (!Files.exists(Path.of(LOG_FILE_NAME))) return;
 			File preExistingLogFile = new File(LOG_FILE_NAME);
-			if (!preExistingLogFile.exists()) return;
 
 			SimpleDateFormat dateFormat = SpringConfiguration.getDateFormat();
 			String archivedLogFileDestinationPath = String.format("%s/log-%s.txt", LOG_ARCHIVE_FOLDER, dateFormat.format(preExistingLogFile.lastModified()));
