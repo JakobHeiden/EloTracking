@@ -1,7 +1,5 @@
 package de.neuefische.elotracking.backend.logging;
 
-import de.neuefische.elotracking.backend.configuration.SpringConfiguration;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +16,7 @@ public class LogFileTools {
 			if (!Files.exists(Path.of(LOG_FILE_NAME))) return;
 			File preExistingLogFile = new File(LOG_FILE_NAME);
 
-			SimpleDateFormat dateFormat = SpringConfiguration.getDateFormat();
+			SimpleDateFormat dateFormat = AopConfig.getDateFormat();
 			String archivedLogFileDestinationPath = String.format("%s/log-%s.txt", LOG_ARCHIVE_FOLDER, dateFormat.format(preExistingLogFile.lastModified()));
 			Files.move(Path.of(LOG_FILE_NAME), Path.of(archivedLogFileDestinationPath));
 		} catch (IOException e) {
