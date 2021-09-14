@@ -33,6 +33,7 @@ public class CommandParser {
             necessaryPrefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
         }
         if (msg.getContent().startsWith(necessaryPrefix)) {
+            //if (msg.getContent().length() < 2) return false;
             log.debug(String.format("Channel %s : %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "NULL"));
             return true;
         }
@@ -54,7 +55,7 @@ public class CommandParser {
                 channel.createMessage(reply).subscribe();
             }
         } catch(Exception e) {
-            bot.sendToAdmin(e.getMessage().toString());
+            bot.sendToAdmin(String.format("%s: %s:\n%s", msg.getChannelId().asString(), msg.getContent(), e.getMessage()));
         }
     }
 }
