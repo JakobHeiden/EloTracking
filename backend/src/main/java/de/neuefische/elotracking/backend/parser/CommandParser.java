@@ -25,6 +25,8 @@ public class CommandParser {
 
     public boolean isCommand(Message msg) {
         log.trace("Incoming message: " + msg.getContent());
+        if (msg.getContent().length() < 2) return false;
+
         String necessaryPrefix;
         Optional<Game> game = service.findGameByChannelId(msg.getChannelId().asString());
         if (game.isPresent()) {
@@ -33,7 +35,6 @@ public class CommandParser {
             necessaryPrefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
         }
         if (msg.getContent().startsWith(necessaryPrefix)) {
-            //if (msg.getContent().length() < 2) return false;
             log.debug(String.format("Channel %s : %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "NULL"));
             return true;
         }
