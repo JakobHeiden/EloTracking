@@ -13,6 +13,9 @@ public class LogFileTools {
 
 	public static void archiveOldLogFile() {
 		try {
+			if (!Files.exists(Path.of(LOG_ARCHIVE_FOLDER))) {
+				Files.createDirectory(Path.of(LOG_ARCHIVE_FOLDER));
+			}
 			if (!Files.exists(Path.of(LOG_FILE_NAME))) return;
 			File preExistingLogFile = new File(LOG_FILE_NAME);
 
