@@ -71,7 +71,7 @@ public abstract class Report extends Command {
         double[] resolvedRatings = service.updateRatings(match);
         match.setHasUpdatedPlayerRatings(true);
         service.saveMatch(match);
-        service.deleteChallenge(challenge.get());
+        service.deleteChallenge(challenge.get().getId());
 
         String winnerMention = this.isWin ? msg.getAuthor().get().getMention() : msg.getUserMentionIds().iterator().next().asString();
         String loserMention = this.isWin ? String.format("<@!%s>", msg.getUserMentionIds().iterator().next().asString()) : msg.getAuthor().get().getMention();

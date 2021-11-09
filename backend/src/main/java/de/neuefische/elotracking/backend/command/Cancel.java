@@ -55,7 +55,7 @@ public class Cancel extends Command {
         challenge.callForCancel(cancelingPlayerId);
 
         if (challenge.shouldBeDeleted()) {
-            service.deleteChallenge(challenge);
+            service.deleteChallenge(challenge.getId());
             addBotReply("Challenge has been deleted.");
             return;
         }

@@ -38,7 +38,7 @@ public class Accept extends Command {
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
         List<ChallengeModel> challenges = service.findAllChallengesOfAcceptorForChannel(acceptingPlayerId, channelId);
         Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
-        Optional<ChallengeModel> challenge = null;
+        Optional<ChallengeModel> challenge;
 
         if (mention.isEmpty()) {
             challenge = inferRelevantChallenge(challenges);
