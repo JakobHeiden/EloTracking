@@ -1,16 +1,26 @@
 package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
-import de.neuefische.elotracking.backend.dao.*;
+import de.neuefische.elotracking.backend.dao.ChallengeDao;
+import de.neuefische.elotracking.backend.dao.GameDao;
+import de.neuefische.elotracking.backend.dao.MatchDao;
+import de.neuefische.elotracking.backend.dao.PlayerDao;
 import de.neuefische.elotracking.backend.dto.PlayerInRankingsDto;
-import de.neuefische.elotracking.backend.model.*;
+import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.model.Match;
+import de.neuefische.elotracking.backend.model.Player;
+import de.neuefische.elotracking.backend.timer.TimedTaskQueue;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,17 +33,19 @@ public class EloTrackingService {
     private final PlayerDao playerDao;
     @Getter
     private final ApplicationPropertiesLoader config;
+    private final TimedTaskQueue timedTaskQueue;
 
     @Autowired
-    public EloTrackingService(@Lazy DiscordBotService discordBotService,
-                              GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
-                              ApplicationPropertiesLoader applicationPropertiesLoader) {
+    public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
+                              ApplicationPropertiesLoader applicationPropertiesLoader,
+                              GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
         this.bot = discordBotService;
         this.gameDao = gameDao;
         this.challengeDao = challengeDao;
         this.matchDao = matchDao;
         this.playerDao = playerDao;
         this.config = applicationPropertiesLoader;
+        this.timedTaskQueue = timedTaskQueue;
     }
 
     public Optional<Game> findGameByChannelId(String channelId) {
@@ -52,8 +64,9 @@ public class EloTrackingService {
         return challengeDao.existsById(id);
     }
 
-    public void addChallenge(String channelId, String challengerId, String otherPlayerId) {
-        ChallengeModel newChallenge = challengeDao.insert(new ChallengeModel(channelId, challengerId, otherPlayerId));
+    public void addChallenge(ChallengeModel challenge, String messageId) {
+        timedTaskQueue.addChallenge(challenge, messageId);
+        challengeDao.insert(challenge);
     }
 
     public Optional<ChallengeModel> findChallenge(String challengeId) {
@@ -64,8 +77,12 @@ public class EloTrackingService {
         challengeDao.save(challenge);
     }
 
-    public void deleteChallenge(ChallengeModel challengeModel) {
-        challengeDao.delete(challengeModel);
+    public void deleteChallenge(String id) {
+        challengeDao.deleteById(id);
+    }
+
+    public void decayChallenge(String messageId, String relationId) {
+        //TODO
     }
 
     // TODO kann das weg?
