@@ -43,7 +43,7 @@ public abstract class Report extends Command {
 
         if (challenge.isEmpty()) {
             addBotReply(String.format("No challenge exists towards that player. Use %schallenge to issue one",
-                    service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX")));
+                    defaultCommandPrefix));
             return;
         }
         if (challenge.get().getAcceptedWhen().isEmpty()) {

@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.dao.MatchDao;
@@ -11,9 +10,9 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.model.Player;
 import de.neuefische.elotracking.backend.timer.TimedTaskQueue;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -26,26 +25,27 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class EloTrackingService {
+
+    @Value("${initial-rating}")
+    private float initialRating;
+    @Value("${k}")
+    private float k;
     private final DiscordBotService bot;
     private final GameDao gameDao;
     private final ChallengeDao challengeDao;
     private final MatchDao matchDao;
     private final PlayerDao playerDao;
-    @Getter
-    private final ApplicationPropertiesLoader config;
     private final TimedTaskQueue timedTaskQueue;
 
     @Autowired
     public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
-                              ApplicationPropertiesLoader applicationPropertiesLoader,
                               GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
         this.bot = discordBotService;
+        this.timedTaskQueue = timedTaskQueue;
         this.gameDao = gameDao;
         this.challengeDao = challengeDao;
         this.matchDao = matchDao;
         this.playerDao = playerDao;
-        this.config = applicationPropertiesLoader;
-        this.timedTaskQueue = timedTaskQueue;
     }
 
     public Optional<Game> findGameByChannelId(String channelId) {
@@ -112,7 +112,7 @@ public class EloTrackingService {
     public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
         if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
             playerDao.insert(new Player(channelId, playerId,
-                    Float.parseFloat(config.getProperty("INITIAL_RATING"))));
+                    initialRating));
             return true;
         }
         return false;
@@ -123,7 +123,7 @@ public class EloTrackingService {
         Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
         double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
                 match.isDraw() ? 0.5 : 1,
-                Float.parseFloat(config.getProperty("K")));
+                k);
         winner.setRating(ratings[2]);
         loser.setRating(ratings[3]);
         playerDao.save(winner);

@@ -5,12 +5,15 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public abstract class Command {
 
+    @Value("${default-command-prefix}")
+    protected String defaultCommandPrefix;
     @Autowired
     protected EloTrackingService service;
     @Autowired

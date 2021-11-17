@@ -26,7 +26,7 @@ public class TimedTaskQueue {
 		}
 	}
 
-	public void addChallenge(ChallengeModel challenge, String messageId) {//TODO minuten konfigurierbar machen
+	public void addChallenge(ChallengeModel challenge, String messageId) {
 		timeSlots[(currentIndex + 3) % numberOfTimeSlots]
 				.add(new TimedTask(messageId, TimedTaskType.CHALLENGE_DECAY, challenge.getId()));
 	}

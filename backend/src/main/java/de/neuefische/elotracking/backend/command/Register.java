@@ -6,6 +6,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.TextChannelEditSpec;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -13,6 +14,9 @@ import java.util.function.Consumer;
 
 @Slf4j
 public class Register extends Command {
+
+    @Value("${base-url}")
+    private String baseUrl;
 
     public Register(Message msg) {
         super(msg);
@@ -43,15 +47,12 @@ public class Register extends Command {
         Mono<MessageChannel> channelMono = msg.getChannel();
 
         service.saveGame(new Game(this.channelId, nameOfNewGame));
-        addBotReply(String.format(String.format("New game created. You can now %schallenge another player",
-                service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX"))));
+        addBotReply(String.format(String.format("New game created. You can now %schallenge another player", defaultCommandPrefix)));
 
         //update channel description to include the new leaderboard URL
         Consumer<TextChannelEditSpec> editConsumer =
                 textChannelEditSpec -> textChannelEditSpec.setTopic(
-                        String.format("Leaderboard: http://%s/%s",
-                                service.getConfig().getProperty("BASE_URL"),
-                                this.channelId));
+                        String.format("Leaderboard: http://%s/%s", baseUrl, this.channelId));
         ((TextChannel) channelMono.block()).edit(editConsumer).subscribe();
         addBotReply("I updated the channel description.");
     }
