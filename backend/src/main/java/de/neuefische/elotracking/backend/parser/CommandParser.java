@@ -6,8 +6,9 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -15,13 +16,21 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Slf4j
-@AllArgsConstructor
 @Component
 public class CommandParser {
 
+    @Value("${default-command-prefix}")
+    private String defaultCommandPrefix;
     private final EloTrackingService service;
     private final DiscordBotService bot;
     private final Function<Message, Command> commandFactory;
+
+    @Autowired
+    public CommandParser(EloTrackingService service, DiscordBotService bot, Function<Message, Command> commandFactory) {
+        this.service = service;
+        this.bot = bot;
+        this.commandFactory = commandFactory;
+    }
 
     public boolean isCommand(Message msg) {
         log.trace("Incoming message: " + msg.getContent());
@@ -32,7 +41,7 @@ public class CommandParser {
         if (game.isPresent()) {
             necessaryPrefix = game.get().getCommandPrefix();
         } else {
-            necessaryPrefix = service.getConfig().getProperty("DEFAULT_COMMAND_PREFIX");
+            necessaryPrefix = defaultCommandPrefix;
         }
         if (msg.getContent().startsWith(necessaryPrefix)) {
             log.debug(String.format("Channel %s : %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "NULL"));

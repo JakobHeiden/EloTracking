@@ -9,8 +9,11 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
@@ -18,7 +21,9 @@ public class DiscordBotService {
 
     private final GatewayDiscordClient client;
     private final EloTrackingService service;
-    private final PrivateChannel adminDm;
+    @Value("${admin-id}")
+    private String adminId;
+    private PrivateChannel adminDm;
     @Getter
     private final String adminMentionAsString;
 
@@ -29,13 +34,8 @@ public class DiscordBotService {
         this.client = gatewayDiscordClient;
         this.service = eloTrackingService;
 
-        String adminId = service.getConfig().getProperty("ADMIN_DISCORD_ID");
         this.adminMentionAsString = String.format("<@%s>", adminId);
-        User admin = client.getUserById(Snowflake.of(adminId)).block();
-        this.adminDm = admin.getPrivateChannel().block();
-        log.info("Private channel to admin established");
         log.info(System.getenv("DATABASE"));//TODO
-        sendToAdmin("I am logged in and ready");
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> {
@@ -45,6 +45,14 @@ public class DiscordBotService {
                 .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
                 .filter(commandParser::isCommand)
                 .subscribe(commandParser::processCommand);
+    }
+
+    @PostConstruct
+    public void initAdminDm() {
+        User admin = client.getUserById(Snowflake.of(adminId)).block();
+        this.adminDm = admin.getPrivateChannel().block();
+        log.info("Private channel to admin established");
+        sendToAdmin("I am logged in and ready");
     }
 
     public void sendToAdmin(String text) {
