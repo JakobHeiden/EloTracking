@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.logging;
 
-import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -15,7 +14,6 @@ import java.util.StringJoiner;
 
 @Aspect
 @Component
-@Slf4j
 public class LoggingAspect {
 
     @AfterReturning(pointcut = "execution(public * *(..)) "
@@ -24,7 +22,7 @@ public class LoggingAspect {
             returning = "returnValue")
     public void onFunctionCall(JoinPoint joinpoint, Object returnValue) {
         Logger log = LoggerFactory.getLogger(joinpoint.getSignature().getDeclaringType());
-        log.debug(String.format("%s(%s) => %s",
+        log.trace(String.format("%s(%s) => %s",
                 joinpoint.getSignature().getName(),
                 formatParameters(joinpoint),
                 getStringRepresentation(returnValue)));

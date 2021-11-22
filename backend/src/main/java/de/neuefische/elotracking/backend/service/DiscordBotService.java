@@ -6,6 +6,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import javax.annotation.PostConstruct;
 public class DiscordBotService {
 
     private final GatewayDiscordClient client;
-    private final EloTrackingService service;
+    private final EloTrackingService service;//TODO kann weg?
     @Value("${admin-id}")
     private String adminId;
     private PrivateChannel adminDm;
@@ -57,6 +58,11 @@ public class DiscordBotService {
 
     public void sendToAdmin(String text) {
         adminDm.createMessage(text).subscribe();
+    }
+
+    public void sendToChannel(String channelId, String text) {
+        TextChannel channel = (TextChannel) client.getChannelById(Snowflake.of(channelId)).block();
+        channel.createMessage(text).subscribe();
     }
 
     public String getPlayerName(String playerId) {

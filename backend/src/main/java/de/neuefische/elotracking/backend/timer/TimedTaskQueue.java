@@ -12,7 +12,7 @@ import java.util.Set;
 @Component
 public class TimedTaskQueue {
 
-	private final int numberOfTimeSlots = 5; //24*60;
+	private final int numberOfTimeSlots = 24*60;
 	private final Set<TimedTask>[] timeSlots;
 	private int currentIndex;
 	@Autowired
@@ -26,16 +26,16 @@ public class TimedTaskQueue {
 		}
 	}
 
-	public void addChallenge(ChallengeModel challenge, String messageId) {
+	public void addChallenge(ChallengeModel challenge, String channelId) {
 		timeSlots[(currentIndex + 3) % numberOfTimeSlots]
-				.add(new TimedTask(messageId, TimedTaskType.CHALLENGE_DECAY, challenge.getId()));
+				.add(new TimedTask(channelId, TimedTaskType.CHALLENGE_DECAY, challenge.getId()));
 	}
 
 	@Scheduled(fixedRate = 60000)
 	public void tick() {
 		for (TimedTask task: timeSlots[currentIndex]) {
 			if (task.getType() == TimedTaskType.CHALLENGE_DECAY) {
-				service.decayChallenge(task.getMessageId(), task.getRelationId());
+				service.decayChallenge(task.getChannelId(), task.getRelationId());
 			}
 		}
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 public class TimedTask {
 
 	@Getter
-	private String messageId;
+	private String channelId;
 	@Getter
 	private TimedTaskType type;
 	@Getter
