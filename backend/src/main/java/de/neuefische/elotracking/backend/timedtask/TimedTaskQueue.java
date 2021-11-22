@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.timer;
+package de.neuefische.elotracking.backend.timedtask;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -27,7 +27,7 @@ public class TimedTaskQueue {
 	}
 
 	public void addChallenge(ChallengeModel challenge, String channelId) {
-		timeSlots[(currentIndex + 3) % numberOfTimeSlots]
+		timeSlots[(currentIndex + 1) % numberOfTimeSlots]
 				.add(new TimedTask(channelId, TimedTaskType.CHALLENGE_DECAY, challenge.getId()));
 	}
 

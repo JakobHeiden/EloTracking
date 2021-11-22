@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.timer;
+package de.neuefische.elotracking.backend.timedtask;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

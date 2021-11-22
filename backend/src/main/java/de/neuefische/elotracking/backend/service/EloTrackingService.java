@@ -9,7 +9,7 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.model.Player;
-import de.neuefische.elotracking.backend.timer.TimedTaskQueue;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,13 +81,17 @@ public class EloTrackingService {
         challengeDao.deleteById(id);
     }
 
-    public void decayChallenge(String channelId, String relationId) {
-        deleteChallenge(relationId);
-        bot.sendToChannel(channelId, "Challenge expired");
-        //TODO schauen ob es geht
-        //TODO kommunikation in etwa grade ziehen
+    public void decayChallenge(String channelId, String challengeId) {
+        ChallengeModel challenge = findChallenge(challengeId).get();
+        if (challenge.isAccepted()) return;
+
+        bot.sendToChannel(channelId, String.format("<@%s> your challenge towards <@%s> has expired.",
+                challenge.getChallengerId(), challenge.getAcceptorId()));
+        deleteChallenge(challengeId);
         //TODO testkonzept und umsetzen
         //TODO validierung konzept und umsetzen
+        //TODO was soll noch deacayen?
+        //TODO werte anpassen
     }
     
 
