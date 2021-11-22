@@ -32,7 +32,7 @@ public class Challenge extends Command {
 
         service.addNewPlayerIfPlayerNotPresent(channelId, challengerId);
         ChallengeModel challengeModel = new ChallengeModel(channelId, challengerId, acceptorId);
-        service.addChallenge(challengeModel, msg.getId().asString());
+        service.addChallenge(challengeModel, channelId);
         addBotReply(String.format("Challenge issued. Your opponent can now %saccept", defaultCommandPrefix));
     }
 }

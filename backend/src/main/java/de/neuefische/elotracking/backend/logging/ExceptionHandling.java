@@ -14,7 +14,7 @@ public class ExceptionHandling {
 	@Autowired
 	SimpleDateFormat dateFormat;
 
-	@ExceptionHandler(RuntimeException.class)
+	@ExceptionHandler(RuntimeException.class)//TODO kann weg
 	public void handleThing(RuntimeException e) {
 		service.sendToAdmin(dateFormat.format(new Date()) + "\n" + e.getMessage());
 	}

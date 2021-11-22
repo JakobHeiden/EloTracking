@@ -66,6 +66,7 @@ public class CommandParser {
             }
         } catch(Exception e) {
             bot.sendToAdmin(String.format("%s: %s:\n%s", msg.getChannelId().asString(), msg.getContent(), e.getMessage()));
+            throw e;
         }
     }
 }

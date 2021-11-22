@@ -64,8 +64,8 @@ public class EloTrackingService {
         return challengeDao.existsById(id);
     }
 
-    public void addChallenge(ChallengeModel challenge, String messageId) {
-        timedTaskQueue.addChallenge(challenge, messageId);
+    public void addChallenge(ChallengeModel challenge, String channelId) {//TODO nach Challenge verschieben?
+        timedTaskQueue.addChallenge(challenge, channelId);
         challengeDao.insert(challenge);
     }
 
@@ -81,9 +81,16 @@ public class EloTrackingService {
         challengeDao.deleteById(id);
     }
 
-    public void decayChallenge(String messageId, String relationId) {
-        //TODO
+    public void decayChallenge(String channelId, String relationId) {
+        deleteChallenge(relationId);
+        bot.sendToChannel(channelId, "Challenge expired");
+        //TODO schauen ob es geht
+        //TODO kommunikation in etwa grade ziehen
+        //TODO testkonzept und umsetzen
+        //TODO validierung konzept und umsetzen
     }
+    
+
 
     // TODO kann das weg?
     public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String acceptorId, String channelId) {
