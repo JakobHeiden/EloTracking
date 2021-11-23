@@ -61,7 +61,6 @@ public class EloTrackingService {
 		return challengeDao.existsById(id);
 	}
 
-
 	public Optional<ChallengeModel> findChallenge(String challengeId) {
 		return challengeDao.findById(challengeId);
 	}

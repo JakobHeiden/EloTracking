@@ -39,10 +39,7 @@ public class DiscordBotService {
         log.info(System.getenv("DATABASE"));//TODO
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
-                .map(msgEvent -> {
-                    log.trace("Incoming message: " + msgEvent.getMessage().getContent());
-                    return msgEvent.getMessage();
-                })
+                .map(msgEvent -> msgEvent.getMessage())
                 .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
                 .filter(commandParser::isCommand)
                 .subscribe(commandParser::processCommand);
