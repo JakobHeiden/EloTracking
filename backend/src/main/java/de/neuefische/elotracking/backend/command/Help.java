@@ -28,7 +28,7 @@ public class Help extends Command {
                 prefix, Accept.getDescription().substring(1),
                 prefix, Report.getDescription().substring(1),
                 prefix, Report.getDescription2().substring(1),
-                prefix, SetPrefix.getDescription().substring(1),
+                prefix, Setprefix.getDescription().substring(1),
                 prefix, Help.getDescription().substring(1)));
     }
 }

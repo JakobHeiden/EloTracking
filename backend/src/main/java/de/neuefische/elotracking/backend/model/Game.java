@@ -13,6 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @UseToStringForLogging
 @Document(collection = "game")
 public class Game {
+
     @Id
     private String channelId;
     private String name;

@@ -3,13 +3,13 @@ package de.neuefische.elotracking.backend.command;
 import de.neuefische.elotracking.backend.model.Game;
 import discord4j.core.object.entity.Message;
 
-public class SetPrefix extends Command {
+public class Setprefix extends Command {
 
     public static String getDescription() {
         return "!setprefix x - Change the command prefix for the bot. Only applies to this channel";
     }
 
-    public SetPrefix(Message msg) {
+    public Setprefix(Message msg) {
         super(msg);
         this.needsRegisteredChannel = true;
     }
