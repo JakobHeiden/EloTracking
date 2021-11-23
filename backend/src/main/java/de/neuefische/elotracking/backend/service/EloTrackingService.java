@@ -16,149 +16,149 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class EloTrackingService {
 
-    @Value("${initial-rating}")
-    private float initialRating;
-    @Value("${k}")
-    private float k;
-    private final DiscordBotService bot;
-    private final GameDao gameDao;
-    private final ChallengeDao challengeDao;
-    private final MatchDao matchDao;
-    private final PlayerDao playerDao;
-    private final TimedTaskQueue timedTaskQueue;
+	@Value("${initial-rating}")
+	private float initialRating;
+	@Value("${k}")
+	private float k;
+	private final DiscordBotService bot;
+	private final GameDao gameDao;
+	private final ChallengeDao challengeDao;
+	private final MatchDao matchDao;
+	private final PlayerDao playerDao;
+	private final TimedTaskQueue timedTaskQueue;
 
-    @Autowired
-    public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
-                              GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
-        this.bot = discordBotService;
-        this.timedTaskQueue = timedTaskQueue;
-        this.gameDao = gameDao;
-        this.challengeDao = challengeDao;
-        this.matchDao = matchDao;
-        this.playerDao = playerDao;
-    }
+	@Autowired
+	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
+							  GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
+		this.bot = discordBotService;
+		this.timedTaskQueue = timedTaskQueue;
+		this.gameDao = gameDao;
+		this.challengeDao = challengeDao;
+		this.matchDao = matchDao;
+		this.playerDao = playerDao;
+	}
 
-    public Optional<Game> findGameByChannelId(String channelId) {
-        return gameDao.findById(channelId);
-    }
+	public Optional<Game> findGameByChannelId(String channelId) {
+		return gameDao.findById(channelId);
+	}
 
-    public void saveGame(Game game) {
-        gameDao.save(game);
-    }
+	public void saveGame(Game game) {
+		gameDao.save(game);
+	}
 
-    public Game getGameData(String channelId) {
-        return gameDao.findByChannelId(channelId);
-    }
+	public Game getGameData(String channelId) {
+		return gameDao.findByChannelId(channelId);
+	}
 
-    public boolean challengeExistsById(String id) {
-        return challengeDao.existsById(id);
-    }
-
-    public void addChallenge(ChallengeModel challenge, String channelId) {//TODO nach Challenge verschieben?
-        timedTaskQueue.addChallenge(challenge, channelId);
-        challengeDao.insert(challenge);
-    }
-
-    public Optional<ChallengeModel> findChallenge(String challengeId) {
-        return challengeDao.findById(challengeId);
-    }
-
-    public void saveChallenge(ChallengeModel challenge) {
-        challengeDao.save(challenge);
-    }
-
-    public void deleteChallenge(String id) {
-        challengeDao.deleteById(id);
-    }
-
-    public void decayChallenge(String channelId, String challengeId) {
-        ChallengeModel challenge = findChallenge(challengeId).get();
-        if (challenge.isAccepted()) return;
-
-        bot.sendToChannel(channelId, String.format("<@%s> your challenge towards <@%s> has expired.",
-                challenge.getChallengerId(), challenge.getAcceptorId()));
-        deleteChallenge(challengeId);
-        //TODO testkonzept und umsetzen
-        //TODO validierung konzept und umsetzen
-        //TODO was soll noch deacayen?
-        //TODO werte anpassen
-    }
-    
+	public boolean challengeExistsById(String id) {
+		return challengeDao.existsById(id);
+	}
 
 
-    // TODO kann das weg?
-    public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String acceptorId, String channelId) {
-        List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
-        List<ChallengeModel> filteredByChannel = allChallenges.stream().
-                filter(challenge -> challenge.getChannelId().equals(channelId))
-                .collect(Collectors.toList());
-        return filteredByChannel;
-    }
+	public Optional<ChallengeModel> findChallenge(String challengeId) {
+		return challengeDao.findById(challengeId);
+	}
 
-    public List<ChallengeModel> findAllChallengesForPlayerForChannel(String playerId, String channelId) {
-        List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
-        allChallengesForPlayer.addAll(challengeDao.findAllByChallengerId(playerId));
-        allChallengesForPlayer.addAll(challengeDao.findAllByAcceptorId(playerId));
+	public void saveChallenge(ChallengeModel challenge) {
+		challengeDao.save(challenge);//TODO save vs insert?
+	}
 
-        List<ChallengeModel> filteredByChannel = allChallengesForPlayer.stream().
-                filter(challenge -> challenge.getChannelId().equals(channelId))
-                .collect(Collectors.toList());
-        return filteredByChannel;
-    }
+	public void addChallenge(ChallengeModel challenge, String channelId) {//TODO nach Challenge verschieben?
+		timedTaskQueue.addChallenge(challenge, channelId);
+		challengeDao.insert(challenge);
+	}
 
-    public void saveMatch(Match match) {
-        matchDao.save(match);
-    }
+	public void decayChallenge(String channelId, String challengeId) {
+		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		if (maybeChallenge.isEmpty()) {
+			throw new NoSuchElementException(
+					String.format("Challenge not found: challenge %s in channel %s", challengeId, channelId));
+		}
+		ChallengeModel challenge = maybeChallenge.get();
+		if (challenge.isAccepted()) return;
 
-    public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
-        if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
-            playerDao.insert(new Player(channelId, playerId,
-                    initialRating));
-            return true;
-        }
-        return false;
-    }
+		bot.sendToChannel(channelId, String.format("<@%s> your challenge towards <@%s> has expired.",
+				challenge.getChallengerId(), challenge.getAcceptorId()));
+		deleteChallenge(challengeId);
+		//TODO testkonzept und umsetzen
+		//TODO was soll noch deacayen?
+		//TODO werte anpassen
+	}
 
-    public double[] updateRatings(Match match) {
-        Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
-        Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
-        double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
-                match.isDraw() ? 0.5 : 1,
-                k);
-        winner.setRating(ratings[2]);
-        loser.setRating(ratings[3]);
-        playerDao.save(winner);
-        playerDao.save(loser);
-        match.setHasUpdatedPlayerRatings(true);
-        matchDao.save(match);
-        return ratings;
-    }
+	public void deleteChallenge(String id) {
+		challengeDao.deleteById(id);
+	}
 
-    private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
-        double player2Result = 1 - player1Result;
-        double expectedResult1 = 1 / (1 + Math.pow(10, (rating2 - rating1) / 400));
-        double expectedResult2 = 1 / (1 + Math.pow(10, (rating1 - rating2) / 400));
-        double newRating1 = rating1 + k * (player1Result - expectedResult1);
-        double newRating2 = rating2 + k * (player2Result - expectedResult2);
-        return new double[]{rating1, rating2, newRating1, newRating2};
-    }
+	// TODO kann das weg?
+	public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String acceptorId, String channelId) {
+		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
+		List<ChallengeModel> filteredByChannel = allChallenges.stream().
+				filter(challenge -> challenge.getChannelId().equals(channelId))
+				.collect(Collectors.toList());
+		return filteredByChannel;
+	}
 
-    public List<PlayerInRankingsDto> getRankings(String channelId) {
-        List<Player> allPlayers = playerDao.findAllByChannelId(channelId);
-        List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
-                .map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getDiscordUserId()), player.getRating()))
-                .collect(Collectors.toList());
-        Collections.sort(allPlayersAsDto);
-        return allPlayersAsDto;
-    }
+	public List<ChallengeModel> findAllChallengesForPlayerForChannel(String playerId, String channelId) {
+		List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
+		allChallengesForPlayer.addAll(challengeDao.findAllByChallengerId(playerId));
+		allChallengesForPlayer.addAll(challengeDao.findAllByAcceptorId(playerId));
+
+		List<ChallengeModel> filteredByChannel = allChallengesForPlayer.stream().
+				filter(challenge -> challenge.getChannelId().equals(channelId))
+				.collect(Collectors.toList());
+		return filteredByChannel;
+	}
+
+	public void saveMatch(Match match) {
+		matchDao.save(match);
+	}
+
+	public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
+		if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
+			playerDao.insert(new Player(channelId, playerId,
+					initialRating));
+			return true;
+		}
+		return false;
+	}
+
+	public double[] updateRatings(Match match) {
+		Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
+		Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
+		double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
+				match.isDraw() ? 0.5 : 1,
+				k);
+		winner.setRating(ratings[2]);
+		loser.setRating(ratings[3]);
+		playerDao.save(winner);
+		playerDao.save(loser);
+		match.setHasUpdatedPlayerRatings(true);
+		matchDao.save(match);
+		return ratings;
+	}
+
+	private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
+		double player2Result = 1 - player1Result;
+		double expectedResult1 = 1 / (1 + Math.pow(10, (rating2 - rating1) / 400));
+		double expectedResult2 = 1 / (1 + Math.pow(10, (rating1 - rating2) / 400));
+		double newRating1 = rating1 + k * (player1Result - expectedResult1);
+		double newRating2 = rating2 + k * (player2Result - expectedResult2);
+		return new double[]{rating1, rating2, newRating1, newRating2};
+	}
+
+	public List<PlayerInRankingsDto> getRankings(String channelId) {
+		List<Player> allPlayers = playerDao.findAllByChannelId(channelId);
+		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
+				.map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getDiscordUserId()), player.getRating()))
+				.collect(Collectors.toList());
+		Collections.sort(allPlayersAsDto);
+		return allPlayersAsDto;
+	}
 }
