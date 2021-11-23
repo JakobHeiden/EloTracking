@@ -5,7 +5,7 @@ import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Challenge extends Command {
+public class Challenge extends Command {//TODO test
 
     public Challenge(Message msg) {
         super(msg);
