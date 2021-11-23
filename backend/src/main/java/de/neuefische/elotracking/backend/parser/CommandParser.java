@@ -33,22 +33,28 @@ public class CommandParser {
     }
 
     public boolean isCommand(Message msg) {
-        log.trace("Incoming message: " + msg.getContent());
-        if (msg.getContent().length() < 2) return false;
+        try {
+            log.trace("Incoming message: " + msg.getContent());
+            if (msg.getContent().length() < 2) return false;
 
-        String necessaryPrefix;
-        Optional<Game> game = service.findGameByChannelId(msg.getChannelId().asString());
-        if (game.isPresent()) {
-            necessaryPrefix = game.get().getCommandPrefix();
-        } else {
-            necessaryPrefix = defaultCommandPrefix;
-        }
-        if (msg.getContent().startsWith(necessaryPrefix)) {
-            log.debug(String.format("Channel %s : %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "NULL"));
-            return true;
-        }
+            String necessaryPrefix;
+            Optional<Game> game = service.findGameByChannelId(msg.getChannelId().asString());
+            if (game.isPresent()) {
+                necessaryPrefix = game.get().getCommandPrefix();
+            } else {
+                necessaryPrefix = defaultCommandPrefix;
+            }
+            if (msg.getContent().startsWith(necessaryPrefix)) {
+                log.debug(String.format("Channel %s : %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "NULL"));
+                return true;
+            }
 
-        return false;
+            return false;
+        } catch (Exception e) {
+            bot.sendToAdmin(String.format("Error in CommandParser::isCommand/n%s : %s\n%s",
+                    msg.getChannelId().asString(), msg.getContent(), e.getMessage()));
+            throw e;
+        }
     }
 
     public void processCommand(Message msg) {
@@ -65,8 +71,9 @@ public class CommandParser {
                 channel.createMessage(reply).subscribe();
             }
         } catch(Exception e) {
-            bot.sendToAdmin(String.format("%s: %s:\n%s", msg.getChannelId().asString(), msg.getContent(), e.getMessage()));
-            throw e;//TODO
+            bot.sendToAdmin(String.format("Error in CommandParser::parseCommand/n%s : %s\n%s",
+                    msg.getChannelId().asString(), msg.getContent(), e.getMessage()));
+            throw e;
         }
     }
 }
