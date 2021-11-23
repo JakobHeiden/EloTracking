@@ -76,12 +76,7 @@ public class EloTrackingService {
 	}
 
 	public void decayChallenge(String channelId, String challengeId) {
-		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
-		if (maybeChallenge.isEmpty()) {
-			throw new NoSuchElementException(
-					String.format("Challenge not found: challenge %s in channel %s", challengeId, channelId));
-		}
-		ChallengeModel challenge = maybeChallenge.get();
+		ChallengeModel challenge = findChallenge(challengeId).get();
 		if (challenge.isAccepted()) return;
 
 		bot.sendToChannel(channelId, String.format("<@%s> your challenge towards <@%s> has expired.",
