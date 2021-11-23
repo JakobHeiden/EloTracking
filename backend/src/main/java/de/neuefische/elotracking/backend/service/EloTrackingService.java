@@ -87,7 +87,6 @@ public class EloTrackingService {
 		bot.sendToChannel(channelId, String.format("<@%s> your challenge towards <@%s> has expired.",
 				challenge.getChallengerId(), challenge.getAcceptorId()));
 		deleteChallenge(challengeId);
-		//TODO testkonzept und umsetzen
 		//TODO was soll noch deacayen?
 		//TODO werte anpassen
 	}
