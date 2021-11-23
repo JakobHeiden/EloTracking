@@ -67,11 +67,12 @@ public class EloTrackingService {
 	}
 
 	public void saveChallenge(ChallengeModel challenge) {
-		challengeDao.save(challenge);//TODO save vs insert?
+		challengeDao.save(challenge);
 	}
 
-	public void addChallenge(ChallengeModel challenge, String channelId) {//TODO nach Challenge verschieben?
-		timedTaskQueue.addChallenge(challenge, channelId);
+	public void addChallenge(ChallengeModel challenge, String channelId) {
+		Game game = findGameByChannelId(channelId).get();
+		timedTaskQueue.addChallenge(challenge, game.getChallengeDecayTime(), channelId);
 		challengeDao.insert(challenge);
 	}
 
@@ -83,7 +84,6 @@ public class EloTrackingService {
 				challenge.getChallengerId(), challenge.getAcceptorId()));
 		deleteChallenge(challengeId);
 		//TODO was soll noch deacayen?
-		//TODO werte anpassen
 	}
 
 	public void deleteChallenge(String id) {

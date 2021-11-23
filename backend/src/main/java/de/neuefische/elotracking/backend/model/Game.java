@@ -18,12 +18,12 @@ public class Game {
     private String channelId;
     private String name;
     private String commandPrefix;
-    private int challengeDecayInMinutes;
+    private int challengeDecayTime;
 
     public Game(String channelId, String name) {
         this.channelId = channelId;
         this.name = name;
         this.commandPrefix = "!";
-        this.challengeDecayInMinutes = 30;
+        this.challengeDecayTime = 30;
     }
 }
