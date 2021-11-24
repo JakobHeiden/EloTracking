@@ -1,4 +1,4 @@
-FROM openjdk:15-oracle
+FROM openjdk:17-oracle
 
 LABEL maintainer="JakobHeiden@gmx.de"
 

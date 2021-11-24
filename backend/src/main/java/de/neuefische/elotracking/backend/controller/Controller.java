@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class Controller {
+
     private final EloTrackingService service;
 
     public Controller(EloTrackingService eloTrackingService) {

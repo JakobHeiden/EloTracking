@@ -6,3 +6,8 @@ heapdump*
 /bin/
 
 /archive/*
+/backend/archive/*
+
+*~
+*.swp
+
