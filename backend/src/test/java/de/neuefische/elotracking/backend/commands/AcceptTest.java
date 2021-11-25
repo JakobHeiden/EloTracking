@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
@@ -13,14 +13,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.List;
 
-import static de.neuefische.elotracking.backend.command.SnowflakeTestFactory.*;
+import static de.neuefische.elotracking.backend.commands.SnowflakeTestFactory.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AcceptTest {
 
     @Mock private EloTrackingService service;

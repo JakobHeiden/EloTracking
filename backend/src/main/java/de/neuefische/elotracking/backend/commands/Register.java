@@ -1,6 +1,8 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -18,8 +20,8 @@ public class Register extends Command {
     @Value("${base-url}")
     private String baseUrl;
 
-    public Register(Message msg) {
-        super(msg);
+    public Register(Message msg, EloTrackingService service, DiscordBotService bot) {
+        super(msg, service, bot);
     }
 
     public static String getDescription() {

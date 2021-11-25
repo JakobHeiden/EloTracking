@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import discord4j.common.util.Snowflake;
 

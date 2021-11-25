@@ -1,17 +1,19 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 
 public class Setprefix extends Command {
 
-    public static String getDescription() {
-        return "!setprefix x - Change the command prefix for the bot. Only applies to this channel";
+    public Setprefix(Message msg, EloTrackingService service, DiscordBotService bot) {
+        super(msg, service, bot);
+        this.needsRegisteredChannel = true;
     }
 
-    public Setprefix(Message msg) {
-        super(msg);
-        this.needsRegisteredChannel = true;
+    public static String getDescription() {
+        return "!setprefix x - Change the command prefix for the bot. Only applies to this channel";
     }
 
     public void execute() {

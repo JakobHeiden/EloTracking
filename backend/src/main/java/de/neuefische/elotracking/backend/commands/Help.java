@@ -1,14 +1,16 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 
 import java.util.Optional;
 
 public class Help extends Command {
 
-    public Help(Message msg) {
-        super(msg);
+    public Help(Message msg, EloTrackingService service, DiscordBotService bot) {
+        super(msg, service, bot);
     }
 
     public static String getDescription() {

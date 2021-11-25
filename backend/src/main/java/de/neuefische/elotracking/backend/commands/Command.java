@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -14,9 +14,7 @@ public abstract class Command {
 
     @Value("${default-command-prefix}")
     protected String defaultCommandPrefix;
-    @Autowired
     protected EloTrackingService service;
-    @Autowired
     protected DiscordBotService bot;
     protected final Message msg;
     protected final String channelId;
@@ -26,8 +24,10 @@ public abstract class Command {
     protected boolean needsMention;
     protected boolean cantHaveTwoMentions;
 
-    protected Command(Message msg) {
+    protected Command(Message msg, EloTrackingService service, DiscordBotService bot) {
         this.msg = msg;
+        this.service = service;
+        this.bot = bot;
         this.channelId = msg.getChannelId().asString();
         this.botReplies = new LinkedList<String>();
 
