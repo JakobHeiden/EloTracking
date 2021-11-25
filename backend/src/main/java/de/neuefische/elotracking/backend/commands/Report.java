@@ -1,7 +1,9 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 
 import java.util.Date;
@@ -18,8 +20,8 @@ public abstract class Report extends Command {
     private Optional<ChallengeModel> challenge;
     private boolean isChallengerReport;
 
-    protected Report(Message msg, ChallengeModel.ReportStatus reportStatus) {
-        super(msg);
+    protected Report(Message msg, EloTrackingService service, DiscordBotService bot, ChallengeModel.ReportStatus reportStatus) {
+        super(msg, service, bot);
         this.needsRegisteredChannel = true;
         this.needsMention = true;
         this.isWin = (reportStatus == ChallengeModel.ReportStatus.WIN);

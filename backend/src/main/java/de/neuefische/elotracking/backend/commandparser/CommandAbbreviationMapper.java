@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.parser;
+package de.neuefische.elotracking.backend.commandparser;
 
 import de.neuefische.elotracking.backend.configuration.CommandAbbreviationsLoader;
 import org.springframework.beans.factory.annotation.Autowired;

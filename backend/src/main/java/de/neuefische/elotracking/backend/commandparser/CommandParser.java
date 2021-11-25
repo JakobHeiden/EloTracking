@@ -1,6 +1,6 @@
-package de.neuefische.elotracking.backend.parser;
+package de.neuefische.elotracking.backend.commandparser;
 
-import de.neuefische.elotracking.backend.command.Command;
+import de.neuefische.elotracking.backend.commands.Command;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -23,10 +23,10 @@ public class CommandParser {
     private String defaultCommandPrefix;
     private final EloTrackingService service;
     private final DiscordBotService bot;
-    private final Function<Message, Command> commandFactory;
+    private final Function<MessageWrapper, Command> commandFactory;
 
     @Autowired
-    public CommandParser(EloTrackingService service, DiscordBotService bot, Function<Message, Command> commandFactory) {
+    public CommandParser(EloTrackingService service, DiscordBotService bot, Function<MessageWrapper, Command> commandFactory) {
         this.service = service;
         this.bot = bot;
         this.commandFactory = commandFactory;
@@ -60,7 +60,8 @@ public class CommandParser {
     public void processCommand(Message msg) {
         try {// TODO!
             Mono<MessageChannel> channelMono = msg.getChannel();
-            Command command = commandFactory.apply(msg);
+            MessageWrapper msgWrapper = new MessageWrapper(msg, service, bot);
+            Command command = commandFactory.apply(msgWrapper);
             log.debug(String.format("new %s(%s) : execute()",
                     command.getClass().getSimpleName(),
                     msg.getContent()));

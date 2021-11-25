@@ -1,6 +1,8 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.object.entity.Message;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -9,8 +11,8 @@ public class Setchallengedecay extends Command {
 	@Value("${number-of-time-slots}")
 	private int numberOfTimeSlots;
 
-	public Setchallengedecay(Message msg) {
-		super(msg);
+	public Setchallengedecay(Message msg, EloTrackingService service, DiscordBotService bot) {
+		super(msg, service, bot);
 		this.needsRegisteredChannel = true;
 	}
 

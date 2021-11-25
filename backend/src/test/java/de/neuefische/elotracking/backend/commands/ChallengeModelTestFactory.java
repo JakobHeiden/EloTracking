@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static de.neuefische.elotracking.backend.command.SnowflakeTestFactory.*;
+import static de.neuefische.elotracking.backend.commands.SnowflakeTestFactory.*;
 
 class ChallengeModelTestFactory {
 

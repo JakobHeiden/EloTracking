@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
@@ -16,20 +16,12 @@ import static java.util.stream.Collectors.toUnmodifiableList;
 public class Cancel extends Command {
 
     private boolean canExecute = true;
-    private Message msg;
     private String cancelingPlayerId;
 
-    public Cancel(Message msg) {
-        super(msg);
-        this.msg = msg;
+    public Cancel(Message msg, EloTrackingService service, DiscordBotService bot) {
+        super(msg, service, bot);
         this.needsRegisteredChannel = true;
         this.cantHaveTwoMentions = true;
-    }
-
-    Cancel(Message msg, EloTrackingService service, DiscordBotService bot) {
-        this(msg);
-        this.service = service;
-        this.bot = bot;
     }
 
     public static String getDescription() {

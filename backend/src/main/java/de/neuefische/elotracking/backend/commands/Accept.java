@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.command;
+package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
@@ -15,17 +15,8 @@ public class Accept extends Command {
 
     private boolean canExecute = true;
 
-    public Accept(Message msg) {
-        super(msg);
-        this.needsRegisteredChannel = true;
-        this.cantHaveTwoMentions = true;
-    }
-
-    // For unit testing purposes
     Accept(Message msg, EloTrackingService service, DiscordBotService bot) {
-        this(msg);
-        this.service = service;
-        this.bot = bot;
+        super(msg, service, bot);
     }
 
     public static String getDescription() {
