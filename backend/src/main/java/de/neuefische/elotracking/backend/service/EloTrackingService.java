@@ -89,7 +89,7 @@ public class EloTrackingService {
 		challengeDao.deleteById(id);
 	}
 
-	// TODO kann das weg?
+	// TODO kann das weg? ...allg aufraeumen, der service ist kein dao
 	public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String acceptorId, String channelId) {
 		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
 		List<ChallengeModel> filteredByChannel = allChallenges.stream().

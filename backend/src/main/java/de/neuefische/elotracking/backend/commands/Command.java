@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.LinkedList;
 import java.util.List;
 
+// Subclasses must start with a capital letter and have no other capital letters to be recognized by the parser
 public abstract class Command {
 
     @Value("${default-command-prefix}")
