@@ -1,17 +1,12 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
-import de.neuefische.elotracking.backend.service.DiscordBotService;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
-import discord4j.core.object.entity.Message;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -24,23 +19,14 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class AcceptTest {
+class AcceptTest extends CommandTest {
 
-    @Mock private EloTrackingService service;
-    @Mock private DiscordBotService bot;
-    private Message msg;
-    private Command accept;
-    private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
+   private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
 
     @BeforeEach
     void initService() {
         when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
         when(service.findAllChallengesOfAcceptorForChannel(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
-    }
-
-    @AfterEach
-    void printBotReplies() {
-        accept.getBotReplies().forEach(System.out::println);
     }
 
     @ParameterizedTest
@@ -49,9 +35,9 @@ class AcceptTest {
     void noOpenChallenge(String text) {
         text = String.format(text, CHALLENGER_ID);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        accept = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot);
 
-        accept.execute();
+        command.execute();
 
         verify(service, never()).addNewPlayerIfPlayerNotPresent(any(), any());
     }
@@ -64,9 +50,9 @@ class AcceptTest {
         challengeFromDifferentPlayer.setChallengerId(SnowflakeTestFactory.createId());
         challenges.add(challengeFromDifferentPlayer);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        accept = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot);
 
-        accept.execute();
+        command.execute();
 
         verify(service, never()).addNewPlayerIfPlayerNotPresent(any(), any());
     }
@@ -80,9 +66,9 @@ class AcceptTest {
         challenge2.setChallengerId(SnowflakeTestFactory.createId());
         challenges.add(challenge2);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        accept = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot);
 
-        accept.execute();
+        command.execute();
 
         verify(service, never()).addNewPlayerIfPlayerNotPresent(any(), any());
     }
@@ -93,9 +79,9 @@ class AcceptTest {
         String text = "!accept";
         challenges.add(ChallengeModelTestFactory.create());
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        accept = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot);
 
-        accept.execute();
+        command.execute();
 
         verify(service).saveChallenge(any());
     }
@@ -109,9 +95,9 @@ class AcceptTest {
         challenge2.setChallengerId(SnowflakeTestFactory.createId());
         challenges.add(challenge2);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        accept = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot);
 
-        accept.execute();
+        command.execute();
 
         verify(service).saveChallenge(any());
     }

@@ -23,25 +23,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CancelTest {
+public class CancelTest extends CommandTest {
 
-    @Mock
-    private EloTrackingService service;
-    @Mock
-    private DiscordBotService bot;
-    private Command cancel;
-    private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
+   private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
 
     @BeforeEach
     void initService() {
         when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
         lenient().when(service.findAllChallengesForPlayerForChannel(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
         lenient().when(service.findAllChallengesForPlayerForChannel(CHALLENGER_ID, CHANNEL_ID)).thenReturn(challenges);
-    }
-
-    @AfterEach
-    void printBotReplies() {
-        cancel.getBotReplies().forEach(System.out::println);
     }
 
     @ParameterizedTest
@@ -51,9 +41,9 @@ public class CancelTest {
         text = String.format(text, CHALLENGER_ID);
         Message msg = MessageTestFactory.createMock(text, CHALLENGER);
         int i = 1;
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
 
-        cancel.execute();
+        command.execute();
 
         verify(service, never()).deleteChallenge(any());
     }
@@ -66,9 +56,9 @@ public class CancelTest {
         challenges.add(new ChallengeModel(CHANNEL_ID, CHALLENGER_ID, SnowflakeTestFactory.createId()));
         challenges.add(new ChallengeModel(CHANNEL_ID, SnowflakeTestFactory.createId(), ACCEPTOR_ID));
         Message msg = MessageTestFactory.createMock("!cancel", Snowflake.of(whoDoesTheCancel));
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
 
-        cancel.execute();
+        command.execute();
 
         verify(service, never()).deleteChallenge(any());
     }
@@ -79,9 +69,9 @@ public class CancelTest {
     void noMentionOneChallengeOrMatch(String whoDoesTheCancel) {
         challenges.add(ChallengeModelTestFactory.create());
         Message msg = MessageTestFactory.createMock("!cancel", Snowflake.of(whoDoesTheCancel));
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
 
-        cancel.execute();
+        command.execute();
 
         verify(service).deleteChallenge(any());
     }
@@ -94,9 +84,9 @@ public class CancelTest {
         Message msg = MessageTestFactory.createMock(
                 String.format("!cancel @%s", switchIdsAround ? ACCEPTOR_ID : CHALLENGER_ID),
                 Snowflake.of(switchIdsAround ? CHALLENGER_ID : ACCEPTOR_ID));
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
 
-        cancel.execute();
+        command.execute();
 
         verify(service).deleteChallenge(any());
     }
@@ -106,9 +96,9 @@ public class CancelTest {
     void oneMentionNoMatchingChallengeOrMatch() {
         challenges.add(new ChallengeModel(CHANNEL_ID, CHALLENGER_ID, SnowflakeTestFactory.createId()));
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
 
-        cancel.execute();
+        command.execute();
 
         verify(service, never()).deleteChallenge(any());
     }
@@ -120,9 +110,9 @@ public class CancelTest {
         challengeSpy.accept();
         challenges.add(challengeSpy);
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
 
-        cancel.execute();
+        command.execute();
 
         verify(challengeSpy).callForCancel(CHALLENGER_ID);
         verify(service, never()).deleteChallenge(any());
@@ -135,11 +125,11 @@ public class CancelTest {
         challengeSpy.accept();
         challenges.add(challengeSpy);
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
-        cancel = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot);
         Message msg2 = MessageTestFactory.createMock(String.format("!cancel @%s", CHALLENGER_ID), ACCEPTOR);
         Command cancel2 = new Cancel(msg2, service, bot);
 
-        cancel.execute();
+        command.execute();
         cancel2.execute();
 
         verify(challengeSpy).callForCancel(CHALLENGER_ID);
