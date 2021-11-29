@@ -26,7 +26,11 @@ public class Challenge extends Command {//TODO test
 
         String challengerId = msg.getAuthor().get().getId().asString();
         String acceptorId = msg.getUserMentionIds().iterator().next().asString();
-        if (service.challengeExistsById(channelId + "-" + challengerId + "-" + acceptorId)) {
+        if (challengerId.equals(acceptorId)) {
+            addBotReply("You cannot challenge yourself");
+            canExecute = false;
+        }
+        if (service.challengeExistsById(ChallengeModel.generateId(channelId, challengerId, acceptorId))) {
             addBotReply("challenge already exists");
             canExecute = false;
         }
