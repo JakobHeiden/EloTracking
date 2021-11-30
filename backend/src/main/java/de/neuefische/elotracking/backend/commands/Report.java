@@ -17,7 +17,7 @@ public abstract class Report extends Command {
     private String reportingPlayerId;
     private String reportedOnPlayerId;
     private String challengeId;
-    private Optional<ChallengeModel> challenge;
+    private ChallengeModel challenge;
     private boolean isChallengerReport;
 
     protected Report(Message msg, EloTrackingService service, DiscordBotService bot, ChallengeModel.ReportStatus reportStatus) {
@@ -41,27 +41,29 @@ public abstract class Report extends Command {
         this.reportingPlayerId = msg.getAuthor().get().getId().asString();
         this.reportedOnPlayerId = msg.getUserMentionIds().iterator().next().asString();
         this.challengeId = ChallengeModel.generateId(channelId, reportingPlayerId, reportedOnPlayerId);
-        this.challenge = service.findChallenge(challengeId);
 
-        if (challenge.isEmpty()) {
+        Optional<ChallengeModel> maybeChallenge = service.findChallenge(challengeId);
+        if (maybeChallenge.isEmpty()) {
             addBotReply(String.format("No challenge exists towards that player. Use %schallenge to issue one",
                     defaultCommandPrefix));
             return;
         }
-        if (challenge.get().getAcceptedWhen().isEmpty()) {
+
+        this.challenge = maybeChallenge.get();
+        if (challenge.getAcceptedWhen().isEmpty()) {
             addBotReply("This challenge has not been accepted yet and cannot be reported as a win");
             return;
         }
 
-        this.isChallengerReport = (reportingPlayerId.equals(challenge.get().getChallengerId()));
-        checkForInconsistentReporting();
+        this.isChallengerReport = (reportingPlayerId.equals(challenge.getChallengerId()));
+        processPossiblyInconsistentReporting();
         if (!canExecute) return;
 
-        setReportStatus();
+        processConsistentReporting();
 
         //if only one player reported, send message and return
-        if (challenge.get().getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
-                challenge.get().getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
+        if (challenge.getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
+                challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
             addBotReply("reported.");
             return;
         }
@@ -73,7 +75,7 @@ public abstract class Report extends Command {
         double[] resolvedRatings = service.updateRatings(match);
         match.setHasUpdatedPlayerRatings(true);
         service.saveMatch(match);
-        service.deleteChallenge(challenge.get().getId());
+        service.deleteChallenge(challenge.getId());
 
         String winnerMention = this.isWin ? msg.getAuthor().get().getMention() : msg.getUserMentionIds().iterator().next().asString();
         String loserMention = this.isWin ? String.format("<@!%s>", msg.getUserMentionIds().iterator().next().asString()) : msg.getAuthor().get().getMention();
@@ -82,28 +84,28 @@ public abstract class Report extends Command {
                 loserMention,  (int) resolvedRatings[1], (int) resolvedRatings[3]));
     }
 
-    private void checkForInconsistentReporting() {
+    private void processPossiblyInconsistentReporting() {
         ChallengeModel.ReportStatus reportedOnPlayerReported = this.isChallengerReport ?
-                challenge.get().getAcceptorReported()
-                : challenge.get().getChallengerReported();
+                challenge.getAcceptorReported()
+                : challenge.getChallengerReported();
         if (this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.WIN) {
             addBotReply("Both reported win");
-            service.saveChallenge(challenge.get());
+            service.saveChallenge(challenge);
             this.canExecute = false;
         }
         if (!this.isWin && reportedOnPlayerReported == ChallengeModel.ReportStatus.LOSS) {
             addBotReply("Both reported loss");
-            service.saveChallenge(challenge.get());
+            service.saveChallenge(challenge);
             this.canExecute = false;
         }
     }
 
-    private void setReportStatus() {
+    private void processConsistentReporting() {
         if (this.isChallengerReport) {
-            challenge.get().setChallengerReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
+            challenge.setChallengerReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
         } else {
-            challenge.get().setAcceptorReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
+            challenge.setAcceptorReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
         }
-        service.saveChallenge(challenge.get());
+        service.saveChallenge(challenge);
     }
 }
