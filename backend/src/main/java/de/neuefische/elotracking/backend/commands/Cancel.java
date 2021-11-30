@@ -33,7 +33,7 @@ public class Cancel extends Command {
         if (!canExecute) return;
 
         cancelingPlayerId = msg.getAuthor().get().getId().asString();
-        List<ChallengeModel> challenges = service.findAllChallengesForPlayerForChannel(cancelingPlayerId, channelId);
+        List<ChallengeModel> challenges = service.findAllChallengesByPlayerIdAndChannelId(cancelingPlayerId, channelId);
         Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
 
         ChallengeModel challenge = null;

@@ -25,7 +25,7 @@ public class ChallengeTest extends CommandTest {
 
 		command.execute();
 
-		verify(service, never()).addChallenge(any(), any());
+		verify(service, never()).addNewChallenge(any(), any());
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class ChallengeTest extends CommandTest {
 
 		command.execute();
 
-		verify(service, never()).addChallenge(any(), any());
+		verify(service, never()).addNewChallenge(any(), any());
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class ChallengeTest extends CommandTest {
 
 		command.execute();
 
-		verify(service).addChallenge(any(), any());
+		verify(service).addNewChallenge(any(), any());
 	}
 
 }
