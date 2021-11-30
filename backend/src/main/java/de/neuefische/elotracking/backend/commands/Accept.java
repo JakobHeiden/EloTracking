@@ -27,7 +27,7 @@ public class Accept extends Command {
         if (!super.canExecute()) return;
 
         String acceptingPlayerId = msg.getAuthor().get().getId().asString();
-        List<ChallengeModel> challenges = service.findAllChallengesOfAcceptorForChannel(acceptingPlayerId, channelId);
+        List<ChallengeModel> challenges = service.findAllChallengesByAcceptorIdAndChannelId(acceptingPlayerId, channelId);
         Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
         Optional<ChallengeModel> challenge;
 

@@ -38,7 +38,7 @@ public class Challenge extends Command {//TODO test
 
         service.addNewPlayerIfPlayerNotPresent(channelId, challengerId);
         ChallengeModel challengeModel = new ChallengeModel(channelId, challengerId, acceptorId);
-        service.addChallenge(challengeModel, channelId);
+        service.addNewChallenge(challengeModel, channelId);
         addBotReply(String.format("Challenge issued. Your opponent can now %saccept", defaultCommandPrefix));
     }
 }

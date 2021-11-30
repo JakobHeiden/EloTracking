@@ -26,7 +26,7 @@ class AcceptTest extends CommandTest {
     @BeforeEach
     void initService() {
         when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
-        when(service.findAllChallengesOfAcceptorForChannel(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
+        when(service.findAllChallengesByAcceptorIdAndChannelId(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
     }
 
     @ParameterizedTest

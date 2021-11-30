@@ -26,8 +26,8 @@ public class CancelTest extends CommandTest {
     @BeforeEach
     void initService() {
         when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
-        lenient().when(service.findAllChallengesForPlayerForChannel(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
-        lenient().when(service.findAllChallengesForPlayerForChannel(CHALLENGER_ID, CHANNEL_ID)).thenReturn(challenges);
+        lenient().when(service.findAllChallengesByPlayerIdAndChannelId(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
+        lenient().when(service.findAllChallengesByPlayerIdAndChannelId(CHALLENGER_ID, CHANNEL_ID)).thenReturn(challenges);
     }
 
     @ParameterizedTest

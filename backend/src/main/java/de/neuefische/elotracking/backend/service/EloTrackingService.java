@@ -23,10 +23,8 @@ import java.util.stream.Collectors;
 @Service
 public class EloTrackingService {
 
-	@Value("${initial-rating}")
-	private float initialRating;
-	@Value("${k}")
-	private float k;
+	private static float initialRating = 1200;
+	private static float k = 16;
 	private final DiscordBotService bot;
 	private final GameDao gameDao;
 	private final ChallengeDao challengeDao;
@@ -45,6 +43,7 @@ public class EloTrackingService {
 		this.playerDao = playerDao;
 	}
 
+	// Game
 	public Optional<Game> findGameByChannelId(String channelId) {
 		return gameDao.findById(channelId);
 	}
@@ -53,10 +52,7 @@ public class EloTrackingService {
 		gameDao.save(game);
 	}
 
-	public Game getGameData(String channelId) {
-		return gameDao.findByChannelId(channelId);
-	}
-
+	// Challenge
 	public boolean challengeExistsById(String id) {
 		return challengeDao.existsById(id);
 	}
@@ -69,7 +65,7 @@ public class EloTrackingService {
 		challengeDao.save(challenge);
 	}
 
-	public void addChallenge(ChallengeModel challenge, String channelId) {
+	public void addNewChallenge(ChallengeModel challenge, String channelId) {
 		Game game = findGameByChannelId(channelId).get();
 		timedTaskQueue.addChallenge(challenge, game.getChallengeDecayTime(), channelId);
 		challengeDao.insert(challenge);
@@ -89,8 +85,7 @@ public class EloTrackingService {
 		challengeDao.deleteById(id);
 	}
 
-	// TODO kann das weg? ...allg aufraeumen, der service ist kein dao
-	public List<ChallengeModel> findAllChallengesOfAcceptorForChannel(String acceptorId, String channelId) {
+	public List<ChallengeModel> findAllChallengesByAcceptorIdAndChannelId(String acceptorId, String channelId) {
 		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
 		List<ChallengeModel> filteredByChannel = allChallenges.stream().
 				filter(challenge -> challenge.getChannelId().equals(channelId))
@@ -98,7 +93,7 @@ public class EloTrackingService {
 		return filteredByChannel;
 	}
 
-	public List<ChallengeModel> findAllChallengesForPlayerForChannel(String playerId, String channelId) {
+	public List<ChallengeModel> findAllChallengesByPlayerIdAndChannelId(String playerId, String channelId) {
 		List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
 		allChallengesForPlayer.addAll(challengeDao.findAllByChallengerId(playerId));
 		allChallengesForPlayer.addAll(challengeDao.findAllByAcceptorId(playerId));
@@ -109,10 +104,12 @@ public class EloTrackingService {
 		return filteredByChannel;
 	}
 
+	// Match
 	public void saveMatch(Match match) {
 		matchDao.save(match);
 	}
 
+	// Player
 	public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
 		if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
 			playerDao.insert(new Player(channelId, playerId,
@@ -122,6 +119,7 @@ public class EloTrackingService {
 		return false;
 	}
 
+	// Rankings
 	public double[] updateRatings(Match match) {
 		Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
