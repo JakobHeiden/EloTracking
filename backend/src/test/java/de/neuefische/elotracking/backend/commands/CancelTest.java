@@ -131,6 +131,5 @@ public class CancelTest extends CommandTest {
         verify(challengeSpy).callForCancel(CHALLENGER_ID);
         verify(challengeSpy).callForCancel(ACCEPTOR_ID);
         verify(service).deleteChallenge(any());
-        cancel2.getBotReplies().forEach(System.out::println);
     }
 }
