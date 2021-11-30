@@ -1,18 +1,14 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
-import de.neuefische.elotracking.backend.service.DiscordBotService;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
