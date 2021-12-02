@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.commands.Command;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +24,14 @@ public class CommandParser {
     private String defaultCommandPrefix;
     private final EloTrackingService service;
     private final DiscordBotService bot;
+    private final TimedTaskQueue queue;
     private final Function<MessageWrapper, Command> commandFactory;
 
     @Autowired
-    public CommandParser(EloTrackingService service, DiscordBotService bot, Function<MessageWrapper, Command> commandFactory) {
+    public CommandParser(EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, Function<MessageWrapper, Command> commandFactory) {
         this.service = service;
         this.bot = bot;
+        this.queue = queue;
         this.commandFactory = commandFactory;
     }
 
@@ -60,7 +63,7 @@ public class CommandParser {
     public void processCommand(Message msg) {
         try {// TODO!
             Mono<MessageChannel> channelMono = msg.getChannel();
-            MessageWrapper msgWrapper = new MessageWrapper(msg, service, bot);
+            MessageWrapper msgWrapper = new MessageWrapper(msg, service, bot, queue);
             Command command = commandFactory.apply(msgWrapper);
             log.debug(String.format("new %s(%s) : execute()",
                     command.getClass().getSimpleName(),

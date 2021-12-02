@@ -35,7 +35,7 @@ class AcceptTest extends CommandTest {
     void noOpenChallenge(String text) {
         text = String.format(text, CHALLENGER_ID);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        command = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot, queue);
 
         command.execute();
 
@@ -50,7 +50,7 @@ class AcceptTest extends CommandTest {
         challengeFromDifferentPlayer.setChallengerId(SnowflakeTestFactory.createId());
         challenges.add(challengeFromDifferentPlayer);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        command = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot, queue);
 
         command.execute();
 
@@ -66,7 +66,7 @@ class AcceptTest extends CommandTest {
         challenge2.setChallengerId(SnowflakeTestFactory.createId());
         challenges.add(challenge2);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        command = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot, queue);
 
         command.execute();
 
@@ -79,7 +79,7 @@ class AcceptTest extends CommandTest {
         String text = "!accept";
         challenges.add(ChallengeModelTestFactory.create());
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        command = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot, queue);
 
         command.execute();
 
@@ -95,7 +95,7 @@ class AcceptTest extends CommandTest {
         challenge2.setChallengerId(SnowflakeTestFactory.createId());
         challenges.add(challenge2);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
-        command = new Accept(msg, service, bot);
+        command = new Accept(msg, service, bot, queue);
 
         command.execute();
 

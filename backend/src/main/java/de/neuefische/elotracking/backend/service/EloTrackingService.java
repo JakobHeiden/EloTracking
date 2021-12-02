@@ -12,7 +12,6 @@ import de.neuefische.elotracking.backend.model.Player;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -65,20 +64,18 @@ public class EloTrackingService {
 		challengeDao.save(challenge);
 	}
 
-	public void addNewChallenge(ChallengeModel challenge, String channelId) {
-		Game game = findGameByChannelId(channelId).get();
-		timedTaskQueue.addChallenge(challenge, game.getChallengeDecayTime(), channelId);
-		challengeDao.insert(challenge);
-	}
-
-	public void decayChallenge(String channelId, String challengeId) {
-		ChallengeModel challenge = findChallenge(challengeId).get();
+	public void decayOpenChallenge(String challengeId) {//TODO? maybe include time in method signature
+		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		if (maybeChallenge.isEmpty()) return;
+		ChallengeModel challenge = maybeChallenge.get();
 		if (challenge.isAccepted()) return;
 
-		bot.sendToChannel(channelId, String.format("<@%s> your challenge towards <@%s> has expired.",
-				challenge.getChallengerId(), challenge.getAcceptorId()));
 		deleteChallenge(challengeId);
-		//TODO was soll noch deacayen?
+		Optional<Game> maybeGame = findGameByChannelId(challenge.getChannelId());
+		if (maybeGame.isEmpty()) return;
+
+		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your open challenge towards <@%s> has expired after %s minutes",
+				challenge.getChallengerId(), challenge.getAcceptorId(), maybeGame.get().getOpenChallengeDecayTime()));
 	}
 
 	public void deleteChallenge(String id) {

@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.timedtask;
 
-enum TimedTaskType {
-	CHALLENGE_DECAY
+public enum TimedTaskType {
+	OPEN_CHALLENGE_DECAY,
+	ACCEPTED_CHALLENGE_DECAY
 }

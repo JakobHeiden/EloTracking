@@ -27,18 +27,16 @@ public class CommandFactoryConfiguration {
 	@Scope("prototype")
 	public Command createCommand(MessageWrapper msgWrapper) {
 		Message msg = msgWrapper.msg();
-		EloTrackingService service = msgWrapper.service();
-		DiscordBotService bot = msgWrapper.bot();
 		String commandString = msg.getContent().split(" ")[0].substring(1).toLowerCase();
 		commandString = commandAbbreviationMapper.mapIfApplicable(commandString);
 		String commandClassName = commandString.substring(0, 1).toUpperCase() + commandString.substring(1);
 		try {
 			return (Command) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
 					.getConstructor(Message.class, EloTrackingService.class, DiscordBotService.class)
-					.newInstance(msg, service, bot);
+					.newInstance(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
 		} catch (Exception e) {//TODO
 			if (e.getClass().equals(ClassNotFoundException.class) || e.getClass().equals(NoSuchMethodException.class)) {
-				return new Unknown(msg, service, bot);
+				return new Unknown(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
 			} else {
 				e.printStackTrace();//TODO
 				return null;
