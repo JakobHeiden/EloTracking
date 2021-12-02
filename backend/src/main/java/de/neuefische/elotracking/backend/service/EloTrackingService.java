@@ -78,6 +78,19 @@ public class EloTrackingService {
 				challenge.getChallengerId(), challenge.getAcceptorId(), maybeGame.get().getOpenChallengeDecayTime()));
 	}
 
+	public void decayAcceptedChallenge(String challengeId) {
+		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		if (maybeChallenge.isEmpty()) return;
+
+		ChallengeModel challenge = maybeChallenge.get();
+		deleteChallenge(challengeId);
+		Optional<Game> maybeGame = findGameByChannelId(challenge.getChannelId());
+		if (maybeGame.isEmpty()) return;
+
+		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",
+				challenge.getChallengerId(), challenge.getAcceptorId(), maybeGame.get().getOpenChallengeDecayTime()));
+	}
+
 	public void deleteChallenge(String id) {
 		challengeDao.deleteById(id);
 	}

@@ -44,8 +44,13 @@ public class TimedTaskQueue {
 	public void tick() {
 		try {
 			for (TimedTask task : timeSlots[currentIndex]) {
-				if (task.getType() == TimedTaskType.OPEN_CHALLENGE_DECAY) {
-					service.decayOpenChallenge(task.getRelationId());
+				switch (task.getType()) {
+					case OPEN_CHALLENGE_DECAY:
+						service.decayOpenChallenge(task.getRelationId());
+						break;
+					case ACCEPTED_CHALLENGE_DECAY:
+						service.decayAcceptedChallenge(task.getRelationId());
+						break;
 				}
 			}
 
