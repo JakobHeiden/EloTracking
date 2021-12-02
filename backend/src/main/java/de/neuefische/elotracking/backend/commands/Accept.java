@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskType;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,8 @@ public class Accept extends Command {
         if (!canExecute) return;
 
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
-        challenge.get().accept();// TODO doppelte akzeptierung behandeln
+        challenge.get().accept();// TODO doppelte akzeptierung behandeln; Optional?
+        queue.addTimedTask(TimedTaskType.ACCEPTED_CHALLENGE_DECAY, game.getAcceptedChallengeDecayTime(), challenge.get().getId());
         service.saveChallenge(challenge.get());
         addBotReply(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
                 service.findGameByChannelId(channelId).get().getCommandPrefix()));
