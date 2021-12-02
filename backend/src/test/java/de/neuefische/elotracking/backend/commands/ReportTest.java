@@ -39,7 +39,7 @@ public class ReportTest extends CommandTest {
 		when(service.findChallenge(ChallengeModelTestFactory.create().getId())).thenReturn(Optional.empty());
 		String text = String.format("!win @%s", ACCEPTOR_ID);
 		Message msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Win(msg, service, bot);
+		command = new Win(msg, service, bot, queue);
 
 		command.execute();
 
@@ -54,7 +54,7 @@ public class ReportTest extends CommandTest {
 		when(service.findChallenge(challenge.getId())).thenReturn(Optional.of(challenge));
 		String text = String.format("!win @%s", ACCEPTOR_ID);
 		Message msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Win(msg, service, bot);
+		command = new Win(msg, service, bot, queue);
 
 		command.execute();
 
@@ -70,7 +70,7 @@ public class ReportTest extends CommandTest {
 		when(service.findChallenge(challenge.getId())).thenReturn(Optional.of(challenge));
 		String text = String.format("!win @%s", ACCEPTOR_ID);
 		Message msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Win(msg, service, bot);
+		command = new Win(msg, service, bot, queue);
 
 		command.execute();
 
@@ -87,7 +87,7 @@ public class ReportTest extends CommandTest {
 		when(service.findChallenge(challenge.getId())).thenReturn(Optional.of(challenge));
 		String text = String.format("!win @%s", ACCEPTOR_ID);
 		Message msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Win(msg, service, bot);
+		command = new Win(msg, service, bot, queue);
 
 		command.execute();
 
@@ -109,7 +109,7 @@ public class ReportTest extends CommandTest {
 		when(service.updateRatings(any())).thenReturn(new double[]{1600, 1600, 1600, 1600});
 		String text = String.format("!win @%s", ACCEPTOR_ID);
 		Message msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Win(msg, service, bot);
+		command = new Win(msg, service, bot, queue);
 
 		command.execute();
 

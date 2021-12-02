@@ -18,12 +18,14 @@ public class Game {
     private String channelId;
     private String name;
     private String commandPrefix;
-    private int challengeDecayTime;
+    private int openChallengeDecayTime;
+    private int acceptedChallengeDecayTime;
 
     public Game(String channelId, String name) {
         this.channelId = channelId;
         this.name = name;
         this.commandPrefix = "!";
-        this.challengeDecayTime = 30;
+        this.openChallengeDecayTime = 120;
+        this.acceptedChallengeDecayTime = 7 * 24 * 60;
     }
 }

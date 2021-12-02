@@ -37,7 +37,7 @@ public class CancelTest extends CommandTest {
         text = String.format(text, CHALLENGER_ID);
         Message msg = MessageTestFactory.createMock(text, CHALLENGER);
         int i = 1;
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
 
         command.execute();
 
@@ -52,7 +52,7 @@ public class CancelTest extends CommandTest {
         challenges.add(new ChallengeModel(CHANNEL_ID, CHALLENGER_ID, SnowflakeTestFactory.createId()));
         challenges.add(new ChallengeModel(CHANNEL_ID, SnowflakeTestFactory.createId(), ACCEPTOR_ID));
         Message msg = MessageTestFactory.createMock("!cancel", Snowflake.of(whoDoesTheCancel));
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
 
         command.execute();
 
@@ -65,7 +65,7 @@ public class CancelTest extends CommandTest {
     void noMentionOneChallengeOrMatch(String whoDoesTheCancel) {
         challenges.add(ChallengeModelTestFactory.create());
         Message msg = MessageTestFactory.createMock("!cancel", Snowflake.of(whoDoesTheCancel));
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
 
         command.execute();
 
@@ -80,7 +80,7 @@ public class CancelTest extends CommandTest {
         Message msg = MessageTestFactory.createMock(
                 String.format("!cancel @%s", switchIdsAround ? ACCEPTOR_ID : CHALLENGER_ID),
                 Snowflake.of(switchIdsAround ? CHALLENGER_ID : ACCEPTOR_ID));
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
 
         command.execute();
 
@@ -92,7 +92,7 @@ public class CancelTest extends CommandTest {
     void oneMentionNoMatchingChallengeOrMatch() {
         challenges.add(new ChallengeModel(CHANNEL_ID, CHALLENGER_ID, SnowflakeTestFactory.createId()));
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
 
         command.execute();
 
@@ -106,7 +106,7 @@ public class CancelTest extends CommandTest {
         challengeSpy.accept();
         challenges.add(challengeSpy);
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
 
         command.execute();
 
@@ -121,9 +121,9 @@ public class CancelTest extends CommandTest {
         challengeSpy.accept();
         challenges.add(challengeSpy);
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
-        command = new Cancel(msg, service, bot);
+        command = new Cancel(msg, service, bot, queue);
         Message msg2 = MessageTestFactory.createMock(String.format("!cancel @%s", CHALLENGER_ID), ACCEPTOR);
-        Command cancel2 = new Cancel(msg2, service, bot);
+        Command cancel2 = new Cancel(msg2, service, bot, queue);
 
         command.execute();
         cancel2.execute();

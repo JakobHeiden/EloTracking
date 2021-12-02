@@ -3,6 +3,7 @@ package de.neuefische.elotracking.backend.commands;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -11,8 +12,8 @@ public class Setchallengedecay extends Command {
 	@Value("${number-of-time-slots}")
 	private int numberOfTimeSlots;
 
-	public Setchallengedecay(Message msg, EloTrackingService service, DiscordBotService bot) {
-		super(msg, service, bot);
+	public Setchallengedecay(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+		super(msg, service, bot, queue);
 		this.needsRegisteredChannel = true;
 	}
 
@@ -42,7 +43,7 @@ public class Setchallengedecay extends Command {
 		}
 
 		Game game = service.findGameByChannelId(this.channelId).get();
-		game.setChallengeDecayTime(x);
+		game.setOpenChallengeDecayTime(x);
 		service.saveGame(game);
 		addBotReply(String.format("Open challenges are now set to decay after %s minutes.", x));
 	}

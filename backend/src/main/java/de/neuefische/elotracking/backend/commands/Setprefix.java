@@ -3,12 +3,13 @@ package de.neuefische.elotracking.backend.commands;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 
 public class Setprefix extends Command {
 
-    public Setprefix(Message msg, EloTrackingService service, DiscordBotService bot) {
-        super(msg, service, bot);
+    public Setprefix(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+        super(msg, service, bot, queue);
         this.needsRegisteredChannel = true;
     }
 

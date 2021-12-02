@@ -21,11 +21,12 @@ public class ChallengeTest extends CommandTest {
 	void cantChallengeSelf() {
 		String text = String.format("!challenge @%s" , CHALLENGER_ID);
 		msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Challenge(msg, service, bot);
+		command = new Challenge(msg, service, bot, queue);
 
 		command.execute();
 
-		verify(service, never()).addNewChallenge(any(), any());
+		verify(service, never()).saveChallenge(any());
+		verify(queue, never()).addTimedTask(any(), anyInt(), any());
 	}
 
 	@Test
@@ -33,22 +34,24 @@ public class ChallengeTest extends CommandTest {
 		when(service.challengeExistsById(ChallengeModelTestFactory.create().getId())).thenReturn(true);
 		String text = String.format("!challenge @%s", ACCEPTOR_ID);
 		msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Challenge(msg, service, bot);
+		command = new Challenge(msg, service, bot, queue);
 
 		command.execute();
 
-		verify(service, never()).addNewChallenge(any(), any());
+		verify(queue, never()).addTimedTask(any(), anyInt(), any());
+		verify(service, never()).saveChallenge(any());
 	}
 
 	@Test
 	void happyPathShouldWork() {
 		String text = String.format("!challenge @%s", ACCEPTOR_ID);
 		msg = MessageTestFactory.createMock(text, CHALLENGER);
-		command = new Challenge(msg, service, bot);
+		command = new Challenge(msg, service, bot, queue);
 
 		command.execute();
 
-		verify(service).addNewChallenge(any(), any());
+		verify(queue).addTimedTask(any(), anyInt(), any());
+		verify(service).saveChallenge(any());
 	}
 
 }

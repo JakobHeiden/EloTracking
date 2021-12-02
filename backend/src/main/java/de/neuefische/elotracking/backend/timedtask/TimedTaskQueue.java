@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.timedtask;
 
-import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,17 +35,17 @@ public class TimedTaskQueue {
 		}
 	}
 
-	public void addChallenge(ChallengeModel challenge, int decayTime, String channelId) {
-		timeSlots[(currentIndex + decayTime) % numberOfTimeSlots]
-				.add(new TimedTask(channelId, TimedTaskType.CHALLENGE_DECAY, challenge.getId()));
+	public void addTimedTask(TimedTaskType type, int time, String relationId) {
+		timeSlots[(currentIndex + time) % numberOfTimeSlots]
+				.add(new TimedTask(type, relationId));
 	}
 
 	@Scheduled(fixedRate = 60000)
 	public void tick() {
 		try {
 			for (TimedTask task : timeSlots[currentIndex]) {
-				if (task.getType() == TimedTaskType.CHALLENGE_DECAY) {
-					service.decayChallenge(task.getChannelId(), task.getRelationId());
+				if (task.getType() == TimedTaskType.OPEN_CHALLENGE_DECAY) {
+					service.decayOpenChallenge(task.getRelationId());
 				}
 			}
 
