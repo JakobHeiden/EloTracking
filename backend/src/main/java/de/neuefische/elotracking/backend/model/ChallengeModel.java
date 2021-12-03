@@ -43,7 +43,7 @@ public class ChallengeModel {
         this.challengerId = challengerId;
         this.acceptorId = acceptorId;
         this.issuedWhen = new Date();
-        this.acceptedWhen = Optional.empty();
+        this.acceptedWhen = Optional.empty();//TODO wird das noch gebraucht?
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
         this.acceptorReported = ReportStatus.NOT_YET_REPORTED;
     }

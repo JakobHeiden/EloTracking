@@ -64,7 +64,11 @@ public class EloTrackingService {
 		challengeDao.save(challenge);
 	}
 
-	public void decayOpenChallenge(String challengeId) {//TODO? maybe include time in method signature
+	public void deleteChallenge(String id) {
+		challengeDao.deleteById(id);
+	}
+
+	public void timedDecayOpenChallenge(String challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
@@ -75,10 +79,10 @@ public class EloTrackingService {
 		if (maybeGame.isEmpty()) return;
 
 		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your open challenge towards <@%s> has expired after %s minutes",
-				challenge.getChallengerId(), challenge.getAcceptorId(), maybeGame.get().getOpenChallengeDecayTime()));
+				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
-	public void decayAcceptedChallenge(String challengeId) {
+	public void timedDecayAcceptedChallenge(String challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
@@ -87,12 +91,8 @@ public class EloTrackingService {
 		Optional<Game> maybeGame = findGameByChannelId(challenge.getChannelId());
 		if (maybeGame.isEmpty()) return;
 
-		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",
-				challenge.getChallengerId(), challenge.getAcceptorId(), maybeGame.get().getOpenChallengeDecayTime()));
-	}
-
-	public void deleteChallenge(String id) {
-		challengeDao.deleteById(id);
+		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",// TODO wochen, tage, etc
+				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
 	public List<ChallengeModel> findAllChallengesByAcceptorIdAndChannelId(String acceptorId, String channelId) {
@@ -115,6 +115,32 @@ public class EloTrackingService {
 	}
 
 	// Match
+	public void timedAutoResolveMatch(String challengeId, int time) {
+		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		if (maybeChallenge.isEmpty()) return;
+
+		ChallengeModel challenge = maybeChallenge.get();
+		boolean reportIsByChallenger = challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED;
+		ChallengeModel.ReportStatus report = reportIsByChallenger ? challenge.getChallengerReported() : challenge.getAcceptorReported();
+		String channelId = challenge.getChannelId();
+		String challengerId = challenge.getChallengerId();
+		String acceptorId = challenge.getAcceptorId();
+		String winnerId = report == ChallengeModel.ReportStatus.WIN ?
+				reportIsByChallenger ? challengerId : acceptorId
+				: reportIsByChallenger ? acceptorId : challengerId;
+		String loserId = winnerId.equals(challengerId) ? acceptorId : challengerId;
+
+		Match match = new Match(channelId, winnerId, loserId, false);
+		double[] resolvedRatings = updateRatings(match);
+		saveMatch(match);
+		deleteChallenge(challenge.getId());
+
+		bot.sendToChannel(channelId, String.format("This match has been auto-resolved because only one player has reported the match after %d minutes:\n" +
+						"<@%s> old rating %d, new rating %d. <@%s> old rating %d, new rating %d", time,
+				winnerId, (int) resolvedRatings[0], (int) resolvedRatings[2],
+				loserId, (int) resolvedRatings[1], (int) resolvedRatings[3]));
+	}
+
 	public void saveMatch(Match match) {
 		matchDao.save(match);
 	}
@@ -134,13 +160,11 @@ public class EloTrackingService {
 		Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
 		double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
-				match.isDraw() ? 0.5 : 1,
-				k);
+				match.isDraw() ? 0.5 : 1, k);
 		winner.setRating(ratings[2]);
 		loser.setRating(ratings[3]);
 		playerDao.save(winner);
 		playerDao.save(loser);
-		match.setHasUpdatedPlayerRatings(true);
 		matchDao.save(match);
 		return ratings;
 	}

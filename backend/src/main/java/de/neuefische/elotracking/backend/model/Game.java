@@ -20,12 +20,14 @@ public class Game {
     private String commandPrefix;
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
+    private int matchAutoResolveTime;
 
     public Game(String channelId, String name) {
         this.channelId = channelId;
         this.name = name;
         this.commandPrefix = "!";
-        this.openChallengeDecayTime = 120;
+        this.openChallengeDecayTime = 2 * 60;
         this.acceptedChallengeDecayTime = 7 * 24 * 60;
+        this.matchAutoResolveTime = 24 * 60;
     }
 }

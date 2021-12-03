@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
+@AllArgsConstructor// TODO kann das weg?
 @NoArgsConstructor
 @ToString
 @UseToStringForLogging
@@ -20,10 +20,18 @@ import java.util.UUID;
 public class Match {
     @Id
     private UUID id;
-    private String channel;
     private Date date;
+    private String channel;
     private String winner;
     private String loser;
     private boolean isDraw;
-    private boolean hasUpdatedPlayerRatings;
+
+    public Match(String channel, String winner, String loser, boolean isDraw) {
+        this.channel = channel;
+        this.winner = winner;
+        this.loser = loser;
+        this.isDraw = isDraw;
+        this.id = UUID.randomUUID();
+        this.date = new Date();
+    }
 }

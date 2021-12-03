@@ -19,6 +19,7 @@ public class Accept extends Command {
 
     Accept(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
         super(msg, service, bot, queue);
+        this.needsRegisteredChannel = true;
     }
 
     public static String getDescription() {

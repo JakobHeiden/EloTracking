@@ -5,6 +5,7 @@ import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskType;
 import discord4j.core.object.entity.Message;
 
 import java.util.Date;
@@ -60,29 +61,28 @@ public abstract class Report extends Command {
         processPossiblyInconsistentReporting();
         if (!canExecute) return;
 
-        processConsistentReporting();
+        processOneSidedOrConsistentReporting();
 
         //if only one player reported, send message and return
         if (challenge.getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
                 challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
+            queue.addTimedTask(TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(), challengeId);
             addBotReply("reported.");
             return;
+            // TODO! Setter commands f[r auto resolve und dings
         }
 
         //both players have reported consistently, so resolve the challenge into a match
         String winnerId = this.isWin ? reportingPlayerId : reportedOnPlayerId;
         String loserId = this.isWin ? reportedOnPlayerId : reportingPlayerId;
-        Match match = new Match(UUID.randomUUID(), channelId, new Date(), winnerId, loserId, false, false);
+        Match match = new Match(channelId, winnerId, loserId, false);
         double[] resolvedRatings = service.updateRatings(match);
-        match.setHasUpdatedPlayerRatings(true);
         service.saveMatch(match);
         service.deleteChallenge(challenge.getId());
 
-        String winnerMention = this.isWin ? msg.getAuthor().get().getMention() : msg.getUserMentionIds().iterator().next().asString();
-        String loserMention = this.isWin ? String.format("<@!%s>", msg.getUserMentionIds().iterator().next().asString()) : msg.getAuthor().get().getMention();
-        addBotReply(String.format("%s old rating %d, new rating %d. %s old rating %d, new rating %d",
-                winnerMention, (int) resolvedRatings[0], (int) resolvedRatings[2],
-                loserMention,  (int) resolvedRatings[1], (int) resolvedRatings[3]));
+        addBotReply(String.format("<@%s> old rating %d, new rating %d. <@%s> old rating %d, new rating %d",
+                winnerId, (int) resolvedRatings[0], (int) resolvedRatings[2],
+                loserId,  (int) resolvedRatings[1], (int) resolvedRatings[3]));
     }
 
     private void processPossiblyInconsistentReporting() {
@@ -101,7 +101,7 @@ public abstract class Report extends Command {
         }
     }
 
-    private void processConsistentReporting() {
+    private void processOneSidedOrConsistentReporting() {
         if (this.isChallengerReport) {
             challenge.setChallengerReported(this.isWin ? ChallengeModel.ReportStatus.WIN : ChallengeModel.ReportStatus.LOSS);
         } else {
