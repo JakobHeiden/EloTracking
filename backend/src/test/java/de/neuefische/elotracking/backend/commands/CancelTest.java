@@ -1,6 +1,10 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
+import de.neuefische.elotracking.backend.testfactories.GameTestFactory;
+import de.neuefische.elotracking.backend.testfactories.MessageTestFactory;
+import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
-import static de.neuefische.elotracking.backend.commands.SnowflakeTestFactory.*;
+import static de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

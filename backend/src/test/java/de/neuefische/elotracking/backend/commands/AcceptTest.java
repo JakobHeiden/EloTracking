@@ -1,6 +1,10 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
+import de.neuefische.elotracking.backend.testfactories.GameTestFactory;
+import de.neuefische.elotracking.backend.testfactories.MessageTestFactory;
+import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,7 +17,7 @@ import org.mockito.quality.Strictness;
 
 import java.util.List;
 
-import static de.neuefische.elotracking.backend.commands.SnowflakeTestFactory.*;
+import static de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -21,7 +25,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AcceptTest extends CommandTest {
 
-   private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
+    private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
 
     @BeforeEach
     void initService() {

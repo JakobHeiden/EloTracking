@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.commands;
+package de.neuefische.elotracking.backend.testfactories;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class MessageTestFactory {
+public class MessageTestFactory {
 
     public static Message createMock(String text, Snowflake author) {
         Message mock = mock(Message.class);
@@ -20,8 +20,6 @@ class MessageTestFactory {
         User authorUser = mock(User.class);
         when(authorUser.getId()).thenReturn(author);
         when(mock.getAuthor()).thenReturn(Optional.of(authorUser));
-
-        //when(mock.getContent()).thenReturn(text);
 
         when(mock.getChannelId()).thenReturn(Snowflake.of(SnowflakeTestFactory.CHANNEL_ID));
 

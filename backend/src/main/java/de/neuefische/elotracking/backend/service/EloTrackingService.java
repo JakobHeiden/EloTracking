@@ -131,8 +131,7 @@ public class EloTrackingService {
 		String loserId = winnerId.equals(challengerId) ? acceptorId : challengerId;
 
 		Match match = new Match(channelId, winnerId, loserId, false);
-		double[] resolvedRatings = updateRatings(match);
-		saveMatch(match);
+		double[] resolvedRatings = updateRatings(match);// TODO vllt umbauen
 		deleteChallenge(challenge.getId());
 
 		bot.sendToChannel(channelId, String.format("This match has been auto-resolved because only one player has reported the match after %d minutes:\n" +
