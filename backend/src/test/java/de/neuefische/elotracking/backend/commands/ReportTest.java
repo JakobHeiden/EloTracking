@@ -1,6 +1,10 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
+import de.neuefische.elotracking.backend.testfactories.GameTestFactory;
+import de.neuefische.elotracking.backend.testfactories.MessageTestFactory;
+import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 import discord4j.core.object.entity.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +21,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 
-import static de.neuefische.elotracking.backend.commands.SnowflakeTestFactory.*;
+import static de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory.*;
 
 // logic for WIN vs LOSS is simple enough and omitted
 @ExtendWith(MockitoExtension.class)

@@ -1,10 +1,11 @@
-package de.neuefische.elotracking.backend.commands;
+package de.neuefische.elotracking.backend.testfactories;
 
 import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 
 import java.util.Optional;
 
-class GameTestFactory {
+public class GameTestFactory {
 
     private static final String NAME = "TestGame";
 
