@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.commands.Command;
 import de.neuefische.elotracking.backend.commands.Unknown;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +32,9 @@ public class CommandFactoryConfiguration {
 		commandString = commandAbbreviationMapper.mapIfApplicable(commandString);
 		String commandClassName = commandString.substring(0, 1).toUpperCase() + commandString.substring(1);
 		try {
+			System.out.println(commandClassName);
 			return (Command) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
-					.getConstructor(Message.class, EloTrackingService.class, DiscordBotService.class)
+					.getConstructor(Message.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
 					.newInstance(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
 		} catch (Exception e) {//TODO
 			if (e.getClass().equals(ClassNotFoundException.class) || e.getClass().equals(NoSuchMethodException.class)) {
