@@ -10,7 +10,6 @@ import discord4j.core.object.entity.channel.TextChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -21,19 +20,15 @@ import javax.annotation.PostConstruct;
 public class DiscordBotService {
 
     private final GatewayDiscordClient client;
-    private final EloTrackingService service;//TODO kann weg?
-    @Value("${admin-id}")
     private String adminId;
     private PrivateChannel adminDm;
     @Getter
     private final String adminMentionAsString;
 
     @Autowired
-    public DiscordBotService(GatewayDiscordClient gatewayDiscordClient,
-                             EloTrackingService eloTrackingService,
-                             @Lazy CommandParser commandParser) {
+    public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service, @Lazy CommandParser commandParser) {
         this.client = gatewayDiscordClient;
-        this.service = eloTrackingService;
+        this.adminId = service.getPropertiesLoader().getAdminId();
 
         this.adminMentionAsString = String.format("<@%s>", adminId);
         log.info(System.getenv("DATABASE"));//TODO

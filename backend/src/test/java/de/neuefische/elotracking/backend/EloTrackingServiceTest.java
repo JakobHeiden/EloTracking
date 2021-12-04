@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend;
 
-import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
 import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.dao.MatchDao;
@@ -10,6 +9,7 @@ import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.model.Player;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

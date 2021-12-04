@@ -2,7 +2,6 @@ package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
-import de.neuefische.elotracking.backend.testfactories.GameTestFactory;
 import de.neuefische.elotracking.backend.testfactories.MessageTestFactory;
 import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import java.util.List;
 
@@ -22,14 +19,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class AcceptTest extends CommandTest {
 
     private List<ChallengeModel> challenges = ChallengeModelTestFactory.createList();
 
     @BeforeEach
     void initService() {
-        when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
         when(service.findAllChallengesByAcceptorIdAndChannelId(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
     }
 

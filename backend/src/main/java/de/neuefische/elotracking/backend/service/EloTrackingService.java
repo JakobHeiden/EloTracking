@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.service;
 
+import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.dao.MatchDao;
@@ -10,12 +11,16 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.model.Player;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -30,12 +35,15 @@ public class EloTrackingService {
 	private final MatchDao matchDao;
 	private final PlayerDao playerDao;
 	private final TimedTaskQueue timedTaskQueue;
+	@Getter
+	private ApplicationPropertiesLoader propertiesLoader;
 
 	@Autowired
-	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
+	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue, ApplicationPropertiesLoader propertiesLoader,
 							  GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
 		this.bot = discordBotService;
 		this.timedTaskQueue = timedTaskQueue;
+		this.propertiesLoader = propertiesLoader;
 		this.gameDao = gameDao;
 		this.challengeDao = challengeDao;
 		this.matchDao = matchDao;

@@ -5,23 +5,22 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
-import org.springframework.beans.factory.annotation.Value;
 
 public abstract class Settime extends Command {
 
-	@Value("${number-of-time-slots}")
 	protected int numberOfTimeSlots;
 	protected int time;
 
 	protected Settime(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		super(msg, service, bot, queue);
 		this.needsRegisteredChannel = true;
+		this.numberOfTimeSlots = service.getPropertiesLoader().getNumberOfTimeSlots();
 	}
 
 	protected boolean canExecute() {
 		if (!super.canExecute()) return false;
 
-		if (!msg.getContent().contains(" ")) {
+		if (msg.getContent().split(" ").length == 1) {
 			addBotReply("Please specify an integer");
 			return false;
 		}

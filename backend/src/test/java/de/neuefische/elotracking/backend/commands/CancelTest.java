@@ -2,7 +2,6 @@ package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
-import de.neuefische.elotracking.backend.testfactories.GameTestFactory;
 import de.neuefische.elotracking.backend.testfactories.MessageTestFactory;
 import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 import discord4j.common.util.Snowflake;
@@ -29,7 +28,6 @@ public class CancelTest extends CommandTest {
 
     @BeforeEach
     void initService() {
-        when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
         lenient().when(service.findAllChallengesByPlayerIdAndChannelId(ACCEPTOR_ID, CHANNEL_ID)).thenReturn(challenges);
         lenient().when(service.findAllChallengesByPlayerIdAndChannelId(CHALLENGER_ID, CHANNEL_ID)).thenReturn(challenges);
     }
