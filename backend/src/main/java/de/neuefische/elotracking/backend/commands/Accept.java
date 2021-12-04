@@ -42,7 +42,7 @@ public class Accept extends Command {
         if (!canExecute) return;
 
         service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
-        challenge.get().accept();// TODO doppelte akzeptierung behandeln; Optional?
+        challenge.get().setAccepted(true);// TODO Optional?
         queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY, game.getAcceptedChallengeDecayTime(), challenge.get().getId());
         service.saveChallenge(challenge.get());
         addBotReply(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
@@ -52,7 +52,7 @@ public class Accept extends Command {
     private Optional<ChallengeModel> inferRelevantChallenge(List<ChallengeModel> challenges) {
         challenges.removeIf(ChallengeModel::isAccepted);
         if (challenges.size() == 0) {
-            addBotReply("No open challenge present against you");
+            addBotReply("No open challenge present against you");// TODO acyeptierte challenges?
             canExecute = false;
             return Optional.empty();
         }

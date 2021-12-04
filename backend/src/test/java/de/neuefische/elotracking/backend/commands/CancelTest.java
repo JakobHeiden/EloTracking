@@ -105,7 +105,7 @@ public class CancelTest extends CommandTest {
     @DisplayName("An accepted challenge cancelled by one party should not call service")
     void acceptedChallengeOneCancel() {
         ChallengeModel challengeSpy = Mockito.spy(ChallengeModelTestFactory.create());
-        challengeSpy.accept();
+        challengeSpy.setAccepted(true);
         challenges.add(challengeSpy);
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
         command = new Cancel(msg, service, bot, queue);
@@ -120,7 +120,7 @@ public class CancelTest extends CommandTest {
     @DisplayName("An accepted challenge with both parties calling for cancel should call service")
     void acceptedChallengeBothCancel() {
         ChallengeModel challengeSpy = Mockito.spy(ChallengeModelTestFactory.create());
-        challengeSpy.accept();
+        challengeSpy.setAccepted(true);
         challenges.add(challengeSpy);
         Message msg = MessageTestFactory.createMock(String.format("!cancel @%s", ACCEPTOR_ID), CHALLENGER);
         command = new Cancel(msg, service, bot, queue);
