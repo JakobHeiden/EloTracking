@@ -2,8 +2,6 @@ package de.neuefische.elotracking.backend.timedtask;
 
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -14,17 +12,17 @@ import java.util.Set;
 @Component
 public class TimedTaskQueue {
 
-	@Value("${number-of-time-slots}")
 	private int numberOfTimeSlots;
 	private Set<TimedTask>[] timeSlots;
 	private int currentIndex;
-	@Autowired
 	private EloTrackingService service;
-	@Autowired
 	private DiscordBotService bot;
 
-	public TimedTaskQueue() {
-		currentIndex = 0;
+	public TimedTaskQueue(EloTrackingService service, DiscordBotService bot) {
+		this.service = service;
+		this.bot = bot;
+		this.currentIndex = 0;
+		this.numberOfTimeSlots = service.getPropertiesLoader().getNumberOfTimeSlots();
 	}
 
 	@PostConstruct

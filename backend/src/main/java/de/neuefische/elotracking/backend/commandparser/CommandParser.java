@@ -9,7 +9,6 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -20,7 +19,6 @@ import java.util.function.Function;
 @Component
 public class CommandParser {
 
-    @Value("${default-command-prefix}")
     private String defaultCommandPrefix;
     private final EloTrackingService service;
     private final DiscordBotService bot;
@@ -33,6 +31,7 @@ public class CommandParser {
         this.bot = bot;
         this.queue = queue;
         this.commandFactory = commandFactory;
+        this.defaultCommandPrefix = service.getPropertiesLoader().getDefaultCommandPrefix();
     }
 
     public boolean isCommand(Message msg) {

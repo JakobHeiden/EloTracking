@@ -1,9 +1,7 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.testfactories.ChallengeModelTestFactory;
-import de.neuefische.elotracking.backend.testfactories.GameTestFactory;
 import de.neuefische.elotracking.backend.testfactories.MessageTestFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,11 +12,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ChallengeTest extends CommandTest {
-
-	@BeforeEach
-	void initService() {
-		when(service.findGameByChannelId(CHANNEL_ID)).thenReturn(GameTestFactory.create());
-	}
 
 	@Test
 	void cantChallengeSelf() {

@@ -1,7 +1,6 @@
 package de.neuefische.elotracking.backend.testfactories;
 
 import de.neuefische.elotracking.backend.model.Game;
-import de.neuefische.elotracking.backend.testfactories.SnowflakeTestFactory;
 
 import java.util.Optional;
 

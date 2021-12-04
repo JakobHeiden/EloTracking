@@ -6,8 +6,6 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.Optional;
 // Bot replies are processed in the parser
 public abstract class Command {
 
-    @Value("${default-command-prefix}")
     protected String defaultCommandPrefix;
     protected EloTrackingService service;
     protected DiscordBotService bot;
@@ -27,9 +24,9 @@ public abstract class Command {
     protected Game game;
     @Getter
     private final List<String> botReplies;
-    protected boolean needsRegisteredChannel;
-    protected boolean needsMention;
-    protected boolean cantHaveTwoMentions;
+    protected boolean needsRegisteredChannel = false;
+    protected boolean needsMention = false;
+    protected boolean cantHaveTwoMentions = false;
 
     protected Command(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
         this.msg = msg;
@@ -38,10 +35,7 @@ public abstract class Command {
         this.queue = queue;
         this.channelId = msg.getChannelId().asString();
         this.botReplies = new LinkedList<String>();
-
-        this.needsRegisteredChannel = false;
-        this.needsMention = false;
-        this.cantHaveTwoMentions = false;
+        this.defaultCommandPrefix = service.getPropertiesLoader().getDefaultCommandPrefix();
     }
 
     public abstract void execute();

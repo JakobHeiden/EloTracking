@@ -15,13 +15,14 @@ import static org.mockito.Mockito.when;
 public class MessageTestFactory {
 
     public static Message createMock(String text, Snowflake author) {
-        Message mock = mock(Message.class);
 
         User authorUser = mock(User.class);
         when(authorUser.getId()).thenReturn(author);
-        when(mock.getAuthor()).thenReturn(Optional.of(authorUser));
 
+        Message mock = mock(Message.class);
+        when(mock.getAuthor()).thenReturn(Optional.of(authorUser));
         when(mock.getChannelId()).thenReturn(Snowflake.of(SnowflakeTestFactory.CHANNEL_ID));
+        when(mock.getContent()).thenReturn(text);
 
         String[] words = text.split(" ");
         Set<Snowflake> mentionIds = Arrays.stream(words)

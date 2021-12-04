@@ -9,7 +9,6 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.TextChannelEditSpec;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -18,11 +17,11 @@ import java.util.function.Consumer;
 @Slf4j
 public class Register extends Command {
 
-    @Value("${base-url}")
     private String baseUrl;
 
     public Register(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
         super(msg, service, bot, queue);
+        this.baseUrl = service.getPropertiesLoader().getBaseUrl();
     }
 
     public static String getDescription() {

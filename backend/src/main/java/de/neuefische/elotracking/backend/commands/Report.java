@@ -8,9 +8,7 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskType;
 import discord4j.core.object.entity.Message;
 
-import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
 
 public abstract class Report extends Command {
 
