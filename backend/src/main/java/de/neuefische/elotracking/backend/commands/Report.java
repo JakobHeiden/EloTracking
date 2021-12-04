@@ -4,8 +4,8 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
-import de.neuefische.elotracking.backend.timedtask.TimedTaskType;
 import discord4j.core.object.entity.Message;
 
 import java.util.Optional;
@@ -64,7 +64,7 @@ public abstract class Report extends Command {
         //if only one player reported, send message and return
         if (challenge.getChallengerReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED ||
                 challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED) {
-            queue.addTimedTask(TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(), challengeId);
+            queue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(), challengeId);
             addBotReply("reported.");
             return;
             // TODO! Setter commands f[r auto resolve und dings

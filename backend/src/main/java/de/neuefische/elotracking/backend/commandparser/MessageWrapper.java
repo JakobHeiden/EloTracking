@@ -5,5 +5,9 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 
-public record MessageWrapper(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+record MessageWrapper(
+		Message msg,
+		EloTrackingService service,
+		DiscordBotService bot,
+		TimedTaskQueue queue) {
 }

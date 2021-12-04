@@ -3,8 +3,8 @@ package de.neuefische.elotracking.backend.commands;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
-import de.neuefische.elotracking.backend.timedtask.TimedTaskType;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +40,7 @@ public class Challenge extends Command {
 
         service.addNewPlayerIfPlayerNotPresent(channelId, challengerId);
         ChallengeModel challenge = new ChallengeModel(channelId, challengerId, acceptorId);
-        queue.addTimedTask(TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), channelId);
+        queue.addTimedTask(TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), channelId);
         service.saveChallenge(challenge);
         addBotReply(String.format("Challenge issued. Your opponent can now %saccept", defaultCommandPrefix));
     }
