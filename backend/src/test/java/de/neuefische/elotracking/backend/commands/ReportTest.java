@@ -58,7 +58,7 @@ public class ReportTest extends CommandTest {
 	@MethodSource("challengeModelStream")
 	@DisplayName("If the other guy has not reported yet any result should get accepted")
 	void firstToChallenge(ChallengeModel challenge) {
-		challenge.accept();
+		challenge.setAccepted(true);
 		when(service.findChallenge(challenge.getId())).thenReturn(Optional.of(challenge));
 		String text = String.format("!win @%s", ACCEPTOR_ID);
 		Message msg = MessageTestFactory.createMock(text, CHALLENGER);
@@ -74,7 +74,7 @@ public class ReportTest extends CommandTest {
 	@MethodSource("challengeModelStream")
 	@DisplayName("If the other guy has already reported a conflicting result, that should be saved but no match should be generated")
 	void conflictingReports(ChallengeModel challenge) {
-		challenge.accept();
+		challenge.setAccepted(true);
 		challenge.setAcceptorReported(ChallengeModel.ReportStatus.WIN);
 		when(service.findChallenge(challenge.getId())).thenReturn(Optional.of(challenge));
 		String text = String.format("!win @%s", ACCEPTOR_ID);
@@ -91,7 +91,7 @@ public class ReportTest extends CommandTest {
 	@MethodSource("challengeModelStream")
 	@DisplayName("If the other guy has already reported a consistent result, that should be saved and a match should be generated")
 	void consistentReports(ChallengeModel challenge) {
-		challenge.accept();
+		challenge.setAccepted(true);
 		if (challenge.getChallengerId().equals(CHALLENGER_ID)) {
 			challenge.setAcceptorReported(ChallengeModel.ReportStatus.LOSS);
 		} else if (challenge.getChallengerId().equals(ACCEPTOR_ID)) {

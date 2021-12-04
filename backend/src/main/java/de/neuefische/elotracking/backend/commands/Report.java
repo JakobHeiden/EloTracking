@@ -50,7 +50,7 @@ public abstract class Report extends Command {
         }
 
         this.challenge = maybeChallenge.get();
-        if (challenge.getAcceptedWhen().isEmpty()) {
+        if (!challenge.isAccepted()) {
             addBotReply("This challenge has not been accepted yet and cannot be reported as a win");
             return;
         }

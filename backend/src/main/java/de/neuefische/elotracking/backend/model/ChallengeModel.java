@@ -30,8 +30,7 @@ public class ChallengeModel {
     private String channelId;
     private String challengerId;
     private String acceptorId;
-    private Date issuedWhen;
-    private Optional<Date> acceptedWhen;
+    private boolean isAccepted;
     private ReportStatus challengerReported;
     private ReportStatus acceptorReported;
     private boolean challengerCalledForCancel = false;
@@ -42,18 +41,9 @@ public class ChallengeModel {
         this.channelId = channelId;
         this.challengerId = challengerId;
         this.acceptorId = acceptorId;
-        this.issuedWhen = new Date();
-        this.acceptedWhen = Optional.empty();//TODO wird das noch gebraucht?
+        this.isAccepted = false;
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;
         this.acceptorReported = ReportStatus.NOT_YET_REPORTED;
-    }
-
-    public boolean isAccepted() {
-        return !acceptedWhen.isEmpty();
-    }
-
-    public void accept() {
-        acceptedWhen = Optional.of(new Date());
     }
 
     public void callForCancel(String playerId) {

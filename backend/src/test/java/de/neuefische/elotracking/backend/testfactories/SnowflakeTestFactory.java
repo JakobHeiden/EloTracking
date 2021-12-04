@@ -6,7 +6,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SnowflakeTestFactory {
 
-    public static final String CHANNEL_ID = "1";//TODO random mache?
+    // these cannot be random since @ValueSource needs these to be "a constant expression" - likely a reflection issue
+    public static final String CHANNEL_ID = "1";
     public static final String CHALLENGER_ID = "2";
     public static final String ACCEPTOR_ID = "3";
     public static final String ADMIN_ID = "4";

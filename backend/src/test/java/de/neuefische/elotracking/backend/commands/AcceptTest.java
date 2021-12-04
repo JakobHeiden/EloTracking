@@ -30,9 +30,22 @@ class AcceptTest extends CommandTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"!accept @%s", "!accept"})
-    @DisplayName("No open challenge should not call service")
-    void noOpenChallenge(String text) {
-        text = String.format(text, CHALLENGER_ID);
+    void noChallenge(String rawText) {
+        String text = String.format(rawText, CHALLENGER_ID);
+        msg = MessageTestFactory.createMock(text, ACCEPTOR);
+        command = new Accept(msg, service, bot, queue);
+
+        command.execute();
+
+        verify(service, never()).addNewPlayerIfPlayerNotPresent(any(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"!accept @%s", "!accept"})
+    void noOpenChallenge(String rawText) {
+        String text = String.format(rawText, CHALLENGER_ID);
+        ChallengeModel acceptedChallenge = ChallengeModelTestFactory.create();
+        acceptedChallenge.setAccepted(true);
         msg = MessageTestFactory.createMock(text, ACCEPTOR);
         command = new Accept(msg, service, bot, queue);
 
@@ -42,7 +55,7 @@ class AcceptTest extends CommandTest {
     }
 
     @Test
-    @DisplayName("Mention present but open challenge from a different player should not call service")
+    @DisplayName("Mention present but open challenge from a different player")
     void openChallengeFromDifferentPlayer() {
         String text = String.format("!accept @%s", CHALLENGER_ID);
         ChallengeModel challengeFromDifferentPlayer = ChallengeModelTestFactory.create();
