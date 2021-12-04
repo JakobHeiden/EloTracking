@@ -33,7 +33,7 @@ public class TimedTaskQueue {
 		}
 	}
 
-	public void addTimedTask(TimedTaskType type, int time, String relationId) {
+	public void addTimedTask(TimedTask.TimedTaskType type, int time, String relationId) {
 		timeSlots[(currentIndex + time) % numberOfTimeSlots]
 				.add(new TimedTask(type, time, relationId));
 	}
@@ -42,9 +42,9 @@ public class TimedTaskQueue {
 	public void tick() {
 		try {
 			for (TimedTask task : timeSlots[currentIndex]) {
-				String id = task.getRelationId();
-				int time = task.getTime();
-				switch (task.getType()) {
+				String id = task.relationId();
+				int time = task.time();
+				switch (task.type()) {
 					case OPEN_CHALLENGE_DECAY:
 						service.timedDecayOpenChallenge(id, time);
 						break;

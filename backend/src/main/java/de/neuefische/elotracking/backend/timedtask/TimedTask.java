@@ -1,15 +1,13 @@
 package de.neuefische.elotracking.backend.timedtask;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+public record TimedTask (
+		TimedTaskType type,
+		int time,
+		String relationId) {
 
-@AllArgsConstructor
-public class TimedTask {//TODO umbauen in record?
-
-	@Getter
-	private TimedTaskType type;
-	@Getter
-	private int time;
-	@Getter
-	private String relationId;
+	public enum TimedTaskType {
+		OPEN_CHALLENGE_DECAY,
+		ACCEPTED_CHALLENGE_DECAY,
+		MATCH_AUTO_RESOLVE
+	}
 }
