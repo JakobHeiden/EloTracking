@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 // Subclasses must start with a capital letter and have no other capital letters to be recognized by the parser
+// Bot replies are processed in the parser
 public abstract class Command {
 
     @Value("${default-command-prefix}")

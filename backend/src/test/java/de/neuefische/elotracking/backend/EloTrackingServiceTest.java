@@ -33,7 +33,7 @@ public class EloTrackingServiceTest {
 	@Mock private DiscordBotService bot;
 	@Mock private TimedTaskQueue queue;
 	@Mock private GameDao gameDao;
-	@Mock ChallengeDao challengeDao;
+	@Mock private ChallengeDao challengeDao;
 	@Mock private MatchDao matchDao;
 	@Mock private PlayerDao playerDao;
 	@InjectMocks
@@ -78,5 +78,4 @@ public class EloTrackingServiceTest {
 		verify(bot).sendToChannel(any(), text.capture());
 		System.out.println(text.getValue());
 	}
-
 }
