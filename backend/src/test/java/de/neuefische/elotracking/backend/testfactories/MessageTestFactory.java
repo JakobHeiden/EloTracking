@@ -5,8 +5,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.mock;
@@ -25,11 +25,11 @@ public class MessageTestFactory {
         when(mock.getContent()).thenReturn(text);
 
         String[] words = text.split(" ");
-        Set<Snowflake> mentionIds = Arrays.stream(words)
+        List<Snowflake> mentionIds = Arrays.stream(words)
                 .filter(word -> word.startsWith("@"))// TODO hier fehlt <>
                 .map(word -> word.substring(1))
                 .map(word -> Snowflake.of(word))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         when(mock.getUserMentionIds()).thenReturn(mentionIds);
 
         return mock;

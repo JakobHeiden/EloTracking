@@ -7,12 +7,10 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.TextChannelEditSpec;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Slf4j
 public class Register extends Command {
@@ -52,10 +50,8 @@ public class Register extends Command {
         addBotReply(String.format(String.format("New game created. You can now %schallenge another player", defaultCommandPrefix)));
 
         //update channel description to include the new leaderboard URL
-        Consumer<TextChannelEditSpec> editConsumer =
-                textChannelEditSpec -> textChannelEditSpec.setTopic(
-                        String.format("Leaderboard: http://%s/%s", baseUrl, this.channelId));
-        ((TextChannel) channelMono.block()).edit(editConsumer).subscribe();
+        ((TextChannel) channelMono.block()).edit()
+                .withTopic(String.format("Leaderboard: http://%s/%s", baseUrl, this.channelId)).subscribe();
         addBotReply("I updated the channel description.");
     }
 }
