@@ -33,7 +33,7 @@ public class Register extends Command {
             addBotReply("needs name");
             canExecute = false;
         }
-        if (nameOfNewGame.equals("NULL")) {
+        if (nameOfNewGame.equals("NULL") || nameOfNewGame.equals("unregistered")) {
             addBotReply("Invalid name");
             canExecute = false;
         }

@@ -15,4 +15,6 @@ public class ApplicationPropertiesLoader {
 	private String defaultCommandPrefix;
 	private String baseUrl;
 	private int numberOfTimeSlots;
+	private String TestBotChallengerId;
+	private String TestBotAcceptorId;
 }

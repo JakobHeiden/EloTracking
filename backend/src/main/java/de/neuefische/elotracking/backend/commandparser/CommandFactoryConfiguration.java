@@ -32,7 +32,6 @@ public class CommandFactoryConfiguration {
 		commandString = commandAbbreviationMapper.mapIfApplicable(commandString);
 		String commandClassName = commandString.substring(0, 1).toUpperCase() + commandString.substring(1);
 		try {
-			System.out.println(commandClassName);
 			return (Command) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
 					.getConstructor(Message.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
 					.newInstance(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
