@@ -20,7 +20,9 @@ public class GatewayDiscordClientConfiguration {
                 .login()
                 .block();
 
-        client.getEventDispatcher().on(ReadyEvent.class)
+        //DiscordClient.create("token).gateway().setEnabledIntents().login() TODO
+
+                client.getEventDispatcher().on(ReadyEvent.class)
                 .subscribe(event -> {
                     User self = event.getSelf();
                     log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());

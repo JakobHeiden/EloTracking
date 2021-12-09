@@ -35,7 +35,7 @@ public class DiscordBotService {
 
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> msgEvent.getMessage())
-                .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))
+                .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))// TODO! testbot ausnahme
                 .filter(commandParser::isCommand)
                 .subscribe(commandParser::processCommand);
     }

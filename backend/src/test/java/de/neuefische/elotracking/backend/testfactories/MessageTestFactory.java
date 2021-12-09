@@ -26,7 +26,7 @@ public class MessageTestFactory {
 
         String[] words = text.split(" ");
         Set<Snowflake> mentionIds = Arrays.stream(words)
-                .filter(word -> word.startsWith("@"))
+                .filter(word -> word.startsWith("@"))// TODO hier fehlt <>
                 .map(word -> word.substring(1))
                 .map(word -> Snowflake.of(word))
                 .collect(Collectors.toSet());
