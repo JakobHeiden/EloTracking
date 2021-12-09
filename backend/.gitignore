@@ -27,8 +27,3 @@ build/
 
 ### VS Code ###
 .vscode/
-
-### my own stuff
-/bin/
-backend.iml
-

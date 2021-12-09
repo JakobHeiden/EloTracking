@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/corde/schema/corde.schema.json",
+  "botPrefix": "!",
+  "botTestId": "612578637836845057",
+  "channelId": "917415887043170354",
+  "cordeBotToken": "Njk3MTA2NjE4NDI0NDkyMDM0.XoydIQ.9VdegnQZ2T-fx2Ubcxp2j-OzDcc",
+  "guildId": "612347065762054165",
+  "testMatches": ["./test/**"],
+  "botToken": "NjEyNTc4NjM3ODM2ODQ1MDU3.XVkaUA.ozLuViBFTNd37ooCCB7ibHYxqtI",
+  "project": "",
+  "timeout": 5000,
+  "exitOnFileReadingError": true,
+  "extensions": [".js", ".ts"],
+  "modulePathIgnorePatterns": ["(?:^|/)node_modules/"],
+  "rootDir": ""
+}
