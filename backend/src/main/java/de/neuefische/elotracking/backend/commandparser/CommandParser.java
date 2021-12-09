@@ -47,7 +47,7 @@ public class CommandParser {
                 necessaryPrefix = defaultCommandPrefix;
             }
             if (msg.getContent().startsWith(necessaryPrefix)) {
-                log.debug(String.format("Channel %s : %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "NULL"));
+                log.debug(String.format("Channel %s : Game %s", msg.getChannelId().asString(), game.isPresent() ? game.get().getName() : "unregistered"));
                 return true;
             }
 

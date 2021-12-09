@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.function.Function;
 
 @Slf4j
 @Component
@@ -29,13 +30,15 @@ public class DiscordBotService {
     public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service, @Lazy CommandParser commandParser) {
         this.client = gatewayDiscordClient;
         this.adminId = service.getPropertiesLoader().getAdminId();
-
         this.adminMentionAsString = String.format("<@%s>", adminId);
         log.info(System.getenv("DATABASE"));//TODO
 
+        Function<User, Boolean> isTestBotOrNotBot = user -> !user.isBot() ||
+                        user.getId().asString().equals(service.getPropertiesLoader().getTestBotChallengerId()) ||
+                        user.getId().asString().equals(service.getPropertiesLoader().getTestBotAcceptorId());
         client.getEventDispatcher().on(MessageCreateEvent.class)
                 .map(msgEvent -> msgEvent.getMessage())
-                .filter(msg -> msg.getAuthor().map(user -> !user.isBot()).orElse(false))// TODO! testbot ausnahme
+                .filter(msg -> msg.getAuthor().map(isTestBotOrNotBot).orElse(false))
                 .filter(commandParser::isCommand)
                 .subscribe(commandParser::processCommand);
     }
