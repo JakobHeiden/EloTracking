@@ -1,11 +1,13 @@
-package de.neuefische.elotracking.backend.commandparser;
+package de.neuefische.elotracking.backend.configuration;
 
 import de.neuefische.elotracking.backend.configuration.CommandAbbreviationsLoader;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CommandAbbreviationMapper {
 
@@ -19,7 +21,9 @@ public class CommandAbbreviationMapper {
 
     public String mapIfApplicable(String in) {
         if (mappings.containsKey(in)) {
-            return mappings.get(in);
+            String out = mappings.get(in);
+            log.trace(String.format("map %s to %s", in, out));
+            return out;
         } else {
             return in;
         }

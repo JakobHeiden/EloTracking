@@ -23,7 +23,7 @@ public abstract class Report extends Command {
     protected Report(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, ChallengeModel.ReportStatus reportStatus) {
         super(msg, service, bot, queue);
         this.needsRegisteredChannel = true;
-        this.needsMention = true;
+        this.needsMention = true;// TODO sollte im regelfall auch ohne mention gehen
         this.isWin = (reportStatus == ChallengeModel.ReportStatus.WIN);
     }
 
