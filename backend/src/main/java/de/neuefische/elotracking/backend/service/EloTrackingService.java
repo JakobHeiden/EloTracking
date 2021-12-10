@@ -48,6 +48,18 @@ public class EloTrackingService {
 		this.challengeDao = challengeDao;
 		this.matchDao = matchDao;
 		this.playerDao = playerDao;
+		if (propertiesLoader.isDeleteDataOnStartup()
+				&& !propertiesLoader.getSpringDataMongodbDatabase().equals("deploy")) {// make extra sure deploy does never get deleted
+			deleteAllData();
+		}
+	}
+
+	private void deleteAllData() {
+		log.info("Deleting all data...");
+		gameDao.deleteAll();
+		challengeDao.deleteAll();
+		matchDao.deleteAll();
+		playerDao.deleteAll();
 	}
 
 	// Game

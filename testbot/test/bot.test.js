@@ -5,5 +5,5 @@ const { group, test, command, beforeStart, afterAll, expect } = require("corde")
 group("main commands", () => {
   test("hello command should be unknown'", () => {
     expect("hello").toReturn("Unknown Command hello");
-  });
+  });// TODO! was ist mit test database?
 });
