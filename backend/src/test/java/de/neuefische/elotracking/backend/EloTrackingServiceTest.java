@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend;
 
+import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
 import de.neuefische.elotracking.backend.dao.MatchDao;
@@ -36,6 +37,7 @@ public class EloTrackingServiceTest {
 	@Mock private ChallengeDao challengeDao;
 	@Mock private MatchDao matchDao;
 	@Mock private PlayerDao playerDao;
+	@Mock private ApplicationPropertiesLoader propertiesLoader;
 	@InjectMocks
 	private EloTrackingService service;
 
