@@ -26,12 +26,10 @@ public class DiscordBotService {
     @Getter
     private final String adminMentionAsString;
 
-    @Autowired
     public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service, @Lazy CommandParser commandParser) {
         this.client = gatewayDiscordClient;
         this.adminId = service.getPropertiesLoader().getAdminId();
         this.adminMentionAsString = String.format("<@%s>", adminId);
-        log.info(System.getenv("DATABASE"));//TODO
 
         Function<User, Boolean> isTestBotOrNotBot = user -> !user.isBot() ||
                         user.getId().asString().equals(service.getPropertiesLoader().getTestBotChallengerId()) ||
