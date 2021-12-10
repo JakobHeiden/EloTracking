@@ -17,7 +17,7 @@ public class Accept extends Command {
 
     private boolean canExecute = true;
 
-    Accept(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+    public Accept(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
         super(msg, service, bot, queue);
         this.needsRegisteredChannel = true;
     }
