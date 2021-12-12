@@ -8,9 +8,6 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-import java.util.Optional;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,7 +24,7 @@ public class ChallengeModel {
 
     @Id
     private String id;
-    private String channelId;
+    private String guildId;
     private String challengerId;
     private String acceptorId;
     private boolean isAccepted;
@@ -36,9 +33,9 @@ public class ChallengeModel {
     private boolean challengerCalledForCancel = false;
     private boolean acceptorCalledForCancel = false;
 
-    public ChallengeModel(String channelId, String challengerId, String acceptorId) {
-        this.id = generateId(channelId, challengerId, acceptorId);
-        this.channelId = channelId;
+    public ChallengeModel(String guildId, String challengerId, String acceptorId) {
+        this.id = generateId(guildId, challengerId, acceptorId);
+        this.guildId = guildId;
         this.challengerId = challengerId;
         this.acceptorId = acceptorId;
         this.isAccepted = false;
@@ -68,18 +65,18 @@ public class ChallengeModel {
                 String.format("%s-%s-%s", channelId, acceptorId, challengerId);
     }
     
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
-        this.id = generateId(channelId, this.challengerId, this.acceptorId);
+    public void setGuildId(String guildId) {// TODO kann weg?
+        this.guildId = guildId;
+        this.id = generateId(guildId, this.challengerId, this.acceptorId);
     }
     
     public void setChallengerId(String challengerId) {
         this.challengerId = challengerId;
-        this.id = generateId(channelId, this.challengerId, this.acceptorId);
+        this.id = generateId(guildId, this.challengerId, this.acceptorId);
     }
 
     public void setAcceptorId(String acceptorId) {
         this.acceptorId = acceptorId;
-        this.id = generateId(channelId, this.challengerId, this.acceptorId);
+        this.id = generateId(guildId, this.challengerId, this.acceptorId);
     }
 }
