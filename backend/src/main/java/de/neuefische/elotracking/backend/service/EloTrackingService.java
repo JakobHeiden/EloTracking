@@ -13,7 +13,6 @@ import de.neuefische.elotracking.backend.model.Player;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -94,10 +93,10 @@ public class EloTrackingService {
 		if (challenge.isAccepted()) return;
 
 		deleteChallenge(challengeId);
-		Optional<Game> maybeGame = findGameByChannelId(challenge.getChannelId());
+		Optional<Game> maybeGame = findGameByChannelId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your open challenge towards <@%s> has expired after %s minutes",
+		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your open challenge towards <@%s> has expired after %s minutes",
 				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
@@ -107,17 +106,17 @@ public class EloTrackingService {
 
 		ChallengeModel challenge = maybeChallenge.get();
 		deleteChallenge(challengeId);
-		Optional<Game> maybeGame = findGameByChannelId(challenge.getChannelId());
+		Optional<Game> maybeGame = findGameByChannelId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		bot.sendToChannel(challenge.getChannelId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",// TODO wochen, tage, etc
+		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",// TODO wochen, tage, etc
 				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
 	public List<ChallengeModel> findAllChallengesByAcceptorIdAndChannelId(String acceptorId, String channelId) {
 		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
 		List<ChallengeModel> filteredByChannel = allChallenges.stream().
-				filter(challenge -> challenge.getChannelId().equals(channelId))
+				filter(challenge -> challenge.getGuildId().equals(channelId))
 				.collect(Collectors.toList());
 		return filteredByChannel;
 	}
@@ -128,7 +127,7 @@ public class EloTrackingService {
 		allChallengesForPlayer.addAll(challengeDao.findAllByAcceptorId(playerId));
 
 		List<ChallengeModel> filteredByChannel = allChallengesForPlayer.stream().
-				filter(challenge -> challenge.getChannelId().equals(channelId))
+				filter(challenge -> challenge.getGuildId().equals(channelId))
 				.collect(Collectors.toList());
 		return filteredByChannel;
 	}
@@ -141,7 +140,7 @@ public class EloTrackingService {
 		ChallengeModel challenge = maybeChallenge.get();
 		boolean reportIsByChallenger = challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED;
 		ChallengeModel.ReportStatus report = reportIsByChallenger ? challenge.getChallengerReported() : challenge.getAcceptorReported();
-		String channelId = challenge.getChannelId();
+		String channelId = challenge.getGuildId();
 		String challengerId = challenge.getChallengerId();
 		String acceptorId = challenge.getAcceptorId();
 		String winnerId = report == ChallengeModel.ReportStatus.WIN ?

@@ -9,5 +9,5 @@ record MessageWrapper(
 		Message msg,
 		EloTrackingService service,
 		DiscordBotService bot,
-		TimedTaskQueue queue) {
-}
+		TimedTaskQueue queue)
+{}

@@ -2,6 +2,7 @@ package de.neuefische.elotracking.backend.timedtask;
 
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ public class TimedTaskQueue {
 	private EloTrackingService service;
 	private DiscordBotService bot;
 
-	public TimedTaskQueue(EloTrackingService service, DiscordBotService bot) {
+	public TimedTaskQueue(EloTrackingService service, @Lazy DiscordBotService bot) {
 		this.service = service;
 		this.bot = bot;
 		this.currentIndex = 0;
