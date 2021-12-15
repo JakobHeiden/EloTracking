@@ -33,12 +33,13 @@ public class Challenge extends Command {// TODO! struktur sinnvoll? -> test migr
         } else if (event instanceof UserInteractionEvent) {
             acceptorId = ((UserInteractionEvent) event).getTargetId().asLong();
         }
+        log.warn(String.valueOf(acceptorId));
 
         if (challengerId == acceptorId) {
             addBotReply("You cannot challenge yourself");// TODO anders ausschliessen?
             canExecute = false;
         }
-        if (service.challengeExistsById(1L)) {// TODO!
+        if (service.challengeExistsByParticipants(guildId, challengerId, acceptorId)) {
             addBotReply("challenge already exists");
             canExecute = false;
         }

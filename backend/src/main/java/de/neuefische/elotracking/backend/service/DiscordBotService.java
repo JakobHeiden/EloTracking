@@ -89,9 +89,7 @@ public class DiscordBotService {
         applicationService.createGuildApplicationCommand(applicationId, entenwieseId, challengeUserCommandRequest).subscribe();
 
         client.on(ApplicationCommandInteractionEvent.class, event -> {
-            log.warn(slashCommandFactory.toString());
             Command command = slashCommandFactory.apply(new EventWrapper(event, service, this, this.queue));
-            log.warn(command.toString());
             command.execute();
             Mono returnValue = null;
             for (String reply : command.getBotReplies()) {
@@ -133,7 +131,7 @@ public class DiscordBotService {
         channel.createMessage(text).subscribe();
     }
 
-    public Mono<Message> sendToUser(long userId, String text) {
+    public Mono<Message> sendToUser(long userId, String text) {// TODO bot ausschliessen?
         return (Mono<Message>) client.getUserById(Snowflake.of(userId)).block()
                 .getPrivateChannel().block()
                 .createMessage(text);

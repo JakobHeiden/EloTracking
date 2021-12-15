@@ -3,6 +3,7 @@ package de.neuefische.elotracking.backend.logging;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,19 +17,28 @@ import java.util.StringJoiner;
 @Component
 public class LoggingAspect {
 
-    @AfterReturning(pointcut = "execution(public * *(..)) "
-            + "&& within(de.neuefische..*) "
-            + "&& (@target(org.springframework.stereotype.Service) || @target(org.springframework.stereotype.Repository))",
-            returning = "returnValue")
-    public void onFunctionCall(JoinPoint joinpoint, Object returnValue) {
-        Logger log = LoggerFactory.getLogger(joinpoint.getSignature().getDeclaringType());
-        log.trace(String.format("%s(%s) => %s",
-                joinpoint.getSignature().getName(),
-                formatParameters(joinpoint),
+    @Before("execution(public * *(..)) && within(de.neuefische..*)")
+    public void onFunctionCall(JoinPoint joinPoint) {
+        Logger log = LoggerFactory.getLogger(joinPoint.getSignature().getDeclaringType());
+        log.trace(String.format("call: %s(%s)",
+                joinPoint.getSignature().getName(),
+                formatParameters(joinPoint)));
+    }
+
+    @AfterReturning(pointcut = "execution(public * *(..)) && within(de.neuefische..*)", returning = "returnValue")
+    public void onFunctionReturn(JoinPoint joinPoint, Object returnValue) {
+        Logger log = LoggerFactory.getLogger(joinPoint.getSignature().getDeclaringType());
+        log.trace(String.format("return: %s(%s) => %s",
+                joinPoint.getSignature().getName(),
+                formatParameters(joinPoint),
                 getStringRepresentation(returnValue)));
     }
 
     private static String formatParameters(JoinPoint joinPoint) {
+        if (joinPoint.getSignature().toString().contains("Function")) {
+            return "";// hack to circumvent crashes in relation to CommandFactoryConfiguration.commandFactory
+        }             // I have no idea why or how.
+
         String[] paramNames = ((MethodSignature) joinPoint.getSignature()).getParameterNames();
         Object[] paramValues = joinPoint.getArgs();
         StringJoiner joiner = new StringJoiner(", ");
@@ -39,7 +49,7 @@ public class LoggingAspect {
     }
 
     private static String getStringRepresentation(Object value) {
-        if (value == null)
+        if (value == null)// TODO void
             return "NULL";
 
         if (value instanceof Optional) {

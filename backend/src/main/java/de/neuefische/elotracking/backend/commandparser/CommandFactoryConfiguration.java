@@ -1,7 +1,6 @@
 package de.neuefische.elotracking.backend.commandparser;
 
 import de.neuefische.elotracking.backend.commands.Command;
-import de.neuefische.elotracking.backend.commands.Unknown;
 import de.neuefische.elotracking.backend.configuration.CommandAbbreviationMapper;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -47,7 +46,7 @@ public class CommandFactoryConfiguration {
 					.newInstance(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
 		} catch (Exception e) {//TODO
 			if (e.getClass().equals(ClassNotFoundException.class)) {
-				return new Unknown(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
+				return null;//new Unknown(msg, msgWrapper.service(), msgWrapper.bot(), msgWrapper.queue());
 			} else {
 				e.printStackTrace();//TODO
 				return null;
@@ -63,7 +62,7 @@ public class CommandFactoryConfiguration {
 		commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
 		log.trace("commandString = " + commandClassName);
 		try {
-			return (Command) Class.forName("de.neuefische.elotracking.backend.commands.Slash" + commandClassName)
+			return (Command) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
 					.getConstructor(ApplicationCommandInteractionEvent.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
 					.newInstance(event, eventWrapper.service(), eventWrapper.bot(), eventWrapper.queue());
 		} catch (Exception e) {
