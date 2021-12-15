@@ -70,6 +70,10 @@ public class EloTrackingService {
 	}
 
 	// Challenge
+	public boolean challengeExistsByParticipants(long guildId, long id1, long id2) {
+		return false;// TODO!
+	}
+
 	public boolean challengeExistsById(long id) {
 		return challengeDao.existsById(id);
 	}

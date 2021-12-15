@@ -21,12 +21,12 @@ public class Controller {
     }
 
     @GetMapping("rankings/{channelId}")
-    public List<PlayerInRankingsDto> getRankings(@PathVariable String channelId) {
+    public List<PlayerInRankingsDto> getRankings(@PathVariable long channelId) {
         return service.getRankings(channelId);
     }
 
     @GetMapping("gamedata/{channelId}")
-    public Game getGame(@PathVariable String channelId) {
+    public Game getGame(@PathVariable long channelId) {
         return service.findGameByChannelId(channelId).get();
     }
 }

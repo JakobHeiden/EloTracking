@@ -28,11 +28,11 @@ public class Accept extends Command {
     public void execute() {
         if (!super.canExecute()) return;
 
-        String acceptorId = event.getInteraction().getUser().getId().asString();
+        long acceptorId = event.getInteraction().getUser().getId().asLong();
         List<ChallengeModel> challenges = service.findAllChallengesByAcceptorIdAndChannelId(acceptorId, guildId);
-        String challengerId = null;
+        long challengerId = 0L;
         if (event instanceof ChatInputInteractionEvent) {
-            challengerId = ((ChatInputInteractionEvent) event).getOption("player").get().getValue().get().asString();
+            challengerId = ((ChatInputInteractionEvent) event).getOption("player").get().getValue().get().asLong();
         } else if (event instanceof MessageInteractionEvent) {
         }
 
@@ -65,9 +65,9 @@ public class Accept extends Command {
         return Optional.of(challenges.get(0));
     }
 
-    private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, String challengerId) {
+    private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, long challengerId) {
         Optional<ChallengeModel> challenge = challenges.stream().
-                filter(chlng -> chlng.getChallengerId().equals(challengerId))
+                filter(chlng -> chlng.getChallengerId() == challengerId)
                 .findAny();
 
         if (challenge.isEmpty()) {// TODO evtl weg

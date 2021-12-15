@@ -40,9 +40,9 @@ public class CommandParser {
             if (msg.getContent().length() < 2) return false;
 
             String necessaryPrefix;
-            Optional<Game> game = service.findGameByChannelId(msg.getChannelId().asString());
+            Optional<Game> game = null;//service.findGameByChannelId(msg.getChannelId().asString());
             if (game.isPresent()) {
-                necessaryPrefix = game.get().getCommandPrefix();
+                necessaryPrefix = "";//game.get().getCommandPrefix();
             } else {
                 necessaryPrefix = defaultCommandPrefix;
             }
