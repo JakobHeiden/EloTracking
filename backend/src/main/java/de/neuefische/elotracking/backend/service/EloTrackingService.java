@@ -61,7 +61,7 @@ public class EloTrackingService {
 	}
 
 	// Game
-	public Optional<Game> findGameByChannelId(String channelId) {
+	public Optional<Game> findGameByChannelId(long channelId) {
 		return gameDao.findById(channelId);
 	}
 
@@ -70,11 +70,11 @@ public class EloTrackingService {
 	}
 
 	// Challenge
-	public boolean challengeExistsById(String id) {
+	public boolean challengeExistsById(long id) {
 		return challengeDao.existsById(id);
 	}
 
-	public Optional<ChallengeModel> findChallenge(String challengeId) {
+	public Optional<ChallengeModel> findChallenge(long challengeId) {
 		return challengeDao.findById(challengeId);
 	}
 
@@ -82,11 +82,11 @@ public class EloTrackingService {
 		challengeDao.save(challenge);
 	}
 
-	public void deleteChallenge(String id) {
+	public void deleteChallenge(long id) {
 		challengeDao.deleteById(id);
 	}
 
-	public void timedDecayOpenChallenge(String challengeId, int time) {
+	public void timedDecayOpenChallenge(long challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
@@ -100,7 +100,7 @@ public class EloTrackingService {
 				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
-	public void timedDecayAcceptedChallenge(String challengeId, int time) {
+	public void timedDecayAcceptedChallenge(long challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
@@ -113,44 +113,44 @@ public class EloTrackingService {
 				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
-	public List<ChallengeModel> findAllChallengesByAcceptorIdAndChannelId(String acceptorId, String channelId) {
+	public List<ChallengeModel> findAllChallengesByAcceptorIdAndChannelId(long acceptorId, long channelId) {
 		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
 		List<ChallengeModel> filteredByChannel = allChallenges.stream().
-				filter(challenge -> challenge.getGuildId().equals(channelId))
+				filter(challenge -> challenge.getGuildId() == channelId)
 				.collect(Collectors.toList());
 		return filteredByChannel;
 	}
 
-	public List<ChallengeModel> findAllChallengesByPlayerIdAndChannelId(String playerId, String channelId) {
+	public List<ChallengeModel> findAllChallengesByPlayerIdAndChannelId(long playerId, long channelId) {
 		List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
 		allChallengesForPlayer.addAll(challengeDao.findAllByChallengerId(playerId));
 		allChallengesForPlayer.addAll(challengeDao.findAllByAcceptorId(playerId));
 
 		List<ChallengeModel> filteredByChannel = allChallengesForPlayer.stream().
-				filter(challenge -> challenge.getGuildId().equals(channelId))
+				filter(challenge -> challenge.getGuildId() == channelId)
 				.collect(Collectors.toList());
 		return filteredByChannel;
 	}
 
 	// Match
-	public void timedAutoResolveMatch(String challengeId, int time) {
+	public void timedAutoResolveMatch(long challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
 		boolean reportIsByChallenger = challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED;
 		ChallengeModel.ReportStatus report = reportIsByChallenger ? challenge.getChallengerReported() : challenge.getAcceptorReported();
-		String channelId = challenge.getGuildId();
-		String challengerId = challenge.getChallengerId();
-		String acceptorId = challenge.getAcceptorId();
-		String winnerId = report == ChallengeModel.ReportStatus.WIN ?
+		long channelId = challenge.getGuildId();
+		long challengerId = challenge.getChallengerId();
+		long acceptorId = challenge.getAcceptorId();
+		long winnerId = report == ChallengeModel.ReportStatus.WIN ?
 				reportIsByChallenger ? challengerId : acceptorId
 				: reportIsByChallenger ? acceptorId : challengerId;
-		String loserId = winnerId.equals(challengerId) ? acceptorId : challengerId;
+		long loserId = winnerId == challengerId ? acceptorId : challengerId;
 
 		Match match = new Match(channelId, winnerId, loserId, false);
 		double[] resolvedRatings = updateRatings(match);// TODO vllt umbauen
-		deleteChallenge(challenge.getId());
+		deleteChallenge(challenge.getMessageId());
 
 		bot.sendToChannel(channelId, String.format("This match has been auto-resolved because only one player has reported the match after %d minutes:\n" +
 						"<@%s> old rating %d, new rating %d. <@%s> old rating %d, new rating %d", time,
@@ -163,9 +163,9 @@ public class EloTrackingService {
 	}
 
 	// Player
-	public boolean addNewPlayerIfPlayerNotPresent(String channelId, String playerId) {
-		if (!playerDao.existsById(Player.generateId(channelId, playerId))) {
-			playerDao.insert(new Player(channelId, playerId,
+	public boolean addNewPlayerIfPlayerNotPresent(long guildId, long playerId) {
+		if (!playerDao.existsById(Player.generateId(guildId, playerId))) {
+			playerDao.insert(new Player(guildId, playerId,
 					initialRating));
 			return true;
 		}
@@ -195,10 +195,10 @@ public class EloTrackingService {
 		return new double[]{rating1, rating2, newRating1, newRating2};
 	}
 
-	public List<PlayerInRankingsDto> getRankings(String channelId) {
-		List<Player> allPlayers = playerDao.findAllByChannelId(channelId);
+	public List<PlayerInRankingsDto> getRankings(long guildId) {
+		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
 		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
-				.map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getDiscordUserId()), player.getRating()))
+				.map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getUserId()), player.getRating()))
 				.collect(Collectors.toList());
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;

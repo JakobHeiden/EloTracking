@@ -3,7 +3,7 @@ package de.neuefische.elotracking.backend.timedtask;
 public record TimedTask (
 		TimedTaskType type,
 		int time,
-		String relationId) {
+		long relationId) {
 
 	public enum TimedTaskType {
 		OPEN_CHALLENGE_DECAY,

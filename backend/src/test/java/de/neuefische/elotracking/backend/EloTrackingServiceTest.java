@@ -58,14 +58,14 @@ public class EloTrackingServiceTest {
 			case 4:
 				challenge.setAcceptorReported(ChallengeModel.ReportStatus.LOSS);
 		}
-		when(challengeDao.findById(challenge.getId())).thenReturn(Optional.of(challenge));
+		when(challengeDao.findById(challenge.getMessageId())).thenReturn(Optional.of(challenge));
 
 		String challengerPlayerId = Player.generateId(CHANNEL_ID, CHALLENGER_ID);
 		String acceptorPlayerId = Player.generateId(CHANNEL_ID, ACCEPTOR_ID);
 		when(playerDao.findById(challengerPlayerId)).thenReturn(Optional.of(new Player(CHANNEL_ID, CHALLENGER_ID, 1600)));
 		when(playerDao.findById(acceptorPlayerId)).thenReturn(Optional.of(new Player(CHANNEL_ID, ACCEPTOR_ID, 1600)));
 
-		service.timedAutoResolveMatch(challenge.getId(), 999);
+		service.timedAutoResolveMatch(challenge.getMessageId(), 999);
 
 		ArgumentCaptor<Match> match = ArgumentCaptor.forClass(Match.class);
 		verify(matchDao).save(match.capture());

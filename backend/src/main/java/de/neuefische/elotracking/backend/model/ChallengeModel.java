@@ -1,10 +1,7 @@
 package de.neuefische.elotracking.backend.model;
 
 import de.neuefische.elotracking.backend.logging.UseToStringForLogging;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -23,19 +20,21 @@ public class ChallengeModel {
     }
 
     @Id
-    private String id;
-    private String guildId;
-    private String challengerId;
-    private String acceptorId;
+    private long messageId;
+    @Getter
+    private long guildId;
+    private long challengerId;
+    private long acceptorId;
     private boolean isAccepted;
     private ReportStatus challengerReported;
     private ReportStatus acceptorReported;
     private boolean challengerCalledForCancel = false;
     private boolean acceptorCalledForCancel = false;
 
-    public ChallengeModel(String guildId, String challengerId, String acceptorId) {
-        this.id = generateId(guildId, challengerId, acceptorId);
+    public ChallengeModel(long guildId, long messageId, long challengerId, long acceptorId) {
+        this.messageId = messageId;
         this.guildId = guildId;
+        this.messageId = messageId;
         this.challengerId = challengerId;
         this.acceptorId = acceptorId;
         this.isAccepted = false;
@@ -57,26 +56,5 @@ public class ChallengeModel {
         } else {
             return challengerCalledForCancel && acceptorCalledForCancel;
         }
-    }
-
-    public static String generateId(String channelId, String challengerId, String acceptorId) {
-        return challengerId.compareTo(acceptorId) < 0 ?
-                String.format("%s-%s-%s", channelId, challengerId, acceptorId) :
-                String.format("%s-%s-%s", channelId, acceptorId, challengerId);
-    }
-    
-    public void setGuildId(String guildId) {// TODO kann weg?
-        this.guildId = guildId;
-        this.id = generateId(guildId, this.challengerId, this.acceptorId);
-    }
-    
-    public void setChallengerId(String challengerId) {
-        this.challengerId = challengerId;
-        this.id = generateId(guildId, this.challengerId, this.acceptorId);
-    }
-
-    public void setAcceptorId(String acceptorId) {
-        this.acceptorId = acceptorId;
-        this.id = generateId(guildId, this.challengerId, this.acceptorId);
     }
 }

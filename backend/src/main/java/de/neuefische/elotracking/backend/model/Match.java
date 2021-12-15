@@ -21,12 +21,12 @@ public class Match {
     @Id
     private UUID id;
     private Date date;
-    private String channel;
-    private String winner;
-    private String loser;
+    private long channel;
+    private long winner;
+    private long loser;
     private boolean isDraw;
 
-    public Match(String channel, String winner, String loser, boolean isDraw) {
+    public Match(long channel, long winner, long loser, boolean isDraw) {
         this.channel = channel;
         this.winner = winner;
         this.loser = loser;
