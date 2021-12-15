@@ -5,21 +5,20 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Message;
+import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.MessageInteractionEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Optional;
-
 @Slf4j
 public class Accept extends Command {
 
     private boolean canExecute = true;
 
-    public Accept(Message msg, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
-        super(msg, service, bot, queue);
-        this.needsRegisteredChannel = true;
+    public Accept(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+        super(event, service, bot, queue);
     }
 
     public static String getDescription() {
@@ -29,27 +28,27 @@ public class Accept extends Command {
     public void execute() {
         if (!super.canExecute()) return;
 
-        String acceptingPlayerId = msg.getAuthor().get().getId().asString();
-        List<ChallengeModel> challenges = service.findAllChallengesByAcceptorIdAndChannelId(acceptingPlayerId, channelId);
-        Optional<Snowflake> mention = msg.getUserMentionIds().stream().findAny();
+        String acceptorId = event.getInteraction().getUser().getId().asString();
+        List<ChallengeModel> challenges = service.findAllChallengesByAcceptorIdAndChannelId(acceptorId, guildId);
+        String challengerId = null;
+        if (event instanceof ChatInputInteractionEvent) {
+            challengerId = ((ChatInputInteractionEvent) event).getOption("player").get().getValue().get().asString();
+        } else if (event instanceof MessageInteractionEvent) {
+        }
+
         Optional<ChallengeModel> challenge;
 
-        if (mention.isEmpty()) {
-            challenge = inferRelevantChallenge(challenges);
-        } else {
-            challenge = getRelevantChallenge(challenges, mention.get());
-        }
+        challenge = getRelevantChallenge(challenges, challengerId);
         if (!canExecute) return;
 
-        service.addNewPlayerIfPlayerNotPresent(channelId, acceptingPlayerId);
+        service.addNewPlayerIfPlayerNotPresent(guildId, acceptorId);
         challenge.get().setAccepted(true);// TODO Optional?
-        queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY, game.getAcceptedChallengeDecayTime(), challenge.get().getId());
+        queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY, game.getAcceptedChallengeDecayTime(), challenge.get().getMessageId());
         service.saveChallenge(challenge.get());
-        addBotReply(String.format("Challenge accepted! Come back and %sreport when your game is finished.",
-                service.findGameByChannelId(channelId).get().getCommandPrefix()));
+        addBotReply(String.format("Challenge accepted! Come back and /report when your game is finished."));
     }
 
-    private Optional<ChallengeModel> inferRelevantChallenge(List<ChallengeModel> challenges) {
+    private Optional<ChallengeModel> inferRelevantChallenge(List<ChallengeModel> challenges) {// TODO vllt noch nuetzlich
         challenges.removeIf(ChallengeModel::isAccepted);
         if (challenges.size() == 0) {
             addBotReply("No open challenge present against you");// TODO acyeptierte challenges?
@@ -66,17 +65,17 @@ public class Accept extends Command {
         return Optional.of(challenges.get(0));
     }
 
-    private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, Snowflake mention) {
+    private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, String challengerId) {
         Optional<ChallengeModel> challenge = challenges.stream().
-                filter(chlng -> chlng.getChallengerId().equals(mention.asString()))
+                filter(chlng -> chlng.getChallengerId().equals(challengerId))
                 .findAny();
 
-        if (challenge.isEmpty()) {
+        if (challenge.isEmpty()) {// TODO evtl weg
             addBotReply("That player has not yet challenged you");
             canExecute = false;
             return challenge;
         }
-        if (challenge.get().isAccepted()) {
+        if (challenge.get().isAccepted()) {// TODO evtl weg
             addBotReply("You already accepted that Challenge");
             canExecute = false;
             return Optional.empty();

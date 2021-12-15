@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface ChallengeDao extends MongoRepository<ChallengeModel, String> {
-    List<ChallengeModel> findAllByAcceptorId(String acceptorId);
-    List<ChallengeModel> findAllByChallengerId(String challengerId);
+public interface ChallengeDao extends MongoRepository<ChallengeModel, Long> {
+    List<ChallengeModel> findAllByAcceptorId(long acceptorId);
+    List<ChallengeModel> findAllByChallengerId(long challengerId);
 }

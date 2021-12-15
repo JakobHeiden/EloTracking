@@ -15,17 +15,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Game {
 
     @Id
-    private String guildId;
+    private long guildId;
     private String name;
-    private String commandPrefix;
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;
 
-    public Game(String guildId, String name) {
+    public Game(long guildId, String name) {
         this.guildId = guildId;
         this.name = name;
-        this.commandPrefix = "!";
         this.openChallengeDecayTime = 2 * 60;
         this.acceptedChallengeDecayTime = 7 * 24 * 60;
         this.matchAutoResolveTime = 24 * 60;

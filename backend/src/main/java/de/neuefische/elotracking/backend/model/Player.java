@@ -8,6 +8,8 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.UUID;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,19 +18,19 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "player")
 public class Player {
     @Id
-    private String id;
-    private String discordUserId;
-    private String channelId;
+    private UUID id;
+    private long userId;
+    private long guildId;
     private double rating;
 
-    public Player(String channelId, String discordUserId, double rating) {
-        this.id = generateId(channelId, discordUserId);
-        this.discordUserId = discordUserId;
-        this.channelId = channelId;
+    public Player(long guildId, long userId, double rating) {
+        this.id = generateId(guildId, userId);
+        this.userId = userId;
+        this.guildId = guildId;
         this.rating = rating;
     }
 
-    public static String generateId(String channelId, String discordUserId) {
-        return String.format("%s-%s", channelId, discordUserId);
+    public static UUID generateId(long guildId, long userId) {
+        return new UUID(guildId, userId);
     }
 }
