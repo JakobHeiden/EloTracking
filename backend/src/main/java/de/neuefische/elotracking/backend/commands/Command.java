@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import lombok.Getter;
 
@@ -19,20 +20,22 @@ public abstract class Command {
 	protected EloTrackingService service;
 	protected DiscordBotService bot;
 	protected TimedTaskQueue queue;
-	protected final ApplicationCommandInteractionEvent event;
-	protected final long guildId;
+	@Getter
+	protected final Event event;
+	protected long guildId;
 	protected Game game;
 	@Getter
 	private final List<String> botReplies;
 
-	protected Command(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+	protected Command(Event event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		this.event = event;
 		this.service = service;
 		this.bot = bot;
 		this.queue = queue;
-		this.guildId = event.getInteraction().getGuildId().get().asLong();
+		if (event instanceof ApplicationCommandInteractionEvent) {
+			this.guildId = ((ApplicationCommandInteractionEvent) event).getInteraction().getGuildId().get().asLong();
+		}
 		this.botReplies = new LinkedList<String>();
-		this.defaultCommandPrefix = service.getPropertiesLoader().getDefaultCommandPrefix();
 	}
 
 	public abstract void execute();
@@ -52,5 +55,11 @@ public abstract class Command {
 
 	protected void addBotReply(String reply) {
 		botReplies.add(reply);
+	}
+
+	public void sendBotReplies() {
+		for (String reply : botReplies) {
+			bot.sendToAdmin(reply);
+		}
 	}
 }
