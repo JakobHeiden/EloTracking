@@ -5,7 +5,9 @@ import de.neuefische.elotracking.backend.configuration.CommandAbbreviationMapper
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,16 +59,22 @@ public class CommandFactoryConfiguration {
 	@Bean
 	@Scope("prototype")
 	public Command createCommand(EventWrapper eventWrapper) {
-		ApplicationCommandInteractionEvent event = eventWrapper.event();
-		String commandClassName = event.getCommandName();
+		Event event = eventWrapper.getEvent();
+		String commandClassName = "commandStringNotSet";
+		if (event instanceof ApplicationCommandInteractionEvent) {
+			commandClassName = ((ApplicationCommandInteractionEvent) event).getCommandName();
+		}
+		if (event instanceof ReactionAddEvent) {
+			commandClassName = eventWrapper.getCommandString();
+		}
 		commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
 		log.trace("commandString = " + commandClassName);
 		try {
 			return (Command) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
-					.getConstructor(ApplicationCommandInteractionEvent.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
-					.newInstance(event, eventWrapper.service(), eventWrapper.bot(), eventWrapper.queue());
+					.getConstructor(Event.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
+					.newInstance(event, eventWrapper.getService(), eventWrapper.getBot(), eventWrapper.getQueue());
 		} catch (Exception e) {
-			eventWrapper.bot().sendToAdmin(e.getMessage());
+			eventWrapper.getBot().sendToAdmin(e.getMessage());
 			e.printStackTrace();
 			return null;
 		}

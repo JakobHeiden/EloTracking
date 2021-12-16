@@ -5,6 +5,7 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class CommandParser {
     }
 
     public void processCommand(Message msg) {
-        try {// TODO!
+        try {
             Mono<MessageChannel> channelMono = msg.getChannel();
             MessageWrapper msgWrapper = new MessageWrapper(msg, service, bot, queue);
             Command command = commandFactory.apply(msgWrapper);
@@ -78,5 +79,11 @@ public class CommandParser {
                     msg.getChannelId().asString(), msg.getContent(), e.getMessage()));
             throw e;
         }
+    }
+
+    public static EventWrapper setCommandStringForReactionAddEvent(EventWrapper wrapper) {
+        String messageContent = ((ReactionAddEvent) wrapper.getEvent()).getMessage().block().getContent();// TODO vllt langsam. vllt doch ueber event.getMessageId()?
+        if (messageContent.contains("Accept")) wrapper.setCommandString("accept");
+        return wrapper;
     }
 }

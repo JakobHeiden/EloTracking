@@ -20,7 +20,9 @@ public class ChallengeModel {
     }
 
     @Id
-    private long messageId;
+    private long challengerMessageId;
+    private long challengerPrivateChannelId;
+    private long acceptorMessageId;
     @Getter
     private long guildId;
     private long challengerId;
@@ -31,10 +33,11 @@ public class ChallengeModel {
     private boolean challengerCalledForCancel = false;
     private boolean acceptorCalledForCancel = false;
 
-    public ChallengeModel(long guildId, long messageId, long challengerId, long acceptorId) {
-        this.messageId = messageId;
+    public ChallengeModel(long guildId, long challengerMessageId, long challengerPrivateChannelId, long acceptorMessageId, long challengerId, long acceptorId) {
+        this.challengerPrivateChannelId = challengerPrivateChannelId;
+        this.acceptorMessageId = acceptorMessageId;
         this.guildId = guildId;
-        this.messageId = messageId;
+        this.challengerMessageId = challengerMessageId;
         this.challengerId = challengerId;
         this.acceptorId = acceptorId;
         this.isAccepted = false;

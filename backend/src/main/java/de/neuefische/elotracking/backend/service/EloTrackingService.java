@@ -71,15 +71,23 @@ public class EloTrackingService {
 
 	// Challenge
 	public boolean challengeExistsByParticipants(long guildId, long id1, long id2) {
-		return false;// TODO!
+		return false;// TODO! ?
 	}
 
-	public boolean challengeExistsById(long id) {
-		return challengeDao.existsById(id);
+	public boolean challengeExistsByAcceptorMessageId(long messageId) {
+		return challengeDao.existsByAcceptorMessageId(messageId);
 	}
 
-	public Optional<ChallengeModel> findChallenge(long challengeId) {
-		return challengeDao.findById(challengeId);
+	public boolean challengeExistsByChallengerMessageId(long messageId) {
+		return challengeDao.existsByChallengerMessageId(messageId);
+	}
+
+	public Optional<ChallengeModel> findChallengeByChallengerMessageId(long messageId) {
+		return challengeDao.findByChallengerMessageId(messageId);
+	}
+
+	public Optional<ChallengeModel> findChallengeByAcceptorMessageId(long messageId) {
+		return challengeDao.findByAcceptorMessageId(messageId);
 	}
 
 	public void saveChallenge(ChallengeModel challenge) {
@@ -91,7 +99,7 @@ public class EloTrackingService {
 	}
 
 	public void timedDecayOpenChallenge(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		Optional<ChallengeModel> maybeChallenge = findChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
 		if (challenge.isAccepted()) return;
@@ -105,7 +113,7 @@ public class EloTrackingService {
 	}
 
 	public void timedDecayAcceptedChallenge(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		Optional<ChallengeModel> maybeChallenge = findChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
@@ -138,7 +146,7 @@ public class EloTrackingService {
 
 	// Match
 	public void timedAutoResolveMatch(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = findChallenge(challengeId);
+		Optional<ChallengeModel> maybeChallenge = findChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
@@ -154,7 +162,7 @@ public class EloTrackingService {
 
 		Match match = new Match(channelId, winnerId, loserId, false);
 		double[] resolvedRatings = updateRatings(match);// TODO vllt umbauen
-		deleteChallenge(challenge.getMessageId());
+		deleteChallenge(challenge.getChallengerMessageId());
 
 		bot.sendToChannel(channelId, String.format("This match has been auto-resolved because only one player has reported the match after %d minutes:\n" +
 						"<@%s> old rating %d, new rating %d. <@%s> old rating %d, new rating %d", time,
