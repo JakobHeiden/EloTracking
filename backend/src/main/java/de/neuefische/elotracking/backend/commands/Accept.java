@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.commandparser.Emojis;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -8,7 +9,6 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +25,7 @@ public class Accept extends Command {
 	}
 
 	public void execute() {
-		if (!super.canExecute()) return;
+		super.checkForGame();
 
 		ReactionAddEvent event = (ReactionAddEvent) super.event;
 		Mono<Message> acceptorMessageMono = event.getMessage();
@@ -50,19 +50,19 @@ public class Accept extends Command {
 		service.saveChallenge(challenge.get());
 
 		Message acceptorMessage = acceptorMessageMono.block();
-		acceptorMessage.removeSelfReaction(bot.crossMark).subscribe();
-		acceptorMessage.removeSelfReaction(bot.checkMark).subscribe();
+		acceptorMessage.removeSelfReaction(Emojis.crossMark).subscribe();
+		acceptorMessage.removeSelfReaction(Emojis.checkMark).subscribe();
 		acceptorMessage.edit().withContent(makeNotBold(acceptorMessage.getContent()) + "\nYou accepted the challenge.\n" +
 				makeBold("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")).subscribe();
-		acceptorMessage.addReaction(bot.arrowUp).subscribe();
-		acceptorMessage.addReaction(bot.arrowDown).subscribe();
+		acceptorMessage.addReaction(Emojis.arrowUp).subscribe();
+		acceptorMessage.addReaction(Emojis.arrowDown).subscribe();
 
 		Message challengerMessage = challengerMessageMono.block();
 		challengerMessage.edit().withContent(challengerMessage.getContent()
 				+ "\nThey have accept your challenge." +
 				makeBold("\nCome back after the match and let me know if you won :arrow_up: or lost :arrow_down:")).subscribe();
-		challengerMessage.addReaction(bot.arrowUp).subscribe();
-		challengerMessage.addReaction(bot.arrowDown).subscribe();
+		challengerMessage.addReaction(Emojis.arrowUp).subscribe();
+		challengerMessage.addReaction(Emojis.arrowDown).subscribe();
 	}
 
 	private Optional<ChallengeModel> getRelevantChallenge(List<ChallengeModel> challenges, long challengerId) {
