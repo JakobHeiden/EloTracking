@@ -40,8 +40,7 @@ public abstract class Command {
 
 	public abstract void execute();
 
-	protected boolean canExecute() {// TODO kann evtl weg
-		boolean canExecute = true;
+	protected void checkForGame() {// TODO kann evtl weg
 		Optional<Game> maybeGame = service.findGameByChannelId(guildId);
 		if (maybeGame.isEmpty()) {
 			Game game = new Game(guildId, "name not set");
@@ -50,7 +49,6 @@ public abstract class Command {
 		} else {
 			this.game = maybeGame.get();
 		}
-		return canExecute;
 	}
 
 	protected void addBotReply(String reply) {

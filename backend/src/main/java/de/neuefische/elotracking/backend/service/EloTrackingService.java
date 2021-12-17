@@ -70,8 +70,11 @@ public class EloTrackingService {
 	}
 
 	// Challenge
-	public boolean challengeExistsByParticipants(long guildId, long id1, long id2) {
-		return false;// TODO! ?
+	public boolean challengeExistsByParticipants(long guildId, long challengerId, long acceptorId) {
+		return challengeDao.findAllByChallengerId(challengerId).stream()
+				.filter(challenge -> challenge.getAcceptorId() == acceptorId)
+				.filter(challenge -> challenge.getGuildId() == guildId)
+				.findAny().isPresent();
 	}
 
 	public boolean challengeExistsByAcceptorMessageId(long messageId) {
@@ -215,4 +218,6 @@ public class EloTrackingService {
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;
 	}
+
+
 }

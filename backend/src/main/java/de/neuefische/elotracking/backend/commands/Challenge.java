@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.commandparser.Emojis;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -28,8 +29,7 @@ public class Challenge extends Command {
 	}
 
 	public void execute() {
-		boolean canExecute = super.canExecute();
-		if (!canExecute) return;
+		super.checkForGame();
 
 		long challengerId = event.getInteraction().getUser().getId().asLong();
 		long acceptorId = 0L;
@@ -42,21 +42,20 @@ public class Challenge extends Command {
 
 		if (challengerId == acceptorId) {
 			addBotReply("You cannot challenge yourself");// TODO anders ausschliessen?
-			canExecute = false;
+			return;
 		}
 		if (service.challengeExistsByParticipants(guildId, challengerId, acceptorId)) {
 			addBotReply("challenge already exists");
-			canExecute = false;
+			return;
 		}
-		if (!canExecute) return;
 
 		Mono<Message> messageToAcceptorMono = bot.sendToUser(acceptorId, String.format(
 				"**You have been challenged by <@%s>. Accept?**", challengerId));
 		Mono<Message> messageToChallengerMono = bot.sendToUser(challengerId, String.format(
 				"You have challenged <@%s> to a match. I'll let you know when they react.", acceptorId));
 		Message messageToAcceptor = messageToAcceptorMono.block();// TODO das geht sicherlich besser
-		messageToAcceptor.addReaction(bot.checkMark).subscribe();
-		messageToAcceptor.addReaction(bot.crossMark).subscribe();
+		messageToAcceptor.addReaction(Emojis.checkMark).subscribe();
+		messageToAcceptor.addReaction(Emojis.crossMark).subscribe();
 		Message messageToChallenger = messageToChallengerMono.block();
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, challengerId);
