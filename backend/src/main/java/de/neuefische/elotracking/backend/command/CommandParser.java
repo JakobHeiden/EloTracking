@@ -1,9 +1,6 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.Accept;
-import de.neuefische.elotracking.backend.commands.Command;
-import de.neuefische.elotracking.backend.commands.EmojiCommand;
-import de.neuefische.elotracking.backend.commands.Win;
+import de.neuefische.elotracking.backend.commands.*;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
@@ -118,7 +115,7 @@ public class CommandParser {
             }
             if (boldLine.contains("won :arrow_up: or lost :arrow_down:")) {
                 if (emoji.equals(Emojis.arrowUp)) return new Win(event, service, bot, queue);
-                if (emoji.equals(Emojis.arrowDown)) return null;// new Lose(event, service, bot, queue);
+                if (emoji.equals(Emojis.arrowDown)) return new Lose(event, service, bot, queue);
                 if (emoji.equals(Emojis.leftRightArrow)) return null;
                 if (emoji.equals(Emojis.crossMark)) return null;
             }

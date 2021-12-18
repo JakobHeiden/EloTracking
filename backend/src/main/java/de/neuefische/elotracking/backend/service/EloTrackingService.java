@@ -97,7 +97,11 @@ public class EloTrackingService {
 		challengeDao.save(challenge);
 	}
 
-	public void deleteChallenge(long id) {
+	public void deleteChallenge(ChallengeModel challenge) {
+		deleteChallengeById(challenge.getChallengerMessageId());
+	}
+
+	public void deleteChallengeById(long id) {
 		challengeDao.deleteById(id);
 	}
 
@@ -107,7 +111,7 @@ public class EloTrackingService {
 		ChallengeModel challenge = maybeChallenge.get();
 		if (challenge.isAccepted()) return;
 
-		deleteChallenge(challengeId);
+		deleteChallengeById(challengeId);
 		Optional<Game> maybeGame = findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
@@ -120,7 +124,7 @@ public class EloTrackingService {
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
-		deleteChallenge(challengeId);
+		deleteChallengeById(challengeId);
 		Optional<Game> maybeGame = findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
@@ -165,7 +169,7 @@ public class EloTrackingService {
 
 		Match match = new Match(channelId, winnerId, loserId, false);
 		double[] resolvedRatings = updateRatings(match);// TODO vllt umbauen
-		deleteChallenge(challenge.getChallengerMessageId());
+		deleteChallengeById(challenge.getChallengerMessageId());
 
 		bot.sendToChannel(channelId, String.format("This match has been auto-resolved because only one player has reported the match after %d minutes:\n" +
 						"<@%s> old rating %d, new rating %d. <@%s> old rating %d, new rating %d", time,
