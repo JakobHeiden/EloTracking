@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useParams} from 'react-router-dom';
-import {getRankings, getGameData} from '../service/LeaderboardService.js';
+import {getGameData, getRankings} from '../service/LeaderboardService.js';
 import RankingsEntry from "./RankingsEntry";
 import styled from 'styled-components/macro';
 

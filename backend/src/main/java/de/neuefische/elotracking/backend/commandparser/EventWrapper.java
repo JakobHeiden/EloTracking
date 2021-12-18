@@ -5,7 +5,6 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.event.domain.Event;
 import lombok.Getter;
-import lombok.Setter;
 
 public class EventWrapper {
 
@@ -17,9 +16,6 @@ public class EventWrapper {
 	private final DiscordBotService bot;
 	@Getter
 	private final TimedTaskQueue queue;
-	@Getter
-	@Setter
-	private String commandString;
 
 	public EventWrapper(Event event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		this.event = event;

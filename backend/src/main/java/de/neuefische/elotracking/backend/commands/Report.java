@@ -1,14 +1,10 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.model.ChallengeModel;
-import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.entity.Message;
-
-import java.util.Optional;
 
 public abstract class Report extends Command {
 
