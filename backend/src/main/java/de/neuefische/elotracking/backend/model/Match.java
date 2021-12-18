@@ -21,15 +21,15 @@ public class Match {
     @Id
     private UUID id;
     private Date date;
-    private long channel;
-    private long winner;
-    private long loser;
+    private long guildId;
+    private long winnerId;
+    private long loserId;
     private boolean isDraw;
 
-    public Match(long channel, long winner, long loser, boolean isDraw) {
-        this.channel = channel;
-        this.winner = winner;
-        this.loser = loser;
+    public Match(long guildId, long winnerId, long loserId, boolean isDraw) {
+        this.guildId = guildId;
+        this.winnerId = winnerId;
+        this.loserId = loserId;
         this.isDraw = isDraw;
         this.id = UUID.randomUUID();
         this.date = new Date();

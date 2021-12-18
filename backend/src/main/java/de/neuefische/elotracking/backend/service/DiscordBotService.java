@@ -1,6 +1,6 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.commandparser.CommandParser;
+import de.neuefische.elotracking.backend.command.CommandParser;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;

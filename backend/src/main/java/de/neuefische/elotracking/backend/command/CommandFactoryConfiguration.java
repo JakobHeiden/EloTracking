@@ -1,6 +1,7 @@
-package de.neuefische.elotracking.backend.commandparser;
+package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.commands.Command;
+import de.neuefische.elotracking.backend.commands.EmojiCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +19,7 @@ public class CommandFactoryConfiguration {
 	}
 
 	@Bean
-	public Function<ReactionAddEventWrapper, Command> emojiCommandFactory() {
+	public Function<ReactionAddEventWrapper, EmojiCommand> emojiCommandFactory() {
 		return eventWrapper -> createEmojiCommand(eventWrapper);
 	}
 
@@ -30,7 +31,7 @@ public class CommandFactoryConfiguration {
 
 	@Bean
 	@Scope("prototype")
-	public Command createEmojiCommand(ReactionAddEventWrapper eventWrapper) {
+	public EmojiCommand createEmojiCommand(ReactionAddEventWrapper eventWrapper) {
 		return CommandParser.createEmojiCommand(eventWrapper);
 	}
 }

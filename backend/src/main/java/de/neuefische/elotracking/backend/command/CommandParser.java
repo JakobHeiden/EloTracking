@@ -1,7 +1,8 @@
-package de.neuefische.elotracking.backend.commandparser;
+package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.commands.Accept;
 import de.neuefische.elotracking.backend.commands.Command;
+import de.neuefische.elotracking.backend.commands.EmojiCommand;
 import de.neuefische.elotracking.backend.commands.Win;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -28,7 +29,7 @@ public class CommandParser {
 
     private final GatewayDiscordClient client;
     private final Function<ApplicationCommandInteractionEventWrapper, Command> slashCommandFactory;
-    private final Function<ReactionAddEventWrapper, Command> emojiCommandFactory;
+    private final Function<ReactionAddEventWrapper, EmojiCommand> emojiCommandFactory;
     private final EloTrackingService service;
     private final DiscordBotService bot;
     private final TimedTaskQueue queue;
@@ -38,7 +39,7 @@ public class CommandParser {
 
     public CommandParser(GatewayDiscordClient client, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
                          Function<ApplicationCommandInteractionEventWrapper, Command> slashCommandFactory,
-                         Function<ReactionAddEventWrapper, Command> emojiCommandFactory) {
+                         Function<ReactionAddEventWrapper, EmojiCommand> emojiCommandFactory) {
         this.client = client;
         this.slashCommandFactory = slashCommandFactory;
         this.emojiCommandFactory = emojiCommandFactory;
@@ -81,8 +82,8 @@ public class CommandParser {
                         .getAuthor().get().getId().equals(botSnowflake))
                 .map(event -> new ReactionAddEventWrapper(event, service, bot, queue))
                 .map(emojiCommandFactory::apply)
-                .filter(command -> command == null)
-                .subscribe(Command::execute);
+                .filter(command -> command != null)
+                .subscribe(EmojiCommand::execute);
     }
 
     public static Command createSlashCommand(ApplicationCommandInteractionEventWrapper eventWrapper) {
@@ -100,28 +101,29 @@ public class CommandParser {
         }
     }
 
-    public static Command createEmojiCommand(ReactionAddEventWrapper wrapper) {
+    public static EmojiCommand createEmojiCommand(ReactionAddEventWrapper wrapper) {
         ReactionAddEvent event = wrapper.event();
         EloTrackingService service = wrapper.service();
         DiscordBotService bot = wrapper.bot();
         TimedTaskQueue queue = wrapper.queue();
-        String lastLine = event.getMessage().block()// TODO vllt langsam. vllt doch ueber event.getMessageId()?
-                .getContent().split("/n")[0];    // entweder ich gehe ueber den content (langsam) oder ich schaue in die db (auch langsam)
+        String boldLine = event.getMessage().block()// TODO vllt langsam. vllt doch ueber event.getMessageId()?
+                .getContent().split("\\*\\*")[1];    // entweder ich gehe ueber den content (langsam) oder ich schaue in die db (auch langsam)
         ReactionEmoji emoji = wrapper.event().getEmoji();
 
         if (wrapper.service().challengeExistsByChallengerMessageId(event.getMessageId().asLong())
                 || wrapper.service().challengeExistsByAcceptorMessageId(event.getMessageId().asLong())) {
-            if (lastLine.contains("Accept?")) {
+            if (boldLine.contains("Accept?")) {
                 if (emoji.equals(Emojis.checkMark)) return new Accept(event, service, bot, queue);
                 if (emoji.equals(Emojis.crossMark)) return null;//TODO reject
             }
-            if (lastLine.contains("won :arrow_up: or lost :arrow_down:")) {
+            if (boldLine.contains("won :arrow_up: or lost :arrow_down:")) {
                 if (emoji.equals(Emojis.arrowUp)) return new Win(event, service, bot, queue);
                 if (emoji.equals(Emojis.arrowDown)) return null;// new Lose(event, service, bot, queue);
                 if (emoji.equals(Emojis.leftRightArrow)) return null;
                 if (emoji.equals(Emojis.crossMark)) return null;
             }
         }
+
         return null;
     }
 }

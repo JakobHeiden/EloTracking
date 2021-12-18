@@ -1,4 +1,4 @@
-package de.neuefische.elotracking.backend.commandparser;
+package de.neuefische.elotracking.backend.command;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 

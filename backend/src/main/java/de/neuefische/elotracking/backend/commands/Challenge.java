@@ -1,6 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
-import de.neuefische.elotracking.backend.commandparser.Emojis;
+import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -29,7 +29,7 @@ public class Challenge extends Command {
 	}
 
 	public void execute() {
-		super.checkForGame();
+		super.setupGameIfNotPresent();
 
 		long challengerId = event.getInteraction().getUser().getId().asLong();
 		long acceptorId = 0L;
@@ -53,14 +53,15 @@ public class Challenge extends Command {
 				"**You have been challenged by <@%s>. Accept?**", challengerId));
 		Mono<Message> messageToChallengerMono = bot.sendToUser(challengerId, String.format(
 				"You have challenged <@%s> to a match. I'll let you know when they react.", acceptorId));
-		Message messageToAcceptor = messageToAcceptorMono.block();// TODO das geht sicherlich besser
-		messageToAcceptor.addReaction(Emojis.checkMark).subscribe();
-		messageToAcceptor.addReaction(Emojis.crossMark).subscribe();
-		Message messageToChallenger = messageToChallengerMono.block();
+		Message acceptorMessage = messageToAcceptorMono.block();// TODO das geht sicherlich besser
+		acceptorMessage.addReaction(Emojis.checkMark).subscribe();
+		acceptorMessage.addReaction(Emojis.crossMark).subscribe();
+		Message challengerMessage = messageToChallengerMono.block();
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, challengerId);
-		ChallengeModel challenge = new ChallengeModel(guildId, messageToChallenger.getId().asLong(),
-				messageToChallenger.getChannel().block().getId().asLong(), messageToAcceptor.getId().asLong(), challengerId, acceptorId);
+		ChallengeModel challenge = new ChallengeModel(guildId,
+				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(),
+				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong());
 
 		System.out.println(challenge.getChallengerMessageId());
 		System.out.println(challenge.getAcceptorMessageId());
