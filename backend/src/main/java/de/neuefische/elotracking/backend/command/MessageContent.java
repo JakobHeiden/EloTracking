@@ -25,6 +25,11 @@ public class MessageContent {
 		return this;
 	}
 
+	public MessageContent makeAllItalic() {
+		content = "*" + content + "*";
+		return this;
+	}
+
 	public String get() {
 		return content;
 	}

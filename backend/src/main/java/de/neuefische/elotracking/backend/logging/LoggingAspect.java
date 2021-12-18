@@ -68,6 +68,10 @@ public class LoggingAspect {
             return "Collection with size " + ((Collection<?>) value).size();
         }
 
+        if (value.getClass().isArray()) {
+            return "Array";// TODO besser machen
+        }
+
         if (hasSimpleStringRepresentation(value.getClass())) {
             return value.toString();
         }
