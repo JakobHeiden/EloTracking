@@ -1,11 +1,15 @@
 package de.neuefische.elotracking.backend.commands;
 
-import de.neuefische.elotracking.backend.commandparser.Emojis;
+import de.neuefische.elotracking.backend.command.Emojis;
+import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+
+import static de.neuefische.elotracking.backend.command.MessageContent.*;
+
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Message;
@@ -16,51 +20,43 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public class Accept extends Command {
+public class Accept extends EmojiCommand {
 
-	private boolean canExecute = true;
-
-	public Accept(Event event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+	public Accept(ReactionAddEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		super(event, service, bot, queue);
 	}
 
 	public void execute() {
-		super.checkForGame();
-
-		ReactionAddEvent event = (ReactionAddEvent) super.event;
-		Mono<Message> acceptorMessageMono = event.getMessage();
-
-		long acceptorId = 0L;
-		acceptorId = event.getUserId().asLong();
-		long acceptorMessageId = event.getMessageId().asLong();
-		super.guildId = service.findChallengeByAcceptorMessageId(acceptorMessageId).get().getGuildId();
+		long acceptorId = event.getUserId().asLong();
+		long challengerId = service.getChallengeByAcceptorMessageId(event.getMessageId().asLong()).get().getChallengerId();
 		List<ChallengeModel> challenges = service.findAllChallengesByAcceptorIdAndChannelId(acceptorId, guildId);
-		long challengerId = 0L;
-		challengerId = service.findChallengeByAcceptorMessageId(event.getMessageId().asLong()).get().getChallengerId();
 
-		Optional<ChallengeModel> challenge;
-		challenge = getRelevantChallenge(challenges, challengerId);
-		if (!canExecute) return;
-
-		Mono<Message> challengerMessageMono = bot.getMessageById(challenge.get().getChallengerPrivateChannelId(), challenge.get().getChallengerMessageId());
+		ChallengeModel challenge = getRelevantChallenge(challenges, challengerId).get();
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, acceptorId);
-		challenge.get().setAccepted(true);// TODO Optional?
-		queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY, game.getAcceptedChallengeDecayTime(), challenge.get().getChallengerMessageId());
-		service.saveChallenge(challenge.get());
+		challenge.setAccepted(true);// TODO Optional?
+		queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY, game.getAcceptedChallengeDecayTime(), challenge.getChallengerMessageId());
+		service.saveChallenge(challenge);
 
-		Message acceptorMessage = acceptorMessageMono.block();
+		Message acceptorMessage = event.getMessage().block();
 		acceptorMessage.removeSelfReaction(Emojis.crossMark).subscribe();
 		acceptorMessage.removeSelfReaction(Emojis.checkMark).subscribe();
-		acceptorMessage.edit().withContent(makeNotBold(acceptorMessage.getContent()) + "\nYou accepted the challenge.\n" +
-				makeBold("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")).subscribe();
+		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+				.makeAllNotBold()
+				.addNewLine("You have accepted the challenge.")
+				.addNewLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
+				.makeLastLineBold();
+		acceptorMessage.edit().withContent(acceptorMessageContent.get()).subscribe();
 		acceptorMessage.addReaction(Emojis.arrowUp).subscribe();
 		acceptorMessage.addReaction(Emojis.arrowDown).subscribe();
 
-		Message challengerMessage = challengerMessageMono.block();
-		challengerMessage.edit().withContent(challengerMessage.getContent()
-				+ "\nThey have accept your challenge." +
-				makeBold("\nCome back after the match and let me know if you won :arrow_up: or lost :arrow_down:")).subscribe();
+		Message challengerMessage = bot.getMessageById(challenge.getChallengerPrivateChannelId(), challenge.getChallengerMessageId()).block();
+		System.out.println(challengerMessage.getId().asLong());
+		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+				.addNewLine("They have accepted your challenge.")
+				.addNewLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
+				.makeLastLineBold();
+		challengerMessage.edit().withContent(challengerMessageContent.get()).subscribe();
 		challengerMessage.addReaction(Emojis.arrowUp).subscribe();
 		challengerMessage.addReaction(Emojis.arrowDown).subscribe();
 	}
@@ -69,17 +65,6 @@ public class Accept extends Command {
 		Optional<ChallengeModel> challenge = challenges.stream().
 				filter(chlng -> chlng.getChallengerId() == challengerId)
 				.findAny();
-
-		if (challenge.isEmpty()) {// TODO evtl weg
-			addBotReply("That player has not yet challenged you");
-			canExecute = false;
-			return challenge;
-		}
-		if (challenge.get().isAccepted()) {// TODO evtl weg
-			addBotReply("You already accepted that Challenge");
-			canExecute = false;
-			return Optional.empty();
-		}
 
 		return challenge;
 	}
@@ -94,11 +79,5 @@ public class Accept extends Command {
 		return returnString.substring(0, returnString.length() - 2);
 	}
 
-	private String makeNotBold(String text) {
-		return text.replace("*", "");
-	}
 
-	private String makeBold(String text) {
-		return "**" + text + "**";
-	}
 }

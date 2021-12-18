@@ -27,6 +27,6 @@ public class Controller {
 
     @GetMapping("gamedata/{channelId}")
     public Game getGame(@PathVariable long channelId) {
-        return service.findGameByChannelId(channelId).get();
+        return service.findGameByGuildId(channelId).get();
     }
 }

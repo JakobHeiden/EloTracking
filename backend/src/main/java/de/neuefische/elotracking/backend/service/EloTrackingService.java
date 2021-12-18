@@ -61,8 +61,8 @@ public class EloTrackingService {
 	}
 
 	// Game
-	public Optional<Game> findGameByChannelId(long channelId) {
-		return gameDao.findById(channelId);
+	public Optional<Game> findGameByGuildId(long guildId) {
+		return gameDao.findById(guildId);
 	}
 
 	public void saveGame(Game game) {
@@ -85,11 +85,11 @@ public class EloTrackingService {
 		return challengeDao.existsByChallengerMessageId(messageId);
 	}
 
-	public Optional<ChallengeModel> findChallengeByChallengerMessageId(long messageId) {
+	public Optional<ChallengeModel> getChallengeByChallengerMessageId(long messageId) {
 		return challengeDao.findByChallengerMessageId(messageId);
 	}
 
-	public Optional<ChallengeModel> findChallengeByAcceptorMessageId(long messageId) {
+	public Optional<ChallengeModel> getChallengeByAcceptorMessageId(long messageId) {
 		return challengeDao.findByAcceptorMessageId(messageId);
 	}
 
@@ -102,13 +102,13 @@ public class EloTrackingService {
 	}
 
 	public void timedDecayOpenChallenge(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = findChallengeByChallengerMessageId(challengeId);
+		Optional<ChallengeModel> maybeChallenge = getChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
 		if (challenge.isAccepted()) return;
 
 		deleteChallenge(challengeId);
-		Optional<Game> maybeGame = findGameByChannelId(challenge.getGuildId());
+		Optional<Game> maybeGame = findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
 		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your open challenge towards <@%s> has expired after %s minutes",
@@ -116,12 +116,12 @@ public class EloTrackingService {
 	}
 
 	public void timedDecayAcceptedChallenge(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = findChallengeByChallengerMessageId(challengeId);
+		Optional<ChallengeModel> maybeChallenge = getChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
 		deleteChallenge(challengeId);
-		Optional<Game> maybeGame = findGameByChannelId(challenge.getGuildId());
+		Optional<Game> maybeGame = findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
 		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",// TODO wochen, tage, etc
@@ -149,7 +149,7 @@ public class EloTrackingService {
 
 	// Match
 	public void timedAutoResolveMatch(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = findChallengeByChallengerMessageId(challengeId);
+		Optional<ChallengeModel> maybeChallenge = getChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
@@ -189,8 +189,8 @@ public class EloTrackingService {
 
 	// Rankings
 	public double[] updateRatings(Match match) {
-		Player winner = playerDao.findById(Player.generateId(match.getChannel(), match.getWinner())).get();
-		Player loser = playerDao.findById(Player.generateId(match.getChannel(), match.getLoser())).get();
+		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
+		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();
 		double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
 				match.isDraw() ? 0.5 : 1, k);
 		winner.setRating(ratings[2]);

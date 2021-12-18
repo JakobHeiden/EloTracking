@@ -16,7 +16,6 @@ import java.util.Optional;
 // Bot replies are processed in the parser
 public abstract class Command {
 
-	protected String defaultCommandPrefix;
 	protected EloTrackingService service;
 	protected DiscordBotService bot;
 	protected TimedTaskQueue queue;
@@ -40,8 +39,8 @@ public abstract class Command {
 
 	public abstract void execute();
 
-	protected void checkForGame() {// TODO kann evtl weg
-		Optional<Game> maybeGame = service.findGameByChannelId(guildId);
+	protected void setupGameIfNotPresent() {// TODO setup()
+		Optional<Game> maybeGame = service.findGameByGuildId(guildId);
 		if (maybeGame.isEmpty()) {
 			Game game = new Game(guildId, "name not set");
 			service.saveGame(game);
