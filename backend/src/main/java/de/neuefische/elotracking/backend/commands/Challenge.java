@@ -62,8 +62,8 @@ public class Challenge extends ApplicationCommandInteractionCommand {
 				.addComponent(ActionRow.of(
 						Button.primary("accept:" + challengerMessage.getChannelId().asString(),
 								Emojis.checkMark, "Accept"),
-						Button.primary("reject:" + challengerMessage.getChannelId().asString(),
-								Emojis.crossMark, "Reject")
+						Button.primary("decline:" + challengerMessage.getChannelId().asString(),
+								Emojis.crossMark, "Decline")
 				)).build();
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 

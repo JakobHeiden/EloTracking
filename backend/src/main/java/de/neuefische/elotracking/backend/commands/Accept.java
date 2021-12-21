@@ -7,17 +7,11 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
-
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
-import discord4j.core.spec.MessageEditSpec;
 import lombok.extern.slf4j.Slf4j;
-
-import java.awt.*;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public class Accept extends ButtonInteractionCommand {
