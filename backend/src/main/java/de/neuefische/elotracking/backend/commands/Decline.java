@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.command.MessageContent;
+import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
@@ -17,8 +18,9 @@ public class Decline extends ButtonInteractionCommand {
 
 	public void execute() {
 		Message acceptorMessage = event.getMessage().get();
+		ChallengeModel challenge = service.getChallengeByAcceptorMessageId(acceptorMessage.getId().asLong()).get();
 
-		service.deleteChallengeById(acceptorMessage.getId().asLong());
+		service.deleteChallengeById(challenge.getChallengerMessageId());
 
 		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
 				.makeAllNotBold()

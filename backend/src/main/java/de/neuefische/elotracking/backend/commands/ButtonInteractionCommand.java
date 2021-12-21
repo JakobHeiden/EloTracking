@@ -22,6 +22,7 @@ public abstract class ButtonInteractionCommand {
 	protected final Game game;
 	protected final ChallengeModel challenge;
 	protected final boolean isChallengerCommand;
+	protected final long otherPlayerPrivateChannelId;
 
 	public ButtonInteractionCommand(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		this.event = event;
@@ -40,6 +41,7 @@ public abstract class ButtonInteractionCommand {
 			this.isChallengerCommand = false;
 		}
 		this.game = service.findGameByGuildId(guildId).get();
+		this.otherPlayerPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
 	}
 
 	public abstract void execute();

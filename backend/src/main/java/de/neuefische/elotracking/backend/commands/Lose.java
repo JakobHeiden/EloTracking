@@ -10,6 +10,8 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
+import java.util.ArrayList;
+
 public class Lose extends ButtonInteractionCommand {
 
 	public Lose(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
@@ -22,8 +24,8 @@ public class Lose extends ButtonInteractionCommand {
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.LOSE);
 		service.saveChallenge(challenge);
 		Message reportedOnMessage = isChallengerCommand ?
-				bot.getMessageById(Long.parseLong(event.getCustomId().split(":")[1]), challenge.getAcceptorMessageId()).block()
-				: bot.getMessageById(Long.parseLong(event.getCustomId().split(":")[1]), challenge.getChallengerMessageId()).block();
+				bot.getMessageById(otherPlayerPrivateChannelId, challenge.getAcceptorMessageId()).block()
+				: bot.getMessageById(otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
 
 		removeSelfReactions(reporterMessage, Emojis.arrowUp, Emojis.arrowDown, Emojis.leftRightArrow, Emojis.crossMark);
 
@@ -31,17 +33,19 @@ public class Lose extends ButtonInteractionCommand {
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
 					.addNewLine("You reported a loss. I'll let you know when your opponent reported as well.");
-			reporterMessage.edit().withContent(reporterMessageContent.get()).subscribe();
+			reporterMessage.edit().withContent(reporterMessageContent.get())
+					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.addNewLine("Your opponent reported a loss.");
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
+			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
+					.withComponents(new ArrayList<>()).subscribe();
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {
 			Match match = new Match(guildId,
-					isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 					isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
+					isChallengerCommand ? challenge.getChallengerId(): challenge.getAcceptorId(),
 					false);
 			double[] eloResults = service.updateRatings(match);// TODO transaction machen?
 			service.saveMatch(match);
@@ -49,16 +53,17 @@ public class Lose extends ButtonInteractionCommand {
 
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addNewLine("You reported a win. Your report matches that of your opponent. The match has been resolved:")
+					.addNewLine("You reported a loss :arrow_down:. Your report matches that of your opponent. The match has been resolved:")
 					.addNewLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]));
-			reporterMessage.edit().withContent(reporterMessageContent.get()).subscribe();
+			reporterMessage.edit().withContent(reporterMessageContent.get())
+					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.makeAllNotBold()
-					.addNewLine("The result reported by your opponent matches yours. The match has been resolved:")
+					.addNewLine("The result reported by your opponent matches your report. The match has been resolved:")
 					.addNewLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]));
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
+			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
+					.withComponents(new ArrayList<>()).subscribe();
 		}
-
 	}
 }
