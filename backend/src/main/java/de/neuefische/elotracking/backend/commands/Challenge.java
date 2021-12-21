@@ -1,35 +1,33 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.command.Emojis;
+import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
+import discord4j.core.spec.MessageCreateSpec;
 import lombok.extern.slf4j.Slf4j;
-import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 @Slf4j
-public class Challenge extends Command {
+public class Challenge extends ApplicationCommandInteractionCommand {
 
-	private final ApplicationCommandInteractionEvent event;
-
-	public Challenge(Event event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+	public Challenge(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		super(event, service, bot, queue);
-		this.event = (ApplicationCommandInteractionEvent) event;
-	}
-
-	public static String getDescription() {
-		return "!ch[allenge] @player - challenge another player to a match";
 	}
 
 	public void execute() {
-		super.setupGameIfNotPresent();
+		setupGameIfNotPresent();
 
 		long challengerId = event.getInteraction().getUser().getId().asLong();
 		long acceptorId = 0L;
@@ -38,36 +36,56 @@ public class Challenge extends Command {
 		} else if (event instanceof UserInteractionEvent) {
 			acceptorId = ((UserInteractionEvent) event).getTargetId().asLong();
 		}
-		log.warn(String.valueOf(acceptorId));
 
 		if (challengerId == acceptorId) {
-			addBotReply("You cannot challenge yourself");// TODO anders ausschliessen?
+			event.reply("You cannot challenge yourself.").withEphemeral(true).subscribe();
 			return;
 		}
 		if (service.challengeExistsByParticipants(guildId, challengerId, acceptorId)) {
-			addBotReply("challenge already exists");
+			event.reply("You already challenged that player. You should have received a private message from me...")
+					.withEphemeral(true).subscribe();
 			return;
 		}
 
-		Mono<Message> messageToAcceptorMono = bot.sendToUser(acceptorId, String.format(
-				"**You have been challenged by <@%s>. Accept?**", challengerId));
-		Mono<Message> messageToChallengerMono = bot.sendToUser(challengerId, String.format(
-				"You have challenged <@%s> to a match. I'll let you know when they react.", acceptorId));
-		Message acceptorMessage = messageToAcceptorMono.block();// TODO das geht sicherlich besser
-		acceptorMessage.addReaction(Emojis.checkMark).subscribe();
-		acceptorMessage.addReaction(Emojis.crossMark).subscribe();
-		Message challengerMessage = messageToChallengerMono.block();
+		MessageContent challengerMessageContent = new MessageContent(
+				String.format("You have challenged <@%s> to a match. I'll let you know when they react.", acceptorId));
+		MessageCreateSpec challengerMessageSpec = MessageCreateSpec.builder()
+				.content(challengerMessageContent.get())
+				.build();
+		Message challengerMessage = bot.sendToUser(challengerId, challengerMessageSpec).block();
+
+		MessageContent acceptorMessageContent = new MessageContent(
+				String.format("You have been challenged to a match by <@%s>. Accept?", challengerId))
+				.makeLastLineBold();
+		MessageCreateSpec acceptorMessageSpec = MessageCreateSpec.builder()
+				.content(acceptorMessageContent.get())
+				.addComponent(ActionRow.of(
+						Button.primary("accept:" + challengerMessage.getChannelId().asString(),
+								Emojis.checkMark, "Accept"),
+						Button.primary("reject:" + challengerMessage.getChannelId().asString(),
+								Emojis.crossMark, "Reject")
+				)).build();
+		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, challengerId);
 		ChallengeModel challenge = new ChallengeModel(guildId,
-				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(),
-				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong());
-
-		System.out.println(challenge.getChallengerMessageId());
-		System.out.println(challenge.getAcceptorMessageId());
+				challengerId, challengerMessage.getId().asLong(),
+				acceptorId, acceptorMessage.getId().asLong());
 
 		queue.addTimedTask(TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), guildId);
 		service.saveChallenge(challenge);
-		addBotReply(String.format("Challenge is registered. I have sent you and %s a message.", bot.getPlayerName(acceptorId)));
+		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",
+				bot.getPlayerName(acceptorId)))
+				.withEphemeral(true).subscribe();
+	}
+
+	private void setupGameIfNotPresent() {
+		Optional<Game> maybeGame = service.findGameByGuildId(guildId);
+		if (maybeGame.isEmpty()) {
+			game = new Game(guildId, "name not set");
+			service.saveGame(game);
+		} else {
+			game = maybeGame.get();
+		}
 	}
 }

@@ -31,10 +31,8 @@ public class ChallengeModel {
     private long challengerId;
     @Id
     private long challengerMessageId;
-    private long challengerPrivateChannelId;
     private long acceptorId;
     private long acceptorMessageId;
-    private long acceptorPrivateChannelId;
 
     private boolean isAccepted;
     private ReportStatus challengerReported;
@@ -43,15 +41,13 @@ public class ChallengeModel {
     private boolean acceptorCalledForCancel = false;
 
     public ChallengeModel(long guildId,
-                          long challengerId, long challengerMessageId, long challengerPrivateChannelId,
-                          long acceptorId, long acceptorMessageId, long acceptorPrivateChannelId) {
+                          long challengerId, long challengerMessageId,
+                          long acceptorId, long acceptorMessageId) {
         this.guildId = guildId;
         this.challengerId = challengerId;
         this.challengerMessageId = challengerMessageId;
-        this.challengerPrivateChannelId = challengerPrivateChannelId;
         this.acceptorId = acceptorId;
         this.acceptorMessageId = acceptorMessageId;
-        this.acceptorPrivateChannelId = acceptorPrivateChannelId;
 
         this.isAccepted = false;
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;

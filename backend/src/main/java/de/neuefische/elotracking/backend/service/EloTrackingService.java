@@ -132,7 +132,7 @@ public class EloTrackingService {
 				challenge.getChallengerId(), challenge.getAcceptorId(), time));
 	}
 
-	public List<ChallengeModel> findAllChallengesByAcceptorIdAndChannelId(long acceptorId, long channelId) {
+	public List<ChallengeModel> findAllChallengesByAcceptorIdAndGuildId(long acceptorId, long channelId) {
 		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
 		List<ChallengeModel> filteredByChannel = allChallenges.stream().
 				filter(challenge -> challenge.getGuildId() == channelId)
