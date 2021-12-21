@@ -7,12 +7,13 @@ import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.Message;
 
-public class Lose extends EmojiCommand {
+public class Lose extends ButtonInteractionCommand {
 
-	public Lose(ReactionAddEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
+	public Lose(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		super(event, service, bot, queue);
 	}
 
@@ -22,8 +23,8 @@ public class Lose extends EmojiCommand {
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.LOSE);
 		service.saveChallenge(challenge);
 		Message reportedOnMessage = isChallengerCommand ?
-				bot.getMessageById(challenge.getAcceptorPrivateChannelId(), challenge.getAcceptorMessageId()).block()
-				: bot.getMessageById(challenge.getChallengerPrivateChannelId(), challenge.getChallengerMessageId()).block();
+				bot.getMessageById(Long.parseLong(event.getCustomId().split(":")[1]), challenge.getAcceptorMessageId()).block()
+				: bot.getMessageById(Long.parseLong(event.getCustomId().split(":")[1]), challenge.getChallengerMessageId()).block();
 
 		removeSelfReactions(reporterMessage, Emojis.arrowUp, Emojis.arrowDown, Emojis.leftRightArrow, Emojis.crossMark);
 

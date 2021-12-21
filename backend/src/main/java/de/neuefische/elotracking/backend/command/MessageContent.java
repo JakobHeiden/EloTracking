@@ -33,4 +33,8 @@ public class MessageContent {
 	public String get() {
 		return content;
 	}
+
+	public String toString() {
+		return get();
+	}
 }
