@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.*;
+import de.neuefische.elotracking.backend.commands.ApplicationCommandInteractionCommand;
+import de.neuefische.elotracking.backend.commands.ButtonInteractionCommand;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
