@@ -15,6 +15,8 @@ public class MessageContent {
 
 	public MessageContent makeAllNotBold() {
 		content = content.replace("**", "");
+		System.out.println("notBold");
+		System.out.println(content);
 		return this;
 	}
 
@@ -27,6 +29,8 @@ public class MessageContent {
 
 	public MessageContent makeAllItalic() {
 		content = "*" + content + "*";
+		System.out.println("italic");
+		System.out.println(content);
 		return this;
 	}
 

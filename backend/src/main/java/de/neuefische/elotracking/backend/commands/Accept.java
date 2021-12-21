@@ -31,12 +31,13 @@ public class Accept extends ButtonInteractionCommand {
 				game.getAcceptedChallengeDecayTime(), challenge.getChallengerMessageId());
 		service.saveChallenge(challenge);
 
-		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
-				.makeAllNotBold()
-				.addNewLine("You have accepted the challenge.")
+		Message challengerMessage = bot.getMessageById(
+				otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
+		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+				.addNewLine("They have accepted your challenge.")
 				.addNewLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
 				.makeLastLineBold();
-		acceptorMessage.edit().withContent(acceptorMessageContent.get())
+		challengerMessage.edit().withContent(challengerMessageContent.get())
 				.withComponents(ActionRow.of(
 						Button.primary("win:" + acceptorMessage.getChannelId().asString(),
 								Emojis.arrowUp, "Win"),
@@ -48,13 +49,12 @@ public class Accept extends ButtonInteractionCommand {
 								Emojis.crossMark, "Cancel match")))
 				.subscribe();
 
-		Message challengerMessage = bot.getMessageById(
-				Long.parseLong(event.getCustomId().split(":")[1]), challenge.getChallengerMessageId()).block();
-		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
-				.addNewLine("They have accepted your challenge.")
+		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+				.makeAllNotBold()
+				.addNewLine("You have accepted the challenge.")
 				.addNewLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
 				.makeLastLineBold();
-		challengerMessage.edit().withContent(challengerMessageContent.get())
+		acceptorMessage.edit().withContent(acceptorMessageContent.get())
 				.withComponents(ActionRow.of(
 						Button.primary("win:" + challengerMessage.getChannelId().asString(),
 								Emojis.arrowUp, "Win"),
