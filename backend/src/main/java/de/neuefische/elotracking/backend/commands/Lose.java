@@ -32,12 +32,12 @@ public class Lose extends ButtonInteractionCommand {
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addNewLine("You reported a loss. I'll let you know when your opponent reported as well.");
+					.addLine("You reported a loss. I'll let you know when your opponent reported as well.");
 			reporterMessage.edit().withContent(reporterMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
-					.addNewLine("Your opponent reported a loss.");
+					.addLine("Your opponent reported a loss.");
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 		}
@@ -45,7 +45,7 @@ public class Lose extends ButtonInteractionCommand {
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {
 			Match match = new Match(guildId,
 					isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
-					isChallengerCommand ? challenge.getChallengerId(): challenge.getAcceptorId(),
+					isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 					false);
 			double[] eloResults = service.updateRatings(match);// TODO transaction machen?
 			service.saveMatch(match);
@@ -53,15 +53,17 @@ public class Lose extends ButtonInteractionCommand {
 
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addNewLine("You reported a loss :arrow_down:. Your report matches that of your opponent. The match has been resolved:")
-					.addNewLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]));
+					.addLine("You reported a loss :arrow_down:. Your report matches that of your opponent. The match has been resolved:")
+					.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
+					.makeAllItalic();
 			reporterMessage.edit().withContent(reporterMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.makeAllNotBold()
-					.addNewLine("The result reported by your opponent matches your report. The match has been resolved:")
-					.addNewLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]));
+					.addLine("The result reported by your opponent matches your report. The match has been resolved:")
+					.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
+					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 		}

@@ -8,15 +8,13 @@ public class MessageContent {
 		this.content = content;
 	}
 
-	public MessageContent addNewLine(String newLine) {
+	public MessageContent addLine(String newLine) {
 		content = content + "\n" + newLine;
 		return this;
 	}
 
 	public MessageContent makeAllNotBold() {
 		content = content.replace("**", "");
-		System.out.println("notBold");
-		System.out.println(content);
 		return this;
 	}
 
@@ -29,16 +27,10 @@ public class MessageContent {
 
 	public MessageContent makeAllItalic() {
 		content = "*" + content + "*";
-		System.out.println("italic");
-		System.out.println(content);
 		return this;
 	}
 
 	public String get() {
 		return content;
-	}
-
-	public String toString() {
-		return get();
 	}
 }

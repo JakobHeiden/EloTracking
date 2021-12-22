@@ -34,8 +34,8 @@ public class Accept extends ButtonInteractionCommand {
 		Message challengerMessage = bot.getMessageById(
 				otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
 		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
-				.addNewLine("They have accepted your challenge.")
-				.addNewLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
+				.addLine("They have accepted your challenge.")
+				.addLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
 				.makeLastLineBold();
 		challengerMessage.edit().withContent(challengerMessageContent.get())
 				.withComponents(ActionRow.of(
@@ -51,8 +51,8 @@ public class Accept extends ButtonInteractionCommand {
 
 		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
 				.makeAllNotBold()
-				.addNewLine("You have accepted the challenge.")
-				.addNewLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
+				.addLine("You have accepted the challenge.")
+				.addLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
 				.makeLastLineBold();
 		acceptorMessage.edit().withContent(acceptorMessageContent.get())
 				.withComponents(ActionRow.of(
