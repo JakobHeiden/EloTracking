@@ -19,6 +19,7 @@ public class ApplicationPropertiesLoader {
 	private String testBotChallengerId;
 	private String testBotAcceptorId;
 	private boolean deleteDataOnStartup;
+	private boolean deployGuildCommands;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
 }

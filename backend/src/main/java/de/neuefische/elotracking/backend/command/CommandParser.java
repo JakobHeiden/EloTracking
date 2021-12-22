@@ -10,12 +10,14 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.function.Function;
 
 @Slf4j
@@ -42,7 +44,7 @@ public class CommandParser {
         this.queue = queue;
         this.botSnowflake = client.getSelfId();
 
-        ApplicationCommandRequest challengeCmdRequest = ApplicationCommandRequest.builder()
+        ApplicationCommandRequest challengeCommandRequest = ApplicationCommandRequest.builder()
                 .name("challenge")
                 .description("Challenge a player to a match")
                 .addOption(ApplicationCommandOptionData.builder()
@@ -56,35 +58,61 @@ public class CommandParser {
                 .name("challenge")
                 .build();
 
-        ApplicationService applicationService = client.getRestClient().getApplicationService();
-        System.out.println("global");
-        applicationService.getGlobalApplicationCommands(botSnowflake.asLong())
-                        .subscribe(applicationCommandData -> System.out.println(applicationCommandData.id()));
-        System.out.println("guild");
-        applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
-                .subscribe(applicationCommandData -> System.out.println(applicationCommandData.id()));
-        //applicationService.deleteGuildApplicationCommand(applicationId, entenwieseId, 919196138941349898L).subscribe();
-        //applicationService.deleteGuildApplicationCommand(applicationId, entenwieseId, 919396992906579999L).subscribe();
-        //applicationService.deleteGuildApplicationCommand(applicationId, entenwieseId, 920374163997327391L).subscribe();
-        //applicationService.deleteGuildApplicationCommand(applicationId, entenwieseId, 920376289536385134L).subscribe();
-        //applicationService.deleteGuildApplicationCommand(applicationId, entenwieseId, 920376617514201128L).subscribe();
-        //applicationService.deleteGuildApplicationCommand(applicationId, entenwieseId, 920381930388717639L).subscribe();
-        //applicationService.deleteGlobalApplicationCommand(applicationId, 920324803393646632L).subscribe();
-        //applicationService.deleteGlobalApplicationCommand(applicationId, 920324803859193897L).subscribe();
-        //applicationService.deleteGlobalApplicationCommand(applicationId, 921890863565664347L).subscribe();
-        //applicationService.createGlobalApplicationCommand(applicationId, challengeCmdRequest).subscribe();
-        //applicationService.createGlobalApplicationCommand(applicationId, challengeUserCommandRequest).subscribe();
+        ApplicationCommandRequest setupCommandRequest = ApplicationCommandRequest.builder()
+                .name("setup")
+                .description("Get started with the bot")
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("name").description("The name of the game you want to track elo rating for")
+                        .type(3).required(true).build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("logchannel").description("Should I create a channel where all resolved matches are displayed?")
+                        .type(5).required(true).build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("modchannel").description("Should I create a channel where all disputes are displayed?")
+                        .type(5).required(true).build())
+                .addOption(ApplicationCommandOptionData.builder()
+                        .name("allowdraw").description("Allow draw results and not just win or lose?")
+                        .type(5).required(true).build())
+                .build();
+
+        ApplicationCommandRequest createResultChannelCommandRequest = ApplicationCommandRequest.builder()
+                .name("createresultchannel")
+                .description("Create a channel to show logs of all matches played on the guild")
+                .build();
+
+        ApplicationCommandRequest createDisputeChannelCommandRequest = ApplicationCommandRequest.builder()
+                .name("createdisputechannel")
+                .description("Create a channel to show disputes that arise from conflicting match reports")
+                .build();
+
+        if (service.getPropertiesLoader().isDeployGuildCommands()) {
+            log.info("Deploying guild commands...");
+            ApplicationService applicationService = client.getRestClient().getApplicationService();
+
+            List<ApplicationCommandData> guildApplicationCommands = applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
+                    .collectList().block();
+            for (ApplicationCommandData guildApplicationCommand : guildApplicationCommands) {
+                applicationService.deleteGuildApplicationCommand(
+                        botSnowflake.asLong(), entenwieseId,
+                        Long.parseLong(guildApplicationCommand.id())).block();
+            }
+
+            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, setupCommandRequest).subscribe();
+            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, challengeCommandRequest).subscribe();
+            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, challengeUserCommandRequest).subscribe();
+            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, createResultChannelCommandRequest).subscribe();
+            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, createDisputeChannelCommandRequest).subscribe();
+        }
 
         client.on(ApplicationCommandInteractionEvent.class)
-                .map(event -> new ApplicationCommandInteractionEventWrapper(event, service, bot, queue))
+                .map(event -> new ApplicationCommandInteractionEventWrapper(event, service, bot, queue, client))
                 .map(slashCommandFactory::apply)
                 .subscribe(ApplicationCommandInteractionCommand::execute);
 
         client.on(ButtonInteractionEvent.class)
-                .map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue))
+                .map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue, client))
                 .map(buttonInteractionCommandFactory::apply)
                 .subscribe(ButtonInteractionCommand::execute);
-
     }
 
     public static ApplicationCommandInteractionCommand createSlashCommand(ApplicationCommandInteractionEventWrapper wrapper) {
@@ -93,8 +121,9 @@ public class CommandParser {
         log.trace("commandString = " + commandClassName);
         try {
             return (ApplicationCommandInteractionCommand) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
-                    .getConstructor(ApplicationCommandInteractionEvent.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
-                    .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue());
+                    .getConstructor(ApplicationCommandInteractionEvent.class, EloTrackingService.class,
+                            DiscordBotService.class, TimedTaskQueue.class, GatewayDiscordClient.class)
+                    .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
         } catch (Exception e) {
             wrapper.bot().sendToAdmin(e.getMessage());
             e.printStackTrace();
@@ -103,18 +132,14 @@ public class CommandParser {
     }
 
     public static ButtonInteractionCommand createButtonInteractionCommand(ButtonInteractionEventWrapper wrapper) {
-        ButtonInteractionEvent event = wrapper.event();
-        EloTrackingService service = wrapper.service();
-        DiscordBotService bot = wrapper.bot();
-        TimedTaskQueue queue = wrapper.queue();
-
-        String commandClassName = event.getCustomId().split(":")[0];
+        String commandClassName = wrapper.event().getCustomId().split(":")[0];
         commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
         log.trace("commandString = " + commandClassName);
         try {
             return (ButtonInteractionCommand) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
-                    .getConstructor(ButtonInteractionEvent.class, EloTrackingService.class, DiscordBotService.class, TimedTaskQueue.class)
-                    .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue());
+                    .getConstructor(ButtonInteractionEvent.class, EloTrackingService.class, DiscordBotService.class,
+                            TimedTaskQueue.class, GatewayDiscordClient.class)
+                    .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
         } catch (Exception e) {
             wrapper.bot().sendToAdmin(e.getMessage());
             e.printStackTrace();
