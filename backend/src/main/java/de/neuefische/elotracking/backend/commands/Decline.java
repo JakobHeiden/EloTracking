@@ -24,7 +24,7 @@ public class Decline extends ButtonInteractionCommand {
 
 		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
 				.makeAllNotBold()
-				.addNewLine("You have declined :negative_squared_cross_mark: their challenge.")
+				.addLine("You have declined :negative_squared_cross_mark: their challenge.")
 				.makeAllItalic();
 		acceptorMessage.edit().withContent(acceptorMessageContent.get())
 				.withComponents(new ArrayList<>()).subscribe();
@@ -32,7 +32,7 @@ public class Decline extends ButtonInteractionCommand {
 		Message challengerMessage = bot.getMessageById(
 				Long.parseLong(event.getCustomId().split(":")[1]), challenge.getChallengerMessageId()).block();
 		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
-				.addNewLine("They have declined :negative_squared_cross_mark: your challenge.")
+				.addLine("They have declined :negative_squared_cross_mark: your challenge.")
 				.makeAllItalic();
 		challengerMessage.edit().withContent(challengerMessageContent.get()).subscribe();
 
