@@ -21,7 +21,8 @@ import javax.annotation.PostConstruct;
 @Component
 public class DiscordBotService {
 
-	private final GatewayDiscordClient client;
+	@Getter
+	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
 	private final EloTrackingService service;
 	private final TimedTaskQueue queue;
 	private PrivateChannel adminDm;

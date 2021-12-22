@@ -5,6 +5,7 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
@@ -12,8 +13,9 @@ import java.util.ArrayList;
 
 public class Decline extends ButtonInteractionCommand {
 
-	public Decline(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
-		super(event, service, bot, queue);
+	public Decline(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+				   TimedTaskQueue queue, GatewayDiscordClient client) {
+		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {

@@ -7,6 +7,7 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
@@ -16,8 +17,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class Accept extends ButtonInteractionCommand {
 
-	public Accept(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
-		super(event, service, bot, queue);
+	public Accept(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
+				  GatewayDiscordClient client) {
+		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {
@@ -38,15 +40,7 @@ public class Accept extends ButtonInteractionCommand {
 				.addLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
 				.makeLastLineBold();
 		challengerMessage.edit().withContent(challengerMessageContent.get())
-				.withComponents(ActionRow.of(
-						Button.primary("win:" + acceptorMessage.getChannelId().asString(),
-								Emojis.arrowUp, "Win"),
-						Button.primary("lose:" + acceptorMessage.getChannelId().asString(),
-								Emojis.arrowDown, "Lose"),
-						Button.primary("draw:" + acceptorMessage.getChannelId().asString(),
-								Emojis.leftRightArrow, "Draw"),
-						Button.danger("cancel:" + acceptorMessage.getChannelId().asString(),
-								Emojis.crossMark, "Cancel match")))
+				.withComponents(createActionRow(acceptorMessage.getChannelId().asLong(), game.isAllowDraw()))
 				.subscribe();
 
 		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
@@ -55,17 +49,28 @@ public class Accept extends ButtonInteractionCommand {
 				.addLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
 				.makeLastLineBold();
 		acceptorMessage.edit().withContent(acceptorMessageContent.get())
-				.withComponents(ActionRow.of(
-						Button.primary("win:" + challengerMessage.getChannelId().asString(),
-								Emojis.arrowUp, "Win"),
-						Button.primary("lose:" + challengerMessage.getChannelId().asString(),
-								Emojis.arrowDown, "Lose"),
-						Button.primary("draw:" + challengerMessage.getChannelId().asString(),
-								Emojis.leftRightArrow, "Draw"),
-						Button.danger("cancel:" + challengerMessage.getChannelId().asString(),
-								Emojis.crossMark, "Cancel match")))
+				.withComponents(createActionRow(challengerMessage.getChannelId().asLong(), game.isAllowDraw()))
 				.subscribe();
 
 		event.acknowledge().subscribe();
+	}
+
+	private static ActionRow createActionRow(long channelId, boolean allowDraw) {
+		if (allowDraw) return ActionRow.of(
+			Button.primary("win:" + channelId,
+					Emojis.arrowUp, "Win"),
+			Button.primary("lose:" + channelId,
+					Emojis.arrowDown, "Lose"),
+			Button.primary("draw:" + channelId,
+					Emojis.leftRightArrow, "Draw"),
+			Button.danger("cancel:" + channelId,
+					Emojis.crossMark, "Cancel match"));
+		else return ActionRow.of(
+				Button.primary("win:" + channelId,
+						Emojis.arrowUp, "Win"),
+				Button.primary("lose:" + channelId,
+						Emojis.arrowDown, "Lose"),
+				Button.danger("cancel:" + channelId,
+						Emojis.crossMark, "Cancel match"));
 	}
 }

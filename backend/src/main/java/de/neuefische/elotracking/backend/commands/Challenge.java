@@ -8,6 +8,7 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
@@ -20,10 +21,11 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Optional;
 
 @Slf4j
-public class Challenge extends ApplicationCommandInteractionCommand {
+public class Challenge extends ApplicationCommandInteractionCommand {// TODO evtl slash und user commands trennen
 
-	public Challenge(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
-		super(event, service, bot, queue);
+	public Challenge(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+					 TimedTaskQueue queue, GatewayDiscordClient client) {
+		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {

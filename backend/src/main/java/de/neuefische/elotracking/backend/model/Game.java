@@ -16,7 +16,12 @@ public class Game {
 
     @Id
     private long guildId;
+    private long adminRoleId;
+    private long modRoleId;
     private String name;
+    private long resultChannelId;
+    private long disputeChannelId;
+    private boolean allowDraw;
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;
