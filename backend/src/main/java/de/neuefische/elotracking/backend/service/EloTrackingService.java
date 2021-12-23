@@ -254,4 +254,8 @@ public class EloTrackingService {
 						isWinnerMessage ? match.getWinnerAfterRating() : match.getLoserAfterRating()))
 				.subscribe();
 	}
+
+	public void timedDeleteMessage(long messageId, long channelId) {
+		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).subscribe();
+	}
 }

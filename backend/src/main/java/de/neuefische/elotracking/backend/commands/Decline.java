@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -38,6 +39,9 @@ public class Decline extends ButtonInteractionCommand {
 				.makeAllItalic();
 		challengerMessage.edit().withContent(challengerMessageContent.get()).subscribe();
 
-		event.acknowledge().subscribe();
+		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
+				challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(), null);
+		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
+				acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong(), null);
 	}
 }
