@@ -26,10 +26,11 @@ public class Challenge extends ApplicationCommandInteractionCommand {// TODO evt
 	public Challenge(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 					 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
+		this.needsGame = true;
 	}
 
 	public void execute() {
-		setupGameIfNotPresent();
+		if (!super.canExecute()) return;
 
 		long challengerId = event.getInteraction().getUser().getId().asLong();
 		long acceptorId = 0L;
@@ -79,15 +80,5 @@ public class Challenge extends ApplicationCommandInteractionCommand {// TODO evt
 		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",
 				bot.getPlayerName(acceptorId)))
 				.withEphemeral(true).subscribe();
-	}
-
-	private void setupGameIfNotPresent() {
-		Optional<Game> maybeGame = service.findGameByGuildId(guildId);
-		if (maybeGame.isEmpty()) {
-			game = new Game(guildId, "name not set");
-			service.saveGame(game);
-		} else {
-			game = maybeGame.get();
-		}
 	}
 }
