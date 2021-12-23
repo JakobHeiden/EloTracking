@@ -24,7 +24,7 @@ public class Win extends ButtonInteractionCommand {
 		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.WIN);
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.WIN);
 		service.saveChallenge(challenge);
-		System.out.println(isChallengerCommand);
+
 		Message reportedOnMessage = isChallengerCommand ?
 				bot.getMessageById(otherPlayerPrivateChannelId, challenge.getAcceptorMessageId()).block()
 				: bot.getMessageById(otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
