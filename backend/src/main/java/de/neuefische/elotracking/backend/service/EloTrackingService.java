@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.service;
 
+import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;
@@ -11,6 +12,10 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.model.Player;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.PrivateChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -29,6 +34,7 @@ public class EloTrackingService {
 	private static float initialRating = 1200;
 	private static float k = 16;
 	private final DiscordBotService bot;
+	private final GatewayDiscordClient client;
 	private final GameDao gameDao;
 	private final ChallengeDao challengeDao;
 	private final MatchDao matchDao;
@@ -37,10 +43,11 @@ public class EloTrackingService {
 	@Getter
 	private ApplicationPropertiesLoader propertiesLoader;
 
-	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
-							  ApplicationPropertiesLoader propertiesLoader,
+	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy GatewayDiscordClient client,
+							  @Lazy TimedTaskQueue timedTaskQueue, ApplicationPropertiesLoader propertiesLoader,
 							  GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
 		this.bot = discordBotService;
+		this.client = client;
 		this.timedTaskQueue = timedTaskQueue;
 		this.propertiesLoader = propertiesLoader;
 		this.gameDao = gameDao;
@@ -193,16 +200,24 @@ public class EloTrackingService {
 	}
 
 	// Rankings
-	public double[] updateRatings(Match match) {
+	public double[] updateRatings(Match match) {// TODO evtl match zurueckgeben
 		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();
+
 		double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
 				match.isDraw() ? 0.5 : 1, k);
+
+		match.setWinnerBeforeRating(winner.getRating());
+		match.setWinnerAfterRating(ratings[2]);
 		winner.setRating(ratings[2]);
+		match.setLoserBeforeRating(loser.getRating());
+		match.setLoserAfterRating(ratings[3]);
 		loser.setRating(ratings[3]);
+
 		playerDao.save(winner);
 		playerDao.save(loser);
 		matchDao.save(match);
+
 		return ratings;
 	}
 
@@ -225,4 +240,19 @@ public class EloTrackingService {
 	}
 
 
+	public void timedSummarizeMatch(long messageId, long channelId, Object value) {
+		Match match = (Match) value;
+		Message message = client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
+		boolean isWinnerMessage = ((PrivateChannel) message.getChannel().block())
+				.getRecipientIds().contains(Snowflake.of(match.getWinnerId()));
+		System.out.println(isWinnerMessage);
+		String opponentName = bot.getPlayerName(isWinnerMessage ? match.getLoserId() : match.getWinnerId());
+		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block()
+				.edit().withContent(String.format("*You played a match against %s and %s. Your rating went from %s to %s.*",
+						opponentName,
+						match.isDraw() ? "drew :left_right_arrow:" : isWinnerMessage ? "won :up_arrow:" : "lost :down_arrow:",
+						isWinnerMessage ? match.getWinnerBeforeRating() : match.getLoserBeforeRating(),
+						isWinnerMessage ? match.getWinnerAfterRating() : match.getLoserAfterRating()))
+				.subscribe();
+	}
 }

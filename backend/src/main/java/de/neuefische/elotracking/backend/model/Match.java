@@ -23,7 +23,11 @@ public class Match {
     private Date date;
     private long guildId;
     private long winnerId;
+    private double winnerBeforeRating;
+    private double winnerAfterRating;
     private long loserId;
+    private double loserBeforeRating;
+    private double loserAfterRating;
     private boolean isDraw;
 
     public Match(long guildId, long winnerId, long loserId, boolean isDraw) {
