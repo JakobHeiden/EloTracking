@@ -25,9 +25,7 @@ public class DiscordBotService {
 	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
 	private final EloTrackingService service;
 	private final TimedTaskQueue queue;
-	private PrivateChannel adminDm;
-	@Getter
-	private String adminMentionAsString;
+	private PrivateChannel ownerPrivateChannel;
 
 
 	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service, @Lazy CommandParser commandParser,
@@ -39,16 +37,15 @@ public class DiscordBotService {
 
 	@PostConstruct
 	public void initAdminDm() {
-		long adminId = Long.valueOf(service.getPropertiesLoader().getAdminId());
-		this.adminMentionAsString = String.format("<@%s>", adminId);
-		User admin = client.getUserById(Snowflake.of(adminId)).block();
-		this.adminDm = admin.getPrivateChannel().block();
-		log.info("Private channel to admin established");
-		sendToAdmin("I am logged in and ready");
+		long ownerId = Long.valueOf(service.getPropertiesLoader().getOwnerId());
+		User owner = client.getUserById(Snowflake.of(ownerId)).block();
+		this.ownerPrivateChannel = owner.getPrivateChannel().block();
+		log.info("Private channel to owner established");
+		sendToOwner("I am logged in and ready");
 	}
 
-	public void sendToAdmin(String text) {
-		adminDm.createMessage(text).subscribe();
+	public void sendToOwner(String text) {
+		ownerPrivateChannel.createMessage(text).subscribe();
 	}
 
 	public void sendToChannel(long channelId, String text) {
