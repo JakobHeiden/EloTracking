@@ -105,9 +105,18 @@ public class CommandParser {
         }
 
         if (service.getPropertiesLoader().isDeployGlobalCommands()) {
-            log.info("Deploying global commands...");
             ApplicationService applicationService = client.getRestClient().getApplicationService();
 
+            log.info("Deleting guild commands...");
+            List<ApplicationCommandData> guildApplicationCommands = applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
+                .collectList().block();
+            for (ApplicationCommandData guildApplicationCommand : guildApplicationCommands) {
+                applicationService.deleteGuildApplicationCommand(
+                        botSnowflake.asLong(), entenwieseId,
+                        Long.parseLong(guildApplicationCommand.id())).block();
+            }
+
+            log.info("Deploying global commands...");
             List<ApplicationCommandData> globalApplicationCommands = applicationService
                     .getGlobalApplicationCommands(botSnowflake.asLong()).collectList().block();
             for (ApplicationCommandData globalApplicationCommand : globalApplicationCommands) {
