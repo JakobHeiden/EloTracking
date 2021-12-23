@@ -32,12 +32,12 @@ public class Win extends ButtonInteractionCommand {
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You reported a win :arrow_up:. I'll let you know when your opponent reported as well.");
+					.addLine("You reported a win :arrow_up:. I'll let you know when your opponent reports.");
 			reporterMessage.edit().withContent(reporterMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
-					.addLine("Your opponent reported a win.");
+					.addLine("Your opponent reported a win :arrow_up:.");
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
 		}
 
@@ -52,7 +52,7 @@ public class Win extends ButtonInteractionCommand {
 
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You reported a win :arrow_up:. Your report matches that of your opponent. The match has been resolved:")
+					.addLine("You reported a win :arrow_up:. The match has been resolved:")
 					.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
 					.makeAllItalic();
 			reporterMessage.edit().withContent(reporterMessageContent.get())
@@ -60,7 +60,7 @@ public class Win extends ButtonInteractionCommand {
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.makeAllNotBold()
-					.addLine("The result reported by your opponent matches your report. The match has been resolved:")
+					.addLine("Your opponent reported a win :arrow_up:. The match has been resolved:")
 					.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
 					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())

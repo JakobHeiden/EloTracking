@@ -12,17 +12,17 @@ import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Cancel extends ButtonInteractionCommand {
+public class Draw extends ButtonInteractionCommand {
 
-	public Cancel(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
-				  TimedTaskQueue queue, GatewayDiscordClient client) {
+	public Draw(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+				TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {
 		ChallengeModel.ReportIntegrity reportIntegrity;
-		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.CANCEL);
-		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.CANCEL);
+		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.DRAW);
+		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.DRAW);
 		service.saveChallenge(challenge);
 
 		Message reportedOnMessage = isChallengerCommand ?
@@ -32,31 +32,36 @@ public class Cancel extends ButtonInteractionCommand {
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You called for a cancel :negative_squared_cross_mark:. " +
-							"I'll let you know when your opponent reacts.");
+					.addLine("You reported a draw :left_right_arrow:. I'll let you know when your opponent reports.");
 			reporterMessage.edit().withContent(reporterMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
-					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.");
+					.addLine("Your opponent reported a draw :left_right_arrow:.");
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {
+			Match match = new Match(guildId,
+					isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
+					isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
+					true);
+			double[] eloResults = service.updateRatings(match);// TODO transaction machen?
+			service.saveMatch(match);
 			service.deleteChallenge(challenge);
 
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You called for a cancel :negative_squared_cross_mark:. " +
-							"The challenge has been canceled.")
+					.addLine("You reported a draw :left_right_arrow:. The match has been resolved:")
+					.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
 					.makeAllItalic();
 			reporterMessage.edit().withContent(reporterMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.makeAllNotBold()
-					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
-							"The challenge has been canceled.")
+					.addLine("Your opponent reported a draw :left_right_arrow:. The match has been resolved:")
+					.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
 					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
