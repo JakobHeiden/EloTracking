@@ -104,6 +104,25 @@ public class CommandParser {
             applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, createDisputeChannelCommandRequest).subscribe();
         }
 
+        if (service.getPropertiesLoader().isDeployGlobalCommands()) {
+            log.info("Deploying global commands...");
+            ApplicationService applicationService = client.getRestClient().getApplicationService();
+
+            List<ApplicationCommandData> globalApplicationCommands = applicationService
+                    .getGlobalApplicationCommands(botSnowflake.asLong()).collectList().block();
+            for (ApplicationCommandData globalApplicationCommand : globalApplicationCommands) {
+                applicationService.deleteGlobalApplicationCommand(
+                        botSnowflake.asLong(),
+                        Long.parseLong(globalApplicationCommand.id())).block();
+            }
+
+            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), setupCommandRequest).subscribe();
+            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeCommandRequest).subscribe();
+            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeUserCommandRequest).subscribe();
+            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), createResultChannelCommandRequest).subscribe();
+            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), createDisputeChannelCommandRequest).subscribe();
+        }
+
         client.on(ApplicationCommandInteractionEvent.class)
                 .map(event -> new ApplicationCommandInteractionEventWrapper(event, service, bot, queue, client))
                 .map(slashCommandFactory::apply)

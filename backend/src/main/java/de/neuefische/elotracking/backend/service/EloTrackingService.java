@@ -37,7 +37,8 @@ public class EloTrackingService {
 	@Getter
 	private ApplicationPropertiesLoader propertiesLoader;
 
-	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue, ApplicationPropertiesLoader propertiesLoader,
+	public EloTrackingService(@Lazy DiscordBotService discordBotService, @Lazy TimedTaskQueue timedTaskQueue,
+							  ApplicationPropertiesLoader propertiesLoader,
 							  GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
 		this.bot = discordBotService;
 		this.timedTaskQueue = timedTaskQueue;

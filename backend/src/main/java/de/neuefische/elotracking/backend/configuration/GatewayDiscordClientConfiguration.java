@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.configuration;
 
+import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -13,9 +14,12 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayDiscordClientConfiguration {
 
 	@Bean
-	public GatewayDiscordClient createClient() {
+	public GatewayDiscordClient createClient(EloTrackingService service) {
+		String botToken = service.getPropertiesLoader().isUseDevBotToken() ?
+				System.getenv("DEV_BOT_TOKEN")
+				: System.getenv("DISCORD_BOT_TOKEN");
 		GatewayDiscordClient client = DiscordClientBuilder
-				.create(System.getenv("DISCORD_BOT_TOKEN"))
+				.create(botToken)
 				.build()
 				.login()
 				.block();
