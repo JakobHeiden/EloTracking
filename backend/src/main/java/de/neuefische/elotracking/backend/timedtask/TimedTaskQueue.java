@@ -34,9 +34,9 @@ public class TimedTaskQueue {
 		}
 	}
 
-	public void addTimedTask(TimedTask.TimedTaskType type, int time, long relationId) {
+	public void addTimedTask(TimedTask.TimedTaskType type, int time, long relationId, long otherId, Object value) {
 		timeSlots[(currentIndex + time) % numberOfTimeSlots]
-				.add(new TimedTask(type, time, relationId));
+				.add(new TimedTask(type, time, relationId, otherId, value));
 	}
 
 	@Scheduled(fixedRate = 60000)
@@ -55,6 +55,8 @@ public class TimedTaskQueue {
 					case MATCH_AUTO_RESOLVE:
 						service.timedAutoResolveMatch(id, time);
 						break;
+					case MATCH_SUMMARIZE:
+						service.timedSummarizeMatch(id, task.otherId(), task.value());
 				}
 			}
 

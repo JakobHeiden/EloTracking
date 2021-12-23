@@ -25,6 +25,7 @@ public class Game {
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;
+    private int matchSummarizeTime;
 
     public Game(long guildId, String name) {
         this.guildId = guildId;
@@ -32,5 +33,6 @@ public class Game {
         this.openChallengeDecayTime = 2 * 60;
         this.acceptedChallengeDecayTime = 7 * 24 * 60;
         this.matchAutoResolveTime = 24 * 60;
+        this.matchSummarizeTime = 24 * 60;
     }
 }

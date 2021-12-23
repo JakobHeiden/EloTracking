@@ -30,14 +30,15 @@ public class Accept extends ButtonInteractionCommand {
 		service.addNewPlayerIfPlayerNotPresent(guildId, acceptorId);
 		challenge.setAccepted(true);
 		queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY,
-				game.getAcceptedChallengeDecayTime(), challenge.getChallengerMessageId());
+				game.getAcceptedChallengeDecayTime(), challenge.getChallengerMessageId(), 0L, null);
 		service.saveChallenge(challenge);
 
 		Message challengerMessage = bot.getMessageById(
 				otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
 		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
 				.addLine("They have accepted your challenge.")
-				.addLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
+				.addLine(String.format("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:%s",
+						game.isAllowDraw() ? " or drew :left_right_arrow:" : ""))
 				.makeLastLineBold();
 		challengerMessage.edit().withContent(challengerMessageContent.get())
 				.withComponents(createActionRow(acceptorMessage.getChannelId().asLong(), game.isAllowDraw()))

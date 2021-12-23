@@ -5,6 +5,7 @@ import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -42,10 +43,7 @@ public class Draw extends ButtonInteractionCommand {
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {
-			Match match = new Match(guildId,
-					isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
-					isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
-					true);
+			Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(), true);
 			double[] eloResults = service.updateRatings(match);// TODO transaction machen?
 			service.saveMatch(match);
 			service.deleteChallenge(challenge);
@@ -65,6 +63,11 @@ public class Draw extends ButtonInteractionCommand {
 					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
+
+			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
+					reporterMessage.getId().asLong(), reporterMessage.getChannelId().asLong(), match);
+			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
+					reportedOnMessage.getId().asLong(), reportedOnMessage.getChannelId().asLong(), match);
 		}
 	}
 }

@@ -75,7 +75,8 @@ public class Challenge extends ApplicationCommandInteractionCommand {// TODO evt
 				challengerId, challengerMessage.getId().asLong(),
 				acceptorId, acceptorMessage.getId().asLong());
 
-		queue.addTimedTask(TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), guildId);
+		queue.addTimedTask(TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), guildId,
+				0L, null);
 		service.saveChallenge(challenge);
 		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",
 				bot.getPlayerName(acceptorId)))
