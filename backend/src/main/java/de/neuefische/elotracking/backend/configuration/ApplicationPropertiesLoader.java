@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "elotracking")
 public class ApplicationPropertiesLoader {
 
-	private String adminId;
+	private String ownerId;
 	private String baseUrl;
 	private int numberOfTimeSlots;
 	private String testBotChallengerId;

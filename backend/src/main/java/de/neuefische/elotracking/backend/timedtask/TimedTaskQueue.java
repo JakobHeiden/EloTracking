@@ -64,7 +64,7 @@ public class TimedTaskQueue {
 			currentIndex++;
 			if (currentIndex == numberOfTimeSlots) currentIndex = 0;
 		} catch (Exception e) {
-			bot.sendToAdmin(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
+			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
 			throw e;
 		}
 	}

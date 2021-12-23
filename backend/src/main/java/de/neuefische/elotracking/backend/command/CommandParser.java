@@ -14,7 +14,6 @@ import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEven
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -177,7 +176,7 @@ public class CommandParser {
                             DiscordBotService.class, TimedTaskQueue.class, GatewayDiscordClient.class)
                     .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
         } catch (Exception e) {
-            wrapper.bot().sendToAdmin(e.getMessage());
+            wrapper.bot().sendToOwner(e.getMessage());
             e.printStackTrace();
             return null;
         }
@@ -193,7 +192,7 @@ public class CommandParser {
                             TimedTaskQueue.class, GatewayDiscordClient.class)
                     .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
         } catch (Exception e) {
-            wrapper.bot().sendToAdmin(e.getMessage());
+            wrapper.bot().sendToOwner(e.getMessage());
             e.printStackTrace();
             return null;
         }

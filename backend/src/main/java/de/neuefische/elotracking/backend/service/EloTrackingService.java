@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import de.neuefische.elotracking.backend.dao.ChallengeDao;
 import de.neuefische.elotracking.backend.dao.GameDao;

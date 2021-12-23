@@ -3,7 +3,6 @@ package de.neuefische.elotracking.backend.commands;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
-import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
@@ -17,8 +16,6 @@ import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateSpec;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Optional;
 
 @Slf4j
 public class Challenge extends ApplicationCommandInteractionCommand {// TODO evtl slash und user commands trennen
