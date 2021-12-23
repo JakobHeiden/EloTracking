@@ -35,12 +35,12 @@ public class Lose extends ButtonInteractionCommand {
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You reported a loss. I'll let you know when your opponent reported as well.");
+					.addLine("You reported a loss :arrow_down:. I'll let you know when your opponent reports.");
 			reporterMessage.edit().withContent(reporterMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
-					.addLine("Your opponent reported a loss.");
+					.addLine("Your opponent reported a loss :arrow_down:.");
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 		}
@@ -56,7 +56,7 @@ public class Lose extends ButtonInteractionCommand {
 
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You reported a loss :arrow_down:. Your report matches that of your opponent. The match has been resolved:")
+					.addLine("You reported a loss :arrow_down:. The match has been resolved:")
 					.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
 					.makeAllItalic();
 			reporterMessage.edit().withContent(reporterMessageContent.get())
@@ -64,7 +64,7 @@ public class Lose extends ButtonInteractionCommand {
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.makeAllNotBold()
-					.addLine("The result reported by your opponent matches your report. The match has been resolved:")
+					.addLine("Your opponent reported a loss :arrow_down:. The match has been resolved:")
 					.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
 					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
