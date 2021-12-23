@@ -2,6 +2,9 @@ package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.commands.ApplicationCommandInteractionCommand;
 import de.neuefische.elotracking.backend.commands.ButtonInteractionCommand;
+import de.neuefische.elotracking.backend.commands.Createdisputechannel;
+import de.neuefische.elotracking.backend.commands.Createresultchannel;
+import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
@@ -10,6 +13,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -130,6 +136,24 @@ public class CommandParser {
             applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeUserCommandRequest).subscribe();
             applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), createResultChannelCommandRequest).subscribe();
             applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), createDisputeChannelCommandRequest).subscribe();
+        }
+
+        if (service.getPropertiesLoader().isSetupDevGame()) {
+            log.info("Setting up Dev Game...");
+            Game game = new Game(entenwieseId, "Dev Game");
+            game.setAllowDraw(true);
+            service.saveGame(game);
+
+            Guild entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
+            List<GuildChannel> channels = entenwieseGuild.getChannels()
+                    .filter(channel -> channel.getName().equals("elotracking-results")
+                            || channel.getName().equals("elotracking-disputes"))
+                    .collectList().block();
+            for (GuildChannel channel : channels) {
+                channel.delete().block();
+            }
+            Createresultchannel.staticExecute(service, entenwieseGuild, game);
+            Createdisputechannel.staticExecute(entenwieseGuild, game);
         }
 
         client.on(ApplicationCommandInteractionEvent.class)
