@@ -26,6 +26,7 @@ public class Game {
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;
     private int matchSummarizeTime;
+    private int deleteMessageTime;
 
     public Game(long guildId, String name) {
         this.guildId = guildId;
@@ -34,5 +35,6 @@ public class Game {
         this.acceptedChallengeDecayTime = 7 * 24 * 60;
         this.matchAutoResolveTime = 24 * 60;
         this.matchSummarizeTime = 24 * 60;
+        this.deleteMessageTime = 60;
     }
 }

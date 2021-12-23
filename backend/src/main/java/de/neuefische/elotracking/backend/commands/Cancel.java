@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -59,6 +60,12 @@ public class Cancel extends ButtonInteractionCommand {
 					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
+
+			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
+					reporterMessage.getId().asLong(), reporterMessage.getChannelId().asLong(), null);
+			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
+					reportedOnMessage.getId().asLong(), reportedOnMessage.getChannelId().asLong(), null);
 		}
+
 	}
 }
