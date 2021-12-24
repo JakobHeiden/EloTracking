@@ -18,7 +18,7 @@ public abstract class ButtonCommand {
 	protected final TimedTaskQueue queue;
 	protected final GatewayDiscordClient client;
 	protected final ButtonInteractionEvent event;
-	protected final Message reporterMessage;
+	protected final Message parentMessage;
 	protected final long guildId;
 	protected final Game game;
 	protected final ChallengeModel challenge;
@@ -31,7 +31,7 @@ public abstract class ButtonCommand {
 		this.service = service;
 		this.bot = bot;
 		this.queue = queue;
-		this.reporterMessage = event.getMessage().get();
+		this.parentMessage = event.getMessage().get();
 		this.client = client;
 		Optional<ChallengeModel> maybeChallengeByChallengerMessageId = service.getChallengeByChallengerMessageId(event.getMessageId().asLong());
 		if (maybeChallengeByChallengerMessageId.isPresent()) {
