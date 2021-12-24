@@ -69,24 +69,8 @@ public class CommandParser {
                         .name("name").description("The name of the game you want to track elo rating for")
                         .type(3).required(true).build())
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("logchannel").description("Should I create a channel where all resolved matches are displayed?")
-                        .type(5).required(true).build())
-                .addOption(ApplicationCommandOptionData.builder()
-                        .name("modchannel").description("Should I create a channel where all disputes are displayed?")
-                        .type(5).required(true).build())
-                .addOption(ApplicationCommandOptionData.builder()
                         .name("allowdraw").description("Allow draw results and not just win or lose?")
                         .type(5).required(true).build())
-                .build();
-
-        ApplicationCommandRequest createResultChannelCommandRequest = ApplicationCommandRequest.builder()
-                .name("createresultchannel")
-                .description("Create a channel to show logs of all matches played on the guild")
-                .build();
-
-        ApplicationCommandRequest createDisputeChannelCommandRequest = ApplicationCommandRequest.builder()
-                .name("createdisputechannel")
-                .description("Create a channel to show disputes that arise from conflicting match reports")
                 .build();
 
         if (service.getPropertiesLoader().isDeployGuildCommands()) {
@@ -104,8 +88,6 @@ public class CommandParser {
             applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, setupCommandRequest).subscribe();
             applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, challengeCommandRequest).subscribe();
             applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, challengeUserCommandRequest).subscribe();
-            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, createResultChannelCommandRequest).subscribe();
-            applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, createDisputeChannelCommandRequest).subscribe();
         }
 
         if (service.getPropertiesLoader().isDeployGlobalCommands()) {
@@ -132,8 +114,6 @@ public class CommandParser {
             applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), setupCommandRequest).subscribe();
             applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeCommandRequest).subscribe();
             applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeUserCommandRequest).subscribe();
-            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), createResultChannelCommandRequest).subscribe();
-            applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), createDisputeChannelCommandRequest).subscribe();
         }
 
         if (service.getPropertiesLoader().isSetupDevGame()) {
