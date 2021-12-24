@@ -1,16 +1,18 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.ApplicationCommandInteractionCommand;
-import de.neuefische.elotracking.backend.commands.ButtonInteractionCommand;
+import de.neuefische.elotracking.backend.commands.SlashCommand;
+import de.neuefische.elotracking.backend.commands.ButtonCommand;
 import de.neuefische.elotracking.backend.commands.Createresultchannel;
+import de.neuefische.elotracking.backend.commands.UserInteractionChallenge;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
@@ -32,8 +34,9 @@ import java.util.function.Function;
 public class CommandParser {
 
     private final GatewayDiscordClient client;
-    private final Function<ApplicationCommandInteractionEventWrapper, ApplicationCommandInteractionCommand> slashCommandFactory;
-    private final Function<ButtonInteractionEventWrapper, ButtonInteractionCommand> buttonInteractionCommandFactory;
+    private final Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory;
+    private final Function<ButtonInteractionEventWrapper, ButtonCommand> buttonInteractionCommandFactory;
+    private final Function<UserInteractionEventWrapper, UserInteractionChallenge> userInteractionChallengeFactory;
     private final EloTrackingService service;
     private final DiscordBotService bot;
     private final TimedTaskQueue queue;
@@ -41,8 +44,9 @@ public class CommandParser {
     private final Snowflake botSnowflake;
 
     public CommandParser(GatewayDiscordClient client, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
-                         Function<ApplicationCommandInteractionEventWrapper, ApplicationCommandInteractionCommand> slashCommandFactory,
-                         Function<ButtonInteractionEventWrapper, ButtonInteractionCommand> buttonInteractionCommandFactory) {
+                         Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory,
+                         Function<ButtonInteractionEventWrapper, ButtonCommand> buttonInteractionCommandFactory,
+                         Function<UserInteractionEventWrapper, UserInteractionChallenge> userInteractionChallengeFactory) {
         this.client = client;
         this.slashCommandFactory = slashCommandFactory;
         this.buttonInteractionCommandFactory = buttonInteractionCommandFactory;
@@ -50,6 +54,7 @@ public class CommandParser {
         this.bot = bot;
         this.queue = queue;
         this.botSnowflake = client.getSelfId();
+        this.userInteractionChallengeFactory = userInteractionChallengeFactory;
 
         ApplicationCommandRequest challengeCommandRequest = ApplicationCommandRequest.builder()
                 .name("challenge")
@@ -147,24 +152,29 @@ public class CommandParser {
             service.saveGame(game);
         }
 
-        client.on(ApplicationCommandInteractionEvent.class)
-                .map(event -> new ApplicationCommandInteractionEventWrapper(event, service, bot, queue, client))
+        client.on(ChatInputInteractionEvent.class)
+                .map(event -> new ChatInputInteractionEventWrapper(event, service, bot, queue, client))
                 .map(slashCommandFactory::apply)
-                .subscribe(ApplicationCommandInteractionCommand::execute);
+                .subscribe(SlashCommand::execute);
 
         client.on(ButtonInteractionEvent.class)
                 .map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue, client))
                 .map(buttonInteractionCommandFactory::apply)
-                .subscribe(ButtonInteractionCommand::execute);
+                .subscribe(ButtonCommand::execute);
+
+        client.on(UserInteractionEvent.class)
+                .map(event -> new UserInteractionEventWrapper(event, service, bot, queue, client))
+                .map(userInteractionChallengeFactory::apply)
+                .subscribe(UserInteractionChallenge::execute);
     }
 
-    public static ApplicationCommandInteractionCommand createSlashCommand(ApplicationCommandInteractionEventWrapper wrapper) {
+    public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
         String commandClassName = wrapper.event().getCommandName();
         commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
         log.trace("commandString = " + commandClassName);
         try {
-            return (ApplicationCommandInteractionCommand) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
-                    .getConstructor(ApplicationCommandInteractionEvent.class, EloTrackingService.class,
+            return (SlashCommand) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
+                    .getConstructor(ChatInputInteractionEvent.class, EloTrackingService.class,
                             DiscordBotService.class, TimedTaskQueue.class, GatewayDiscordClient.class)
                     .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
         } catch (Exception e) {
@@ -174,12 +184,12 @@ public class CommandParser {
         }
     }
 
-    public static ButtonInteractionCommand createButtonInteractionCommand(ButtonInteractionEventWrapper wrapper) {
+    public static ButtonCommand createButtonInteractionCommand(ButtonInteractionEventWrapper wrapper) {
         String commandClassName = wrapper.event().getCustomId().split(":")[0];
         commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
         log.trace("commandString = " + commandClassName);
         try {
-            return (ButtonInteractionCommand) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
+            return (ButtonCommand) Class.forName("de.neuefische.elotracking.backend.commands." + commandClassName)
                     .getConstructor(ButtonInteractionEvent.class, EloTrackingService.class, DiscordBotService.class,
                             TimedTaskQueue.class, GatewayDiscordClient.class)
                     .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
@@ -188,5 +198,10 @@ public class CommandParser {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static UserInteractionChallenge createUserInteractionChallenge(UserInteractionEventWrapper wrapper) {
+        return new UserInteractionChallenge(
+                wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
     }
 }

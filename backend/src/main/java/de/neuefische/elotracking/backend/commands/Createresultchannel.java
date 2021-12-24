@@ -5,13 +5,13 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 
-public class Createresultchannel extends ApplicationCommandInteractionCommand {// TODO wird so nicht mehr genutzt
+public class Createresultchannel extends SlashCommand {// TODO wird so nicht mehr genutzt
 
-	public Createresultchannel(ApplicationCommandInteractionEvent event, EloTrackingService service,
+	public Createresultchannel(ChatInputInteractionEvent event, EloTrackingService service,
 							   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 		this.needsGame = true;

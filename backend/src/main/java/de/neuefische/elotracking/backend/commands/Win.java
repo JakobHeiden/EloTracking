@@ -16,7 +16,7 @@ import discord4j.rest.http.client.ClientException;
 
 import java.util.ArrayList;
 
-public class Win extends ButtonInteractionCommand {
+public class Win extends ButtonCommand {
 
 	public Win(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
 			   GatewayDiscordClient client) {

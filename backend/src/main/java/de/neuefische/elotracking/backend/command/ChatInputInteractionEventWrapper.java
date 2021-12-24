@@ -6,11 +6,12 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
 @UseToStringForLogging
 public
-record ApplicationCommandInteractionEventWrapper(
-		ApplicationCommandInteractionEvent event,
+record ChatInputInteractionEventWrapper(
+		ChatInputInteractionEvent event,
 		EloTrackingService service,
 		DiscordBotService bot,
 		TimedTaskQueue queue,
