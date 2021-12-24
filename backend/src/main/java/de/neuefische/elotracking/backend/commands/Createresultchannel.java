@@ -9,7 +9,7 @@ import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEven
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 
-public class Createresultchannel extends ApplicationCommandInteractionCommand {
+public class Createresultchannel extends ApplicationCommandInteractionCommand {// TODO wird so nicht mehr genutzt
 
 	public Createresultchannel(ApplicationCommandInteractionEvent event, EloTrackingService service,
 							   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {

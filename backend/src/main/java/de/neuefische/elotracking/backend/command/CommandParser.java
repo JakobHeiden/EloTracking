@@ -13,11 +13,14 @@ import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEven
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.spec.RoleCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
+import discord4j.rest.util.PermissionSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -120,7 +123,6 @@ public class CommandParser {
             log.info("Setting up Dev Game...");
             Game game = new Game(entenwieseId, "Dev Game");
             game.setAllowDraw(true);
-            service.saveGame(game);
 
             Guild entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
             List<GuildChannel> channels = entenwieseGuild.getChannels()
@@ -131,6 +133,17 @@ public class CommandParser {
                 channel.delete().block();
             }
             Createresultchannel.staticExecute(service, entenwieseGuild, game);
+
+            entenwieseGuild.getRoles().filter(role -> role.getName().equals("Elotracking Admin")
+                    || role.getName().equals("Elotracking Moderator"))
+                    .subscribe(role -> role.delete().subscribe());
+            Role adminRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elotracking Admin")
+                    .permissions(PermissionSet.none()).build()).block();
+            game.setAdminRoleId(adminRole.getId().asLong());
+            Role modRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elotracking Moderator")
+                    .permissions(PermissionSet.none()).build()).block();
+            game.setModRoleId(modRole.getId().asLong());
+
             service.saveGame(game);
         }
 
