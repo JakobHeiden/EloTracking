@@ -47,6 +47,6 @@ public class Createdisputechannel extends SlashCommand {// TODO kann so weg, evt
 								PermissionSet.none()))
 				.withTopic("Disputes from conflicting match reports will be logged here")
 				.block();
-		game.setDisputeChannelId(disputeChannel.getId().asLong());
+		//game.setDisputeChannelId(disputeChannel.getId().asLong());
 	}
 }

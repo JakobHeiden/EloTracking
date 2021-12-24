@@ -74,7 +74,7 @@ public class CommandParser {
                 .name("setup")
                 .description("Get started with the bot")
                 .addOption(ApplicationCommandOptionData.builder()
-                        .name("name").description("The name of the game you want to track elo rating for")
+                        .name("nameofgame").description("The name of the game you want to track elo rating for")
                         .type(3).required(true).build())
                 .addOption(ApplicationCommandOptionData.builder()
                         .name("allowdraw").description("Allow draw results and not just win or lose?")
@@ -139,13 +139,13 @@ public class CommandParser {
             }
             Createresultchannel.staticExecute(service, entenwieseGuild, game);
 
-            entenwieseGuild.getRoles().filter(role -> role.getName().equals("Elotracking Admin")
-                    || role.getName().equals("Elotracking Moderator"))
+            entenwieseGuild.getRoles().filter(role -> role.getName().equals("Elo Admin")
+                    || role.getName().equals("Elo Moderator"))
                     .subscribe(role -> role.delete().subscribe());
-            Role adminRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elotracking Admin")
+            Role adminRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elo Admin")
                     .permissions(PermissionSet.none()).build()).block();
             game.setAdminRoleId(adminRole.getId().asLong());
-            Role modRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elotracking Moderator")
+            Role modRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
                     .permissions(PermissionSet.none()).build()).block();
             game.setModRoleId(modRole.getId().asLong());
 
