@@ -38,12 +38,8 @@ public class Setup extends ApplicationCommandInteractionCommand {
 				.permissions(PermissionSet.none()).build()).block();
 		game.setModRoleId(modRole.getId().asLong());
 
-		if (event.getOption("logchannel").get().getValue().get().asBoolean()) {
-			Createresultchannel.staticExecute(service, guild, game);
-		}
-		if (event.getOption("modchannel").get().getValue().get().asBoolean()) {
-			Createdisputechannel.staticExecute(guild, game);
-		}
+		Createresultchannel.staticExecute(service, guild, game);
+
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 
 		service.saveGame(game);
