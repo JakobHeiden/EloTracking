@@ -5,16 +5,15 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.spec.RoleCreateSpec;
 import discord4j.rest.util.PermissionSet;
 
-public class Setup extends ApplicationCommandInteractionCommand {
+public class Setup extends SlashCommand {
 
-	public Setup(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+	public Setup(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
@@ -25,10 +24,9 @@ public class Setup extends ApplicationCommandInteractionCommand {
 			return;
 		}
 
-		ChatInputInteractionEvent event = (ChatInputInteractionEvent) super.event;
 		Guild guild = event.getInteraction().getGuild().block();
 
-		Game game = new Game(guild.getId().asLong(),
+		game = new Game(guild.getId().asLong(),
 				event.getOption("name").get().getValue().get().asString());
 
 		Role adminRole = guild.createRole(RoleCreateSpec.builder().name("Elotracking Admin")
@@ -39,6 +37,7 @@ public class Setup extends ApplicationCommandInteractionCommand {
 		game.setModRoleId(modRole.getId().asLong());
 
 		Createresultchannel.staticExecute(service, guild, game);
+		createDisputeCategory();
 
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 
@@ -46,5 +45,9 @@ public class Setup extends ApplicationCommandInteractionCommand {
 
 		event.reply("Setup performed. Here is a link to the leaderboard: "// TODO! mehr infoes, rolles etc
 				+ String.format("http://%s/%s", service.getPropertiesLoader().getBaseUrl(), guildId)).subscribe();
+	}
+
+	private void createDisputeCategory() {
+		// TODO!
 	}
 }

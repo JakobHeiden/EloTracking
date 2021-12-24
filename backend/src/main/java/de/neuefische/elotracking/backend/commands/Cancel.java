@@ -12,7 +12,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Cancel extends ButtonInteractionCommand {
+public class Cancel extends ButtonCommand {
 
 	public Cancel(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				  TimedTaskQueue queue, GatewayDiscordClient client) {

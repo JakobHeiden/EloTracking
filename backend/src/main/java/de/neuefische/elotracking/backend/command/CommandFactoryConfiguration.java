@@ -1,7 +1,8 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.ApplicationCommandInteractionCommand;
-import de.neuefische.elotracking.backend.commands.ButtonInteractionCommand;
+import de.neuefische.elotracking.backend.commands.SlashCommand;
+import de.neuefische.elotracking.backend.commands.ButtonCommand;
+import de.neuefische.elotracking.backend.commands.UserInteractionChallenge;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,24 +15,39 @@ import java.util.function.Function;
 public class CommandFactoryConfiguration {
 
 	@Bean
-	public Function<ApplicationCommandInteractionEventWrapper, ApplicationCommandInteractionCommand> slashCommandFactory() {
+	public Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory() {
 		return eventWrapper -> createSlashCommand(eventWrapper);
 	}
 
 	@Bean
-	public Function<ButtonInteractionEventWrapper, ButtonInteractionCommand> emojiCommandFactory() {
-		return eventWrapper -> createButtonInteractionCommand(eventWrapper);
-	}
-
-	@Bean
 	@Scope("prototype")
-	public ApplicationCommandInteractionCommand createSlashCommand(ApplicationCommandInteractionEventWrapper eventWrapper) {
+	public SlashCommand createSlashCommand(ChatInputInteractionEventWrapper eventWrapper) {
 		return CommandParser.createSlashCommand(eventWrapper);
 	}
 
 	@Bean
+	public Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory() {
+		return eventWrapper -> createButtonCommand(eventWrapper);
+	}
+
+	@Bean
 	@Scope("prototype")
-	public ButtonInteractionCommand createButtonInteractionCommand(ButtonInteractionEventWrapper eventWrapper) {
+	public ButtonCommand createButtonCommand(ButtonInteractionEventWrapper eventWrapper) {
 		return CommandParser.createButtonInteractionCommand(eventWrapper);
 	}
+
+	@Bean
+	public Function<UserInteractionEventWrapper, UserInteractionChallenge> userInteractionChallengeFactory() {
+		return eventWrapper -> createUserInteractionChallenge(eventWrapper);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public UserInteractionChallenge createUserInteractionChallenge(UserInteractionEventWrapper eventWrapper) {
+		return CommandParser.createUserInteractionChallenge(eventWrapper);
+	}
+
+
+
+
 }

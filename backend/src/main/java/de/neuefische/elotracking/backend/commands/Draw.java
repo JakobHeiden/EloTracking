@@ -13,7 +13,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Draw extends ButtonInteractionCommand {
+public class Draw extends ButtonCommand {
 
 	public Draw(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				TimedTaskQueue queue, GatewayDiscordClient client) {

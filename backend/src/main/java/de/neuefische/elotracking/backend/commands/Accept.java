@@ -15,7 +15,7 @@ import discord4j.core.object.entity.Message;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Accept extends ButtonInteractionCommand {
+public class Accept extends ButtonCommand {
 
 	public Accept(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
 				  GatewayDiscordClient client) {

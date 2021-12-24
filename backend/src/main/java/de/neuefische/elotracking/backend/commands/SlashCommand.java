@@ -5,24 +5,24 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
 import java.util.Optional;
 
 // Subclasses must start with a capital letter and have no other capital letters to be recognized by the parser
-public abstract class ApplicationCommandInteractionCommand {
+public abstract class SlashCommand {
 
 	protected final EloTrackingService service;
 	protected final DiscordBotService bot;
 	protected final TimedTaskQueue queue;
 	protected final GatewayDiscordClient client;
-	protected final ApplicationCommandInteractionEvent event;
+	protected final ChatInputInteractionEvent event;
 	protected long guildId;
 	protected Game game;
 	protected boolean needsGame;
 
-	protected ApplicationCommandInteractionCommand(ApplicationCommandInteractionEvent event, EloTrackingService service,
-												   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	protected SlashCommand(ChatInputInteractionEvent event, EloTrackingService service,
+						   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		this.event = event;
 		this.service = service;
 		this.bot = bot;

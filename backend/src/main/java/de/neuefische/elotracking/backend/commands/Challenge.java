@@ -3,6 +3,7 @@ package de.neuefische.elotracking.backend.commands;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
+import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
@@ -10,7 +11,6 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Button;
 import discord4j.core.object.entity.Message;
@@ -18,9 +18,9 @@ import discord4j.core.spec.MessageCreateSpec;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class Challenge extends ApplicationCommandInteractionCommand {// TODO evtl slash und user commands trennen
+public class Challenge extends SlashCommand {
 
-	public Challenge(ApplicationCommandInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+	public Challenge(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 					 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 		this.needsGame = true;
@@ -29,16 +29,17 @@ public class Challenge extends ApplicationCommandInteractionCommand {// TODO evt
 	public void execute() {
 		if (!super.canExecute()) return;
 
+		long acceptorId = event.getOption("player").get().getValue().get().asUser().block().getId().asLong();
+		staticExecute(acceptorId, guildId, game, event, service, bot, queue);
+	}
+
+	public static void staticExecute(long acceptorId, long guildId, Game game, ApplicationCommandInteractionEvent event, EloTrackingService service,
+									 DiscordBotService bot, TimedTaskQueue queue) {
 		long challengerId = event.getInteraction().getUser().getId().asLong();
-		long acceptorId = 0L;
-		if (event instanceof ChatInputInteractionEvent) {
-			acceptorId = ((ChatInputInteractionEvent) event).getOption("player").get().getValue().get().asUser().block().getId().asLong();
-		} else if (event instanceof UserInteractionEvent) {
-			acceptorId = ((UserInteractionEvent) event).getTargetId().asLong();
-		}
 
 		if (challengerId == acceptorId) {
-			event.reply("You cannot challenge yourself.").withEphemeral(true).subscribe();
+			event.reply("You cannot challenge yourself.")
+					.withEphemeral(true).subscribe();
 			return;
 		}
 		if (service.challengeExistsByParticipants(guildId, challengerId, acceptorId)) {
@@ -76,7 +77,7 @@ public class Challenge extends ApplicationCommandInteractionCommand {// TODO evt
 				0L, null);
 		service.saveChallenge(challenge);
 		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",
-				bot.getPlayerName(acceptorId)))
+						bot.getPlayerName(acceptorId)))
 				.withEphemeral(true).subscribe();
 	}
 }

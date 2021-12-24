@@ -11,7 +11,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.Optional;
 
-public abstract class ButtonInteractionCommand {
+public abstract class ButtonCommand {
 
 	protected final EloTrackingService service;
 	protected final DiscordBotService bot;
@@ -25,8 +25,8 @@ public abstract class ButtonInteractionCommand {
 	protected final boolean isChallengerCommand;
 	protected final long otherPlayerPrivateChannelId;
 
-	protected ButtonInteractionCommand(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
-									TimedTaskQueue queue, GatewayDiscordClient client) {
+	protected ButtonCommand(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+							TimedTaskQueue queue, GatewayDiscordClient client) {
 		this.event = event;
 		this.service = service;
 		this.bot = bot;

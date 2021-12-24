@@ -13,7 +13,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Lose extends ButtonInteractionCommand {
+public class Lose extends ButtonCommand {
 
 	public Lose(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
 				GatewayDiscordClient client) {
