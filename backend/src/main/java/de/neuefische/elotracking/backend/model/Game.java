@@ -20,7 +20,7 @@ public class Game {
     private long modRoleId;
     private String name;
     private long resultChannelId;
-    private long disputeChannelId;
+    private long disputeCategoryId;
     private boolean allowDraw;
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
