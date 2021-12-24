@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.commands;
 
-import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
@@ -31,8 +30,6 @@ public class Lose extends ButtonInteractionCommand {
 				bot.getMessageById(otherPlayerPrivateChannelId, challenge.getAcceptorMessageId()).block()
 				: bot.getMessageById(otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
 
-		removeSelfReactions(reporterMessage, Emojis.arrowUp, Emojis.arrowDown, Emojis.leftRightArrow, Emojis.crossMark);
-
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
 			MessageContent reporterMessageContent = new MessageContent(reporterMessage.getContent())
 					.makeAllNotBold()
@@ -42,8 +39,7 @@ public class Lose extends ButtonInteractionCommand {
 
 			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
 					.addLine("Your opponent reported a loss :arrow_down:.");
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
-					.withComponents(new ArrayList<>()).subscribe();
+			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {

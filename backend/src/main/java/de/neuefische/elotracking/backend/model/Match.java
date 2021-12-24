@@ -1,6 +1,8 @@
 package de.neuefische.elotracking.backend.model;
 
 import de.neuefische.elotracking.backend.logging.UseToStringForLogging;
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,5 +39,13 @@ public class Match {
         this.isDraw = isDraw;
         this.id = UUID.randomUUID();
         this.date = new Date();
+    }
+
+    public String getWinnerName(GatewayDiscordClient client) {
+        return client.getUserById(Snowflake.of(winnerId)).block().getUsername();
+    }
+
+    public String getLoserName(GatewayDiscordClient client) {
+        return client.getUserById(Snowflake.of(loserId)).block().getUsername();
     }
 }

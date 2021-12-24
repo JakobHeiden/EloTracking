@@ -8,7 +8,6 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.reaction.ReactionEmoji;
 
 import java.util.Optional;
 
@@ -49,11 +48,4 @@ public abstract class ButtonInteractionCommand {
 	}
 
 	public abstract void execute();
-
-	protected void removeSelfReactions(Message message, ReactionEmoji... emojis) {
-		for (ReactionEmoji emoji : emojis) {
-			message.removeSelfReaction(emoji).subscribe();
-		}
-	}
-
 }
