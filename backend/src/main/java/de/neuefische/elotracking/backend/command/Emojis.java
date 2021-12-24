@@ -8,4 +8,6 @@ public class Emojis {
 	public static final ReactionEmoji arrowUp = ReactionEmoji.codepoints("U+2B06");
 	public static final ReactionEmoji arrowDown = ReactionEmoji.codepoints("U+2B07");
 	public static final ReactionEmoji leftRightArrow = ReactionEmoji.codepoints("U+2194");
+	public static final ReactionEmoji exclamation = ReactionEmoji.codepoints("U+2757");
+	public static final ReactionEmoji redoArrow = ReactionEmoji.codepoints("U+21A9");
 }
