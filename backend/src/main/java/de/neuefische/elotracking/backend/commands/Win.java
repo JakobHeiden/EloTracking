@@ -70,18 +70,7 @@ public class Win extends ButtonCommand {
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
-			if (game.getResultChannelId() != 0L) {
-				try {
-					TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
-					resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
-							match.getWinnerName(client), match.getWinnerAfterRating(),
-							match.isDraw() ? "drew" : "defeated",
-							match.getLoserName(client), match.getLoserAfterRating())).subscribe();
-				} catch (ClientException e) {
-					game.setResultChannelId(0L);
-					service.saveGame(game);
-				}
-			}
+			bot.postToResultChannel(game, match);
 
 			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
 					reporterMessage.getId().asLong(), reporterMessage.getChannelId().asLong(), match);

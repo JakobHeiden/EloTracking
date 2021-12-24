@@ -1,6 +1,8 @@
 package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.command.CommandParser;
+import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -9,6 +11,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.rest.http.client.ClientException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -75,5 +78,20 @@ public class DiscordBotService {
 
 	public Mono<Message> getMessageById(long channelId, long messageId) {
 		return client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId));
+	}
+
+	public void postToResultChannel(Game game, Match match) {
+		if (game.getResultChannelId() != 0L) {
+			try {
+				TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
+				resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
+						match.getWinnerName(client), match.getWinnerAfterRating(),
+						match.isDraw() ? "drew" : "defeated",
+						match.getLoserName(client), match.getLoserAfterRating())).subscribe();
+			} catch (ClientException e) {
+				game.setResultChannelId(0L);
+				service.saveGame(game);
+			}
+		}
 	}
 }
