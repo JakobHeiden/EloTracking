@@ -48,7 +48,7 @@ public class Setup extends ApplicationCommandInteractionCommand {
 
 		service.saveGame(game);
 
-		event.reply("Setup performed. Here is a link to the leaderboard: "
+		event.reply("Setup performed. Here is a link to the leaderboard: "// TODO! mehr infoes, rolles etc
 				+ String.format("http://%s/%s", service.getPropertiesLoader().getBaseUrl(), guildId)).subscribe();
 	}
 }

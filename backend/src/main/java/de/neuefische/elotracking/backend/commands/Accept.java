@@ -47,7 +47,8 @@ public class Accept extends ButtonInteractionCommand {
 		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You have accepted the challenge.")
-				.addLine("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:")
+				.addLine(String.format("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:",
+						game.isAllowDraw() ? " or drew :left_right_arrow:" : ""))
 				.makeLastLineBold();
 		acceptorMessage.edit().withContent(acceptorMessageContent.get())
 				.withComponents(createActionRow(challengerMessage.getChannelId().asLong(), game.isAllowDraw()))
@@ -58,14 +59,14 @@ public class Accept extends ButtonInteractionCommand {
 
 	private static ActionRow createActionRow(long channelId, boolean allowDraw) {
 		if (allowDraw) return ActionRow.of(
-			Button.primary("win:" + channelId,
-					Emojis.arrowUp, "Win"),
-			Button.primary("lose:" + channelId,
-					Emojis.arrowDown, "Lose"),
-			Button.primary("draw:" + channelId,
-					Emojis.leftRightArrow, "Draw"),
-			Button.danger("cancel:" + channelId,
-					Emojis.crossMark, "Cancel match"));
+				Button.primary("win:" + channelId,
+						Emojis.arrowUp, "Win"),
+				Button.primary("lose:" + channelId,
+						Emojis.arrowDown, "Lose"),
+				Button.primary("draw:" + channelId,
+						Emojis.leftRightArrow, "Draw"),
+				Button.danger("cancel:" + channelId,
+						Emojis.crossMark, "Cancel match"));
 		else return ActionRow.of(
 				Button.primary("win:" + channelId,
 						Emojis.arrowUp, "Win"),

@@ -13,7 +13,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
-public class Createdisputechannel extends ApplicationCommandInteractionCommand {
+public class Createdisputechannel extends ApplicationCommandInteractionCommand {// TODO kann so weg, evtl umbauen
 
 	public Createdisputechannel(ApplicationCommandInteractionEvent event, EloTrackingService service,
 								DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -31,7 +31,7 @@ public class Createdisputechannel extends ApplicationCommandInteractionCommand {
 	}
 
 	public static void staticExecute(Guild guild, Game game) {
-		TextChannel resultChannel = guild.createTextChannel("Elotracking disputes")
+		TextChannel disputeChannel = guild.createTextChannel("Elotracking disputes")
 				.withPermissionOverwrites(
 						PermissionOverwrite.forRole(
 								guild.getEveryoneRole().block().getId(),
@@ -47,6 +47,6 @@ public class Createdisputechannel extends ApplicationCommandInteractionCommand {
 								PermissionSet.none()))
 				.withTopic("Disputes from conflicting match reports will be logged here")
 				.block();
-		game.setResultChannelId(resultChannel.getId().asLong());
+		game.setDisputeChannelId(disputeChannel.getId().asLong());
 	}
 }

@@ -7,9 +7,12 @@ import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.rest.http.client.ClientException;
 
 import java.util.ArrayList;
 
@@ -66,6 +69,19 @@ public class Win extends ButtonInteractionCommand {
 					.makeAllItalic();
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
+
+			if (game.getResultChannelId() != 0L) {
+				try {
+					TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
+					resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
+							match.getWinnerName(client), match.getWinnerAfterRating(),
+							match.isDraw() ? "drew" : "defeated",
+							match.getLoserName(client), match.getLoserAfterRating())).subscribe();
+				} catch (ClientException e) {
+					game.setResultChannelId(0L);
+					service.saveGame(game);
+				}
+			}
 
 			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
 					reporterMessage.getId().asLong(), reporterMessage.getChannelId().asLong(), match);

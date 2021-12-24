@@ -2,7 +2,6 @@ package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.commands.ApplicationCommandInteractionCommand;
 import de.neuefische.elotracking.backend.commands.ButtonInteractionCommand;
-import de.neuefische.elotracking.backend.commands.Createdisputechannel;
 import de.neuefische.elotracking.backend.commands.Createresultchannel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
@@ -152,7 +151,7 @@ public class CommandParser {
                 channel.delete().block();
             }
             Createresultchannel.staticExecute(service, entenwieseGuild, game);
-            Createdisputechannel.staticExecute(entenwieseGuild, game);
+            service.saveGame(game);
         }
 
         client.on(ApplicationCommandInteractionEvent.class)
