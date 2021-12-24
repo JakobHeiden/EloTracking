@@ -67,6 +67,8 @@ public class Lose extends ButtonCommand {
 			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
+			bot.postToResultChannel(game, match);
+
 			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
 					reporterMessage.getId().asLong(), reporterMessage.getChannelId().asLong(), match);
 			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
