@@ -33,7 +33,7 @@ public class CommandFactoryConfiguration {
 	@Bean
 	@Scope("prototype")
 	public ButtonCommand createButtonCommand(ButtonInteractionEventWrapper eventWrapper) {
-		return CommandParser.createButtonInteractionCommand(eventWrapper);
+		return CommandParser.createButtonCommand(eventWrapper);
 	}
 
 	@Bean

@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.Buttons;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
@@ -29,20 +30,16 @@ public class Win extends ButtonCommand {
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.WIN);
 		service.saveChallenge(challenge);
 
-		Message reportedOnMessage = isChallengerCommand ?
-				bot.getMessageById(otherPlayerPrivateChannelId, challenge.getAcceptorMessageId()).block()
-				: bot.getMessageById(otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
-
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
-			MessageContent reporterMessageContent = new MessageContent(parentMessage.getContent())
+			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
 					.addLine("You reported a win :arrow_up:. I'll let you know when your opponent reports.");
-			parentMessage.edit().withContent(reporterMessageContent.get())
+			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
-			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
+			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent reported a win :arrow_up:.");
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
+			targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
 			return;
 		}
 
@@ -55,20 +52,20 @@ public class Win extends ButtonCommand {
 			service.saveMatch(match);
 			service.deleteChallenge(challenge);
 
-			MessageContent reporterMessageContent = new MessageContent(parentMessage.getContent())
+			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
 					.addLine("You reported a win :arrow_up:. The match has been resolved:")
 					.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
 					.makeAllItalic();
-			parentMessage.edit().withContent(reporterMessageContent.get())
+			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
-			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
+			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.makeAllNotBold()
 					.addLine("Your opponent reported a win :arrow_up:. The match has been resolved:")
 					.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
 					.makeAllItalic();
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
+			targetMessage.edit().withContent(targetMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			bot.postToResultChannel(game, match);
@@ -76,37 +73,33 @@ public class Win extends ButtonCommand {
 			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
 					parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
 			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
-					reportedOnMessage.getId().asLong(), reportedOnMessage.getChannelId().asLong(), match);
+					targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
 			return;
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.CONFLICT) {
-			MessageContent reporterMessageContent = new MessageContent(parentMessage.getContent())
+			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
 					.addLine("You reported a win :arrow_up:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
 							"or file a dispute :exclamation:.")
 					.makeLastLineBold();
-			parentMessage.edit().withContent(reporterMessageContent.get())
+			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(ActionRow.of(
-							Button.primary("redo:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.redoArrow, "Call for redo"),
-							Button.secondary("dispute:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.exclamation, "File a dispute"))).subscribe();
+							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
-			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
+			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent reported a win :arrow_up:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
 							"or file a dispute :exclamation:.")
 					.makeLastLineBold();
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
+			targetMessage.edit().withContent(targetMessageContent.get())
 					.withComponents(ActionRow.of(
-							Button.primary("redo:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.redoArrow, "Call for a redo"),
-							Button.secondary("dispute:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.exclamation, "File a dispute"))).subscribe();
+							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			// I have no idea why this is necessary here but not in the other cases
 			event.acknowledge().subscribe();

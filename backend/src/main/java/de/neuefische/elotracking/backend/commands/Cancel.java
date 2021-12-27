@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.Buttons;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
@@ -28,77 +29,69 @@ public class Cancel extends ButtonCommand {
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.CANCEL);
 		service.saveChallenge(challenge);
 
-		Message reportedOnMessage = isChallengerCommand ?
-				bot.getMessageById(otherPlayerPrivateChannelId, challenge.getAcceptorMessageId()).block()
-				: bot.getMessageById(otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
-
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
-			MessageContent reporterMessageContent = new MessageContent(parentMessage.getContent())
+			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
 					.addLine("You called for a cancel :negative_squared_cross_mark:. " +
 							"I'll let you know when your opponent reacts.");
-			parentMessage.edit().withContent(reporterMessageContent.get())
+			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
-			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
+			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.");
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get()).subscribe();
+			targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
 			return;
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {
 			service.deleteChallenge(challenge);
 
-			MessageContent reporterMessageContent = new MessageContent(parentMessage.getContent())
+			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
 					.addLine("You called for a cancel :negative_squared_cross_mark:. " +
 							"The challenge has been canceled.")
 					.makeAllItalic();
-			parentMessage.edit().withContent(reporterMessageContent.get())
+			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
-			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
+			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.makeAllNotBold()
 					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
 							"The challenge has been canceled.")
 					.makeAllItalic();
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
+			targetMessage.edit().withContent(targetMessageContent.get())
 					.withComponents(new ArrayList<>()).subscribe();
 
 			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
 					parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
 			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
-					reportedOnMessage.getId().asLong(), reportedOnMessage.getChannelId().asLong(), null);
+					targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
 			return;
 		}
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.CONFLICT) {
-			MessageContent reporterMessageContent = new MessageContent(parentMessage.getContent())
+			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
 					.addLine("You called for a cancel :negative_squared_cross_mark:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
 							"or file a dispute :exclamation:.")
 					.makeLastLineBold();
-			parentMessage.edit().withContent(reporterMessageContent.get())
+			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(ActionRow.of(
-							Button.primary("redo:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.redoArrow, "Call for redo"),
-							Button.secondary("dispute:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.exclamation, "File a dispute"))).subscribe();
+							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
-			MessageContent reportedOnMessageContent = new MessageContent(reportedOnMessage.getContent())
+			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
 							"or file a dispute :exclamation:.")
 					.makeLastLineBold();
-			reportedOnMessage.edit().withContent(reportedOnMessageContent.get())
+			targetMessage.edit().withContent(targetMessageContent.get())
 					.withComponents(ActionRow.of(
-							Button.primary("redo:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.redoArrow, "Call for a redo"),
-							Button.secondary("dispute:" + reportedOnMessage.getChannelId().asString(),
-									Emojis.exclamation, "File a dispute"))).subscribe();
+							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			// I have no idea why this is necessary here but not in the other cases
 			event.acknowledge().subscribe();
