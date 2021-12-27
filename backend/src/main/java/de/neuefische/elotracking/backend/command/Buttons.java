@@ -39,6 +39,16 @@ public class Buttons {
 				Emojis.redoArrow, "Call for a redo");
 	}
 
+	public static Button cancelOnConflict(long channelId) {
+		return Button.danger("cancelonconflict:" + channelId,
+				Emojis.crossMark, "Cancel match");
+	}
+
+	public static Button redoOrCancelOnConflict(long channelId) {
+		return Button.primary("redoorcancel:" + channelId,
+				Emojis.shrug, "Redo or Cancel");
+	}
+
 	public static Button dispute(long channelId) {
 		return Button.secondary("dispute:" + channelId,
 				Emojis.exclamation, "File a dispute");

@@ -1,7 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.command.Buttons;
-import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Match;
@@ -12,8 +11,6 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
@@ -70,9 +67,9 @@ public class Win extends ButtonCommand {
 
 			bot.postToResultChannel(game, match);
 
-			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
+			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 					parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
-			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMatchSummarizeTime(),
+			queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 					targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
 			return;
 		}
@@ -83,22 +80,26 @@ public class Win extends ButtonCommand {
 					.addLine("You reported a win :arrow_up:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-							"or file a dispute :exclamation:.")
+							"and/or call for a cancel, or file a dispute :exclamation:.")
 					.makeLastLineBold();
 			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(ActionRow.of(
 							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
+							Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent reported a win :arrow_up:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-							"or file a dispute :exclamation:.")
+							"and/or call for a cancel, or file a dispute :exclamation:.")
 					.makeLastLineBold();
 			targetMessage.edit().withContent(targetMessageContent.get())
 					.withComponents(ActionRow.of(
 							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
+							Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			// I have no idea why this is necessary here but not in the other cases
