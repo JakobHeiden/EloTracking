@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
@@ -19,11 +20,12 @@ public abstract class ButtonCommand {
 	protected final GatewayDiscordClient client;
 	protected final ButtonInteractionEvent event;
 	protected final Message parentMessage;
+	protected final Message targetMessage;
 	protected final long guildId;
 	protected final Game game;
 	protected final ChallengeModel challenge;
 	protected final boolean isChallengerCommand;
-	protected final long otherPlayerPrivateChannelId;
+	protected final long targetUserPrivateChannelId;
 
 	protected ButtonCommand(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 							TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -31,8 +33,8 @@ public abstract class ButtonCommand {
 		this.service = service;
 		this.bot = bot;
 		this.queue = queue;
-		this.parentMessage = event.getMessage().get();
 		this.client = client;
+
 		Optional<ChallengeModel> maybeChallengeByChallengerMessageId = service.getChallengeByChallengerMessageId(event.getMessageId().asLong());
 		if (maybeChallengeByChallengerMessageId.isPresent()) {
 			this.challenge = maybeChallengeByChallengerMessageId.get();
@@ -44,7 +46,11 @@ public abstract class ButtonCommand {
 			this.isChallengerCommand = false;
 		}
 		this.game = service.findGameByGuildId(guildId).get();
-		this.otherPlayerPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
+		this.targetUserPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
+		this.parentMessage = event.getMessage().get();
+		this.targetMessage = isChallengerCommand ?
+				bot.getMessageById(targetUserPrivateChannelId, challenge.getAcceptorMessageId()).block()
+				: bot.getMessageById(targetUserPrivateChannelId, challenge.getChallengerMessageId()).block();
 	}
 
 	public abstract void execute();

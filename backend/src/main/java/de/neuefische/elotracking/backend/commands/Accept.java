@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.Buttons;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
@@ -23,35 +24,33 @@ public class Accept extends ButtonCommand {
 	}
 
 	public void execute() {
-		long acceptorId = event.getInteraction().getUser().getId().asLong();
-		Message acceptorMessage = event.getMessage().get();
-		ChallengeModel challenge = service.getChallengeByAcceptorMessageId(acceptorMessage.getId().asLong()).get();
+		long parentId = event.getInteraction().getUser().getId().asLong();
+		Message parentMessage = event.getMessage().get();
+		ChallengeModel challenge = service.getChallengeByAcceptorMessageId(parentMessage.getId().asLong()).get();
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, acceptorId);
+		service.addNewPlayerIfPlayerNotPresent(guildId, parentId);
 		challenge.setAccepted(true);
 		queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY,
 				game.getAcceptedChallengeDecayTime(), challenge.getChallengerMessageId(), 0L, null);
 		service.saveChallenge(challenge);
 
-		Message challengerMessage = bot.getMessageById(
-				otherPlayerPrivateChannelId, challenge.getChallengerMessageId()).block();
-		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.addLine("They have accepted your challenge.")
 				.addLine(String.format("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:%s",
 						game.isAllowDraw() ? " or drew :left_right_arrow:" : ""))
 				.makeLastLineBold();
-		challengerMessage.edit().withContent(challengerMessageContent.get())
-				.withComponents(createActionRow(acceptorMessage.getChannelId().asLong(), game.isAllowDraw()))
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw()))
 				.subscribe();
 
-		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You have accepted the challenge.")
 				.addLine(String.format("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:",
 						game.isAllowDraw() ? " or drew :left_right_arrow:" : ""))
 				.makeLastLineBold();
-		acceptorMessage.edit().withContent(acceptorMessageContent.get())
-				.withComponents(createActionRow(challengerMessage.getChannelId().asLong(), game.isAllowDraw()))
+		parentMessage.edit().withContent(parentMessageContent.get())
+				.withComponents(createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw()))
 				.subscribe();
 
 		event.acknowledge().subscribe();
@@ -59,20 +58,13 @@ public class Accept extends ButtonCommand {
 
 	private static ActionRow createActionRow(long channelId, boolean allowDraw) {
 		if (allowDraw) return ActionRow.of(
-				Button.primary("win:" + channelId,
-						Emojis.arrowUp, "Win"),
-				Button.primary("lose:" + channelId,
-						Emojis.arrowDown, "Lose"),
-				Button.primary("draw:" + channelId,
-						Emojis.leftRightArrow, "Draw"),
-				Button.danger("cancel:" + channelId,
-						Emojis.crossMark, "Cancel match"));
+				Buttons.win(channelId),
+				Buttons.lose(channelId),
+				Buttons.draw(channelId),
+				Buttons.cancel(channelId));
 		else return ActionRow.of(
-				Button.primary("win:" + channelId,
-						Emojis.arrowUp, "Win"),
-				Button.primary("lose:" + channelId,
-						Emojis.arrowDown, "Lose"),
-				Button.danger("cancel:" + channelId,
-						Emojis.crossMark, "Cancel match"));
+				Buttons.win(channelId),
+				Buttons.lose(channelId),
+				Buttons.cancel(channelId));
 	}
 }

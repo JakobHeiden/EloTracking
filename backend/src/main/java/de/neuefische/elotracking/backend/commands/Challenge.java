@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.Buttons;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
@@ -61,10 +62,8 @@ public class Challenge extends SlashCommand {
 		MessageCreateSpec acceptorMessageSpec = MessageCreateSpec.builder()
 				.content(acceptorMessageContent.get())
 				.addComponent(ActionRow.of(
-						Button.primary("accept:" + challengerMessage.getChannelId().asString(),
-								Emojis.checkMark, "Accept"),
-						Button.primary("decline:" + challengerMessage.getChannelId().asString(),
-								Emojis.crossMark, "Decline")
+						Buttons.accept(challengerMessage.getChannelId().asLong()),
+						Buttons.decline(challengerMessage.getChannelId().asLong())
 				)).build();
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 

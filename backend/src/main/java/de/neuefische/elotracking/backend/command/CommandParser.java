@@ -184,7 +184,7 @@ public class CommandParser {
         }
     }
 
-    public static ButtonCommand createButtonInteractionCommand(ButtonInteractionEventWrapper wrapper) {
+    public static ButtonCommand createButtonCommand(ButtonInteractionEventWrapper wrapper) {
         String commandClassName = wrapper.event().getCustomId().split(":")[0];
         commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
         log.trace("commandString = " + commandClassName);
