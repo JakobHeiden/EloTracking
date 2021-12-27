@@ -25,7 +25,6 @@ public abstract class ButtonCommand {
 	protected final Game game;
 	protected final ChallengeModel challenge;
 	protected final boolean isChallengerCommand;
-	protected final long targetUserPrivateChannelId;
 
 	protected ButtonCommand(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 							TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -46,7 +45,7 @@ public abstract class ButtonCommand {
 			this.isChallengerCommand = false;
 		}
 		this.game = service.findGameByGuildId(guildId).get();
-		this.targetUserPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
+		long targetUserPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
 		this.parentMessage = event.getMessage().get();
 		this.targetMessage = isChallengerCommand ?
 				bot.getMessageById(targetUserPrivateChannelId, challenge.getAcceptorMessageId()).block()

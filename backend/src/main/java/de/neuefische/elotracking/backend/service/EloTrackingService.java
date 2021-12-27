@@ -256,6 +256,6 @@ public class EloTrackingService {
 	}
 
 	public void timedDeleteMessage(long messageId, long channelId) {
-		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).subscribe();
+		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block().delete().subscribe();
 	}
 }

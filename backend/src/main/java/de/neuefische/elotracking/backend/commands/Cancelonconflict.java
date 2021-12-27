@@ -1,9 +1,11 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.Buttons;
 import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.timedtask.TimedTask;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -12,9 +14,9 @@ import discord4j.core.object.component.Button;
 
 import java.util.ArrayList;
 
-public class CancelOnConflict extends ButtonCommand {// TODO! klassenname??
+public class Cancelonconflict extends ButtonCommand {
 
-	protected CancelOnConflict(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	protected Cancelonconflict(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
@@ -32,13 +34,12 @@ public class CancelOnConflict extends ButtonCommand {// TODO! klassenname??
 		if (!bothCalledForCancel) {
 			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 					.makeAllNotBold()
-					.addLine("You called for a cancel :negative_squared_cross_mark:. If your opponent does as well, the match will be canceled. " +
-							"You can still file a dispute.")
+					.addLine("You called for a cancel :negative_squared_cross_mark:. If your opponent does as well, " +
+							"the match will be canceled. You can still file a dispute.")
 					.makeLastLineBold();
 			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(ActionRow.of(
-							Button.secondary("dispute:" + targetMessage.getChannelId().asString(),
-									Emojis.exclamation, "File a dispute"))).subscribe();
+							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.");
@@ -58,8 +59,11 @@ public class CancelOnConflict extends ButtonCommand {// TODO! klassenname??
 			targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
 
 			service.deleteChallenge(challenge);
+
+			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
+					parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
+			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
+					targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
 		}
-
-
 	}
 }

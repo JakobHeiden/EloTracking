@@ -75,22 +75,26 @@ public class Cancel extends ButtonCommand {
 					.addLine("You called for a cancel :negative_squared_cross_mark:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-							"or file a dispute :exclamation:.")
+							"and/or call for a cancel, or file a dispute :exclamation:.")
 					.makeLastLineBold();
 			parentMessage.edit().withContent(parentMessageContent.get())
 					.withComponents(ActionRow.of(
 							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
+							Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
 					.addLine("Your report and that of your opponent is in conflict.")
 					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-							"or file a dispute :exclamation:.")
+							"and/or call for a cancel, or file a dispute :exclamation:.")
 					.makeLastLineBold();
 			targetMessage.edit().withContent(targetMessageContent.get())
 					.withComponents(ActionRow.of(
 							Buttons.redo(targetMessage.getChannelId().asLong()),
+							Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
+							Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 			// I have no idea why this is necessary here but not in the other cases
