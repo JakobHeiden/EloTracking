@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "challenge")
 public class ChallengeModel {
 
-    public enum ReportStatus {
+	public enum ReportStatus {
         NOT_YET_REPORTED,
         WIN,
         LOSE,
@@ -42,6 +42,8 @@ public class ChallengeModel {
     private ReportStatus acceptorReported;
     private boolean challengerCalledForCancel = false;
     private boolean acceptorCalledForCancel = false;
+    private boolean challengerCalledForRedo = false;
+    private boolean acceptorCalledForRedo = false;
 
     public ChallengeModel(long guildId,
                           long challengerId, long challengerMessageId,
@@ -81,5 +83,14 @@ public class ChallengeModel {
         if (acceptorReported == ReportStatus.CANCEL && challengerReported == ReportStatus.CANCEL) return ReportIntegrity.HARMONY;
 
         return ReportIntegrity.CONFLICT;
+    }
+
+    public void redo() {
+        challengerReported = ReportStatus.NOT_YET_REPORTED;
+        acceptorReported = ReportStatus.NOT_YET_REPORTED;
+        challengerCalledForRedo = false;
+        acceptorCalledForRedo = false;
+        challengerCalledForCancel = false;
+        acceptorCalledForCancel = false;
     }
 }
