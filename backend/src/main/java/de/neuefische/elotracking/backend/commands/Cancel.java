@@ -27,78 +27,81 @@ public class Cancel extends ButtonCommand {
 		ChallengeModel.ReportIntegrity reportIntegrity;
 		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.CANCEL);
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.CANCEL);
+
+		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) processFirstToReport();
+		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) processHarmony();
+		if (reportIntegrity == ChallengeModel.ReportIntegrity.CONFLICT) processConflict();
+		event.acknowledge().subscribe();
+	}
+
+	private void processFirstToReport() {
 		service.saveChallenge(challenge);
 
-		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) {
-			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
-					.makeAllNotBold()
-					.addLine("You called for a cancel :negative_squared_cross_mark:. " +
-							"I'll let you know when your opponent reacts.");
-			parentMessage.edit().withContent(parentMessageContent.get())
-					.withComponents(new ArrayList<>()).subscribe();
+		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+				.makeAllNotBold()
+				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
+						"I'll let you know when your opponent reacts.");
+		parentMessage.edit().withContent(parentMessageContent.get())
+				.withComponents(new ArrayList<>()).subscribe();
 
-			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.");
-			targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
-			return;
-		}
+		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.");
+		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
+	}
 
-		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) {
-			service.deleteChallenge(challenge);
+	private void processHarmony() {
+		service.deleteChallenge(challenge);
 
-			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
-					.makeAllNotBold()
-					.addLine("You called for a cancel :negative_squared_cross_mark:. " +
-							"The challenge has been canceled.")
-					.makeAllItalic();
-			parentMessage.edit().withContent(parentMessageContent.get())
-					.withComponents(new ArrayList<>()).subscribe();
+		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+				.makeAllNotBold()
+				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
+						"The challenge has been canceled.")
+				.makeAllItalic();
+		parentMessage.edit().withContent(parentMessageContent.get())
+				.withComponents(new ArrayList<>()).subscribe();
 
-			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-					.makeAllNotBold()
-					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
-							"The challenge has been canceled.")
-					.makeAllItalic();
-			targetMessage.edit().withContent(targetMessageContent.get())
-					.withComponents(new ArrayList<>()).subscribe();
+		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+				.makeAllNotBold()
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+						"The challenge has been canceled.")
+				.makeAllItalic();
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(new ArrayList<>()).subscribe();
 
-			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
-					parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
-			queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getDeleteMessageTime(),
-					targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
-			return;
-		}
+		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
+				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
+		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
+				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
+	}
 
-		if (reportIntegrity == ChallengeModel.ReportIntegrity.CONFLICT) {
-			MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
-					.makeAllNotBold()
-					.addLine("You called for a cancel :negative_squared_cross_mark:.")
-					.addLine("Your report and that of your opponent is in conflict.")
-					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-							"and/or call for a cancel, or file a dispute :exclamation:.")
-					.makeLastLineBold();
-			parentMessage.edit().withContent(parentMessageContent.get())
-					.withComponents(ActionRow.of(
-							Buttons.redo(targetMessage.getChannelId().asLong()),
-							Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-							Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+	private void processConflict() {
+		service.saveChallenge(challenge);
 
-			MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-					.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
-					.addLine("Your report and that of your opponent is in conflict.")
-					.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-							"and/or call for a cancel, or file a dispute :exclamation:.")
-					.makeLastLineBold();
-			targetMessage.edit().withContent(targetMessageContent.get())
-					.withComponents(ActionRow.of(
-							Buttons.redo(targetMessage.getChannelId().asLong()),
-							Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-							Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-							Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+				.makeAllNotBold()
+				.addLine("You called for a cancel :negative_squared_cross_mark:.")
+				.addLine("Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
+						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.makeLastLineBold();
+		parentMessage.edit().withContent(parentMessageContent.get())
+				.withComponents(ActionRow.of(
+						Buttons.redo(targetMessage.getChannelId().asLong()),
+						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
+						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
+						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
-			// I have no idea why this is necessary here but not in the other cases
-			event.acknowledge().subscribe();
-		}
+		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
+				.addLine("Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
+						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.makeLastLineBold();
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(ActionRow.of(
+						Buttons.redo(targetMessage.getChannelId().asLong()),
+						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
+						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
+						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 	}
 }
