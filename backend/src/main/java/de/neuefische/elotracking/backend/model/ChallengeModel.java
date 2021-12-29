@@ -34,8 +34,10 @@ public class ChallengeModel {
     private long challengerId;
     @Id
     private long challengerMessageId;
+    private long challengerChannelId;
     private long acceptorId;
     private long acceptorMessageId;
+    private long acceptorChannelId;
 
     private boolean isAccepted;
     private ReportStatus challengerReported;
@@ -44,15 +46,18 @@ public class ChallengeModel {
     private boolean acceptorCalledForCancel = false;
     private boolean challengerCalledForRedo = false;
     private boolean acceptorCalledForRedo = false;
+    private boolean isDispute = false;
 
     public ChallengeModel(long guildId,
-                          long challengerId, long challengerMessageId,
-                          long acceptorId, long acceptorMessageId) {
+                          long challengerId, long challengerMessageId, long challengerChannelId,
+                          long acceptorId, long acceptorMessageId, long acceptorChannelId) {
         this.guildId = guildId;
         this.challengerId = challengerId;
         this.challengerMessageId = challengerMessageId;
+        this.challengerChannelId = challengerChannelId;
         this.acceptorId = acceptorId;
         this.acceptorMessageId = acceptorMessageId;
+        this.acceptorChannelId = acceptorChannelId;
 
         this.isAccepted = false;
         this.challengerReported = ReportStatus.NOT_YET_REPORTED;

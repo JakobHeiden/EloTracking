@@ -1,7 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
 import de.neuefische.elotracking.backend.command.Buttons;
-import de.neuefische.elotracking.backend.command.Emojis;
 import de.neuefische.elotracking.backend.command.MessageContent;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
@@ -11,12 +10,10 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.Button;
-import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Cancel extends ButtonCommand {
+public class Cancel extends ButtonCommandForChallenge {
 
 	public Cancel(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				  TimedTaskQueue queue, GatewayDiscordClient client) {

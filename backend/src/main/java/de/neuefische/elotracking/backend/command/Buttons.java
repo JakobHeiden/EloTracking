@@ -26,7 +26,7 @@ public class Buttons {
 
 	public static Button accept(long channelId) {
 		return Button.primary("accept:" + channelId,
-				Emojis.checkMark, "Accept");
+				Emojis.checkMark, "Accept");// TODO evtl U+2694 crossed swords?
 	}
 
 	public static Button decline(long channelId) {
@@ -62,5 +62,33 @@ public class Buttons {
 	public static Button dispute(long channelId) {
 		return Button.secondary("dispute:" + channelId,
 				Emojis.exclamation, "File a dispute");
+	}
+
+	public static Button ruleAsWin(long challengeId, boolean isChallengerWin, String winnerName,
+								   long challengerChannelId, long acceptorChannelId) {
+		return Button.primary(String.format("ruleaswin:%s:%s:%s:%s",
+						challengeId, String.valueOf(isChallengerWin),
+						challengerChannelId, acceptorChannelId),
+				Emojis.arrowUp, "Rule the match a win for " + winnerName);
+	}
+
+	public static Button ruleAsDraw(long challengeId) {
+		return Button.primary("declaredraw:" + challengeId,
+				Emojis.leftRightArrow, "Rule the match a draw");
+	}
+
+	public static Button ruleAsCancel(long challengeId) {
+		return Button.danger("ruleascancel:" + challengeId,
+				Emojis.crossMark, "Rule the match as canceled");
+	}
+
+	public static Button closeChannelNow() {
+		return Button.secondary("closechannelnow",
+				Emojis.crossMark, "Close this channel now");
+	}
+
+	public static Button closeChannelLater() {
+		return Button.secondary("closechannellater",
+				Emojis.hourglass, "Close this channel in 24h");// TODO vllt konfbar machen
 	}
 }

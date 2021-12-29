@@ -14,7 +14,7 @@ import discord4j.core.object.component.ActionRow;
 
 import java.util.ArrayList;
 
-public class Draw extends ButtonCommand {
+public class Draw extends ButtonCommandForChallenge {
 
 	public Draw(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				TimedTaskQueue queue, GatewayDiscordClient client) {

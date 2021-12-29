@@ -9,7 +9,7 @@ import discord4j.core.event.domain.interaction.UserInteractionEvent;
 
 import java.util.Optional;
 
-public class UserInteractionChallenge {
+public class ChallengeAsUserInteraction {
 
 	private final UserInteractionEvent event;
 	private final EloTrackingService service;
@@ -17,8 +17,8 @@ public class UserInteractionChallenge {
 	private final TimedTaskQueue queue;
 	private final GatewayDiscordClient client;
 
-	public UserInteractionChallenge(UserInteractionEvent event, EloTrackingService service, DiscordBotService bot,
-									TimedTaskQueue queue, GatewayDiscordClient client) {
+	public ChallengeAsUserInteraction(UserInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+									  TimedTaskQueue queue, GatewayDiscordClient client) {
 		this.event = event;
 		this.service = service;
 		this.bot = bot;

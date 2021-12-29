@@ -12,7 +12,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Decline extends ButtonCommand {
+public class Decline extends ButtonCommandForChallenge {
 
 	public Decline(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				   TimedTaskQueue queue, GatewayDiscordClient client) {

@@ -33,6 +33,6 @@ public class Game {
         this.openChallengeDecayTime = 2 * 60;
         this.acceptedChallengeDecayTime = 7 * 24 * 60;
         this.matchAutoResolveTime = 24 * 60;
-        this.messageCleanupTime = 24 * 60;
+        this.messageCleanupTime = 12 * 60;
     }
 }
