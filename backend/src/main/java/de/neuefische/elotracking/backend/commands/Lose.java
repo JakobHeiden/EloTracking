@@ -84,10 +84,9 @@ public class Lose extends ButtonCommand {
 
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine("You reported a loss :arrow_down:.")
-				.addLine("Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.addLine("You reported a loss :arrow_down:. Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
+						"or file a dispute.")
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(ActionRow.of(
@@ -97,10 +96,10 @@ public class Lose extends ButtonCommand {
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent reported a loss :arrow_down:.")
-				.addLine("Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.addLine("Your opponent reported a loss :arrow_down:. " +
+						"Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
+						"or file a dispute.")
 				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(ActionRow.of(

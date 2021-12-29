@@ -37,23 +37,40 @@ public class Redoorcancel extends ButtonCommand {
 		boolean opponentDidNotCallEither = !bothCalledForCancel && !bothCalledForRedo;
 
 		if (opponentDidNotCallEither) opponentDidNotCallEither();
-		else if (bothCalledForRedo) Redo.bothCalledForRedo(parentMessage, targetMessage, challenge, game, service);
-		else if (bothCalledForCancel) Cancelonconflict.bothCalledForCancel(parentMessage, targetMessage,
-				challenge, game, service, queue);
+		// this should be dead code, but might get accessed by simultaneous button presses by both parties...?
+		// TODO figure this out
+		else if (bothCalledForRedo) {
+			Redo.bothCalledForRedo(parentMessage, targetMessage, challenge, game, service);
+			bot.sendToOwner("Redo.bothCalledForRedo()");
+		}
+		else if (bothCalledForCancel) {
+			Cancelonconflict.bothCalledForCancel(parentMessage, targetMessage, challenge, game, service, queue);
+			bot.sendToOwner("Redo.bothCalledForRedo()");
+		}
+		event.acknowledge().subscribe();
 	}
 
 	private void opponentDidNotCallEither() {
+		service.saveChallenge(challenge);
+
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine("You called for a redo or a cancel :person_shrugging:. You can still file a dispute.")
-				.makeLastLineBold();
+				.addLine("You called for a redo or a cancel :person_shrugging:. You can still file a dispute.");
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(ActionRow.of(
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent called for a redo or a cancel :person_shrugging:.");
-		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
+				.makeAllNotBold()
+				.makeLastLineStrikeThrough()
+				.addLine("Your opponent called for a redo or a cancel :person_shrugging:. " +
+						"You can accept either, or file a dispute")
+				.makeLastLineBold();
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(ActionRow.of(
+						Buttons.agreeToRedo(parentMessage.getChannelId().asLong()),
+						Buttons.agreeToCancelOnConflict(parentMessage.getChannelId().asLong()),
+						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
 	}
 }
 

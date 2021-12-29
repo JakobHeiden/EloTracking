@@ -79,10 +79,9 @@ public class Cancel extends ButtonCommand {
 
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine("You called for a cancel :negative_squared_cross_mark:.")
-				.addLine("Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.addLine("You called for a cancel :negative_squared_cross_mark:. Your report and that of your " +
+						"opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(ActionRow.of(
@@ -92,10 +91,10 @@ public class Cancel extends ButtonCommand {
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
-				.addLine("Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+						"Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, " +
+						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(ActionRow.of(
