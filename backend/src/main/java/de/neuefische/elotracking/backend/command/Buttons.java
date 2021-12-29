@@ -30,7 +30,7 @@ public class Buttons {
 	}
 
 	public static Button decline(long channelId) {
-		return Button.primary("decline:" + channelId,
+		return Button.danger("decline:" + channelId,
 				Emojis.crossMark, "Decline");
 	}
 
@@ -39,7 +39,17 @@ public class Buttons {
 				Emojis.redoArrow, "Call for a redo");
 	}
 
+	public static Button agreeToRedo(long channelId) {
+		return Button.primary("redo:" + channelId,
+				Emojis.redoArrow, "Agree to a redo");
+	}
+
 	public static Button cancelOnConflict(long channelId) {
+		return Button.danger("cancelonconflict:" + channelId,
+				Emojis.crossMark, "Cancel match");
+	}
+
+	public static Button agreeToCancelOnConflict(long channelId) {
 		return Button.danger("cancelonconflict:" + channelId,
 				Emojis.crossMark, "Cancel match");
 	}

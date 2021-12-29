@@ -85,18 +85,16 @@ public class Win extends ButtonCommand {
 
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine("You reported a win :arrow_up:.")
-				.addLine("Your report and that of your opponent is in conflict.")
+				.addLine("You reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(createActionRow(targetMessage)).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent reported a win :arrow_up:.")
-				.addLine("Your report and that of your opponent is in conflict.")
+				.addLine("Your opponent reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
-						"or file a dispute :exclamation:.")
+						"or file a dispute.")
 				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(createActionRow(parentMessage)).subscribe();

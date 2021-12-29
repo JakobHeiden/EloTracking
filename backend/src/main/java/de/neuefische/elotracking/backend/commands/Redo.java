@@ -34,40 +34,51 @@ public class Redo extends ButtonCommand {
 
 		if (!bothCalledForRedo) oneCalledForRedo();
 		if (bothCalledForRedo) bothCalledForRedo(parentMessage, targetMessage, challenge, game, service);
+		event.acknowledge().subscribe();
 	}
 
 	private void oneCalledForRedo() {
+		service.saveChallenge(challenge);
+
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You called for a redo :leftwards_arrow_with_hook:. If your opponent does as well, " +
-						"reports will be redone. You can still file a dispute.")
-				.makeLastLineBold();
+						"reports will be redone. You can still file a dispute.");
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(ActionRow.of(
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent called for a redo :leftwards_arrow_with_hook:.");
-		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
+				.makeAllNotBold()
+				.makeLastLineStrikeThrough()
+				.addLine("Your opponent called for a redo :leftwards_arrow_with_hook:. " +
+						"You can agree to a redo or file a dispute.")
+				.makeLastLineBold();
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(ActionRow.of(
+						Buttons.agreeToRedo(parentMessage.getChannelId().asLong()),
+						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
 	}
 
 	static void bothCalledForRedo(Message parentMessage, Message targetMessage, ChallengeModel challenge, Game game,
 								  EloTrackingService service) {
+		challenge.redo();
+		service.saveChallenge(challenge);
+
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine(String.format("You called for a redo :leftwards_arrow_with_hook:. Reports are redone. " +
-						"Did you win or lose%s", game.isAllowDraw() ? " or draw?" : "?"));
+				.addLine(String.format("You agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
+						"Did you win or lose%s", game.isAllowDraw() ? " or draw?" : "?"))
+				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get()).withComponents(
 				createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine(String.format("Your opponent called for a redo :leftwards_arrow_with_hook:. Reports are redone. " +
-						"Did you win or lose%s", game.isAllowDraw() ? " or draw?" : "?"));
+				.addLine(String.format("Your opponent agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
+						"Did you win or lose%s", game.isAllowDraw() ? " or draw?" : "?"))
+				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get()).withComponents(
 				createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
-
-		challenge.redo();
-		service.saveChallenge(challenge);
 	}
 
 	private static ActionRow createActionRow(long channelId, boolean allowDraw) {

@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class Cancelonconflict extends ButtonCommand {
 
-	protected Cancelonconflict(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	public Cancelonconflict(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
@@ -32,13 +32,16 @@ public class Cancelonconflict extends ButtonCommand {
 			challenge.setAcceptorCalledForCancel(true);
 			bothCalledForCancel = challenge.isChallengerCalledForCancel();
 		}
-		service.saveChallenge(challenge);
 
-		if (!bothCalledForCancel) oneCalledForCancel(parentMessage, targetMessage);
+		if (!bothCalledForCancel) oneCalledForCancel(parentMessage, targetMessage, challenge, service);
 		if (bothCalledForCancel) bothCalledForCancel(parentMessage, targetMessage, challenge, game, service, queue);
+		event.acknowledge().subscribe();
 	}
 
-	static void oneCalledForCancel(Message parentMessage, Message targetMessage) {
+	static void oneCalledForCancel(Message parentMessage, Message targetMessage, ChallengeModel challenge,
+								   EloTrackingService service) {
+		service.saveChallenge(challenge);
+
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You called for a cancel :negative_squared_cross_mark:. If your opponent does as well, " +
@@ -49,24 +52,31 @@ public class Cancelonconflict extends ButtonCommand {
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.");
-		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+						"You can agree to a cancel or file a dispute.");
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(ActionRow.of(
+						Buttons.agreeToCancelOnConflict(parentMessage.getChannelId().asLong()),
+						Buttons.dispute(parentMessage.getChannelId().asLong())
+				)).subscribe();
 	}
 
 	static void bothCalledForCancel(Message parentMessage, Message targetMessage,
 									ChallengeModel challenge, Game game,
 									EloTrackingService service, TimedTaskQueue queue) {
+		service.deleteChallenge(challenge);
+
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine("You called for a cancel :negative_squared_cross_mark:. The match is canceled.");
+				.addLine("You agreed to a cancel :negative_squared_cross_mark:. The match is canceled.");
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(new ArrayList<>()).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. The match is canceled.");
-		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
-
-		service.deleteChallenge(challenge);
+				.makeAllNotBold()
+				.addLine("Your opponent agreed to a cancel :negative_squared_cross_mark:. The match is canceled.");
+		targetMessage.edit().withContent(targetMessageContent.get())
+				.withComponents(new ArrayList<>()).subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);

@@ -30,6 +30,13 @@ public class MessageContent {
 		return this;
 	}
 
+	public MessageContent makeLastLineStrikeThrough() {
+		String[] lines = content.split("\n");
+		lines[lines.length - 1] = "~~" + lines[lines.length - 1] + "~~";
+		content = String.join("\n", lines);
+		return this;
+	}
+
 	public String get() {
 		return content;
 	}

@@ -45,8 +45,8 @@ public abstract class ButtonCommand {
 			this.isChallengerCommand = false;
 		}
 		this.game = service.findGameByGuildId(guildId).get();
-		long targetUserPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
 		this.parentMessage = event.getMessage().get();
+		long targetUserPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
 		this.targetMessage = isChallengerCommand ?
 				bot.getMessageById(targetUserPrivateChannelId, challenge.getAcceptorMessageId()).block()
 				: bot.getMessageById(targetUserPrivateChannelId, challenge.getChallengerMessageId()).block();

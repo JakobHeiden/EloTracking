@@ -48,6 +48,8 @@ public class DiscordBotService {
 	}
 
 	public void sendToOwner(String text) {
+		if (text == null) text = "null";
+		if (text.equals("")) text = "empty String";
 		ownerPrivateChannel.createMessage(text).subscribe();
 	}
 

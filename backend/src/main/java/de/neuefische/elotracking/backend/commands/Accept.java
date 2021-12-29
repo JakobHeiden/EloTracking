@@ -36,8 +36,8 @@ public class Accept extends ButtonCommand {
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.addLine("They have accepted your challenge.")
-				.addLine(String.format("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:%s",
-						game.isAllowDraw() ? " or drew :left_right_arrow:" : ""))
+				.addLine(String.format("Come back after the match and let me know if you won or lost %s",
+						game.isAllowDraw() ? " or drew" : ""))
 				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw()))
@@ -46,8 +46,8 @@ public class Accept extends ButtonCommand {
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You have accepted the challenge.")
-				.addLine(String.format("Come back after the match and let me know if you won :arrow_up: or lost :arrow_down:",
-						game.isAllowDraw() ? " or drew :left_right_arrow:" : ""))
+				.addLine(String.format("Come back after the match and let me know if you won or lost",
+						game.isAllowDraw() ? " or drew" : ""))
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw()))

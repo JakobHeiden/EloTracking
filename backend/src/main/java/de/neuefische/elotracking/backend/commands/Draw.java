@@ -82,9 +82,8 @@ public class Draw extends ButtonCommand {
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You reported a draw :left_right_arrow:.")
-				.addLine("Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
+						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(ActionRow.of(
@@ -95,9 +94,8 @@ public class Draw extends ButtonCommand {
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.addLine("Your opponent reported a draw :left_right_arrow:.")
-				.addLine("Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo :leftwards_arrow_with_hook: of the reporting, " +
-						"and/or call for a cancel, or file a dispute :exclamation:.")
+				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
+						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(ActionRow.of(
