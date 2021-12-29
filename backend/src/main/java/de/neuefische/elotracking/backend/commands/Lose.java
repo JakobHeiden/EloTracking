@@ -14,7 +14,7 @@ import discord4j.core.object.component.ActionRow;
 
 import java.util.ArrayList;
 
-public class Lose extends ButtonCommand {
+public class Lose extends ButtonCommandForChallenge {
 
 	public Lose(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
 				GatewayDiscordClient client) {

@@ -9,7 +9,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Redoorcancel extends ButtonCommand {
+public class Redoorcancel extends ButtonCommandForChallenge {
 
 	public Redoorcancel(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);

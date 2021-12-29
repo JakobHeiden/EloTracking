@@ -18,6 +18,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.spec.MessageCreateSpec;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
+
 @Slf4j
 public class Challenge extends SlashCommand {
 
@@ -34,8 +36,8 @@ public class Challenge extends SlashCommand {
 		staticExecute(acceptorId, guildId, game, event, service, bot, queue);
 	}
 
-	public static void staticExecute(long acceptorId, long guildId, Game game, ApplicationCommandInteractionEvent event, EloTrackingService service,
-									 DiscordBotService bot, TimedTaskQueue queue) {
+	public static void staticExecute(long acceptorId, long guildId, Game game, ApplicationCommandInteractionEvent event,
+									 EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue) {
 		long challengerId = event.getInteraction().getUser().getId().asLong();
 
 		if (challengerId == acceptorId) {
@@ -43,8 +45,12 @@ public class Challenge extends SlashCommand {
 					.withEphemeral(true).subscribe();
 			return;
 		}
-		if (service.challengeExistsByParticipants(guildId, challengerId, acceptorId)) {
-			event.reply("You already challenged that player. You should have received a private message from me...")
+		Optional<ChallengeModel> maybeChallenge = service.findChallengeByParticipants(guildId, challengerId, acceptorId);
+		if (maybeChallenge.isPresent()) {
+			if (maybeChallenge.get().isDispute())
+				event.reply("You cannot challenge that player again while there is an unresolved dispute")
+						.withEphemeral(true).subscribe();//TODO verlinken
+			else event.reply("You already challenged that player. You should have received a private message from me...")
 					.withEphemeral(true).subscribe();
 			return;
 		}
@@ -63,14 +69,15 @@ public class Challenge extends SlashCommand {
 				.content(acceptorMessageContent.get())
 				.addComponent(ActionRow.of(
 						Buttons.accept(challengerMessage.getChannelId().asLong()),
-						Buttons.decline(challengerMessage.getChannelId().asLong())
+						Buttons.decline(challengerMessage.getChannelId().asLong()),
+						Buttons.dispute(challengerMessage.getChannelId().asLong())// TODO! entfernen
 				)).build();
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, challengerId);
 		ChallengeModel challenge = new ChallengeModel(guildId,
-				challengerId, challengerMessage.getId().asLong(),
-				acceptorId, acceptorMessage.getId().asLong());
+				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(),
+				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong());
 
 		queue.addTimedTask(TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), guildId,
 				0L, null);

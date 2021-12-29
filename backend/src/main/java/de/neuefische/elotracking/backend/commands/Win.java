@@ -15,7 +15,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.ArrayList;
 
-public class Win extends ButtonCommand {
+public class Win extends ButtonCommandForChallenge {
 
 	public Win(ButtonInteractionEvent event, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
 			   GatewayDiscordClient client) {

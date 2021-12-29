@@ -75,7 +75,7 @@ public class DiscordBotService {
 	}
 
 	public String getPlayerName(long playerId) {
-		return client.getUserById(Snowflake.of(playerId)).block().getTag();
+		return client.getUserById(Snowflake.of(playerId)).block().getUsername();
 	}
 
 	public Mono<Message> getMessageById(long channelId, long messageId) {
@@ -87,9 +87,9 @@ public class DiscordBotService {
 			try {
 				TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
 				resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
-						match.getWinnerName(client), match.getWinnerAfterRating(),
+						match.getWinnerTag(client), match.getWinnerAfterRating(),
 						match.isDraw() ? "drew" : "defeated",
-						match.getLoserName(client), match.getLoserAfterRating())).subscribe();
+						match.getLoserTag(client), match.getLoserAfterRating())).subscribe();
 			} catch (ClientException e) {
 				game.setResultChannelId(0L);
 				service.saveGame(game);

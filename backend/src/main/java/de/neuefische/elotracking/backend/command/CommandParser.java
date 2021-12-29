@@ -1,9 +1,6 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.SlashCommand;
-import de.neuefische.elotracking.backend.commands.ButtonCommand;
-import de.neuefische.elotracking.backend.commands.Createresultchannel;
-import de.neuefische.elotracking.backend.commands.UserInteractionChallenge;
+import de.neuefische.elotracking.backend.commands.*;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -35,8 +32,8 @@ public class CommandParser {
 
     private final GatewayDiscordClient client;
     private final Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory;
-    private final Function<ButtonInteractionEventWrapper, ButtonCommand> buttonInteractionCommandFactory;
-    private final Function<UserInteractionEventWrapper, UserInteractionChallenge> userInteractionChallengeFactory;
+    private final Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory;
+    private final Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory;
     private final EloTrackingService service;
     private final DiscordBotService bot;
     private final TimedTaskQueue queue;
@@ -45,11 +42,11 @@ public class CommandParser {
 
     public CommandParser(GatewayDiscordClient client, EloTrackingService service, DiscordBotService bot, TimedTaskQueue queue,
                          Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory,
-                         Function<ButtonInteractionEventWrapper, ButtonCommand> buttonInteractionCommandFactory,
-                         Function<UserInteractionEventWrapper, UserInteractionChallenge> userInteractionChallengeFactory) {
+                         Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory,
+                         Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
         this.client = client;
         this.slashCommandFactory = slashCommandFactory;
-        this.buttonInteractionCommandFactory = buttonInteractionCommandFactory;
+        this.buttonCommandFactory = buttonCommandFactory;
         this.service = service;
         this.bot = bot;
         this.queue = queue;
@@ -128,6 +125,7 @@ public class CommandParser {
             log.info("Setting up Dev Game...");
             Game game = new Game(entenwieseId, "Dev Game");
             game.setAllowDraw(true);
+            game.setDisputeCategoryId(924066405836554251L);
 
             Guild entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
             List<GuildChannel> channels = entenwieseGuild.getChannels()
@@ -159,13 +157,13 @@ public class CommandParser {
 
         client.on(ButtonInteractionEvent.class)
                 .map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue, client))
-                .map(buttonInteractionCommandFactory::apply)
+                .map(buttonCommandFactory::apply)
                 .subscribe(ButtonCommand::execute);
 
         client.on(UserInteractionEvent.class)
                 .map(event -> new UserInteractionEventWrapper(event, service, bot, queue, client))
                 .map(userInteractionChallengeFactory::apply)
-                .subscribe(UserInteractionChallenge::execute);
+                .subscribe(ChallengeAsUserInteraction::execute);
     }
 
     public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
@@ -194,14 +192,14 @@ public class CommandParser {
                             TimedTaskQueue.class, GatewayDiscordClient.class)
                     .newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
         } catch (Exception e) {
-            wrapper.bot().sendToOwner(e.getMessage());
+            wrapper.bot().sendToOwner(e.toString());
             e.printStackTrace();
             return null;
         }
     }
 
-    public static UserInteractionChallenge createUserInteractionChallenge(UserInteractionEventWrapper wrapper) {
-        return new UserInteractionChallenge(
+    public static ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEventWrapper wrapper) {
+        return new ChallengeAsUserInteraction(
                 wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
     }
 }

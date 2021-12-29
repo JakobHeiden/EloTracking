@@ -1,8 +1,8 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.SlashCommand;
 import de.neuefische.elotracking.backend.commands.ButtonCommand;
-import de.neuefische.elotracking.backend.commands.UserInteractionChallenge;
+import de.neuefische.elotracking.backend.commands.SlashCommand;
+import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,13 +37,13 @@ public class CommandFactoryConfiguration {
 	}
 
 	@Bean
-	public Function<UserInteractionEventWrapper, UserInteractionChallenge> userInteractionChallengeFactory() {
+	public Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory() {
 		return eventWrapper -> createUserInteractionChallenge(eventWrapper);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public UserInteractionChallenge createUserInteractionChallenge(UserInteractionEventWrapper eventWrapper) {
+	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEventWrapper eventWrapper) {
 		return CommandParser.createUserInteractionChallenge(eventWrapper);
 	}
 

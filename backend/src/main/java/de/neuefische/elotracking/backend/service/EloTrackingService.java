@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,11 +74,11 @@ public class EloTrackingService {
 	}
 
 	// Challenge
-	public boolean challengeExistsByParticipants(long guildId, long challengerId, long acceptorId) {
+	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
 		return challengeDao.findAllByChallengerId(challengerId).stream()
 				.filter(challenge -> challenge.getAcceptorId() == acceptorId)
 				.filter(challenge -> challenge.getGuildId() == guildId)
-				.findAny().isPresent();
+				.findAny();
 	}
 
 	public boolean challengeExistsByAcceptorMessageId(long messageId) {
@@ -196,6 +193,10 @@ public class EloTrackingService {
 			return true;
 		}
 		return false;
+	}
+
+	public Optional<Player> findPlayerByGuildAndUserId(long guildId, long userId) {
+		return playerDao.findById(Player.generateId(guildId, userId));
 	}
 
 	// Rankings

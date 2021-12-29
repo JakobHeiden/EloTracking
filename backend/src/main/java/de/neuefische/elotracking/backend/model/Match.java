@@ -41,11 +41,11 @@ public class Match {
         this.date = new Date();
     }
 
-    public String getWinnerName(GatewayDiscordClient client) {
-        return client.getUserById(Snowflake.of(winnerId)).block().getUsername();
+    public String getWinnerTag(GatewayDiscordClient client) {
+        return client.getUserById(Snowflake.of(winnerId)).block().getTag();
     }
 
-    public String getLoserName(GatewayDiscordClient client) {
-        return client.getUserById(Snowflake.of(loserId)).block().getUsername();
+    public String getLoserTag(GatewayDiscordClient client) {
+        return client.getUserById(Snowflake.of(loserId)).block().getTag();
     }
 }
