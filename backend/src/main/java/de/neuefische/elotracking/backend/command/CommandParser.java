@@ -150,6 +150,11 @@ public class CommandParser {
                     .permissions(PermissionSet.none()).build()).block();
             game.setModRoleId(modRole.getId().asLong());
 
+            long ownerId = Long.valueOf(service.getPropertiesLoader().getOwnerId());
+            entenwieseGuild.getMemberById(Snowflake.of(ownerId)).block()
+                    .asFullMember().block()
+                    .addRole(adminRole.getId()).subscribe();
+
             service.saveGame(game);
         }
 

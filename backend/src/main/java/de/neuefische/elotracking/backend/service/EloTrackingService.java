@@ -15,6 +15,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.rest.http.client.ClientException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -261,5 +262,12 @@ public class EloTrackingService {
 
 	public void timedDeleteMessage(long messageId, long channelId) {
 		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block().delete().subscribe();
+	}
+
+	public void timedDeleteChannel(long channelId) {
+		try {
+			client.getChannelById(Snowflake.of(channelId)).block()
+					.delete().subscribe();
+		} catch (ClientException ignored) {}
 	}
 }

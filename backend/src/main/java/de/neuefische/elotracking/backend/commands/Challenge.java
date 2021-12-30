@@ -67,8 +67,7 @@ public class Challenge extends SlashCommand {
 				.content(acceptorMessageContent.get())
 				.addComponent(ActionRow.of(
 						Buttons.accept(challengerMessage.getChannelId().asLong()),
-						Buttons.decline(challengerMessage.getChannelId().asLong()),
-						Buttons.dispute(challengerMessage.getChannelId().asLong())// TODO! entfernen
+						Buttons.decline(challengerMessage.getChannelId().asLong())
 				)).build();
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 
