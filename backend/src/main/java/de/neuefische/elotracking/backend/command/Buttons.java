@@ -4,6 +4,17 @@ import discord4j.core.object.component.Button;
 
 public class Buttons {
 
+	// Challenge
+	public static Button accept(long channelId) {
+		return Button.primary("accept:" + channelId,
+				Emojis.checkMark, "Accept");// TODO evtl U+2694 crossed swords?
+	}
+
+	public static Button decline(long channelId) {
+		return Button.danger("decline:" + channelId,
+				Emojis.crossMark, "Decline");
+	}
+
 	public static Button win(long channelId) {
 		return Button.primary("win:" + channelId,
 				Emojis.arrowUp, "Win");
@@ -24,32 +35,12 @@ public class Buttons {
 				Emojis.crossMark, "Cancel match");
 	}
 
-	public static Button accept(long channelId) {
-		return Button.primary("accept:" + channelId,
-				Emojis.checkMark, "Accept");// TODO evtl U+2694 crossed swords?
-	}
-
-	public static Button decline(long channelId) {
-		return Button.danger("decline:" + channelId,
-				Emojis.crossMark, "Decline");
-	}
-
 	public static Button redo(long channelId) {
 		return Button.primary("redo:" + channelId,
 				Emojis.redoArrow, "Call for a redo");
 	}
 
-	public static Button agreeToRedo(long channelId) {
-		return Button.primary("redo:" + channelId,
-				Emojis.redoArrow, "Agree to a redo");
-	}
-
 	public static Button cancelOnConflict(long channelId) {
-		return Button.danger("cancelonconflict:" + channelId,
-				Emojis.crossMark, "Cancel match");
-	}
-
-	public static Button agreeToCancelOnConflict(long channelId) {
 		return Button.danger("cancelonconflict:" + channelId,
 				Emojis.crossMark, "Cancel match");
 	}
@@ -59,11 +50,22 @@ public class Buttons {
 				Emojis.shrug, "Redo or Cancel");
 	}
 
+	public static Button agreeToRedo(long channelId) {
+		return Button.primary("redo:" + channelId,
+				Emojis.redoArrow, "Agree to a redo");
+	}
+
+	public static Button agreeToCancelOnConflict(long channelId) {
+		return Button.danger("cancelonconflict:" + channelId,
+				Emojis.crossMark, "Cancel match");
+	}
+
 	public static Button dispute(long channelId) {
 		return Button.secondary("dispute:" + channelId,
 				Emojis.exclamation, "File a dispute");
 	}
 
+	// Dispute
 	public static Button ruleAsWin(long challengeId, boolean isChallengerWin, String winnerName,
 								   long challengerChannelId, long acceptorChannelId) {
 		return Button.primary(String.format("ruleaswin:%s:%s:%s:%s",
@@ -73,7 +75,7 @@ public class Buttons {
 	}
 
 	public static Button ruleAsDraw(long challengeId) {
-		return Button.primary("declaredraw:" + challengeId,
+		return Button.primary("ruleasdraw:" + challengeId,
 				Emojis.leftRightArrow, "Rule the match a draw");
 	}
 

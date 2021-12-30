@@ -45,14 +45,14 @@ public class Dispute extends ButtonCommandForChallenge {
 	private void editChallengeMessages() {
 		parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
-				.addLine(String.format("You filed a dispute :exclamation:. For resolution, please go to <#%s>",
+				.addLine(String.format("You filed a dispute :exclamation:. For resolution, please go to <#%s>.",
 						disputeChannel.getId().asString()));
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(none).block();
 
 		targetMessageContent = new MessageContent(targetMessage.getContent())
 				.makeAllNotBold()
-				.addLine(String.format("Your opponent filed a dispute :exclamation:. For resolution, please go to <#%s>",
+				.addLine(String.format("Your opponent filed a dispute :exclamation:. For resolution, please go to <#%s>.",
 						disputeChannel.getId().asString()));
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(none).block();
