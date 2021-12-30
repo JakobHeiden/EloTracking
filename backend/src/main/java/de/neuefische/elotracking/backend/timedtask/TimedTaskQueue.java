@@ -61,6 +61,9 @@ public class TimedTaskQueue {
 					case MESSAGE_DELETE:
 						service.timedDeleteMessage(id, task.otherId());
 						break;
+					case CHANNEL_DELETE:
+						service.timedDeleteChannel(id);
+						break;
 				}
 			}
 
