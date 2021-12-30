@@ -65,14 +65,14 @@ public class Redo extends ButtonCommandForChallenge {
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine(String.format("You agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
-						"Did you win or lose%s", game.isAllowDraw() ? " or draw?" : "?"))
+						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get()).withComponents(
 				createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.addLine(String.format("Your opponent agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
-						"Did you win or lose%s", game.isAllowDraw() ? " or draw?" : "?"))
+						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
 				.makeLastLineBold();
 		targetMessage.edit().withContent(targetMessageContent.get()).withComponents(
 				createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();

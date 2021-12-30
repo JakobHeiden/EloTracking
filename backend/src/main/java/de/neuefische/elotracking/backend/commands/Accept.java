@@ -44,7 +44,7 @@ public class Accept extends ButtonCommandForChallenge {
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You have accepted the challenge.")
-				.addLine(String.format("Come back after the match and let me know if you won or lost.",
+				.addLine(String.format("Come back after the match and let me know if you won or lost %s.",
 						game.isAllowDraw() ? " or drew" : ""))
 				.makeLastLineBold();
 		parentMessage.edit().withContent(parentMessageContent.get())

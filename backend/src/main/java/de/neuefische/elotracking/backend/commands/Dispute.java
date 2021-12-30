@@ -88,17 +88,23 @@ public class Dispute extends ButtonCommandForChallenge {
 								isChallengerCommand ? targetMessageContent.get() : parentMessageContent.get(),
 								true))
 						.build())
-				.withComponents(createActionRow())
+				.withComponents(createActionRow(game.isAllowDraw()))
 				.subscribe();
 	}
 
-	private ActionRow createActionRow() {
-		return ActionRow.of(
+	private ActionRow createActionRow(boolean allowDraw) {
+		if (allowDraw) return ActionRow.of(
 				Buttons.ruleAsWin(challenge.getChallengerMessageId(), true, challengerName,
 						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
 				Buttons.ruleAsWin(challenge.getChallengerMessageId(), false, acceptorName,
 						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
 				Buttons.ruleAsDraw(challenge.getChallengerMessageId()),
+				Buttons.ruleAsCancel(challenge.getChallengerMessageId()));
+		else return ActionRow.of(
+				Buttons.ruleAsWin(challenge.getChallengerMessageId(), true, challengerName,
+						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
+				Buttons.ruleAsWin(challenge.getChallengerMessageId(), false, acceptorName,
+						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
 				Buttons.ruleAsCancel(challenge.getChallengerMessageId()));
 	}
 }
