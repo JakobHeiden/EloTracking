@@ -1,6 +1,9 @@
 package de.neuefische.elotracking.backend.command;
 
-import de.neuefische.elotracking.backend.commands.*;
+import de.neuefische.elotracking.backend.commands.ButtonCommand;
+import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
+import de.neuefische.elotracking.backend.commands.Createresultchannel;
+import de.neuefische.elotracking.backend.commands.SlashCommand;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
