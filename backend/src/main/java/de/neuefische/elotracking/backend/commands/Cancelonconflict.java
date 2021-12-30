@@ -76,9 +76,9 @@ public class Cancelonconflict extends ButtonCommandForChallenge {
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(new ArrayList<>()).subscribe();
 
-		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
-		queue.addTimedTask(TimedTask.TimedTaskType.DELETE_MESSAGE, game.getMessageCleanupTime(),
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
 	}
 }

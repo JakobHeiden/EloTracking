@@ -39,6 +39,7 @@ public class Ruleaswin extends ButtonCommandForDispute {
 		bot.postToResultChannel(game, match);
 		postToWinnerAndLoserChannels();
 		addMatchSummarizeToQueue(match);
+		event.acknowledge().subscribe();
 	}
 
 	private void postToWinnerAndLoserChannels() {

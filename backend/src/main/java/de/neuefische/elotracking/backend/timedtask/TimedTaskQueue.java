@@ -58,7 +58,7 @@ public class TimedTaskQueue {
 					case MATCH_SUMMARIZE:
 						service.timedSummarizeMatch(id, task.otherId(), task.value());
 						break;
-					case DELETE_MESSAGE:
+					case MESSAGE_DELETE:
 						service.timedDeleteMessage(id, task.otherId());
 						break;
 				}
