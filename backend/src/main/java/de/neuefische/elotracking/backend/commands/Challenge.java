@@ -13,6 +13,7 @@ import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEven
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.spec.MessageCreateSpec;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,8 +30,13 @@ public class Challenge extends SlashCommand {
 
 	public void execute() {
 		if (!super.canExecute()) return;
+		User targetPlayer = event.getOption("player").get().getValue().get().asUser().block();
+		if (targetPlayer.isBot()) {
+			event.reply("You cannot challenge a bot.").withEphemeral(true).subscribe();
+			return;
+		}
 
-		long acceptorId = event.getOption("player").get().getValue().get().asUser().block().getId().asLong();
+		long acceptorId = targetPlayer.getId().asLong();
 		staticExecute(acceptorId, guildId, game, event, service, bot, queue);
 	}
 
