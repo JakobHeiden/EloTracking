@@ -38,6 +38,7 @@ public class Setup extends SlashCommand {
 		Role modRole = guild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
 				.permissions(PermissionSet.none()).build()).block();
 		game.setModRoleId(modRole.getId().asLong());
+		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
 
 		Createresultchannel.staticExecute(service, guild, game);
 
@@ -56,6 +57,7 @@ public class Setup extends SlashCommand {
 
 		event.reply("Setup performed. Here is what I did:\n" +
 				"- I created the roles Elo Admin and Elo Moderator\n" +
+				"- I made you an Elo Admin\n" +
 				"- I created a channel where I will post all match results\n" +
 				"- I created a channel category ELO DISPUTES only visible to Elo Admin and Elo Moderator\n" +
 				"- I created a web page with rankings: "

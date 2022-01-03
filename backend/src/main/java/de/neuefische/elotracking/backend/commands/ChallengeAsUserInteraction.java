@@ -32,6 +32,10 @@ public class ChallengeAsUserInteraction {
 			event.reply("Please run /setup first.").withEphemeral(true).subscribe();
 			return;
 		}
+		if (event.getTargetUser().block().isBot()) {
+			event.reply("You cannot challenge a bot.").withEphemeral(true).subscribe();
+			return;
+		}
 
 		long acceptorId = event.getTargetId().asLong();
 		long guildId = event.getInteraction().getGuildId().get().asLong();
