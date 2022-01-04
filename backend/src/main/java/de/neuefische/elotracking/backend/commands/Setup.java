@@ -33,10 +33,13 @@ public class Setup extends SlashCommand {
 				event.getOption("nameofgame").get().getValue().get().asString());
 
 		Role adminRole = guild.createRole(RoleCreateSpec.builder().name("Elo Admin")
-				.permissions(PermissionSet.none()).build()).block();
+				.permissions(PermissionSet.none())
+				.mentionable(true)
+				.build()).block();
 		game.setAdminRoleId(adminRole.getId().asLong());
 		Role modRole = guild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
-				.permissions(PermissionSet.none()).build()).block();
+				.permissions(PermissionSet.none())
+				.build()).block();
 		game.setModRoleId(modRole.getId().asLong());
 		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
 
@@ -56,7 +59,7 @@ public class Setup extends SlashCommand {
 		service.saveGame(game);
 
 		event.reply("Setup performed. Here is what I did:\n" +
-				"- I created the roles Elo Admin and Elo Moderator\n" +
+				"- I created the roles Elo Admin and Elo Moderator\n" +// TODO rollen erklaeren
 				"- I made you an Elo Admin\n" +
 				"- I created a channel where I will post all match results\n" +
 				"- I created a channel category ELO DISPUTES only visible to Elo Admin and Elo Moderator\n" +

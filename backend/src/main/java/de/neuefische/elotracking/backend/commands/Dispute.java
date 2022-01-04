@@ -75,9 +75,9 @@ public class Dispute extends ButtonCommandForChallenge {
 	}
 
 	private void createDisputeMessage() {
-		disputeChannel.createMessage("Welcome everyone. Please use this channel to sort out your dispute. " +
+		disputeChannel.createMessage(String.format("Welcome everyone. Please use this channel to sort out your dispute. " +
 						"Only Moderators and affected parties can view this channel. " +
-						"Note that the Buttons in this channel can only be used by Moderators.")
+						"Note that the Buttons in this channel can only be used by <@&%s>.", game.getModRoleId()))
 				.withEmbeds(EmbedCreateSpec.builder()
 						.addField(EmbedCreateFields.Field.of(
 								"My message with " + challengerName,
