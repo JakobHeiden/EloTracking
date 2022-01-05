@@ -17,6 +17,7 @@ public class ApplicationPropertiesLoader {
 	private int numberOfTimeSlots;
 	private String testBotChallengerId;
 	private String testBotAcceptorId;
+	private String entenwieseId;
 	private boolean useDevBotToken;
 	private boolean deleteDataOnStartup;
 	private boolean deployGuildCommands;

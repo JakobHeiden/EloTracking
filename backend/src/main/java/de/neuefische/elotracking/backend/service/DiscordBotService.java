@@ -1,6 +1,5 @@
 package de.neuefische.elotracking.backend.service;
 
-import de.neuefische.elotracking.backend.command.CommandParser;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
@@ -14,7 +13,6 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -30,8 +28,7 @@ public class DiscordBotService {
 	private PrivateChannel ownerPrivateChannel;
 
 
-	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service,
-							 @Lazy CommandParser commandParser) {
+	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service) {
 		this.client = gatewayDiscordClient;
 		this.service = service;
 	}
