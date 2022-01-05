@@ -13,6 +13,7 @@ import discord4j.core.object.entity.channel.Category;
 import discord4j.core.spec.RoleCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
@@ -37,11 +38,6 @@ public class Setup extends SlashCommand {
 	}
 
 	public void execute() {
-		if (game != null) {
-			event.reply("Setup was already performed before.").subscribe();
-			return;
-		}
-
 		Guild guild = event.getInteraction().getGuild().block();
 
 		game = new Game(guild.getId().asLong(),
@@ -82,5 +78,14 @@ public class Setup extends SlashCommand {
 				+ String.format("http://%s/%s\n", service.getPropertiesLoader().getBaseUrl(), guildId)
 				+ "Players should now be able to challenge each other with the /challenge command or by going " +
 				"right click on a user -> apps -> challenge.").subscribe();
+
+		ApplicationService applicationService = client.getRestClient().getApplicationService();
+		long botId = client.getSelfId().asLong();
+		applicationService.getGuildApplicationCommands(botId, guildId)
+				.filter(applicationCommandData -> applicationCommandData.name().equals("setup"))
+				.map(applicationCommandData ->
+						applicationService.deleteGuildApplicationCommand(
+								botId, guildId, Long.parseLong(applicationCommandData.id()))
+				.subscribe()).subscribe();
 	}
 }
