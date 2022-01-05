@@ -12,7 +12,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.RoleCreateSpec;
-import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.PermissionSet;
@@ -43,6 +42,7 @@ public class DevTools {
 		if (props.isDeployGlobalCommands()) deployGlobalCommands();
 		if (props.isDeployGuildCommands()) deployGuildCommands();
 		if (props.isDeleteDataOnStartup()) service.deleteAllData();
+		if (!props.isUseDevBotToken()) deleteEntenwieseData();
 	}
 
 	private void setupDevGame() {
@@ -83,52 +83,27 @@ public class DevTools {
 		service.saveGame(game);
 	}
 
-	private void deployGlobalCommands() {
-		log.info("Deleting guild commands...");
-		List<ApplicationCommandData> guildApplicationCommands = applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
-				.collectList().block();
-		for (ApplicationCommandData guildApplicationCommand : guildApplicationCommands) {
-			applicationService.deleteGuildApplicationCommand(
-					botSnowflake.asLong(), entenwieseId,
-					Long.parseLong(guildApplicationCommand.id())).block();
-		}
+	private void deleteEntenwieseData() {
+		// TODO!
+	}
 
+	private void deployGlobalCommands() {
 		log.info("Deploying global commands...");
-		// delete all
-		List<ApplicationCommandData> globalApplicationCommands = applicationService
-				.getGlobalApplicationCommands(botSnowflake.asLong()).collectList().block();
-		for (ApplicationCommandData globalApplicationCommand : globalApplicationCommands) {
-			applicationService.deleteGlobalApplicationCommand(
-					botSnowflake.asLong(),
-					Long.parseLong(globalApplicationCommand.id())).block();
-		}
-		// create anew
-		for (ApplicationCommandRequest request : applicationCommandRequests()) {
-			applicationService.createGlobalApplicationCommand(botSnowflake.asLong(),  request).subscribe();
-		}
+		applicationService.bulkOverwriteGlobalApplicationCommand(
+				botSnowflake.asLong(), applicationCommandRequests())
+				.subscribe();
 	}
 
 	private void deployGuildCommands() {
 		log.info("Deploying guild commands...");
-		// delete all
-		List<ApplicationCommandData> guildApplicationCommands =
-				applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
-				.collectList().block();
-		for (ApplicationCommandData guildApplicationCommand : guildApplicationCommands) {
-			applicationService.deleteGuildApplicationCommand(
-					botSnowflake.asLong(), entenwieseId,
-					Long.parseLong(guildApplicationCommand.id())).block();
-		}
-		// create anew
-		for (ApplicationCommandRequest request : applicationCommandRequests()) {
-			applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId,  request).subscribe();
-		}
+		applicationService.bulkOverwriteGuildApplicationCommand(
+				botSnowflake.asLong(), entenwieseId, applicationCommandRequests())
+				.subscribe();
 	}
 
 	private List<ApplicationCommandRequest> applicationCommandRequests() {
 		return List.of(
 				Challenge.getRequest(),
-				ChallengeAsUserInteraction.getRequest(),
-				Setup.getRequest());
+				ChallengeAsUserInteraction.getRequest());
 	}
 }

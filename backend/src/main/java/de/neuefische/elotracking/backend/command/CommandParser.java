@@ -2,14 +2,18 @@ package de.neuefische.elotracking.backend.command;
 
 import de.neuefische.elotracking.backend.commands.ButtonCommand;
 import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
+import de.neuefische.elotracking.backend.commands.Setup;
 import de.neuefische.elotracking.backend.commands.SlashCommand;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -53,6 +57,16 @@ public class CommandParser {
                 .map(event -> new UserInteractionEventWrapper(event, service, bot, queue, client))
                 .map(userInteractionChallengeFactory::apply)
                 .subscribe(ChallengeAsUserInteraction::execute);
+
+        client.on(GuildCreateEvent.class)
+                .filter(event -> service.findGameByGuildId(event.getGuild().getId().asLong()).isEmpty())
+                .subscribe(event -> {
+                    client.getRestClient().getApplicationService()
+                            .createGuildApplicationCommand(
+                                    client.getSelfId().asLong(),
+                                    event.getGuild().getId().asLong(),
+                                    Setup.getRequest()).subscribe();
+                });
     }
 
     public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
