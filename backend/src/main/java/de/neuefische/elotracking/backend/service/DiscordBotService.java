@@ -4,7 +4,6 @@ import de.neuefische.elotracking.backend.command.CommandParser;
 import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
-import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
@@ -28,15 +27,13 @@ public class DiscordBotService {
 	@Getter
 	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
 	private final EloTrackingService service;
-	private final TimedTaskQueue queue;
 	private PrivateChannel ownerPrivateChannel;
 
 
-	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service, @Lazy CommandParser commandParser,
-							 TimedTaskQueue queue) {
+	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service,
+							 @Lazy CommandParser commandParser) {
 		this.client = gatewayDiscordClient;
 		this.service = service;
-		this.queue = queue;
 	}
 
 	@PostConstruct
