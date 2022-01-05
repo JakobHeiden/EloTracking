@@ -2,6 +2,7 @@ package de.neuefische.elotracking.backend.timedtask;
 
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
+import de.neuefische.elotracking.backend.service.TimedTaskService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,12 +17,12 @@ public class TimedTaskQueue {
 	private int numberOfTimeSlots;
 	private Set<TimedTask>[] timeSlots;
 	private int currentIndex;
-	private EloTrackingService service;
-	private DiscordBotService bot;
+	private final DiscordBotService bot;
+	private final TimedTaskService timedTaskService;
 
-	public TimedTaskQueue(EloTrackingService service, @Lazy DiscordBotService bot) {
-		this.service = service;
+	public TimedTaskQueue(EloTrackingService service, @Lazy DiscordBotService bot, TimedTaskService timedTaskService) {
 		this.bot = bot;
+		this.timedTaskService = timedTaskService;
 		this.currentIndex = 0;
 		this.numberOfTimeSlots = service.getPropertiesLoader().getNumberOfTimeSlots();
 	}
@@ -47,22 +48,22 @@ public class TimedTaskQueue {
 				int time = task.time();
 				switch (task.type()) {
 					case OPEN_CHALLENGE_DECAY:
-						service.timedDecayOpenChallenge(id, time);
+						timedTaskService.timedDecayOpenChallenge(id, time);
 						break;
 					case ACCEPTED_CHALLENGE_DECAY:
-						service.timedDecayAcceptedChallenge(id, time);
+						timedTaskService.timedDecayAcceptedChallenge(id, time);
 						break;
 					case MATCH_AUTO_RESOLVE:
-						service.timedAutoResolveMatch(id, time);
+						timedTaskService.timedAutoResolveMatch(id, time);
 						break;
 					case MATCH_SUMMARIZE:
-						service.timedSummarizeMatch(id, task.otherId(), task.value());
+						timedTaskService.timedSummarizeMatch(id, task.otherId(), task.value());
 						break;
 					case MESSAGE_DELETE:
-						service.timedDeleteMessage(id, task.otherId());
+						timedTaskService.timedDeleteMessage(id, task.otherId());
 						break;
 					case CHANNEL_DELETE:
-						service.timedDeleteChannel(id);
+						timedTaskService.timedDeleteChannel(id);
 						break;
 				}
 			}
