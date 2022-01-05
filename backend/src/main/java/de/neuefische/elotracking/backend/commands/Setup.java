@@ -11,6 +11,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.spec.RoleCreateSpec;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
@@ -19,6 +21,19 @@ public class Setup extends SlashCommand {
 	public Setup(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
+	}
+
+	public static ApplicationCommandRequest getRequest() {
+		return ApplicationCommandRequest.builder()
+				.name("setup")
+				.description("Get started with the bot")
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("nameofgame").description("The name of the game you want to track elo rating for")
+						.type(3).required(true).build())
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("allowdraw").description("Allow draw results and not just win or lose?")
+						.type(5).required(true).build())
+				.build();
 	}
 
 	public void execute() {
