@@ -45,6 +45,9 @@ public class Win extends ButtonCommandForChallenge {
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.addLine("Your opponent reported a win :arrow_up:.");
 		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
+
+		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
+				challenge.getId(), 0L, null);
 	}
 
 	private void processHarmony() {

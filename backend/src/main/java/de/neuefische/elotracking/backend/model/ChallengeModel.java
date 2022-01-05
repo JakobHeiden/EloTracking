@@ -1,12 +1,15 @@
 package de.neuefische.elotracking.backend.model;
 
 import de.neuefische.elotracking.backend.logging.UseToStringForLogging;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import reactor.core.publisher.Mono;
 
 @Data
 @AllArgsConstructor
@@ -64,6 +67,10 @@ public class ChallengeModel {
         this.acceptorReported = ReportStatus.NOT_YET_REPORTED;
     }
 
+    public long getId() {
+        return getChallengerMessageId();
+    }
+
     public ReportIntegrity setChallengerReported(ReportStatus challengerReported) {
         this.challengerReported = challengerReported;
 
@@ -74,6 +81,7 @@ public class ChallengeModel {
         if (challengerReported == ReportStatus.DRAW && acceptorReported == ReportStatus.DRAW) return ReportIntegrity.HARMONY;
         if (challengerReported == ReportStatus.CANCEL && acceptorReported == ReportStatus.CANCEL) return ReportIntegrity.HARMONY;
 
+        isDispute = true;
         return ReportIntegrity.CONFLICT;
     }
 
@@ -87,6 +95,7 @@ public class ChallengeModel {
         if (acceptorReported == ReportStatus.DRAW && challengerReported == ReportStatus.DRAW) return ReportIntegrity.HARMONY;
         if (acceptorReported == ReportStatus.CANCEL && challengerReported == ReportStatus.CANCEL) return ReportIntegrity.HARMONY;
 
+        isDispute = true;
         return ReportIntegrity.CONFLICT;
     }
 

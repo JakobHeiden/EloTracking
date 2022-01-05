@@ -22,6 +22,7 @@ public class Game {
     private long resultChannelId;
     private long disputeCategoryId;
     private boolean allowDraw;
+
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;

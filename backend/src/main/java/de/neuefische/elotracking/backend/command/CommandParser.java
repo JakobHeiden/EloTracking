@@ -129,6 +129,10 @@ public class CommandParser {
             Game game = new Game(entenwieseId, "Dev Game");
             game.setAllowDraw(true);
             game.setDisputeCategoryId(924066405836554251L);
+            game.setMatchAutoResolveTime(1);
+            game.setOpenChallengeDecayTime(1);
+            game.setAcceptedChallengeDecayTime(1);
+            game.setMessageCleanupTime(3);
 
             Guild entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
             List<GuildChannel> channels = entenwieseGuild.getChannels()
