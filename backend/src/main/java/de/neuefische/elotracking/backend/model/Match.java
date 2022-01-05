@@ -25,11 +25,11 @@ public class Match {
     private Date date;
     private long guildId;
     private long winnerId;
-    private double winnerBeforeRating;
-    private double winnerAfterRating;
+    private double winnerOldRating;
+    private double winnerNewRating;
     private long loserId;
-    private double loserBeforeRating;
-    private double loserAfterRating;
+    private double loserOldRating;
+    private double loserNewRating;
     private boolean isDraw;
 
     public Match(long guildId, long winnerId, long loserId, boolean isDraw) {
@@ -41,7 +41,7 @@ public class Match {
         this.date = new Date();
     }
 
-    public String getWinnerTag(GatewayDiscordClient client) {
+    public String getWinnerTag(GatewayDiscordClient client) {// TODO umziehen nach bot
         return client.getUserById(Snowflake.of(winnerId)).block().getTag();
     }
 

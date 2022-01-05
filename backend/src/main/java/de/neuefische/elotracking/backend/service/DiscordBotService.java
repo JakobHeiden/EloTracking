@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.service;
 
 import de.neuefische.elotracking.backend.command.CommandParser;
+import de.neuefische.elotracking.backend.model.ChallengeModel;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
@@ -87,14 +88,24 @@ public class DiscordBotService {
 			try {
 				TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
 				resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
-						match.getWinnerTag(client), Math.round(match.getWinnerAfterRating()),
-						match.isDraw() ? "drew" : "defeated",
-						match.getLoserTag(client), Math.round(match.getLoserAfterRating())))
+								match.getWinnerTag(client), Math.round(match.getWinnerNewRating()),
+								match.isDraw() ? "drew" : "defeated",
+								match.getLoserTag(client), Math.round(match.getLoserNewRating())))
 						.subscribe();
 			} catch (ClientException e) {
 				game.setResultChannelId(0L);
 				service.saveGame(game);
 			}
 		}
+	}
+
+	public Mono<Message> getChallengerMessage(ChallengeModel challenge) {// TODO schauen wo das noch uber client gemacht wird
+		return client.getMessageById(Snowflake.of(challenge.getChallengerChannelId()),
+				Snowflake.of(challenge.getChallengerMessageId()));
+	}
+
+	public Mono<Message> getAcceptorMessage(ChallengeModel challenge) {
+		return client.getMessageById(Snowflake.of(challenge.getAcceptorChannelId()),
+				Snowflake.of(challenge.getAcceptorMessageId()));
 	}
 }
