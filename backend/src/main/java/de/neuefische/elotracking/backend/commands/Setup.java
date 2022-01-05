@@ -19,6 +19,10 @@ import discord4j.rest.util.PermissionSet;
 
 public class Setup extends SlashCommand {
 
+	private Guild guild;
+	private Role modRole;
+	private Role adminRole;
+
 	public Setup(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
@@ -38,35 +42,15 @@ public class Setup extends SlashCommand {
 	}
 
 	public void execute() {
-		Guild guild = event.getInteraction().getGuild().block();
-
+		guild = event.getInteraction().getGuild().block();
 		game = new Game(guild.getId().asLong(),
 				event.getOption("nameofgame").get().getValue().get().asString());
 
-		Role adminRole = guild.createRole(RoleCreateSpec.builder().name("Elo Admin")
-				.permissions(PermissionSet.none())
-				.mentionable(true)
-				.build()).block();
-		game.setAdminRoleId(adminRole.getId().asLong());
-		Role modRole = guild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
-				.permissions(PermissionSet.none())
-				.build()).block();
-		game.setModRoleId(modRole.getId().asLong());
-		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
-
+		createModAndAdminRoles();
 		Createresultchannel.staticExecute(service, guild, game);
-
-		Category disputeCategory = guild.createCategory("elo disputes").withPermissionOverwrites(
-				PermissionOverwrite.forRole(guild.getId(), PermissionSet.none(),
-						PermissionSet.of(Permission.VIEW_CHANNEL)),
-				PermissionOverwrite.forRole(adminRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
-						PermissionSet.none()),
-				PermissionOverwrite.forRole(modRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
-						PermissionSet.none())).block();
-		game.setDisputeCategoryId(disputeCategory.getId().asLong());
+		createDisputeCategory();
 
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
-
 		service.saveGame(game);
 
 		event.reply("Setup performed. Here is what I did:\n" +
@@ -79,13 +63,41 @@ public class Setup extends SlashCommand {
 				+ "Players should now be able to challenge each other with the /challenge command or by going " +
 				"right click on a user -> apps -> challenge.").subscribe();
 
+		deleteSetupGuildCommand();
+	}
+
+	private void createModAndAdminRoles() {
+		adminRole = guild.createRole(RoleCreateSpec.builder().name("Elo Admin")
+				.permissions(PermissionSet.none())
+				.mentionable(true)
+				.build()).block();
+		game.setAdminRoleId(adminRole.getId().asLong());
+		modRole = guild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
+				.permissions(PermissionSet.none())
+				.build()).block();
+		game.setModRoleId(modRole.getId().asLong());
+		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
+	}
+
+	private void createDisputeCategory() {
+		Category disputeCategory = guild.createCategory("elo disputes").withPermissionOverwrites(
+				PermissionOverwrite.forRole(guild.getId(), PermissionSet.none(),
+						PermissionSet.of(Permission.VIEW_CHANNEL)),
+				PermissionOverwrite.forRole(adminRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
+						PermissionSet.none()),
+				PermissionOverwrite.forRole(modRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
+						PermissionSet.none())).block();
+		game.setDisputeCategoryId(disputeCategory.getId().asLong());
+	}
+
+	private void deleteSetupGuildCommand() {
 		ApplicationService applicationService = client.getRestClient().getApplicationService();
 		long botId = client.getSelfId().asLong();
 		applicationService.getGuildApplicationCommands(botId, guildId)
 				.filter(applicationCommandData -> applicationCommandData.name().equals("setup"))
 				.map(applicationCommandData ->
 						applicationService.deleteGuildApplicationCommand(
-								botId, guildId, Long.parseLong(applicationCommandData.id()))
-				.subscribe()).subscribe();
+										botId, guildId, Long.parseLong(applicationCommandData.id()))
+								.subscribe()).subscribe();
 	}
 }
