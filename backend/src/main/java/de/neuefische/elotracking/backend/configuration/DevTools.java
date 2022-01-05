@@ -1,17 +1,18 @@
 package de.neuefische.elotracking.backend.configuration;
 
+import de.neuefische.elotracking.backend.commands.Challenge;
+import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
 import de.neuefische.elotracking.backend.commands.Createresultchannel;
+import de.neuefische.elotracking.backend.commands.Setup;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.RoleCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandData;
-import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.PermissionSet;
@@ -28,12 +29,14 @@ public class DevTools {
 	private GatewayDiscordClient client;
 	private final long entenwieseId;
 	private final Snowflake botSnowflake;
+	private final ApplicationService applicationService;
 
 	public DevTools(EloTrackingService service, GatewayDiscordClient client) {
 		this.service = service;
 		this.client = client;
 		this.entenwieseId = Long.parseLong(service.getPropertiesLoader().getEntenwieseId());
 		this.botSnowflake = client.getSelfId();
+		this.applicationService = client.getRestClient().getApplicationService();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
 		if (props.isSetupDevGame()) setupDevGame();
@@ -81,34 +84,6 @@ public class DevTools {
 	}
 
 	private void deployGlobalCommands() {
-		ApplicationCommandRequest challengeCommandRequest = ApplicationCommandRequest.builder()
-				.name("challenge")
-				.description("Challenge a player to a match")
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("player").description("The player to challenge")
-						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
-						.build())
-				.build();
-
-		ApplicationCommandRequest challengeUserCommandRequest = ApplicationCommandRequest.builder()
-				.type(2)
-				.name("challenge")
-				.build();
-
-		ApplicationCommandRequest setupCommandRequest = ApplicationCommandRequest.builder()
-				.name("setup")
-				.description("Get started with the bot")
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("nameofgame").description("The name of the game you want to track elo rating for")
-						.type(3).required(true).build())
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("allowdraw").description("Allow draw results and not just win or lose?")
-						.type(5).required(true).build())
-				.build();
-
-
-		ApplicationService applicationService = client.getRestClient().getApplicationService();
-
 		log.info("Deleting guild commands...");
 		List<ApplicationCommandData> guildApplicationCommands = applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
 				.collectList().block();
@@ -119,6 +94,7 @@ public class DevTools {
 		}
 
 		log.info("Deploying global commands...");
+		// delete all
 		List<ApplicationCommandData> globalApplicationCommands = applicationService
 				.getGlobalApplicationCommands(botSnowflake.asLong()).collectList().block();
 		for (ApplicationCommandData globalApplicationCommand : globalApplicationCommands) {
@@ -126,51 +102,33 @@ public class DevTools {
 					botSnowflake.asLong(),
 					Long.parseLong(globalApplicationCommand.id())).block();
 		}
-
-		applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), setupCommandRequest).subscribe();
-		applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeCommandRequest).subscribe();
-		applicationService.createGlobalApplicationCommand(botSnowflake.asLong(), challengeUserCommandRequest).subscribe();
+		// create anew
+		for (ApplicationCommandRequest request : applicationCommandRequests()) {
+			applicationService.createGlobalApplicationCommand(botSnowflake.asLong(),  request).subscribe();
+		}
 	}
 
 	private void deployGuildCommands() {
-		ApplicationCommandRequest challengeCommandRequest = ApplicationCommandRequest.builder()
-				.name("challenge")
-				.description("Challenge a player to a match")
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("player").description("The player to challenge")
-						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
-						.build())
-				.build();
-
-		ApplicationCommandRequest challengeUserCommandRequest = ApplicationCommandRequest.builder()
-				.type(2)
-				.name("challenge")
-				.build();
-
-		ApplicationCommandRequest setupCommandRequest = ApplicationCommandRequest.builder()
-				.name("setup")
-				.description("Get started with the bot")
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("nameofgame").description("The name of the game you want to track elo rating for")
-						.type(3).required(true).build())
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("allowdraw").description("Allow draw results and not just win or lose?")
-						.type(5).required(true).build())
-				.build();
-
 		log.info("Deploying guild commands...");
-		ApplicationService applicationService = client.getRestClient().getApplicationService();
-
-		List<ApplicationCommandData> guildApplicationCommands = applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
+		// delete all
+		List<ApplicationCommandData> guildApplicationCommands =
+				applicationService.getGuildApplicationCommands(botSnowflake.asLong(), entenwieseId)
 				.collectList().block();
 		for (ApplicationCommandData guildApplicationCommand : guildApplicationCommands) {
 			applicationService.deleteGuildApplicationCommand(
 					botSnowflake.asLong(), entenwieseId,
 					Long.parseLong(guildApplicationCommand.id())).block();
 		}
+		// create anew
+		for (ApplicationCommandRequest request : applicationCommandRequests()) {
+			applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId,  request).subscribe();
+		}
+	}
 
-		applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, setupCommandRequest).subscribe();
-		applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, challengeCommandRequest).subscribe();
-		applicationService.createGuildApplicationCommand(botSnowflake.asLong(), entenwieseId, challengeUserCommandRequest).subscribe();
+	private List<ApplicationCommandRequest> applicationCommandRequests() {
+		return List.of(
+				Challenge.getRequest(),
+				ChallengeAsUserInteraction.getRequest(),
+				Setup.getRequest());
 	}
 }

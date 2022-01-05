@@ -54,7 +54,7 @@ public class EloTrackingService {
 		if (propertiesLoader.getSpringDataMongodbDatabase().equals("deploy")) {
 			throw new RuntimeException("deleteAllData is being called on deploy database");
 		}
-		log.info("Deleting all data...");
+		log.info(String.format("Deleting all data on %s...", propertiesLoader.getSpringDataMongodbDatabase()));
 		gameDao.deleteAll();
 		challengeDao.deleteAll();
 		matchDao.deleteAll();

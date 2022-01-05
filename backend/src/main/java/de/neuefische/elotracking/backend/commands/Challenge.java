@@ -11,10 +11,13 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
@@ -26,6 +29,17 @@ public class Challenge extends SlashCommand {
 					 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 		this.needsGame = true;
+	}
+
+	public static ApplicationCommandRequest getRequest() {
+		return ApplicationCommandRequest.builder()
+				.name("challenge")
+				.description("Challenge a player to a match")
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("player").description("The player to challenge")
+						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
+						.build())
+				.build();
 	}
 
 	public void execute() {

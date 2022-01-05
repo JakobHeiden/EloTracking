@@ -6,6 +6,7 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
 
@@ -24,6 +25,13 @@ public class ChallengeAsUserInteraction {
 		this.bot = bot;
 		this.queue = queue;
 		this.client = client;
+	}
+
+	public static ApplicationCommandRequest getRequest() {
+		return ApplicationCommandRequest.builder()
+				.type(2)
+				.name("challenge")
+				.build();
 	}
 
 	public void execute() {
