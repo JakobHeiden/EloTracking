@@ -20,8 +20,7 @@ public class ApplicationPropertiesLoader {
 	private String entenwieseId;
 	private boolean useDevBotToken;
 	private boolean deleteDataOnStartup;
-	private boolean deployGuildCommands;
-	private boolean deployGlobalCommands;
+	private boolean useGlobalCommands;
 	private boolean setupDevGame;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
