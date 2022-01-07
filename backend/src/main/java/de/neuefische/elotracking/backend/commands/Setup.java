@@ -72,6 +72,10 @@ public class Setup extends SlashCommand {
 				"right click on a user -> apps -> challenge.").subscribe();
 
 		deleteSetupGuildCommand();
+
+		Guild newGuild = event.getInteraction().getGuild().block();
+		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
+				newGuild.getId(), newGuild.getName(), newGuild.getMemberCount()));
 	}
 
 	private void createModAndAdminRoles() {
