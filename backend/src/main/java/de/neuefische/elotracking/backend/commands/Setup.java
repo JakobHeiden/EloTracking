@@ -12,6 +12,8 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.spec.RoleCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandPermissionsData;
+import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
@@ -77,6 +79,22 @@ public class Setup extends SlashCommand {
 				.build()).block();
 		game.setModRoleId(modRole.getId().asLong());
 		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
+
+		ApplicationCommandPermissionsData modRolePermission = ApplicationCommandPermissionsData.builder()
+				.id(modRole.getId().asLong()).type(1).permission(true).build();
+		ApplicationCommandPermissionsData adminRolePermission = ApplicationCommandPermissionsData.builder()
+				.id(adminRole.getId().asLong()).type(1).permission(true).build();
+		ApplicationCommandPermissionsRequest request = ApplicationCommandPermissionsRequest.builder()
+				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
+		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
+				.filter(applicationCommandData -> applicationCommandData.name().equals("forcewin"))
+				.subscribe(applicationCommandData ->
+						client.getRestClient().getApplicationService()
+								.modifyApplicationCommandPermissions(
+										client.getSelfId().asLong(), guildId,
+										Long.parseLong(applicationCommandData.id()),
+										request)
+								.subscribe());
 	}
 
 	private void createDisputeCategory() {

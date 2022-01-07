@@ -4,6 +4,7 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
@@ -20,6 +21,8 @@ public abstract class SlashCommand {
 	protected long guildId;
 	protected Game game;
 	protected boolean needsGame;
+	protected boolean needsModRole;
+	protected boolean needsAdminRole;
 
 	protected SlashCommand(ChatInputInteractionEvent event, EloTrackingService service,
 						   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -29,6 +32,8 @@ public abstract class SlashCommand {
 		this.queue = queue;
 		this.client = client;
 		this.needsGame = false;
+		this.needsModRole = false;
+		this.needsAdminRole = false;
 
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
 
@@ -42,6 +47,20 @@ public abstract class SlashCommand {
 		if (needsGame) {
 			if (game == null) {
 				event.reply("Please run /setup first.").subscribe();
+				return false;
+			}
+		}
+		if (needsModRole) {
+			if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId()))
+					&& !event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))) {
+				event.reply("You need the Elo Moderator role to use that command").subscribe();
+				return false;
+			}
+		}
+		if (needsAdminRole) {
+			if (!event.getInteraction().getMember().get().getRoleIds()
+					.contains(Snowflake.of(game.getAdminRoleId()))) {
+				event.reply("You need the Elo Admin role to use that command").subscribe();
 				return false;
 			}
 		}

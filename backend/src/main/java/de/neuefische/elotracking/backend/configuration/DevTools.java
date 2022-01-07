@@ -1,9 +1,6 @@
 package de.neuefische.elotracking.backend.configuration;
 
-import de.neuefische.elotracking.backend.commands.Challenge;
-import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
-import de.neuefische.elotracking.backend.commands.Createresultchannel;
-import de.neuefische.elotracking.backend.commands.Setup;
+import de.neuefische.elotracking.backend.commands.*;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
@@ -38,11 +35,12 @@ public class DevTools {
 		this.applicationService = client.getRestClient().getApplicationService();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
-		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDeployGlobalCommands()) deployGlobalCommands();
 		if (props.isDeployGuildCommands()) deployGuildCommands();
 		if (props.isDeleteDataOnStartup()) service.deleteAllData();
 		if (!props.isUseDevBotToken()) deleteEntenwieseData();
+		if (props.isSetupDevGame()) setupDevGame();
+		else deploySetupGuildCommandToEntenwiese();
 	}
 
 	private void setupDevGame() {
@@ -83,6 +81,15 @@ public class DevTools {
 		service.saveGame(game);
 	}
 
+	private void deploySetupGuildCommandToEntenwiese() {
+		client.getRestClient().getApplicationService()
+				.createGuildApplicationCommand(
+						client.getSelfId().asLong(),
+						entenwieseId,
+						Setup.getRequest())
+				.subscribe();
+	}
+
 	private void deleteEntenwieseData() {
 		// TODO!
 	}
@@ -104,6 +111,7 @@ public class DevTools {
 	private List<ApplicationCommandRequest> applicationCommandRequests() {
 		return List.of(
 				Challenge.getRequest(),
-				ChallengeAsUserInteraction.getRequest());
+				ChallengeAsUserInteraction.getRequest(),
+				Forcewin.getRequest());
 	}
 }
