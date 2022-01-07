@@ -55,7 +55,7 @@ public class Draw extends ButtonCommandForChallenge {
 		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
 				.makeAllNotBold()
 				.addLine("You reported a draw :left_right_arrow:. The match has been resolved:")
-				.addLine(String.format("Your rating went from %s to %s",
+				.addLine(String.format("Your rating went from %s to %s.",
 						Math.round(eloResults[0]), Math.round(eloResults[2])))
 				.makeAllItalic();
 		parentMessage.edit().withContent(parentMessageContent.get())
@@ -64,7 +64,7 @@ public class Draw extends ButtonCommandForChallenge {
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.makeAllNotBold()
 				.addLine("Your opponent reported a draw :left_right_arrow:. The match has been resolved:")
-				.addLine(String.format("Your rating went from %s to %s",
+				.addLine(String.format("Your rating went from %s to %s.",
 						Math.round(eloResults[1]), Math.round(eloResults[3])))
 				.makeAllItalic();
 		targetMessage.edit().withContent(targetMessageContent.get())

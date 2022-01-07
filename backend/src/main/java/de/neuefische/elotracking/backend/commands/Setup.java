@@ -10,6 +10,7 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.RoleCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
@@ -19,11 +20,15 @@ import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
+import java.util.Arrays;
+
 public class Setup extends SlashCommand {
 
 	private Guild guild;
 	private Role modRole;
 	private Role adminRole;
+	private static String[] commandsThatNeedModRole = {"forcewin"};
+	private static String[] commandsThatNeedAdminRole = {};
 
 	public Setup(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -49,7 +54,8 @@ public class Setup extends SlashCommand {
 				event.getOption("nameofgame").get().getValue().get().asString());
 
 		createModAndAdminRoles();
-		Createresultchannel.staticExecute(service, guild, game);
+		setPermissionsForCommands();
+		createResultChannel();
 		createDisputeCategory();
 
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
@@ -80,21 +86,47 @@ public class Setup extends SlashCommand {
 		game.setModRoleId(modRole.getId().asLong());
 		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
 
+
+	}
+
+	private void setPermissionsForCommands() {
 		ApplicationCommandPermissionsData modRolePermission = ApplicationCommandPermissionsData.builder()
 				.id(modRole.getId().asLong()).type(1).permission(true).build();
 		ApplicationCommandPermissionsData adminRolePermission = ApplicationCommandPermissionsData.builder()
 				.id(adminRole.getId().asLong()).type(1).permission(true).build();
-		ApplicationCommandPermissionsRequest request = ApplicationCommandPermissionsRequest.builder()
-				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
+		// supply permission for admin commands to just admins
+		ApplicationCommandPermissionsRequest onlyAdminPermissionRequest = ApplicationCommandPermissionsRequest.builder()
+				.addPermission(adminRolePermission).build();
 		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
-				.filter(applicationCommandData -> applicationCommandData.name().equals("forcewin"))
+				.filter(applicationCommandData ->
+						Arrays.asList(commandsThatNeedAdminRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
 						client.getRestClient().getApplicationService()
 								.modifyApplicationCommandPermissions(
 										client.getSelfId().asLong(), guildId,
 										Long.parseLong(applicationCommandData.id()),
-										request)
+										onlyAdminPermissionRequest)
 								.subscribe());
+		// supply permission for mod commands to both mods and admins
+		ApplicationCommandPermissionsRequest adminAndModPermissionRequest = ApplicationCommandPermissionsRequest.builder()
+				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
+		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
+				.filter(applicationCommandData ->
+						Arrays.asList(commandsThatNeedModRole).contains(applicationCommandData.name()))
+				.subscribe(applicationCommandData ->
+						client.getRestClient().getApplicationService()
+								.modifyApplicationCommandPermissions(
+										client.getSelfId().asLong(), guildId,
+										Long.parseLong(applicationCommandData.id()),
+										adminAndModPermissionRequest)
+								.subscribe());
+	}
+
+	private void createResultChannel() {
+		TextChannel resultChannel = guild.createTextChannel("Elotracking results")
+				.withTopic(String.format("All resolved matches will be logged here. Leaderboard: http://%s/%s",
+						service.getPropertiesLoader().getBaseUrl(), guild.getId().asString())).block();
+		game.setResultChannelId(resultChannel.getId().asLong());
 	}
 
 	private void createDisputeCategory() {
