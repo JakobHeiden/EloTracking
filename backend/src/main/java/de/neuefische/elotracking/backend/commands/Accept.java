@@ -26,7 +26,6 @@ public class Accept extends ButtonCommandForChallenge {
 		Message parentMessage = event.getMessage().get();
 		ChallengeModel challenge = service.getChallengeByAcceptorMessageId(parentMessage.getId().asLong()).get();
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, parentId);
 		challenge.setAccepted(true);
 		queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY,
 				game.getAcceptedChallengeDecayTime(), challenge.getChallengerMessageId(), 0L, null);

@@ -91,7 +91,6 @@ public class Challenge extends SlashCommand {
 				)).build();
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, challengerId);
 		ChallengeModel challenge = new ChallengeModel(guildId,
 				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(),
 				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong());

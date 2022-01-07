@@ -135,21 +135,15 @@ public class EloTrackingService {
 	}
 
 	// Player
-	public boolean addNewPlayerIfPlayerNotPresent(long guildId, long playerId) {
-		if (!playerDao.existsById(Player.generateId(guildId, playerId))) {
-			playerDao.insert(new Player(guildId, playerId,
-					initialRating));
-			return true;
-		}
-		return false;
-	}
-
 	public Optional<Player> findPlayerByGuildAndUserId(long guildId, long userId) {
 		return playerDao.findById(Player.generateId(guildId, userId));
 	}
 
 	// Rankings
 	public double[] updateRatings(Match match) {// TODO evtl match zurueckgeben
+		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getWinnerId());
+		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getLoserId());
+
 		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();
 
@@ -168,6 +162,12 @@ public class EloTrackingService {
 		matchDao.save(match);
 
 		return ratings;
+	}
+
+	private void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {
+		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
+			playerDao.insert(new Player(guildId, userId, initialRating));
+		}
 	}
 
 	private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
