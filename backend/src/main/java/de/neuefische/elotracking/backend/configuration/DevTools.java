@@ -9,6 +9,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.RoleCreateSpec;
+import discord4j.discordjson.json.ApplicationCommandPermissionsData;
+import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.PermissionSet;
@@ -72,6 +74,22 @@ public class DevTools {
 		Role modRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
 				.permissions(PermissionSet.none()).build()).block();
 		game.setModRoleId(modRole.getId().asLong());
+
+		ApplicationCommandPermissionsData modRolePermission = ApplicationCommandPermissionsData.builder()
+				.id(modRole.getId().asLong()).type(1).permission(true).build();
+		ApplicationCommandPermissionsData adminRolePermission = ApplicationCommandPermissionsData.builder()
+				.id(adminRole.getId().asLong()).type(1).permission(true).build();
+		ApplicationCommandPermissionsRequest request = ApplicationCommandPermissionsRequest.builder()
+				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
+		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), entenwieseId)
+				.filter(applicationCommandData -> applicationCommandData.name().equals("forcewin"))
+				.subscribe(applicationCommandData ->
+						client.getRestClient().getApplicationService()
+								.modifyApplicationCommandPermissions(
+										client.getSelfId().asLong(), entenwieseId,
+										Long.parseLong(applicationCommandData.id()),
+										request)
+								.subscribe());
 
 		long ownerId = Long.valueOf(service.getPropertiesLoader().getOwnerId());
 		entenwieseGuild.getMemberById(Snowflake.of(ownerId)).block()

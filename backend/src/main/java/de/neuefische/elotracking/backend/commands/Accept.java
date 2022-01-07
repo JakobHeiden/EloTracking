@@ -22,7 +22,6 @@ public class Accept extends ButtonCommandForChallenge {
 	}
 
 	public void execute() {
-		long parentId = event.getInteraction().getUser().getId().asLong();
 		Message parentMessage = event.getMessage().get();
 		ChallengeModel challenge = service.getChallengeByAcceptorMessageId(parentMessage.getId().asLong()).get();
 
@@ -50,7 +49,7 @@ public class Accept extends ButtonCommandForChallenge {
 				.withComponents(createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw()))
 				.subscribe();
 
-		event.acknowledge().subscribe();
+		event.deferEdit().subscribe();
 	}
 
 	private static ActionRow createActionRow(long channelId, boolean allowDraw) {
