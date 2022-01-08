@@ -6,6 +6,7 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
@@ -32,6 +33,12 @@ public class ChallengeAsUserInteraction {
 				.type(2)
 				.name("challenge")
 				.build();
+	}
+
+	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
+		client.getRestClient().getApplicationService()
+				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
+				.subscribe();
 	}
 
 	public void execute() {

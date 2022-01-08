@@ -14,12 +14,12 @@ import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-public class Forcewin extends SlashCommand {
+public class Forcedraw extends SlashCommand {
 
-	private User winner;
-	private User loser;
+	private User player1;
+	private User player2;
 
-	public Forcewin(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
+	public Forcedraw(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 					TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 		this.needsGame = true;
@@ -28,14 +28,14 @@ public class Forcewin extends SlashCommand {
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name("forcewin")
-				.description("Force a win of one player over another")
+				.name("forcedraw")
+				.description("Force a draw for two players")
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("winner").description("The player that gets a win")
+						.name("player1").description("The first player")
 						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
 						.build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("loser").description("The player that gets a loss")
+						.name("player2").description("The second player")
 						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
 						.build())
 				.defaultPermission(false)
@@ -50,18 +50,18 @@ public class Forcewin extends SlashCommand {
 
 	public void execute() {
 		if (!super.canExecute()) return;
-		winner = event.getOption("winner").get().getValue().get().asUser().block();
-		loser = event.getOption("loser").get().getValue().get().asUser().block();
-		if (winner.isBot() || loser.isBot()) {
+		player1 = event.getOption("player1").get().getValue().get().asUser().block();
+		player2 = event.getOption("player2").get().getValue().get().asUser().block();
+		if (player1.isBot() || player2.isBot()) {
 			event.reply("Cannot force a match involving a bot.").subscribe();
 			return;
 		}
-		if (winner.equals(loser)) {
-			event.reply("Winner and loser must not be the same player.").subscribe();
+		if (player1.equals(player2)) {
+			event.reply("Player1 and player2 must not be the same player.").subscribe();
 			return;
 		}
 
-		Match match = new Match(guildId, winner.getId().asLong(), loser.getId().asLong(), false);
+		Match match = new Match(guildId, player1.getId().asLong(), player2.getId().asLong(), true);
 		double[] eloResults = service.updateRatings(match);
 		service.saveMatch(match);
 
@@ -71,24 +71,24 @@ public class Forcewin extends SlashCommand {
 	}
 
 	private void informPlayers(double[] eloResults) {
-		MessageContent winnerMessageContent = new MessageContent(
-				String.format("%s has forced a win over %s. Your rating went from %s to %s.",
-						event.getInteraction().getUser().getTag(), loser.getTag(),
+		MessageContent player1MessageContent = new MessageContent(
+				String.format("%s has forced a draw with %s. Your rating went from %s to %s.",
+						event.getInteraction().getUser().getTag(), player2.getTag(),
 						Math.round(eloResults[0]), Math.round(eloResults[2])))
 				.makeAllItalic();
-		MessageCreateSpec winnerMessageSpec = MessageCreateSpec.builder()
-				.content(winnerMessageContent.get())
+		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
+				.content(player1MessageContent.get())
 				.build();
-		winner.getPrivateChannel().subscribe(channel -> channel.createMessage(winnerMessageSpec).subscribe());
+		player1.getPrivateChannel().subscribe(channel -> channel.createMessage(player1MessageSpec).subscribe());
 
-		MessageContent loserMessageContent = new MessageContent(
+		MessageContent player2MessageContent = new MessageContent(
 				String.format("%s has forced a loss to %s. Your rating went from %s to %s.",
-						event.getInteraction().getUser().getTag(), winner.getTag(),
+						event.getInteraction().getUser().getTag(), player1.getTag(),
 						Math.round(eloResults[1]), Math.round(eloResults[3])))
 				.makeAllItalic();
-		MessageCreateSpec loserMessageSpec = MessageCreateSpec.builder()
-				.content(loserMessageContent.get())
+		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
+				.content(player2MessageContent.get())
 				.build();
-		loser.getPrivateChannel().subscribe(channel -> channel.createMessage(loserMessageSpec).subscribe());
+		player2.getPrivateChannel().subscribe(channel -> channel.createMessage(player2MessageSpec).subscribe());
 	}
 }

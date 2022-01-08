@@ -1,5 +1,6 @@
 package de.neuefische.elotracking.backend.commands;
 
+import de.neuefische.elotracking.backend.command.DiscordCommandManager;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -25,14 +26,17 @@ import java.util.Arrays;
 public class Setup extends SlashCommand {
 
 	private Guild guild;
+	private long botId;
 	private Role modRole;
 	private Role adminRole;
-	private static String[] commandsThatNeedModRole = {"forcewin"};
-	private static String[] commandsThatNeedAdminRole = {};
+	private ApplicationService applicationService;
 
 	public Setup(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
+		this.applicationService = client.getRestClient().getApplicationService();
+		this.guild = event.getInteraction().getGuild().block();
+		this.botId = client.getSelfId().asLong();
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -48,34 +52,46 @@ public class Setup extends SlashCommand {
 				.build();
 	}
 
+	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
+		client.getRestClient().getApplicationService()
+				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
+				.subscribe();
+	}
+
 	public void execute() {
-		guild = event.getInteraction().getGuild().block();
 		game = new Game(guild.getId().asLong(),
 				event.getOption("nameofgame").get().getValue().get().asString());
-
 		createModAndAdminRoles();
 		setPermissionsForCommands();
 		createResultChannel();
 		createDisputeCategory();
-
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 		service.saveGame(game);
 
 		event.reply("Setup performed. Here is what I did:\n" +
-				"- I created the roles Elo Admin and Elo Moderator\n" +// TODO rollen erklaeren
-				"- I made you an Elo Admin\n" +
-				"- I created a channel where I will post all match results\n" +
-				"- I created a channel category ELO DISPUTES only visible to Elo Admin and Elo Moderator\n" +
-				"- I created a web page with rankings: "
-				+ String.format("http://%s/%s\n", service.getPropertiesLoader().getBaseUrl(), guildId)
-				+ "Players should now be able to challenge each other with the /challenge command or by going " +
-				"right click on a user -> apps -> challenge.").subscribe();
+						"- I created the role Elo Moderator. Elo Moderator has permissions related to " +
+						"dispute resolution and will get notified when disputes happen\n" +
+						"- I created the role Elo Admin. Elo Admin has all the permissions of Elo Moderator, " +
+						"and can also modify my settings\n" +
+						"- I made you an Elo Admin\n" +
+						"- I created a channel where I will post all match results\n" +
+						"- I created a channel category ELO DISPUTES only visible to Elo Moderator\n" +
+						"- I created a web page with rankings: " +
+						String.format("http://%s/%s\n", service.getPropertiesLoader().getBaseUrl(), guildId) +
+						"- I created two challenge commands, one for chat and " +
+						"one user command (right click on a user -> apps -> challenge)\n" +
+						"- I created the forcewin command, only available to Elo Moderator" +
+						(game.isAllowDraw() ? "\n- I created the the forcedraw command, only available to Elo Moderator" : ""))
+				.subscribe();
 
 		deleteSetupGuildCommand();
+		if (game.isAllowDraw()) Forcedraw.deployToGuild(client, guild);
+		Forcewin.deployToGuild(client, guild);
+		Challenge.deployToGuild(client, guild);
+		ChallengeAsUserInteraction.deployToGuild(client, guild);
 
-		Guild newGuild = event.getInteraction().getGuild().block();
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
-				newGuild.getId(), newGuild.getName(), newGuild.getMemberCount()));
+				guild.getId(), guild.getName(), guild.getMemberCount()));
 	}
 
 	private void createModAndAdminRoles() {
@@ -89,11 +105,9 @@ public class Setup extends SlashCommand {
 				.build()).block();
 		game.setModRoleId(modRole.getId().asLong());
 		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
-
-
 	}
 
-	private void setPermissionsForCommands() {
+	private void setPermissionsForCommands() {// TODO vllt nach DiscordCommandManager umziehen?
 		ApplicationCommandPermissionsData modRolePermission = ApplicationCommandPermissionsData.builder()
 				.id(modRole.getId().asLong()).type(1).permission(true).build();
 		ApplicationCommandPermissionsData adminRolePermission = ApplicationCommandPermissionsData.builder()
@@ -103,7 +117,7 @@ public class Setup extends SlashCommand {
 				.addPermission(adminRolePermission).build();
 		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
 				.filter(applicationCommandData ->
-						Arrays.asList(commandsThatNeedAdminRole).contains(applicationCommandData.name()))
+						Arrays.asList(DiscordCommandManager.commandsThatNeedAdminRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
 						client.getRestClient().getApplicationService()
 								.modifyApplicationCommandPermissions(
@@ -116,7 +130,7 @@ public class Setup extends SlashCommand {
 				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
 		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
 				.filter(applicationCommandData ->
-						Arrays.asList(commandsThatNeedModRole).contains(applicationCommandData.name()))
+						Arrays.asList(DiscordCommandManager.commandsThatNeedModRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
 						client.getRestClient().getApplicationService()
 								.modifyApplicationCommandPermissions(
@@ -127,7 +141,7 @@ public class Setup extends SlashCommand {
 	}
 
 	private void createResultChannel() {
-		TextChannel resultChannel = guild.createTextChannel("Elotracking results")
+		TextChannel resultChannel = guild.createTextChannel("Elo Ranking results")
 				.withTopic(String.format("All resolved matches will be logged here. Leaderboard: http://%s/%s",
 						service.getPropertiesLoader().getBaseUrl(), guild.getId().asString())).block();
 		game.setResultChannelId(resultChannel.getId().asLong());
@@ -145,13 +159,15 @@ public class Setup extends SlashCommand {
 	}
 
 	private void deleteSetupGuildCommand() {
-		ApplicationService applicationService = client.getRestClient().getApplicationService();
-		long botId = client.getSelfId().asLong();
 		applicationService.getGuildApplicationCommands(botId, guildId)
 				.filter(applicationCommandData -> applicationCommandData.name().equals("setup"))
 				.map(applicationCommandData ->
 						applicationService.deleteGuildApplicationCommand(
 										botId, guildId, Long.parseLong(applicationCommandData.id()))
 								.subscribe()).subscribe();
+	}
+
+	private void deployForcedrawGuildCommand() {
+		applicationService.createGuildApplicationCommand(botId, guildId, Forcedraw.getRequest()).subscribe();
 	}
 }

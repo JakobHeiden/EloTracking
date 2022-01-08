@@ -4,7 +4,6 @@ import de.neuefische.elotracking.backend.commands.Challenge;
 import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
 import de.neuefische.elotracking.backend.commands.Forcewin;
 import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
-import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -12,6 +11,7 @@ import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,9 +23,9 @@ public class DiscordCommandManager {
 	private final ApplicationService applicationService;
 	private final long entenwieseId;
 
-	public static String[] commandsThatNeedModRole = {"forcewin"};
+	public static String[] commandsThatNeedModRole = {"forcewin", "forcedraw"};
 	public static String[] commandsThatNeedAdminRole = {};
-	public static List<ApplicationCommandRequest> allNecessaryApplicationCommandRequests() {
+	public static List<ApplicationCommandRequest> allNecessaryGlobalApplicationCommandRequests() {
 		return List.of(
 				Challenge.getRequest(),
 				ChallengeAsUserInteraction.getRequest(),
@@ -37,12 +37,12 @@ public class DiscordCommandManager {
 		this.applicationService = client.getRestClient().getApplicationService();
 		this.entenwieseId = Long.parseLong(applicationPropertiesLoader.getEntenwieseId());
 
-		if (applicationPropertiesLoader.isUseGlobalCommands()) {
+		/*if (applicationPropertiesLoader.isUseGlobalCommands()) {
 			deleteGlobalCommandsNotNecessary();
 			deployGlobalCommandsThatAreNotPresent();
 		} else {
 			bulkOverwriteGuildCommands();
-		}
+		}*/
 	}
 
 	private void deployGlobalCommandsThatAreNotPresent() {
@@ -51,7 +51,7 @@ public class DiscordCommandManager {
 				.map(applicationCommandData -> applicationCommandData.name())
 				.collectList()
 				.block();
-		for (ApplicationCommandRequest request : allNecessaryApplicationCommandRequests()) {
+		for (ApplicationCommandRequest request : allNecessaryGlobalApplicationCommandRequests()) {
 			if (!globalCommandsPresent.contains(request.name())) {
 				applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), request).subscribe();
 				log.info(String.format("Deploying global command %s", request.name()));
@@ -64,7 +64,7 @@ public class DiscordCommandManager {
 				.getGlobalApplicationCommands(client.getSelfId().asLong())
 				.collectList()
 				.block();
-		List<String> globalCommandsNecessary = allNecessaryApplicationCommandRequests().stream()
+		List<String> globalCommandsNecessary = allNecessaryGlobalApplicationCommandRequests().stream()
 				.map(request -> request.name())
 				.collect(Collectors.toList());
 		for (ApplicationCommandData commandData : globalCommandsPresent) {
@@ -81,7 +81,7 @@ public class DiscordCommandManager {
 		applicationService.bulkOverwriteGuildApplicationCommand(
 						client.getSelfId().asLong(),
 						entenwieseId,
-						allNecessaryApplicationCommandRequests())
+						allNecessaryGlobalApplicationCommandRequests())
 				.subscribe();
 	}
 }
