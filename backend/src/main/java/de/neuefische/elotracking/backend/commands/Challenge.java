@@ -13,6 +13,7 @@ import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEven
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.MessageCreateSpec;
@@ -40,6 +41,12 @@ public class Challenge extends SlashCommand {
 						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
 						.build())
 				.build();
+	}
+
+	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
+		client.getRestClient().getApplicationService()
+				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
+				.subscribe();
 	}
 
 	public void execute() {

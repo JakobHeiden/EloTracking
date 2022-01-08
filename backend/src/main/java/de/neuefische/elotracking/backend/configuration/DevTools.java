@@ -1,7 +1,6 @@
 package de.neuefische.elotracking.backend.configuration;
 
-import de.neuefische.elotracking.backend.commands.Createresultchannel;
-import de.neuefische.elotracking.backend.commands.Setup;
+import de.neuefische.elotracking.backend.commands.*;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
@@ -12,10 +11,12 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.RoleCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
+import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.PermissionSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class DevTools {
 
 	private long entenwieseId;
 	private Guild entenwieseGuild;
+	private long botId;
 	private Game game;
 	private Role modRole;
 	private Role adminRole;
@@ -38,17 +40,36 @@ public class DevTools {
 	public DevTools(EloTrackingService service, GatewayDiscordClient client) {
 		this.service = service;
 		this.client = client;
+		this.botId = client.getSelfId().asLong();
+		entenwieseId = Long.parseLong(service.getPropertiesLoader().getEntenwieseId());
+		this.entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
-		if (props.isDeleteDataOnStartup()) service.deleteAllData();
-		//if (!props.isUseDevBotToken()) deleteEntenwieseData(); TODO!
+		if (props.isDeleteDataOnStartup()) {
+			service.deleteAllData();
+			deleteAllGuildCommandsForEntenwiese();
+			Setup.deployToGuild(client, entenwieseGuild);
+		}
 		if (props.isSetupDevGame()) setupDevGame();
-		else deploySetupGuildCommandToEntenwiese();
+
+		client.getGuilds().subscribe(guild -> {
+			Forcedraw.deployToGuild(client, guild);
+			Forcewin.deployToGuild(client, guild);
+			Challenge.deployToGuild(client, guild);
+			ChallengeAsUserInteraction.deployToGuild(client, guild);
+		});
+	}
+
+
+	private void deleteAllGuildCommandsForEntenwiese() {
+		ApplicationService applicationService = client.getRestClient().getApplicationService();
+		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), entenwieseId)
+				.subscribe(applicationCommandData -> applicationService.
+						deleteGuildApplicationCommand(client.getSelfId().asLong(), entenwieseId,
+								Long.parseLong(applicationCommandData.id())).subscribe());
 	}
 
 	private void setupDevGame() {
-		entenwieseId = Long.parseLong(service.getPropertiesLoader().getEntenwieseId());
-		entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
 		log.info("Setting up Dev Game...");
 		game = new Game(entenwieseId, "Dev Game");
 		game.setAllowDraw(true);
@@ -97,26 +118,26 @@ public class DevTools {
 		// supply permission for admin commands to just admins
 		ApplicationCommandPermissionsRequest onlyAdminPermissionRequest = ApplicationCommandPermissionsRequest.builder()
 				.addPermission(adminRolePermission).build();
-		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), entenwieseId)
+		client.getRestClient().getApplicationService().getGuildApplicationCommands(botId, entenwieseId)
 				.filter(applicationCommandData ->
 						Arrays.asList(commandsThatNeedAdminRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
 						client.getRestClient().getApplicationService()
 								.modifyApplicationCommandPermissions(
-										client.getSelfId().asLong(), entenwieseId,
+										botId, entenwieseId,
 										Long.parseLong(applicationCommandData.id()),
 										onlyAdminPermissionRequest)
 								.subscribe());
 		// supply permission for mod commands to both mods and admins
 		ApplicationCommandPermissionsRequest adminAndModPermissionRequest = ApplicationCommandPermissionsRequest.builder()
 				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
-		client.getRestClient().getApplicationService().getGuildApplicationCommands(client.getSelfId().asLong(), entenwieseId)
+		client.getRestClient().getApplicationService().getGuildApplicationCommands(botId, entenwieseId)
 				.filter(applicationCommandData ->
 						Arrays.asList(commandsThatNeedModRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
 						client.getRestClient().getApplicationService()
 								.modifyApplicationCommandPermissions(
-										client.getSelfId().asLong(), entenwieseId,
+										botId, entenwieseId,
 										Long.parseLong(applicationCommandData.id()),
 										adminAndModPermissionRequest)
 								.subscribe());
@@ -132,7 +153,7 @@ public class DevTools {
 	private void deploySetupGuildCommandToEntenwiese() {
 		client.getRestClient().getApplicationService()
 				.createGuildApplicationCommand(
-						client.getSelfId().asLong(),
+						botId,
 						entenwieseId,
 						Setup.getRequest())
 				.subscribe();
