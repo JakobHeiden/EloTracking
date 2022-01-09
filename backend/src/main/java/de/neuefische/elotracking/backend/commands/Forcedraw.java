@@ -42,12 +42,6 @@ public class Forcedraw extends SlashCommand {
 				.build();
 	}
 
-	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
-		client.getRestClient().getApplicationService()
-				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
-				.subscribe();
-	}
-
 	public void execute() {
 		if (!super.canExecute()) return;
 		player1 = event.getOption("player1").get().getValue().get().asUser().block();
@@ -67,7 +61,7 @@ public class Forcedraw extends SlashCommand {
 
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
-		event.reply("Done.").subscribe();
+		event.reply(String.format("Forced a draw between %s and %s.", player1.getTag(), player2.getTag())).subscribe();
 	}
 
 	private void informPlayers(double[] eloResults) {

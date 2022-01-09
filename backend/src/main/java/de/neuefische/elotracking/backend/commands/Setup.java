@@ -84,11 +84,11 @@ public class Setup extends SlashCommand {
 						(game.isAllowDraw() ? "\n- I created the the forcedraw command, only available to Elo Moderator" : ""))
 				.subscribe();
 
-		deleteSetupGuildCommand();
-		if (game.isAllowDraw()) Forcedraw.deployToGuild(client, guild);
-		Forcewin.deployToGuild(client, guild);
-		Challenge.deployToGuild(client, guild);
-		ChallengeAsUserInteraction.deployToGuild(client, guild);
+		deleteSetupCommand();
+		if (game.isAllowDraw()) bot.deployToGuild(Forcedraw.getRequest(), guild, adminRole, modRole);
+		bot.deployToGuild(Forcewin.getRequest(), guild, adminRole, modRole);
+		bot.deployToGuild(Challenge.getRequest(), guild);
+		bot.deployToGuild(ChallengeAsUserInteraction.getRequest(), guild);
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
 				guild.getId(), guild.getName(), guild.getMemberCount()));
@@ -158,7 +158,7 @@ public class Setup extends SlashCommand {
 		game.setDisputeCategoryId(disputeCategory.getId().asLong());
 	}
 
-	private void deleteSetupGuildCommand() {
+	private void deleteSetupCommand() {
 		applicationService.getGuildApplicationCommands(botId, guildId)
 				.filter(applicationCommandData -> applicationCommandData.name().equals("setup"))
 				.map(applicationCommandData ->
