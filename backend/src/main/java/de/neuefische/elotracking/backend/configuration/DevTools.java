@@ -52,12 +52,19 @@ public class DevTools {
 		}
 		if (props.isSetupDevGame()) setupDevGame();
 
-		client.getGuilds().subscribe(guild -> {
+		/*client.getGuilds().subscribe(guild -> {
 			Forcedraw.deployToGuild(client, guild);
 			Forcewin.deployToGuild(client, guild);
 			Challenge.deployToGuild(client, guild);
 			ChallengeAsUserInteraction.deployToGuild(client, guild);
 		});
+		*/
+		/*ApplicationService applicationService = client.getRestClient().getApplicationService();
+		applicationService.getGlobalApplicationCommands(client.getSelfId().asLong())
+				.subscribe(command -> applicationService.deleteGlobalApplicationCommand(client.getSelfId().asLong(),
+						Long.parseLong(command.id())));
+		 */
+
 	}
 
 

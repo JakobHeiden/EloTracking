@@ -35,12 +35,6 @@ public class ChallengeAsUserInteraction {
 				.build();
 	}
 
-	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
-		client.getRestClient().getApplicationService()
-				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
-				.subscribe();
-	}
-
 	public void execute() {
 		Optional<Game> maybeGame = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong());
 		if (maybeGame.isEmpty()) {

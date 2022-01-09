@@ -43,12 +43,6 @@ public class Challenge extends SlashCommand {
 				.build();
 	}
 
-	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
-		client.getRestClient().getApplicationService()
-				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
-				.subscribe();
-	}
-
 	public void execute() {
 		if (!super.canExecute()) return;
 		User targetPlayer = event.getOption("player").get().getValue().get().asUser().block();

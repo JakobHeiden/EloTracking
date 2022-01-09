@@ -9,10 +9,14 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+
+import java.awt.event.ActionListener;
 
 public class Forcewin extends SlashCommand {
 
@@ -42,12 +46,6 @@ public class Forcewin extends SlashCommand {
 				.build();
 	}
 
-	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
-		client.getRestClient().getApplicationService()
-				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
-				.subscribe();
-	}
-
 	public void execute() {
 		if (!super.canExecute()) return;
 		winner = event.getOption("winner").get().getValue().get().asUser().block();
@@ -67,7 +65,7 @@ public class Forcewin extends SlashCommand {
 
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
-		event.reply("Done.").subscribe();
+		event.reply(String.format("Forced a win for %s over %s.", winner.getTag(), loser.getTag())).subscribe();
 	}
 
 	private void informPlayers(double[] eloResults) {

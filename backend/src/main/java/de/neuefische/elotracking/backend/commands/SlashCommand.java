@@ -54,6 +54,8 @@ public abstract class SlashCommand {
 			if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId()))
 					&& !event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))) {
 				event.reply("You need the Elo Moderator role to use that command").subscribe();
+				bot.sendToOwner(String.format("%s has accessed a mod command without permission on guild %s",
+						event.getInteraction().getUser().getTag(), guildId));
 				return false;
 			}
 		}
@@ -61,6 +63,8 @@ public abstract class SlashCommand {
 			if (!event.getInteraction().getMember().get().getRoleIds()
 					.contains(Snowflake.of(game.getAdminRoleId()))) {
 				event.reply("You need the Elo Admin role to use that command").subscribe();
+				bot.sendToOwner(String.format("%s has accessed an admin command without permission on guild %s",
+						event.getInteraction().getUser().getTag(), guildId));
 				return false;
 			}
 		}

@@ -5,11 +5,14 @@ import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.model.Match;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.discordjson.json.*;
 import discord4j.rest.http.client.ClientException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,10 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
+
+import static de.neuefische.elotracking.backend.command.DiscordCommandManager.commandsThatNeedAdminRole;
+import static de.neuefische.elotracking.backend.command.DiscordCommandManager.commandsThatNeedModRole;
 
 @Slf4j
 @Component
@@ -26,11 +33,13 @@ public class DiscordBotService {
 	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
 	private final EloTrackingService service;
 	private PrivateChannel ownerPrivateChannel;
+	private final long botId;
 
 
 	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloTrackingService service) {
 		this.client = gatewayDiscordClient;
 		this.service = service;
+		this.botId = client.getSelfId().asLong();
 	}
 
 	@PostConstruct
@@ -101,5 +110,24 @@ public class DiscordBotService {
 	public Mono<Message> getAcceptorMessage(ChallengeModel challenge) {
 		return client.getMessageById(Snowflake.of(challenge.getAcceptorChannelId()),
 				Snowflake.of(challenge.getAcceptorMessageId()));
+	}
+
+	public void deployToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
+		ApplicationCommandData commandData = client.getRestClient().getApplicationService()
+				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), request)
+				.block();
+		setDiscordCommandPermissions(guild, commandData, permitRoles);
+	}
+
+	private void setDiscordCommandPermissions(Guild guild, ApplicationCommandData commandData, Role... roles) {
+		ImmutableApplicationCommandPermissionsRequest.Builder requestBuilder = ApplicationCommandPermissionsRequest.builder();
+		Arrays.stream(roles).map(role -> ApplicationCommandPermissionsData.builder()
+						.id(role.getId().asLong()).type(1).permission(true).build())
+				.forEach(applicationCommandPermissionsData -> requestBuilder.addPermission(applicationCommandPermissionsData));
+
+		client.getRestClient().getApplicationService().
+				modifyApplicationCommandPermissions(botId, guild.getId().asLong(), Long.parseLong(commandData.id()),
+						requestBuilder.build())
+				.subscribe();
 	}
 }
