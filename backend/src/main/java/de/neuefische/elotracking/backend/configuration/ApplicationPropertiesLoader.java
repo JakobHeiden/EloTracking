@@ -22,6 +22,7 @@ public class ApplicationPropertiesLoader {
 	private boolean deleteDataOnStartup;
 	private boolean useGlobalCommands;
 	private boolean setupDevGame;
+	private boolean doUpdateGuildCommands;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
 }
