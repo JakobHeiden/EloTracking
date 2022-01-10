@@ -8,7 +8,6 @@ import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -22,7 +21,6 @@ public class Forcedraw extends SlashCommand {
 	public Forcedraw(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 					TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.needsGame = true;
 		this.needsModRole = true;
 	}
 

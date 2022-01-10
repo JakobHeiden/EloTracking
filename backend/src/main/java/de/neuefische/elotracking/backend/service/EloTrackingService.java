@@ -61,7 +61,17 @@ public class EloTrackingService {
 		playerDao.deleteAll();
 	}
 
+	public void deleteAllDataForGameExceptGame(Game game) {
+		matchDao.deleteAllByGuildId(game.getGuildId());
+		challengeDao.deleteAllByGuildId(game.getGuildId());
+		playerDao.deleteAllByGuildId(game.getGuildId());
+	}
+
 	// Game
+	public void deleteGame(Game game) {
+		gameDao.deleteById(game.getGuildId());
+	}
+
 	public Optional<Game> findGameByGuildId(long guildId) {
 		return gameDao.findById(guildId);
 	}

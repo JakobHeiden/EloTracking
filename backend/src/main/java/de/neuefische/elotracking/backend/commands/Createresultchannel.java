@@ -14,7 +14,6 @@ public class Createresultchannel extends SlashCommand {// TODO wird so nicht meh
 	public Createresultchannel(ChatInputInteractionEvent event, EloTrackingService service,
 							   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.needsGame = true;
 	}
 
 	public void execute() {

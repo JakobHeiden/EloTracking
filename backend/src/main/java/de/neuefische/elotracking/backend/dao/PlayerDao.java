@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface PlayerDao extends MongoRepository<Player, UUID> {
     List<Player> findAllByGuildId(long guildId);
+	void deleteAllByGuildId(long guildId);
 }

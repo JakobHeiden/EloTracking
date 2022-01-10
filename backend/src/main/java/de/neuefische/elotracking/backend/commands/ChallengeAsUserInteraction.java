@@ -6,7 +6,6 @@ import de.neuefische.elotracking.backend.service.EloTrackingService;
 import de.neuefische.elotracking.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
@@ -17,7 +16,7 @@ public class ChallengeAsUserInteraction {
 	private final EloTrackingService service;
 	private final DiscordBotService bot;
 	private final TimedTaskQueue queue;
-	private final GatewayDiscordClient client;
+	private final GatewayDiscordClient client;// TODO kann weg?
 
 	public ChallengeAsUserInteraction(UserInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 									  TimedTaskQueue queue, GatewayDiscordClient client) {
