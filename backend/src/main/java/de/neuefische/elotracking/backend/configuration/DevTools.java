@@ -1,8 +1,10 @@
 package de.neuefische.elotracking.backend.configuration;
 
 import de.neuefische.elotracking.backend.commands.Createresultchannel;
+import de.neuefische.elotracking.backend.commands.Reset;
 import de.neuefische.elotracking.backend.commands.Setup;
 import de.neuefische.elotracking.backend.model.Game;
+import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -28,7 +30,9 @@ import static de.neuefische.elotracking.backend.command.DiscordCommandManager.co
 public class DevTools {
 
 	private final EloTrackingService service;
+	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
+	private final ApplicationService applicationService;
 
 	private long entenwieseId;
 	private Guild entenwieseGuild;
@@ -37,12 +41,14 @@ public class DevTools {
 	private Role modRole;
 	private Role adminRole;
 
-	public DevTools(EloTrackingService service, GatewayDiscordClient client) {
+	public DevTools(EloTrackingService service, DiscordBotService bot, GatewayDiscordClient client) {
 		this.service = service;
+		this.bot = bot;
 		this.client = client;
 		this.botId = client.getSelfId().asLong();
 		entenwieseId = Long.parseLong(service.getPropertiesLoader().getEntenwieseId());
 		this.entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
+		this.applicationService = client.getRestClient().getApplicationService();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
 		if (props.isDeleteDataOnStartup()) {
@@ -51,6 +57,7 @@ public class DevTools {
 			Setup.deployToGuild(client, entenwieseGuild);
 		}
 		if (props.isSetupDevGame()) setupDevGame();
+		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 
 		/*client.getGuilds().subscribe(guild -> {
 			Forcedraw.deployToGuild(client, guild);
@@ -67,9 +74,22 @@ public class DevTools {
 
 	}
 
+	private void updateGuildCommands() {
+		log.warn("updating guild commands...");
+		service.findAllGames().stream().forEach(
+				game -> {
+					try {
+						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
+						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
+						bot.deployToGuild(Reset.getRequest(), guild, currentAdminRole);
+					} catch (Exception e) {
+						log.error(e.getMessage());
+					}
+				}
+		);
+	}
 
 	private void deleteAllGuildCommandsForEntenwiese() {
-		ApplicationService applicationService = client.getRestClient().getApplicationService();
 		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), entenwieseId)
 				.subscribe(applicationCommandData -> applicationService.
 						deleteGuildApplicationCommand(client.getSelfId().asLong(), entenwieseId,
@@ -125,7 +145,7 @@ public class DevTools {
 		// supply permission for admin commands to just admins
 		ApplicationCommandPermissionsRequest onlyAdminPermissionRequest = ApplicationCommandPermissionsRequest.builder()
 				.addPermission(adminRolePermission).build();
-		client.getRestClient().getApplicationService().getGuildApplicationCommands(botId, entenwieseId)
+		applicationService.getGuildApplicationCommands(botId, entenwieseId)
 				.filter(applicationCommandData ->
 						Arrays.asList(commandsThatNeedAdminRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
@@ -138,7 +158,7 @@ public class DevTools {
 		// supply permission for mod commands to both mods and admins
 		ApplicationCommandPermissionsRequest adminAndModPermissionRequest = ApplicationCommandPermissionsRequest.builder()
 				.addPermission(modRolePermission).addPermission(adminRolePermission).build();
-		client.getRestClient().getApplicationService().getGuildApplicationCommands(botId, entenwieseId)
+		applicationService.getGuildApplicationCommands(botId, entenwieseId)
 				.filter(applicationCommandData ->
 						Arrays.asList(commandsThatNeedModRole).contains(applicationCommandData.name()))
 				.subscribe(applicationCommandData ->
@@ -158,8 +178,7 @@ public class DevTools {
 	}
 
 	private void deploySetupGuildCommandToEntenwiese() {
-		client.getRestClient().getApplicationService()
-				.createGuildApplicationCommand(
+		applicationService.createGuildApplicationCommand(
 						botId,
 						entenwieseId,
 						Setup.getRequest())

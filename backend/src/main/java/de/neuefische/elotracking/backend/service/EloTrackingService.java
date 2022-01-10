@@ -80,6 +80,10 @@ public class EloTrackingService {
 		gameDao.save(game);
 	}
 
+	public List<Game> findAllGames() {
+		return gameDao.findAll();
+	}
+
 	// Challenge
 	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
 		return challengeDao.findAllByChallengerId(challengerId).stream()
@@ -201,4 +205,6 @@ public class EloTrackingService {
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;
 	}
+
+
 }
