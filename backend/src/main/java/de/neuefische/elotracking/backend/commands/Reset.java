@@ -55,7 +55,7 @@ public class Reset extends SlashCommand {
 		service.deleteAllDataForGameExceptGame(game);
 
 		InteractionApplicationCommandCallbackReplyMono reply;
-		if (event.getOption("resetsettings").get().getValue().get().asBoolean()) {
+		if (event.getOption("factoryreset").get().getValue().get().asBoolean()) {
 			event.reply("Deleting matches.\n" +
 					"Deleting challenges.\n" +
 					"Deleting players.\n" +
