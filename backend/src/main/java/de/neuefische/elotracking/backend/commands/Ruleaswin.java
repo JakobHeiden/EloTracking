@@ -46,7 +46,8 @@ public class Ruleaswin extends ButtonCommandForDispute {
 		Message winnerMessage = isChallengerWin ? challengerMessage : acceptorMessage;
 		MessageContent winnerMessageContent = new MessageContent(winnerMessage.getContent())
 				.addLine(String.format("%s has ruled this as a win :arrow_up: for you.", moderatorName))
-				.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
+				.addLine(String.format("Your rating went from %s to %s",
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic();
 		winnerMessage.edit().withContent(winnerMessageContent.get())
 				.withComponents(none).subscribe();
@@ -54,7 +55,8 @@ public class Ruleaswin extends ButtonCommandForDispute {
 		Message loserMessage = isChallengerWin ? acceptorMessage : challengerMessage;
 		MessageContent loserMessageContent = new MessageContent(loserMessage.getContent())
 				.addLine(String.format("%s has ruled this as a loss :arrow_down: for you.", moderatorName))
-				.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
+				.addLine(String.format("Your rating went from %s to %s",
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic();
 		loserMessage.edit().withContent(loserMessageContent.get())
 				.withComponents(none).subscribe();

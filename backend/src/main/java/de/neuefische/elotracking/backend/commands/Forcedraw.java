@@ -68,7 +68,7 @@ public class Forcedraw extends SlashCommand {
 		MessageContent player1MessageContent = new MessageContent(
 				String.format("%s has forced a draw with %s. Your rating went from %s to %s.",
 						event.getInteraction().getUser().getTag(), player2.getTag(),
-						Math.round(eloResults[0]), Math.round(eloResults[2])))
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic();
 		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
 				.content(player1MessageContent.get())
@@ -78,7 +78,7 @@ public class Forcedraw extends SlashCommand {
 		MessageContent player2MessageContent = new MessageContent(
 				String.format("%s has forced a loss to %s. Your rating went from %s to %s.",
 						event.getInteraction().getUser().getTag(), player1.getTag(),
-						Math.round(eloResults[1]), Math.round(eloResults[3])))
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic();
 		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
 				.content(player2MessageContent.get())
