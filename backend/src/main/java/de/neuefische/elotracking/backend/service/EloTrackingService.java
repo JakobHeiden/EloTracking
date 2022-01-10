@@ -179,6 +179,10 @@ public class EloTrackingService {
 		return new double[]{rating1, rating2, newRating1, newRating2};
 	}
 
+	public static String formatRating(double rating) {
+		return String.valueOf(Math.round(rating * 10) / 10);
+	}
+
 	public List<PlayerInRankingsDto> getRankings(long guildId) {
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
 		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()

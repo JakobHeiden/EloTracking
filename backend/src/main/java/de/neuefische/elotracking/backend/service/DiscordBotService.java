@@ -91,9 +91,9 @@ public class DiscordBotService {
 			try {
 				TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
 				resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
-								match.getWinnerTag(client), Math.round(match.getWinnerNewRating()),
+								match.getWinnerTag(client), service.formatRating(match.getWinnerNewRating()),
 								match.isDraw() ? "drew" : "defeated",
-								match.getLoserTag(client), Math.round(match.getLoserNewRating())))
+								match.getLoserTag(client), service.formatRating(match.getLoserNewRating())))
 						.subscribe();
 			} catch (ClientException e) {
 				game.setResultChannelId(0L);

@@ -44,8 +44,8 @@ public class TimedTaskService {
 				.edit().withContent(String.format("*You played a match against %s and %s. Your rating went from %s to %s.*",
 						opponentName,
 						match.isDraw() ? "drew :left_right_arrow:" : isWinnerMessage ? "won :arrow_up:" : "lost :arrow_down:",
-						isWinnerMessage ? Math.round(match.getWinnerOldRating()) : Math.round(match.getLoserOldRating()),
-						isWinnerMessage ? Math.round(match.getWinnerNewRating()) : Math.round(match.getLoserNewRating())))
+						isWinnerMessage ? service.formatRating(match.getWinnerOldRating()) : service.formatRating(match.getLoserOldRating()),
+						isWinnerMessage ? service.formatRating(match.getWinnerNewRating()) : service.formatRating(match.getLoserNewRating())))
 				.subscribe();
 	}
 
@@ -136,10 +136,10 @@ public class TimedTaskService {
 		Message reportPresentMessage = hasChallengerReported ?
 				bot.getChallengerMessage(challenge).block()
 				: bot.getAcceptorMessage(challenge).block();
-		int reportPresentOldRating = (int) Math.round(isDraw ?
+		String reportPresentOldRating = service.formatRating(isDraw ?
 				hasChallengerReported ? match.getWinnerOldRating() : match.getLoserOldRating()
 				: isWin ? match.getWinnerOldRating() : match.getLoserOldRating());
-		int reportPresentNewRating = (int) Math.round(isDraw ?
+		String reportPresentNewRating = service.formatRating(isDraw ?
 				hasChallengerReported ? match.getWinnerNewRating() : match.getLoserNewRating()
 				: isWin ? match.getWinnerNewRating() : match.getLoserNewRating());
 		MessageContent reportPresentMessageContent = new MessageContent(reportPresentMessage.getContent())
@@ -156,10 +156,10 @@ public class TimedTaskService {
 		Message reportAbsentMessage = hasChallengerReported ?
 				bot.getAcceptorMessage(challenge).block()
 				: bot.getChallengerMessage(challenge).block();
-		int reportAbsentOldRating = (int) Math.round(isDraw ?
+		String reportAbsentOldRating = service.formatRating(isDraw ?
 				hasChallengerReported ? match.getLoserOldRating() : match.getWinnerOldRating()
 				: isWin ? match.getLoserOldRating() : match.getWinnerOldRating());
-		int reportAbsentNewRating = (int) Math.round(isDraw ?
+		String reportAbsentNewRating = service.formatRating(isDraw ?
 				hasChallengerReported ? match.getLoserNewRating() : match.getWinnerNewRating()
 				: isWin ? match.getLoserNewRating() : match.getWinnerNewRating());
 		MessageContent reportAbsentMessageContent = new MessageContent(reportAbsentMessage.getContent())

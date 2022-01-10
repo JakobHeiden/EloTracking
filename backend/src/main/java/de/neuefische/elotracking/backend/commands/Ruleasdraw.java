@@ -37,14 +37,16 @@ public class Ruleasdraw extends ButtonCommandForDispute {
 	private void postToChallengerAndAcceptorChannels() {
 		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
-				.addLine(String.format("Your rating went from %s to %s", eloResults[0], eloResults[2]))
+				.addLine(String.format("Your rating went from %s to %s",
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic();
 		challengerMessage.edit().withContent(challengerMessageContent.get())
 				.withComponents(none).subscribe();
 
 		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
-				.addLine(String.format("Your rating went from %s to %s", eloResults[1], eloResults[3]))
+				.addLine(String.format("Your rating went from %s to %s",
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic();
 		acceptorMessage.edit().withContent(acceptorMessageContent.get())
 				.withComponents(none).subscribe();

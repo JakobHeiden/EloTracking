@@ -59,7 +59,7 @@ public class Lose extends ButtonCommandForChallenge {
 				.makeAllNotBold()
 				.addLine("You reported a loss :arrow_down:. The match has been resolved:")
 				.addLine(String.format("Your rating went from %s to %s.",
-						Math.round(eloResults[1]), Math.round(eloResults[3])))
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic();
 		parentMessage.edit().withContent(parentMessageContent.get())
 				.withComponents(new ArrayList<>()).subscribe();
@@ -68,7 +68,7 @@ public class Lose extends ButtonCommandForChallenge {
 				.makeAllNotBold()
 				.addLine("Your opponent reported a loss :arrow_down:. The match has been resolved:")
 				.addLine(String.format("Your rating went from %s to %s.",
-						Math.round(eloResults[0]), Math.round(eloResults[2])))
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic();
 		targetMessage.edit().withContent(targetMessageContent.get())
 				.withComponents(new ArrayList<>()).subscribe();

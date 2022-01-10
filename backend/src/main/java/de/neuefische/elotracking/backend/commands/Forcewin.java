@@ -72,7 +72,7 @@ public class Forcewin extends SlashCommand {
 		MessageContent winnerMessageContent = new MessageContent(
 				String.format("%s has forced a win over %s. Your rating went from %s to %s.",
 						event.getInteraction().getUser().getTag(), loser.getTag(),
-						Math.round(eloResults[0]), Math.round(eloResults[2])))
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic();
 		MessageCreateSpec winnerMessageSpec = MessageCreateSpec.builder()
 				.content(winnerMessageContent.get())
@@ -82,7 +82,7 @@ public class Forcewin extends SlashCommand {
 		MessageContent loserMessageContent = new MessageContent(
 				String.format("%s has forced a loss to %s. Your rating went from %s to %s.",
 						event.getInteraction().getUser().getTag(), winner.getTag(),
-						Math.round(eloResults[1]), Math.round(eloResults[3])))
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic();
 		MessageCreateSpec loserMessageSpec = MessageCreateSpec.builder()
 				.content(loserMessageContent.get())
