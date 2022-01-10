@@ -20,7 +20,6 @@ public abstract class SlashCommand {
 	protected final ChatInputInteractionEvent event;
 	protected long guildId;
 	protected Game game;
-	protected boolean needsGame;
 	protected boolean needsModRole;
 	protected boolean needsAdminRole;
 
@@ -31,7 +30,6 @@ public abstract class SlashCommand {
 		this.bot = bot;
 		this.queue = queue;
 		this.client = client;
-		this.needsGame = false;
 		this.needsModRole = false;
 		this.needsAdminRole = false;
 
@@ -44,12 +42,6 @@ public abstract class SlashCommand {
 	public abstract void execute();
 
 	protected boolean canExecute() {
-		if (needsGame) {
-			if (game == null) {
-				event.reply("Please run /setup first.").subscribe();
-				return false;
-			}
-		}
 		if (needsModRole) {
 			if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId()))
 					&& !event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))) {

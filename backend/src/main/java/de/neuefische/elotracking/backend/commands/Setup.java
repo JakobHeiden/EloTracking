@@ -89,6 +89,7 @@ public class Setup extends SlashCommand {
 		bot.deployToGuild(Forcewin.getRequest(), guild, adminRole, modRole);
 		bot.deployToGuild(Challenge.getRequest(), guild);
 		bot.deployToGuild(ChallengeAsUserInteraction.getRequest(), guild);
+		bot.deployToGuild(Reset.getRequest(), guild, adminRole);
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
 				guild.getId(), guild.getName(), guild.getMemberCount()));

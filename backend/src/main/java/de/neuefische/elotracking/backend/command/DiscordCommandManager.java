@@ -5,15 +5,12 @@ import de.neuefische.elotracking.backend.commands.ChallengeAsUserInteraction;
 import de.neuefische.elotracking.backend.commands.Forcewin;
 import de.neuefische.elotracking.backend.configuration.ApplicationPropertiesLoader;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j

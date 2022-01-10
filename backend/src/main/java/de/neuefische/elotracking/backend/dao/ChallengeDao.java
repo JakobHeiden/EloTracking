@@ -13,4 +13,5 @@ public interface ChallengeDao extends MongoRepository<ChallengeModel, Long> {
     Optional<ChallengeModel> findByChallengerMessageId(long challengerMessageId);
     Boolean existsByAcceptorMessageId(long acceptorMessageId);
     Optional<ChallengeModel> findByAcceptorMessageId(long acceptorMessageId);
+	void deleteAllByGuildId(long guildId);
 }

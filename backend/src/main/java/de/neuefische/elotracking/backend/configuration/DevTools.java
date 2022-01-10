@@ -1,6 +1,7 @@
 package de.neuefische.elotracking.backend.configuration;
 
-import de.neuefische.elotracking.backend.commands.*;
+import de.neuefische.elotracking.backend.commands.Createresultchannel;
+import de.neuefische.elotracking.backend.commands.Setup;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
 import discord4j.common.util.Snowflake;
@@ -16,7 +17,6 @@ import discord4j.rest.util.PermissionSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

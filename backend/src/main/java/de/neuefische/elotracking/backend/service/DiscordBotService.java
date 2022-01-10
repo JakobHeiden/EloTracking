@@ -14,6 +14,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.*;
 import discord4j.rest.http.client.ClientException;
+import discord4j.rest.service.ApplicationService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,9 +23,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 
-import static de.neuefische.elotracking.backend.command.DiscordCommandManager.commandsThatNeedAdminRole;
-import static de.neuefische.elotracking.backend.command.DiscordCommandManager.commandsThatNeedModRole;
-
 @Slf4j
 @Component
 public class DiscordBotService {
@@ -32,6 +30,7 @@ public class DiscordBotService {
 	@Getter
 	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
 	private final EloTrackingService service;
+	private final ApplicationService applicationService;
 	private PrivateChannel ownerPrivateChannel;
 	private final long botId;
 
@@ -40,6 +39,7 @@ public class DiscordBotService {
 		this.client = gatewayDiscordClient;
 		this.service = service;
 		this.botId = client.getSelfId().asLong();
+		applicationService = client.getRestClient().getApplicationService();
 	}
 
 	@PostConstruct
@@ -113,10 +113,21 @@ public class DiscordBotService {
 	}
 
 	public void deployToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
-		ApplicationCommandData commandData = client.getRestClient().getApplicationService()
+		ApplicationCommandData commandData = applicationService
 				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), request)
 				.block();
 		setDiscordCommandPermissions(guild, commandData, permitRoles);
+	}
+
+	public void deployToGuild(ApplicationCommandRequest request, long guildId) {
+		applicationService.createGuildApplicationCommand(client.getSelfId().asLong(), guildId, request).subscribe();
+	}
+
+	public void deleteAllGuildCommands(long guildId) {
+		applicationService.getGuildApplicationCommands(botId, guildId)
+				.subscribe(commandData -> applicationService.
+						deleteGuildApplicationCommand(botId, guildId, Long.parseLong(commandData.id()))
+						.subscribe());
 	}
 
 	private void setDiscordCommandPermissions(Guild guild, ApplicationCommandData commandData, Role... roles) {
@@ -125,9 +136,8 @@ public class DiscordBotService {
 						.id(role.getId().asLong()).type(1).permission(true).build())
 				.forEach(applicationCommandPermissionsData -> requestBuilder.addPermission(applicationCommandPermissionsData));
 
-		client.getRestClient().getApplicationService().
-				modifyApplicationCommandPermissions(botId, guild.getId().asLong(), Long.parseLong(commandData.id()),
-						requestBuilder.build())
+		applicationService.modifyApplicationCommandPermissions(
+						botId, guild.getId().asLong(), Long.parseLong(commandData.id()), requestBuilder.build())
 				.subscribe();
 	}
 }
