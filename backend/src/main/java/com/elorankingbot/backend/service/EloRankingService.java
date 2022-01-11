@@ -195,7 +195,7 @@ public class EloRankingService {
 	}
 
 	public static String formatRating(double rating) {
-		return String.valueOf(Math.round(rating * 10) / 10);
+		return String.format("%.1f", Float.valueOf(Math.round(rating * 10)) / 10);
 	}
 
 	public List<PlayerInRankingsDto> getRankings(long guildId) {
