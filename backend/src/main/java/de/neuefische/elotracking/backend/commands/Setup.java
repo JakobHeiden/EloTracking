@@ -87,11 +87,11 @@ public class Setup extends SlashCommand {
 				.subscribe();
 
 		deleteSetupCommand();
-		if (game.isAllowDraw()) bot.deployToGuild(Forcedraw.getRequest(), guild, adminRole, modRole);
-		bot.deployToGuild(Forcewin.getRequest(), guild, adminRole, modRole);
-		bot.deployToGuild(Challenge.getRequest(), guild);
-		bot.deployToGuild(ChallengeAsUserInteraction.getRequest(), guild);
-		bot.deployToGuild(Reset.getRequest(), guild, adminRole);
+		if (game.isAllowDraw()) bot.deployCommandToGuild(Forcedraw.getRequest(), guild, adminRole, modRole);
+		bot.deployCommandToGuild(Forcewin.getRequest(), guild, adminRole, modRole);
+		bot.deployCommandToGuild(Challenge.getRequest(), guild);
+		bot.deployCommandToGuild(ChallengeAsUserInteraction.getRequest(), guild);
+		bot.deployCommandToGuild(Reset.getRequest(), guild, adminRole);
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
 				guild.getId(), guild.getName(), guild.getMemberCount()));

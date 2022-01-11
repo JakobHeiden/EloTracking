@@ -54,11 +54,6 @@ public class DevTools {
 		}
 		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
-
-		/*applicationService.getGlobalApplicationCommands(botId).subscribe(
-				commandData -> applicationService.
-						deleteGlobalApplicationCommand(botId, Long.parseLong(commandData.id())).subscribe());
-					 */
 	}
 
 	private void updateGuildCommands() {
@@ -69,8 +64,8 @@ public class DevTools {
 						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
 						Role currentModRole = guild.getRoleById(Snowflake.of(game.getModRoleId())).block();
-						bot.deployToGuild(Forcewin.getRequest(), guild, currentAdminRole, currentModRole);
-						if (game.isAllowDraw())	bot.deployToGuild(Forcedraw.getRequest(), guild, currentAdminRole, currentModRole);
+						bot.deployCommandToGuild(Forcewin.getRequest(), guild, currentAdminRole, currentModRole);
+						if (game.isAllowDraw())	bot.deployCommandToGuild(Forcedraw.getRequest(), guild, currentAdminRole, currentModRole);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

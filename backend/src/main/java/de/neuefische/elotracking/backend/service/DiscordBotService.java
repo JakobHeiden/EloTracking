@@ -22,7 +22,6 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -112,15 +111,15 @@ public class DiscordBotService {
 				Snowflake.of(challenge.getAcceptorMessageId()));
 	}
 
-	public void deployToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
+	public void deployCommandToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
 		ApplicationCommandData commandData = applicationService
-				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), request)
+				.createGuildApplicationCommand(botId, guild.getId().asLong(), request)
 				.block();
 		setDiscordCommandPermissions(guild, commandData, permitRoles);
 	}
 
-	public void deployToGuild(ApplicationCommandRequest request, long guildId) {
-		applicationService.createGuildApplicationCommand(client.getSelfId().asLong(), guildId, request).subscribe();
+	public void deployCommandToGuild(ApplicationCommandRequest request, long guildId) {
+		applicationService.createGuildApplicationCommand(botId, guildId, request).subscribe();
 	}
 
 	public void deleteAllGuildCommands(long guildId) {

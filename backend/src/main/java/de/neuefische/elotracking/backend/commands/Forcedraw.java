@@ -17,6 +17,7 @@ public class Forcedraw extends SlashCommand {
 
 	private User player1;
 	private User player2;
+	private String reason;
 
 	public Forcedraw(ChatInputInteractionEvent event, EloTrackingService service, DiscordBotService bot,
 					TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -35,6 +36,10 @@ public class Forcedraw extends SlashCommand {
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("player2").description("The second player")
 						.type(ApplicationCommandOption.Type.USER.getValue()).required(true)
+						.build())
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("reason").description("Give a reason. This will be relayed to the players involved.")
+						.type(ApplicationCommandOption.Type.STRING.getValue()).required(false)
 						.build())
 				.defaultPermission(false)
 				.build();
@@ -57,16 +62,20 @@ public class Forcedraw extends SlashCommand {
 		double[] eloResults = service.updateRatings(match);
 		service.saveMatch(match);
 
+		reason = event.getOption("reason").isPresent() ?
+				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
+				: "";
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
-		event.reply(String.format("Forced a draw between %s and %s.", player1.getTag(), player2.getTag())).subscribe();
+		event.reply(String.format("Forced a draw between %s and %s.%s", player1.getTag(), player2.getTag(), reason)).subscribe();
 	}
 
 	private void informPlayers(double[] eloResults) {
 		MessageContent player1MessageContent = new MessageContent(
-				String.format("%s has forced a draw with %s. Your rating went from %s to %s.",
+				String.format("%s has forced a draw with %s. Your rating went from %s to %s.%s",
 						event.getInteraction().getUser().getTag(), player2.getTag(),
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2]),
+						reason))
 				.makeAllItalic();
 		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
 				.content(player1MessageContent.get())
@@ -74,9 +83,10 @@ public class Forcedraw extends SlashCommand {
 		player1.getPrivateChannel().subscribe(channel -> channel.createMessage(player1MessageSpec).subscribe());
 
 		MessageContent player2MessageContent = new MessageContent(
-				String.format("%s has forced a loss to %s. Your rating went from %s to %s.",
+				String.format("%s has forced a loss to %s. Your rating went from %s to %s.%s",
 						event.getInteraction().getUser().getTag(), player1.getTag(),
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3]),
+						reason))
 				.makeAllItalic();
 		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
 				.content(player2MessageContent.get())
