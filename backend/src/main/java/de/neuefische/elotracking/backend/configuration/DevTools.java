@@ -53,18 +53,18 @@ public class DevTools {
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
 		if (props.isDeleteDataOnStartup()) {
 			service.deleteAllData();
-			deleteAllGuildCommandsForEntenwiese();
-			Setup.deployToGuild(client, entenwieseGuild);
 		}
 		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 
-		applicationService.getGlobalApplicationCommands(botId).subscribe(
+		/*applicationService.getGlobalApplicationCommands(botId).subscribe(
 				commandData -> applicationService.
 						deleteGlobalApplicationCommand(botId, Long.parseLong(commandData.id())).subscribe());
+					 */
 	}
 
 	private void updateGuildCommands() {
+		/*
 		log.warn("updating guild commands...");
 		service.findAllGames().stream().forEach(
 				game -> {
@@ -77,13 +77,7 @@ public class DevTools {
 					}
 				}
 		);
-	}
-
-	private void deleteAllGuildCommandsForEntenwiese() {
-		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), entenwieseId)
-				.subscribe(applicationCommandData -> applicationService.
-						deleteGuildApplicationCommand(client.getSelfId().asLong(), entenwieseId,
-								Long.parseLong(applicationCommandData.id())).subscribe());
+		 */
 	}
 
 	private void setupDevGame() {
@@ -165,13 +159,5 @@ public class DevTools {
 		entenwieseGuild.getMemberById(Snowflake.of(ownerId)).block()
 				.asFullMember().block()
 				.addRole(adminRole.getId()).subscribe();
-	}
-
-	private void deploySetupGuildCommandToEntenwiese() {
-		applicationService.createGuildApplicationCommand(
-						botId,
-						entenwieseId,
-						Setup.getRequest())
-				.subscribe();
 	}
 }
