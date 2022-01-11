@@ -93,7 +93,7 @@ public class Reset extends SlashCommand {
 
 	private void resetGuildCommands() {
 		bot.deleteAllGuildCommands(guildId);
-		bot.deployToGuild(Setup.getRequest(), guildId);
+		bot.deployCommandToGuild(Setup.getRequest(), guildId);
 		channel.createMessage("Resetting server commands.").subscribe();
 	}
 
