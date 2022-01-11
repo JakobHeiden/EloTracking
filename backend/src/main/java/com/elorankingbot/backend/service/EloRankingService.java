@@ -70,6 +70,7 @@ public class EloRankingService {
 	// Game
 	public void deleteGame(Game game) {
 		gameDao.deleteById(game.getGuildId());
+		bot.sendToOwner(String.format("deleting game %s", game.getName()));// TODO remove
 	}
 
 	public Optional<Game> findGameByGuildId(long guildId) {

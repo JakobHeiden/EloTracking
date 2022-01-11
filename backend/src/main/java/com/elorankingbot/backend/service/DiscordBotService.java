@@ -3,6 +3,7 @@ package com.elorankingbot.backend.service;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
@@ -30,14 +31,16 @@ public class DiscordBotService {
 	@Getter
 	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
 	private final EloRankingService service;
+	private final TimedTaskQueue queue;
 	private final ApplicationService applicationService;
 	private PrivateChannel ownerPrivateChannel;
 	private final long botId;
 
 
-	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloRankingService service) {
+	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloRankingService service, TimedTaskQueue queue) {
 		this.client = gatewayDiscordClient;
 		this.service = service;
+		this.queue = queue;
 		this.botId = client.getSelfId().asLong();
 		applicationService = client.getRestClient().getApplicationService();
 	}
