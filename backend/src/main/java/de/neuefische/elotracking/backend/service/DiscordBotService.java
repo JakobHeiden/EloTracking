@@ -48,7 +48,6 @@ public class DiscordBotService {
 		long ownerId = Long.valueOf(service.getPropertiesLoader().getOwnerId());
 		User owner = client.getUserById(Snowflake.of(ownerId)).block();
 		this.ownerPrivateChannel = owner.getPrivateChannel().block();
-		log.info("Private channel to owner established");
 		sendToOwner("I am logged in and ready");
 	}
 

@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApplicationPropertiesLoader {
 
 	private String ownerId;
+	private long announcementChannelId;
 	private String baseUrl;
 	private int numberOfTimeSlots;
 	private String testBotChallengerId;

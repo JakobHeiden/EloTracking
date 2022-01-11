@@ -81,7 +81,9 @@ public class Setup extends SlashCommand {
 						"- I created two challenge commands, one for chat and " +
 						"one user command (right click on a user -> apps -> challenge)\n" +
 						"- I created the forcewin command, only available to Elo Moderator" +
-						(game.isAllowDraw() ? "\n- I created the the forcedraw command, only available to Elo Moderator" : ""))
+						(game.isAllowDraw() ? "\n- I created the the forcedraw command, only available to Elo Moderator" : "") +
+						String.format("\n- Follow my announcement channel: <#%s>",
+								service.getPropertiesLoader().getAnnouncementChannelId()))
 				.subscribe();
 
 		deleteSetupCommand();
