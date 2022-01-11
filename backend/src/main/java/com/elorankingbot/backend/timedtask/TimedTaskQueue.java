@@ -55,30 +55,8 @@ public class TimedTaskQueue {
 			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
 			if (maybeTimeSlot.isPresent()) {
 				for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
-					long id = task.relationId();
-					int time = task.time();
-					switch (task.type()) {
-						case OPEN_CHALLENGE_DECAY:
-							timedTaskService.timedDecayOpenChallenge(id, time);
-							break;
-						case ACCEPTED_CHALLENGE_DECAY:
-							timedTaskService.timedDecayAcceptedChallenge(id, time);
-							break;
-						case MATCH_AUTO_RESOLVE:
-							timedTaskService.timedAutoResolveMatch(id, time);
-							break;
-						case MATCH_SUMMARIZE:
-							timedTaskService.timedSummarizeMatch(id, task.otherId(), task.value());
-							break;
-						case MESSAGE_DELETE:
-							timedTaskService.timedDeleteMessage(id, task.otherId());
-							break;
-						case CHANNEL_DELETE:
-							timedTaskService.timedDeleteChannel(id);
-							break;
-					}
+					processTimedTask(task);
 				}
-
 				timeSlotDao.delete(maybeTimeSlot.get());
 			}
 
@@ -93,6 +71,31 @@ public class TimedTaskQueue {
 		} catch (Exception e) {
 			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
 			throw e;
+		}
+	}
+
+	private void processTimedTask(TimedTask task) {
+		long id = task.relationId();
+		int time = task.time();
+		switch (task.type()) {
+			case OPEN_CHALLENGE_DECAY:
+				timedTaskService.timedDecayOpenChallenge(id, time);
+				break;
+			case ACCEPTED_CHALLENGE_DECAY:
+				timedTaskService.timedDecayAcceptedChallenge(id, time);
+				break;
+			case MATCH_AUTO_RESOLVE:
+				timedTaskService.timedAutoResolveMatch(id, time);
+				break;
+			case MATCH_SUMMARIZE:
+				timedTaskService.timedSummarizeMatch(id, task.otherId(), task.value());
+				break;
+			case MESSAGE_DELETE:
+				timedTaskService.timedDeleteMessage(id, task.otherId());
+				break;
+			case CHANNEL_DELETE:
+				timedTaskService.timedDeleteChannel(id);
+				break;
 		}
 	}
 }
