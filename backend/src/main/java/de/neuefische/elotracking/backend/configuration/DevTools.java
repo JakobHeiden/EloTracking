@@ -58,6 +58,10 @@ public class DevTools {
 		}
 		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
+
+		applicationService.getGlobalApplicationCommands(botId).subscribe(
+				commandData -> applicationService.
+						deleteGlobalApplicationCommand(botId, Long.parseLong(commandData.id())).subscribe());
 	}
 
 	private void updateGuildCommands() {
