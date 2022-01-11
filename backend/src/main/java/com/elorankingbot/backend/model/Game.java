@@ -21,7 +21,8 @@ public class Game {
     private String name;
     private long resultChannelId;
     private long disputeCategoryId;
-    private boolean allowDraw;
+    private boolean allowDraw = false;
+    private boolean isMarkedForDeletion = false;
 
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;

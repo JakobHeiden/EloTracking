@@ -68,6 +68,11 @@ public class TimedTaskQueue {
 				}
 			}
 
+			if (currentIndex == 0) {
+				timedTaskService.deleteGamesMarkedForDeletion();
+				timedTaskService.markGamesForDeletion();
+			}
+
 			timeSlots[currentIndex] = new HashSet<TimedTask>();
 			currentIndex++;
 			if (currentIndex == numberOfTimeSlots) currentIndex = 0;

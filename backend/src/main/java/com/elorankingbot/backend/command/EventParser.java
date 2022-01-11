@@ -4,6 +4,7 @@ import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.Setup;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -12,9 +13,11 @@ import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
+import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 @Slf4j
@@ -27,7 +30,9 @@ public class EventParser {
     private final Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory;
     private final EloRankingService service;
     private final DiscordBotService bot;
+    private final ApplicationService applicationService;
     private final TimedTaskQueue queue;
+    private final long botId;
 
     public EventParser(GatewayDiscordClient client, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
                        Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory,
@@ -38,6 +43,8 @@ public class EventParser {
         this.buttonCommandFactory = buttonCommandFactory;
         this.service = service;
         this.bot = bot;
+        this.applicationService = client.getRestClient().getApplicationService();
+        this.botId = client.getSelfId().asLong();
         this.queue = queue;
         this.userInteractionChallengeFactory = userInteractionChallengeFactory;
 
@@ -57,13 +64,15 @@ public class EventParser {
                 .subscribe(ChallengeAsUserInteraction::execute);
 
         client.on(GuildCreateEvent.class)
-                .filter(event -> service.findGameByGuildId(event.getGuild().getId().asLong()).isEmpty())
-                .subscribe(event ->
-                    client.getRestClient().getApplicationService()
-                            .createGuildApplicationCommand(
-                                    client.getSelfId().asLong(),
-                                    event.getGuild().getId().asLong(),
-                                    Setup.getRequest()).subscribe());
+                .subscribe(event -> {
+                    Optional<Game> maybeGame = service.findGameByGuildId(event.getGuild().getId().asLong());
+                    if (maybeGame.isEmpty())
+                        applicationService.createGuildApplicationCommand(
+                                botId, event.getGuild().getId().asLong(), Setup.getRequest())
+                                .subscribe();
+                    else
+                        maybeGame.get().setMarkedForDeletion(false);
+                });
     }
 
     public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {

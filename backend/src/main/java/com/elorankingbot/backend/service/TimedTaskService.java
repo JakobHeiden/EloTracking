@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,12 +26,27 @@ public class TimedTaskService {
 	private final TimedTaskQueue queue;
 	private final GatewayDiscordClient client;
 
-	public TimedTaskService(EloRankingService service, DiscordBotService bot,
+	public TimedTaskService(EloRankingService service, @Lazy DiscordBotService bot,
 							@Lazy TimedTaskQueue queue, GatewayDiscordClient client) {
 		this.service = service;
 		this.bot = bot;
 		this.queue = queue;
 		this.client = client;
+	}
+
+	public void markGamesForDeletion() {
+		List<Long> allGuildIds = client.getGuilds()
+				.map(guild -> guild.getId().asLong())
+				.collectList().block();
+		service.findAllGames().stream()
+				.filter(game -> !allGuildIds.contains(game.getGuildId()))
+				.forEach(game -> game.setMarkedForDeletion(true));
+	}
+
+	public void deleteGamesMarkedForDeletion() {
+		service.findAllGames().stream()
+				.filter(game -> game.isMarkedForDeletion())
+				.forEach(game -> service.deleteGame(game));
 	}
 
 	public void timedSummarizeMatch(long messageId, long channelId, Object value) {
