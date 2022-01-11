@@ -1,8 +1,6 @@
 package de.neuefische.elotracking.backend.configuration;
 
-import de.neuefische.elotracking.backend.commands.Createresultchannel;
-import de.neuefische.elotracking.backend.commands.Reset;
-import de.neuefische.elotracking.backend.commands.Setup;
+import de.neuefische.elotracking.backend.commands.*;
 import de.neuefische.elotracking.backend.model.Game;
 import de.neuefische.elotracking.backend.service.DiscordBotService;
 import de.neuefische.elotracking.backend.service.EloTrackingService;
@@ -64,20 +62,20 @@ public class DevTools {
 	}
 
 	private void updateGuildCommands() {
-		/*
 		log.warn("updating guild commands...");
 		service.findAllGames().stream().forEach(
 				game -> {
 					try {
 						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
-						bot.deployToGuild(Reset.getRequest(), guild, currentAdminRole);
+						Role currentModRole = guild.getRoleById(Snowflake.of(game.getModRoleId())).block();
+						bot.deployToGuild(Forcewin.getRequest(), guild, currentAdminRole, currentModRole);
+						if (game.isAllowDraw())	bot.deployToGuild(Forcedraw.getRequest(), guild, currentAdminRole, currentModRole);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
 				}
 		);
-		 */
 	}
 
 	private void setupDevGame() {
