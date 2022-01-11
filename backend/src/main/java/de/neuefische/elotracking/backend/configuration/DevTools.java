@@ -58,20 +58,6 @@ public class DevTools {
 		}
 		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
-
-		/*client.getGuilds().subscribe(guild -> {
-			Forcedraw.deployToGuild(client, guild);
-			Forcewin.deployToGuild(client, guild);
-			Challenge.deployToGuild(client, guild);
-			ChallengeAsUserInteraction.deployToGuild(client, guild);
-		});
-		*/
-		/*ApplicationService applicationService = client.getRestClient().getApplicationService();
-		applicationService.getGlobalApplicationCommands(client.getSelfId().asLong())
-				.subscribe(command -> applicationService.deleteGlobalApplicationCommand(client.getSelfId().asLong(),
-						Long.parseLong(command.id())));
-		 */
-
 	}
 
 	private void updateGuildCommands() {
