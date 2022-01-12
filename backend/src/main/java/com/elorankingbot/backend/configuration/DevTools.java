@@ -41,7 +41,7 @@ public class DevTools {
 		this.client = client;
 		this.botId = client.getSelfId().asLong();
 		entenwieseId = Long.parseLong(service.getPropertiesLoader().getEntenwieseId());
-		this.entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
+		//this.entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
 		this.applicationService = client.getRestClient().getApplicationService();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
