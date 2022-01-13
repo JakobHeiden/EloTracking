@@ -19,6 +19,7 @@ import discord4j.rest.service.ApplicationService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -114,22 +115,26 @@ public class DiscordBotService {
 				Snowflake.of(challenge.getAcceptorMessageId()));
 	}
 
-	public void deployCommandToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
-		ApplicationCommandData commandData = applicationService
-				.createGuildApplicationCommand(botId, guild.getId().asLong(), request)
-				.block();
-		setDiscordCommandPermissions(guild, commandData, permitRoles);
+	// Commands
+	public Mono<ApplicationCommandData> deployCommandToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
+		return applicationService.createGuildApplicationCommand(botId, guild.getId().asLong(), request)
+				.doOnNext(commandData -> log.trace(String.format("deployed command %s:%s to %s",
+						commandData.name(), commandData.id(), guild.getId().asString())))
+				.doOnNext(commandData -> setDiscordCommandPermissions(guild, commandData, permitRoles));
 	}
 
-	public void deployCommandToGuild(ApplicationCommandRequest request, long guildId) {
-		applicationService.createGuildApplicationCommand(botId, guildId, request).subscribe();
+	public Mono<ApplicationCommandData> deployCommandToGuild(ApplicationCommandRequest request, long guildId) {
+		return applicationService.createGuildApplicationCommand(botId, guildId, request)
+				.doOnNext(commandData -> log.trace(String.format("deployed command %s:%s to %s",
+						commandData.name(), commandData.id(), guildId)));
 	}
 
-	public void deleteAllGuildCommands(long guildId) {
-		applicationService.getGuildApplicationCommands(botId, guildId)
-				.subscribe(commandData -> applicationService.
-						deleteGuildApplicationCommand(botId, guildId, Long.parseLong(commandData.id()))
-						.subscribe());
+	public Flux<ApplicationCommandData> deleteAllGuildCommands(long guildId) {
+		return applicationService.getGuildApplicationCommands(botId, guildId)
+				.doOnNext(commandData -> log.trace(String.format("deleting command %s:%s on %s",
+						commandData.name(), commandData.id(), guildId)))
+				.doOnNext(commandData -> applicationService.deleteGuildApplicationCommand(
+						botId, guildId, Long.parseLong(commandData.id())).subscribe());
 	}
 
 	private void setDiscordCommandPermissions(Guild guild, ApplicationCommandData commandData, Role... roles) {
@@ -137,9 +142,8 @@ public class DiscordBotService {
 		Arrays.stream(roles).map(role -> ApplicationCommandPermissionsData.builder()
 						.id(role.getId().asLong()).type(1).permission(true).build())
 				.forEach(applicationCommandPermissionsData -> requestBuilder.addPermission(applicationCommandPermissionsData));
-
 		applicationService.modifyApplicationCommandPermissions(
 						botId, guild.getId().asLong(), Long.parseLong(commandData.id()), requestBuilder.build())
 				.subscribe();
-	}
+	}// TODO permissions fuer owner setzen?
 }

@@ -15,15 +15,13 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 public class Reset extends SlashCommand {
 
-	private final Guild guild;
+	private Guild guild;
 	private final TextChannel channel;
 
 	public Reset(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.needsAdminRole = true;
 
-		this.guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 		this.channel = (TextChannel) event.getInteraction().getChannel().block();
 	}
 
@@ -44,7 +42,11 @@ public class Reset extends SlashCommand {
 	}
 
 	public void execute() {
-		if (!super.canExecute()) return;
+		if (game == null) {
+			cleanCorruptState();
+			return;
+		}
+
 		String entered = event.getOption("areyousure").get().getValue().get().asString();
 		if (!entered.equals(game.getName())) {
 			event.reply(String.format("Aborting. The name of the game is \"%s\". You entered \"%s\".",
@@ -52,16 +54,16 @@ public class Reset extends SlashCommand {
 			return;
 		}
 
+		guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
+
 		service.deleteAllDataForGameExceptGame(game);
 
-		InteractionApplicationCommandCallbackReplyMono reply;
 		if (event.getOption("factoryreset").get().getValue().get().asBoolean()) {
 			event.reply("Deleting matches.\n" +
 					"Deleting challenges.\n" +
 					"Deleting players.\n" +
 					"Deleting game.").subscribe();// TODO createFollowup Done! wenn subscribes durch sind
 			service.deleteGame(game);
-			deleteModAndAdminRoles();
 			deleteResultChannel();
 			deleteDisputeCategory();
 			resetGuildCommands();
@@ -73,16 +75,10 @@ public class Reset extends SlashCommand {
 		}
 	}
 
-	private void deleteModAndAdminRoles() {
-		guild.getRoleById(Snowflake.of(game.getModRoleId())).subscribe(role -> role.delete().subscribe());
-		guild.getRoleById(Snowflake.of(game.getAdminRoleId())).subscribe(role -> role.delete().subscribe());
-		channel.createMessage("Deleting Elo Admin and Elo Moderator Roles.").subscribe();
-	}
-
 	private void deleteResultChannel() {
 		guild.getChannelById(Snowflake.of(game.getResultChannelId())).subscribe(
 				guildChannel -> guildChannel.delete().subscribe());
-		channel.createMessage("Deleting result channel").subscribe();
+		channel.createMessage("Deleting result channel.").subscribe();
 	}
 
 	private void deleteDisputeCategory() {
@@ -92,8 +88,8 @@ public class Reset extends SlashCommand {
 	}
 
 	private void resetGuildCommands() {
-		bot.deleteAllGuildCommands(guildId);
-		bot.deployCommandToGuild(Setup.getRequest(), guildId);
+		bot.deleteAllGuildCommands(guildId).blockLast();
+		bot.deployCommandToGuild(Setup.getRequest(), guildId).subscribe();
 		channel.createMessage("Resetting server commands.").subscribe();
 	}
 
@@ -107,5 +103,12 @@ public class Reset extends SlashCommand {
 							lastMessage.delete().subscribe();
 						}));
 		channel.createMessage("Deleting result messages.").subscribe();
+	}
+
+	private void cleanCorruptState() {
+		event.reply("Error: Cannot find game in database. Something went wrong. " +
+				"I will reset the server as best I can. " +
+				"You may have to remove the result channel and the dispute category manually.").subscribe();
+		resetGuildCommands();
 	}
 }

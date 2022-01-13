@@ -22,7 +22,6 @@ public class Forcedraw extends SlashCommand {
 	public Forcedraw(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 					 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.needsModRole = true;
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -46,7 +45,6 @@ public class Forcedraw extends SlashCommand {
 	}
 
 	public void execute() {
-		if (!super.canExecute()) return;
 		player1 = event.getOption("player1").get().getValue().get().asUser().block();
 		player2 = event.getOption("player2").get().getValue().get().asUser().block();
 		if (player1.isBot() || player2.isBot()) {
