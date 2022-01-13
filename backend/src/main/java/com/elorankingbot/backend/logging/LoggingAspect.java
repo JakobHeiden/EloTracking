@@ -17,7 +17,7 @@ import java.util.StringJoiner;
 @Component
 public class LoggingAspect {
 
-    @Before("execution(public * *(..)) && within(de.neuefische..*)")
+    @Before("execution(public * *(..)) && within(com.elorankingbot..*)")
     public void onFunctionCall(JoinPoint joinPoint) {
         Logger log = LoggerFactory.getLogger(joinPoint.getSignature().getDeclaringType());
         log.trace(String.format("call: %s(%s)",
@@ -25,7 +25,7 @@ public class LoggingAspect {
                 formatParameters(joinPoint)));
     }
 
-    @AfterReturning(pointcut = "execution(public * *(..)) && within(de.neuefische..*)", returning = "returnValue")
+    @AfterReturning(pointcut = "execution(public * *(..)) && within(com.elorankingbot..*)", returning = "returnValue")
     public void onFunctionReturn(JoinPoint joinPoint, Object returnValue) {
         Logger log = LoggerFactory.getLogger(joinPoint.getSignature().getDeclaringType());
         log.trace(String.format("return: %s(%s) => %s",

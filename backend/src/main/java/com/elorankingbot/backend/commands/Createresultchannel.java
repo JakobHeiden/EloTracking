@@ -17,8 +17,6 @@ public class Createresultchannel extends SlashCommand {// TODO wird so nicht meh
 	}
 
 	public void execute() {
-		if (!super.canExecute()) return;
-
 		staticExecute(service, event.getInteraction().getGuild().block(), game);
 		service.saveGame(game);
 

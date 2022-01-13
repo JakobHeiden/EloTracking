@@ -42,7 +42,6 @@ public class Challenge extends SlashCommand {
 	}
 
 	public void execute() {
-		if (!super.canExecute()) return;
 		User targetPlayer = event.getOption("player").get().getValue().get().asUser().block();
 		if (targetPlayer.isBot()) {
 			event.reply("You cannot challenge a bot.").withEphemeral(true).subscribe();

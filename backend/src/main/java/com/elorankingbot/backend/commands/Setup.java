@@ -1,9 +1,11 @@
 package com.elorankingbot.backend.commands;
 
+import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
@@ -22,9 +24,10 @@ public class Setup extends SlashCommand {
 
 	private Guild guild;
 	private long botId;
-	private Role modRole;
 	private Role adminRole;
+	private Role modRole;
 	private ApplicationService applicationService;
+	private MessageContent reply;
 
 	public Setup(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -44,71 +47,84 @@ public class Setup extends SlashCommand {
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("allowdraw").description("Allow draw results and not just win or lose?")
 						.type(5).required(true).build())
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("adminrole").description("Choose an Elo Admin role. This role can change my settings. " +
+								"Alternatively assign this later.")
+						.type(8).required(false).build())
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("moderatorrole").description("Choose an Elo Moderator role. This role is " +
+								"for dispute resolution. Alternatively assign this later.")
+						.type(8).required(false).build())
 				.build();
 	}
 
-	public static void deployToGuild(GatewayDiscordClient client, Guild guild) {
-		client.getRestClient().getApplicationService()
-				.createGuildApplicationCommand(client.getSelfId().asLong(), guild.getId().asLong(), getRequest())
-				.subscribe();
-	}
-
+	// TODO! setup -> reset -> setup - commands vom timing her sortieren, warten, oder so
 	public void execute() {
+		reply = new MessageContent("Setup performed. Here is what I did:");
 		game = new Game(guild.getId().asLong(),
 				event.getOption("nameofgame").get().getValue().get().asString());
-		createModAndAdminRoles();
+
+		assignModAndAdminRole();
 		createResultChannel();
 		createDisputeCategory();
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 		service.saveGame(game);
 
-		event.reply("Setup performed. Here is what I did:\n" +
-						"- I created the role Elo Moderator. Elo Moderator has permissions related to " +
-						"dispute resolution and will get notified when disputes happen\n" +
-						"- I created the role Elo Admin. Elo Admin has all the permissions of Elo Moderator, " +
-						"and can also modify my settings\n" +
-						"- I made you an Elo Admin\n" +
-						"- I created a channel where I will post all match results\n" +
-						"- I created a channel category ELO DISPUTES only visible to Elo Moderator\n" +
-						"- I created a web page with rankings: " +
-						String.format("http://%s/%s\n", service.getPropertiesLoader().getBaseUrl(), guildId) +
-						"- I created two challenge commands, one for chat and " +
-						"one user command (right click on a user -> apps -> challenge)\n" +
-						"- I created the forcewin command, only available to Elo Moderator" +
-						(game.isAllowDraw() ? "\n- I created the the forcedraw command, only available to Elo Moderator" : "") +
-						String.format("\n- Follow my announcement channel: <#%s>",
-								service.getPropertiesLoader().getAnnouncementChannelId()))
-				.subscribe();
-
 		deleteSetupCommand();
-		if (game.isAllowDraw()) bot.deployCommandToGuild(Forcedraw.getRequest(), guild, adminRole, modRole);
-		bot.deployCommandToGuild(Forcewin.getRequest(), guild, adminRole, modRole);
-		bot.deployCommandToGuild(Challenge.getRequest(), guild);
-		bot.deployCommandToGuild(ChallengeAsUserInteraction.getRequest(), guild);
-		bot.deployCommandToGuild(Reset.getRequest(), guild, adminRole);
+		if (game.isAllowDraw()) bot.deployCommandToGuild(Forcedraw.getRequest(), guild, adminRole, modRole).subscribe();
+		bot.deployCommandToGuild(Forcewin.getRequest(), guild, adminRole, modRole).subscribe();
+		bot.deployCommandToGuild(Challenge.getRequest(), guild).subscribe();
+		bot.deployCommandToGuild(ChallengeAsUserInteraction.getRequest(), guild).subscribe();
+		bot.deployCommandToGuild(Reset.getRequest(), guild, adminRole).subscribe();
+		reply.addLine("- I updated my commands on this server");
+
+		reply.addLine(String.format("- I created a web page with rankings: http://%s/%s",
+						service.getPropertiesLoader().getBaseUrl(), guildId));
+		reply.addLine(String.format("Follow my announcement channel: <#%s>",
+				service.getPropertiesLoader().getAnnouncementChannelId()));
+
+		event.reply(reply.get()).doOnError(error -> System.out.println(error.getMessage())).subscribe();
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
 				guild.getId(), guild.getName(), guild.getMemberCount()));
 	}
 
-	private void createModAndAdminRoles() {
-		adminRole = guild.createRole(RoleCreateSpec.builder().name("Elo Admin")
-				.permissions(PermissionSet.none())
-				.mentionable(true)
-				.build()).block();
+	private void assignModAndAdminRole() {
+		boolean adminRolePresent = event.getOption("adminrole").isPresent();
+		boolean modRolePresent = event.getOption("modrole").isPresent();
+		Role everyone = null;
+		if (!adminRolePresent || !modRolePresent) everyone = guild.getEveryoneRole().block();
+
+		if (adminRolePresent) {
+			adminRole = event.getOption("adminrole").get().getValue().get().asRole().block();
+			reply.addLine(String.format("- I assigned Elo Admin permissions to %s", adminRole.getName()));
+		} else {
+			adminRole = everyone;
+			reply.addLine("- I assigned Elo Admin permissions to @everyone. I suggest you use /addpermission soon.");
+		}
 		game.setAdminRoleId(adminRole.getId().asLong());
-		modRole = guild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
-				.permissions(PermissionSet.none())
-				.build()).block();
+
+		if (modRolePresent) {
+			modRole = event.getOption("moderatorrole").get().getValue().get().asRole().block();
+			reply.addLine(String.format("- I assigned Elo Moderator permissions to %s", modRole.getName()));
+		} else {
+			modRole = everyone;
+			reply.addLine("- I assigned Elo Moderator permissions to @everyone. I suggest you use /addpermission soon.");
+		}
 		game.setModRoleId(modRole.getId().asLong());
-		event.getInteraction().getMember().get().addRole(adminRole.getId()).subscribe();
 	}
 
 	private void createResultChannel() {
 		TextChannel resultChannel = guild.createTextChannel("Elo Ranking results")
 				.withTopic(String.format("All resolved matches will be logged here. Leaderboard: http://%s/%s",
-						service.getPropertiesLoader().getBaseUrl(), guild.getId().asString())).block();
+						service.getPropertiesLoader().getBaseUrl(), guild.getId().asString()))
+				.withPermissionOverwrites(PermissionOverwrite.forRole(
+						Snowflake.of(guildId),
+						PermissionSet.none(),
+						PermissionSet.of(Permission.SEND_MESSAGES)))
+				.block();
 		game.setResultChannelId(resultChannel.getId().asLong());
+		reply.addLine(String.format("- I created %s where I will post all match results", resultChannel.getMention()));
 	}
 
 	private void createDisputeCategory() {
@@ -120,6 +136,8 @@ public class Setup extends SlashCommand {
 				PermissionOverwrite.forRole(modRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
 						PermissionSet.none())).block();
 		game.setDisputeCategoryId(disputeCategory.getId().asLong());
+		reply.addLine(String.format("- I created a category %s where I will create dispute channels as needed. " +
+				"It is only visible to Elo Admins and Moderators", disputeCategory.getMention()));
 	}
 
 	private void deleteSetupCommand() {
@@ -128,10 +146,7 @@ public class Setup extends SlashCommand {
 				.map(applicationCommandData ->
 						applicationService.deleteGuildApplicationCommand(
 										botId, guildId, Long.parseLong(applicationCommandData.id()))
+								.doOnError(e -> System.out.println(e.toString()))
 								.subscribe()).subscribe();
-	}
-
-	private void deployForcedrawGuildCommand() {
-		applicationService.createGuildApplicationCommand(botId, guildId, Forcedraw.getRequest()).subscribe();
 	}
 }

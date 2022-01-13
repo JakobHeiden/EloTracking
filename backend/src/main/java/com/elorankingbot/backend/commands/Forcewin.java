@@ -22,7 +22,6 @@ public class Forcewin extends SlashCommand {
 	public Forcewin(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 					TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.needsModRole = true;
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -46,7 +45,6 @@ public class Forcewin extends SlashCommand {
 	}
 
 	public void execute() {
-		if (!super.canExecute()) return;
 		winner = event.getOption("winner").get().getValue().get().asUser().block();
 		loser = event.getOption("loser").get().getValue().get().asUser().block();
 		if (winner.isBot() || loser.isBot()) {

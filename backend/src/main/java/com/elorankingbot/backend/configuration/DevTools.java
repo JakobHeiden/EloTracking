@@ -1,8 +1,6 @@
 package com.elorankingbot.backend.configuration;
 
-import com.elorankingbot.backend.commands.Createresultchannel;
-import com.elorankingbot.backend.commands.Forcedraw;
-import com.elorankingbot.backend.commands.Forcewin;
+import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -60,8 +58,7 @@ public class DevTools {
 						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
 						Role currentModRole = guild.getRoleById(Snowflake.of(game.getModRoleId())).block();
-						bot.deployCommandToGuild(Forcewin.getRequest(), guild, currentAdminRole, currentModRole);
-						if (game.isAllowDraw())	bot.deployCommandToGuild(Forcedraw.getRequest(), guild, currentAdminRole, currentModRole);
+						bot.deployCommandToGuild(Setup.getRequest(), guild);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
