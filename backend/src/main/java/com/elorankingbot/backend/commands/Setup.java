@@ -13,12 +13,16 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.RoleCreateSpec;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
+import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple7;
+
+import java.util.Arrays;
 
 public class Setup extends SlashCommand {
 
@@ -58,7 +62,6 @@ public class Setup extends SlashCommand {
 				.build();
 	}
 
-	// TODO! setup -> reset -> setup - commands vom timing her sortieren, warten, oder so
 	public void execute() {
 		reply = new MessageContent("Setup performed. Here is what I did:");
 		game = new Game(guild.getId().asLong(),
@@ -69,20 +72,14 @@ public class Setup extends SlashCommand {
 		createDisputeCategory();
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 		service.saveGame(game);
-
-		deleteSetupCommand();
-		if (game.isAllowDraw()) bot.deployCommandToGuild(Forcedraw.getRequest(), guild, adminRole, modRole).subscribe();
-		bot.deployCommandToGuild(Forcewin.getRequest(), guild, adminRole, modRole).subscribe();
-		bot.deployCommandToGuild(Challenge.getRequest(), guild).subscribe();
-		bot.deployCommandToGuild(ChallengeAsUserInteraction.getRequest(), guild).subscribe();
-		bot.deployCommandToGuild(Reset.getRequest(), guild, adminRole).subscribe();
-		reply.addLine("- I updated my commands on this server");
+		updateCommands().block();
+		setPermissionsForAdminCommands();
+		setPermissionsForModCommands();
 
 		reply.addLine(String.format("- I created a web page with rankings: http://%s/%s",
-						service.getPropertiesLoader().getBaseUrl(), guildId));
+				service.getPropertiesLoader().getBaseUrl(), guildId));
 		reply.addLine(String.format("Follow my announcement channel: <#%s>",
 				service.getPropertiesLoader().getAnnouncementChannelId()));
-
 		event.reply(reply.get()).doOnError(error -> System.out.println(error.getMessage())).subscribe();
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
@@ -91,15 +88,15 @@ public class Setup extends SlashCommand {
 
 	private void assignModAndAdminRole() {
 		boolean adminRolePresent = event.getOption("adminrole").isPresent();
-		boolean modRolePresent = event.getOption("modrole").isPresent();
-		Role everyone = null;
-		if (!adminRolePresent || !modRolePresent) everyone = guild.getEveryoneRole().block();
+		boolean modRolePresent = event.getOption("moderatorrole").isPresent();
+		Role everyoneRole = null;
+		if (!adminRolePresent || !modRolePresent) everyoneRole = guild.getEveryoneRole().block();
 
 		if (adminRolePresent) {
 			adminRole = event.getOption("adminrole").get().getValue().get().asRole().block();
 			reply.addLine(String.format("- I assigned Elo Admin permissions to %s", adminRole.getName()));
 		} else {
-			adminRole = everyone;
+			adminRole = everyoneRole;
 			reply.addLine("- I assigned Elo Admin permissions to @everyone. I suggest you use /addpermission soon.");
 		}
 		game.setAdminRoleId(adminRole.getId().asLong());
@@ -108,7 +105,7 @@ public class Setup extends SlashCommand {
 			modRole = event.getOption("moderatorrole").get().getValue().get().asRole().block();
 			reply.addLine(String.format("- I assigned Elo Moderator permissions to %s", modRole.getName()));
 		} else {
-			modRole = everyone;
+			modRole = everyoneRole;
 			reply.addLine("- I assigned Elo Moderator permissions to @everyone. I suggest you use /addpermission soon.");
 		}
 		game.setModRoleId(modRole.getId().asLong());
@@ -124,7 +121,7 @@ public class Setup extends SlashCommand {
 						PermissionSet.of(Permission.SEND_MESSAGES)))
 				.block();
 		game.setResultChannelId(resultChannel.getId().asLong());
-		reply.addLine(String.format("- I created %s where I will post all match results", resultChannel.getMention()));
+		reply.addLine(String.format("- I created %s where I will post all match results.", resultChannel.getMention()));
 	}
 
 	private void createDisputeCategory() {
@@ -137,16 +134,33 @@ public class Setup extends SlashCommand {
 						PermissionSet.none())).block();
 		game.setDisputeCategoryId(disputeCategory.getId().asLong());
 		reply.addLine(String.format("- I created a category %s where I will create dispute channels as needed. " +
-				"It is only visible to Elo Admins and Moderators", disputeCategory.getMention()));
+				"It is only visible to Elo Admins and Moderators.", disputeCategory.getMention()));
 	}
 
-	private void deleteSetupCommand() {
-		applicationService.getGuildApplicationCommands(botId, guildId)
-				.filter(applicationCommandData -> applicationCommandData.name().equals("setup"))
-				.map(applicationCommandData ->
-						applicationService.deleteGuildApplicationCommand(
-										botId, guildId, Long.parseLong(applicationCommandData.id()))
-								.doOnError(e -> System.out.println(e.toString()))
-								.subscribe()).subscribe();
+	private Mono<Tuple7<Void, ApplicationCommandData, ApplicationCommandData, ApplicationCommandData,
+			ApplicationCommandData, ApplicationCommandData, ApplicationCommandData>> updateCommands() {
+		// TODO vielleicht verallgemeinern, auslagern in SlashCommand, mit nem array an relevanten classes in jeder subklasse
+		Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
+		Mono<ApplicationCommandData> deployForcedraw = game.isAllowDraw() ?
+				bot.deployCommand(guildId, Forcedraw.getRequest())
+				: Mono.just(null);
+		Mono<ApplicationCommandData> deployForcewin = bot.deployCommand(guildId, Forcewin.getRequest());
+		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
+		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
+		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.Permission.getRequest());
+		reply.addLine("- I updated my commands on this server. This may take a minute to update on the server.");
+		return Mono.zip(deleteSetup, deployForcedraw, deployForcewin, deployChallenge, deployUserInteractionChallenge,
+				deployReset, deployPermission);
+	}
+
+	private void setPermissionsForAdminCommands() {
+		Arrays.stream(com.elorankingbot.backend.commands.Permission.adminCommands)
+				.forEach(commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
+	}
+
+	private void setPermissionsForModCommands() {
+		Arrays.stream(com.elorankingbot.backend.commands.Permission.modCommands).forEach(
+				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
 }

@@ -9,6 +9,7 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -53,16 +54,19 @@ public class EventParser {
 		client.on(ChatInputInteractionEvent.class)
 				.map(event -> new ChatInputInteractionEventWrapper(event, service, bot, queue, client))
 				.map(slashCommandFactory::apply)
+				.doOnNext(slashCommand -> log.debug(slashCommand.getClass().getSimpleName() + "::execute"))
 				.subscribe(SlashCommand::execute);
 
 		client.on(ButtonInteractionEvent.class)
 				.map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue, client))
 				.map(buttonCommandFactory::apply)
+				.doOnNext(buttonCommand -> log.debug(buttonCommand.getClass().getSimpleName() + "::execute"))
 				.subscribe(ButtonCommand::execute);
 
 		client.on(UserInteractionEvent.class)
 				.map(event -> new UserInteractionEventWrapper(event, service, bot, queue, client))
 				.map(userInteractionChallengeFactory::apply)
+				.doOnNext(userInteraction -> log.debug(userInteraction.getClass().getSimpleName() + "::execute"))
 				.subscribe(ChallengeAsUserInteraction::execute);
 
 		client.on(GuildCreateEvent.class)
@@ -81,10 +85,12 @@ public class EventParser {
 					Optional<Game> maybeGame = service.findGameByGuildId(event.getGuildId().asLong());
 					if (maybeGame.isEmpty()) return;
 
-					if (event.getRoleId().asLong() == maybeGame.get().getAdminRoleId())
-						maybeGame.get().setAdminRoleId(event.getGuildId().asLong());
-					if (event.getRoleId().asLong() == maybeGame.get().getModRoleId())
-						maybeGame.get().setModRoleId(event.getGuildId().asLong());
+					if (event.getRoleId().asLong() == maybeGame.get().getAdminRoleId()) {
+						bot.setDiscordCommandPermissions(
+								event.getGuildId().asLong(),
+								"permission",
+								event.getGuild().block().getEveryoneRole().block());
+					}
 				});
 	}
 
