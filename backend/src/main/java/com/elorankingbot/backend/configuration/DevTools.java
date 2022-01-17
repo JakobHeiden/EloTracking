@@ -58,7 +58,7 @@ public class DevTools {
 						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
 						Role currentModRole = guild.getRoleById(Snowflake.of(game.getModRoleId())).block();
-						bot.deployCommandToGuild(Setup.getRequest(), guild);
+						bot.deployCommand(game.getGuildId(), Permission.getRequest()).subscribe();
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

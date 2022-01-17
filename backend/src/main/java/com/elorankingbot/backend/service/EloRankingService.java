@@ -73,11 +73,12 @@ public class EloRankingService {
 		bot.sendToOwner(String.format("deleting game %s", game.getName()));// TODO remove
 	}
 
-	public Optional<Game> findGameByGuildId(long guildId) {
+	public Optional<Game> findGameByGuildId(long guildId) {// TODO kein optional zurueckgeben, fehler hier behandeln
 		return gameDao.findById(guildId);
 	}
 
 	public void saveGame(Game game) {
+		log.debug("saving game " + game.getName());
 		gameDao.save(game);
 	}
 
@@ -114,6 +115,7 @@ public class EloRankingService {
 	}
 
 	public void saveChallenge(ChallengeModel challenge) {
+		log.debug("saving challenge " + challenge.getChallengerMessageId());
 		challengeDao.save(challenge);
 	}
 
@@ -146,10 +148,15 @@ public class EloRankingService {
 
 	// Match
 	public void saveMatch(Match match) {
+		log.debug(String.format("saving match % defeated %", match.getWinnerId(), match.getLoserId()));
 		matchDao.save(match);
 	}
 
 	// Player
+	public void savePlayer(Player player) {
+		log.debug("saving player " + player.getUserId());
+		playerDao.save(player);
+	}
 	public Optional<Player> findPlayerByGuildAndUserId(long guildId, long userId) {
 		return playerDao.findById(Player.generateId(guildId, userId));
 	}
@@ -172,9 +179,9 @@ public class EloRankingService {
 		match.setLoserNewRating(ratings[3]);
 		loser.setRating(ratings[3]);
 
-		playerDao.save(winner);
-		playerDao.save(loser);
-		matchDao.save(match);
+		savePlayer(winner);
+		savePlayer(loser);
+		saveMatch(match);
 
 		return ratings;
 	}
@@ -206,6 +213,4 @@ public class EloRankingService {
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;
 	}
-
-
 }

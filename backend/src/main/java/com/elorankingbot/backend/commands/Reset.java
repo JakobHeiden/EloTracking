@@ -9,7 +9,6 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.InteractionApplicationCommandCallbackReplyMono;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -29,6 +28,7 @@ public class Reset extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name("reset")
 				.description("Reset all elo data on the server, and optionally do a full reset of the bot")
+				.defaultPermission(false)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("factoryreset").description("Should I do a full reset of the bot?")
 						.type(ApplicationCommandOption.Type.BOOLEAN.getValue()).required(true)
@@ -59,18 +59,18 @@ public class Reset extends SlashCommand {
 		service.deleteAllDataForGameExceptGame(game);
 
 		if (event.getOption("factoryreset").get().getValue().get().asBoolean()) {
-			event.reply("Deleting matches.\n" +
-					"Deleting challenges.\n" +
-					"Deleting players.\n" +
-					"Deleting game.").subscribe();// TODO createFollowup Done! wenn subscribes durch sind
+			event.reply("Deleting match data.\n" +
+					"Deleting challenge data.\n" +
+					"Deleting player data.\n" +
+					"Deleting game data.").subscribe();// TODO createFollowup Done! wenn subscribes durch sind
 			service.deleteGame(game);
 			deleteResultChannel();
 			deleteDisputeCategory();
 			resetGuildCommands();
 		} else {
-			event.reply("Deleting matches.\n" +
-					"Deleting challenges.\n" +
-					"Deleting players.").subscribe();
+			event.reply("Deleting match data.\n" +
+					"Deleting challenge data.\n" +
+					"Deleting player data.").subscribe();
 			clearResultChannel();
 		}
 	}
@@ -89,8 +89,8 @@ public class Reset extends SlashCommand {
 
 	private void resetGuildCommands() {
 		bot.deleteAllGuildCommands(guildId).blockLast();
-		bot.deployCommandToGuild(Setup.getRequest(), guildId).subscribe();
-		channel.createMessage("Resetting server commands.").subscribe();
+		bot.deployCommand(guildId, Setup.getRequest()).subscribe();
+		channel.createMessage("Resetting server commands. This may take a minute to update on the server.").subscribe();
 	}
 
 	private void clearResultChannel() {

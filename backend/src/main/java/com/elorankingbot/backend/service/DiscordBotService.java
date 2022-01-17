@@ -6,7 +6,6 @@ import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
@@ -116,17 +115,16 @@ public class DiscordBotService {
 	}
 
 	// Commands
-	public Mono<ApplicationCommandData> deployCommandToGuild(ApplicationCommandRequest request, Guild guild, Role... permitRoles) {
-		return applicationService.createGuildApplicationCommand(botId, guild.getId().asLong(), request)
-				.doOnNext(commandData -> log.trace(String.format("deployed command %s:%s to %s",
-						commandData.name(), commandData.id(), guild.getId().asString())))
-				.doOnNext(commandData -> setDiscordCommandPermissions(guild, commandData, permitRoles));
+	public Mono<ApplicationCommandData> deployCommand(long guildId, ApplicationCommandRequest request) {
+		return applicationService.createGuildApplicationCommand(botId, guildId, request)
+				.doOnNext(commandData -> log.debug(String.format("deployed command %s:%s to %s",
+						commandData.name(), commandData.id(), guildId)));
 	}
 
-	public Mono<ApplicationCommandData> deployCommandToGuild(ApplicationCommandRequest request, long guildId) {
-		return applicationService.createGuildApplicationCommand(botId, guildId, request)
-				.doOnNext(commandData -> log.trace(String.format("deployed command %s:%s to %s",
-						commandData.name(), commandData.id(), guildId)));
+	public Mono<Void> deleteCommand(long guildId, String name) {
+		log.debug("deleting command " + name);
+		return getCommandIdByName(guildId, name)
+				.flatMap(commandId -> applicationService.deleteGuildApplicationCommand(botId, guildId, commandId));
 	}
 
 	public Flux<ApplicationCommandData> deleteAllGuildCommands(long guildId) {
@@ -137,13 +135,24 @@ public class DiscordBotService {
 						botId, guildId, Long.parseLong(commandData.id())).subscribe());
 	}
 
-	private void setDiscordCommandPermissions(Guild guild, ApplicationCommandData commandData, Role... roles) {
-		ImmutableApplicationCommandPermissionsRequest.Builder requestBuilder = ApplicationCommandPermissionsRequest.builder();
-		Arrays.stream(roles).map(role -> ApplicationCommandPermissionsData.builder()
-						.id(role.getId().asLong()).type(1).permission(true).build())
-				.forEach(applicationCommandPermissionsData -> requestBuilder.addPermission(applicationCommandPermissionsData));
-		applicationService.modifyApplicationCommandPermissions(
-						botId, guild.getId().asLong(), Long.parseLong(commandData.id()), requestBuilder.build())
-				.subscribe();
-	}// TODO permissions fuer owner setzen?
+	// TODO permissions fuer server-owner setzen?
+
+	public void setDiscordCommandPermissions(long guildId, String commandName, Role... roles) {
+		var requestBuilder = ApplicationCommandPermissionsRequest.builder();
+		Arrays.stream(roles).forEach(role -> {
+			log.debug(String.format("setting permissions for command %s to role %s",commandName, role.getName()));
+			requestBuilder.addPermission(ApplicationCommandPermissionsData.builder()
+					.id(role.getId().asLong()).type(1).permission(true).build()).build();
+		});
+		getCommandIdByName(guildId, commandName).subscribe(commandId ->
+				applicationService.modifyApplicationCommandPermissions(botId, guildId, commandId, requestBuilder.build())
+						.subscribe(permissionsData -> log.debug("...to command " + permissionsData.id())));
+	}
+
+	private Mono<Long> getCommandIdByName(long guildid, String commandName) {
+		return applicationService.getGuildApplicationCommands(botId, guildid)
+				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName))
+				.next()
+				.map(commandData -> Long.parseLong(commandData.id()));
+	}
 }
