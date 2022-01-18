@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.configuration;
 
-import com.elorankingbot.backend.commands.*;
+import com.elorankingbot.backend.commands.Createresultchannel;
+import com.elorankingbot.backend.commands.Forcematch;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -52,13 +53,13 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating guild commands...");
-		service.findAllGames().stream().forEach(
+		service.findAllGames().forEach(
 				game -> {
 					try {
 						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
 						Role currentModRole = guild.getRoleById(Snowflake.of(game.getModRoleId())).block();
-						bot.deployCommand(game.getGuildId(), Permission.getRequest()).subscribe();
+						bot.deployCommand(game.getGuildId(), Forcematch.getRequest(false)).subscribe();
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

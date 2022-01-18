@@ -148,8 +148,32 @@ public class EloRankingService {
 
 	// Match
 	public void saveMatch(Match match) {
-		log.debug(String.format("saving match % defeated %", match.getWinnerId(), match.getLoserId()));
+		log.debug(String.format("saving match %s %s %s",
+				match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
 		matchDao.save(match);
+	}
+
+	public void deleteMatch(Match match) {
+		log.debug(String.format("deleting match %s %s %s",
+				match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
+		matchDao.delete(match);
+	}
+
+	public Optional<Match> findMostRecentMatch(long player1Id, long player2Id) {
+		Optional<Match> search = matchDao.findFirstByWinnerIdAndLoserIdOrderByDate(player1Id, player2Id);
+		Optional<Match> searchReverseParams = matchDao.findFirstByWinnerIdAndLoserIdOrderByDate(player2Id, player1Id);
+
+		if (search.isEmpty()) {
+			return searchReverseParams;
+		} else if (searchReverseParams.isEmpty()) {
+			return search;
+		} else {
+			if (search.get().getDate().after(searchReverseParams.get().getDate())) {
+				return search;
+			} else {
+				return searchReverseParams;
+			}
+		}
 	}
 
 	// Player
@@ -157,7 +181,8 @@ public class EloRankingService {
 		log.debug("saving player " + player.getUserId());
 		playerDao.save(player);
 	}
-	public Optional<Player> findPlayerByGuildAndUserId(long guildId, long userId) {
+
+	public Optional<Player> findPlayerByGuildIdAndUserId(long guildId, long userId) {
 		return playerDao.findById(Player.generateId(guildId, userId));
 	}
 
