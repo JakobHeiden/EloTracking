@@ -9,17 +9,18 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputAutoCompleteEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
-import discord4j.core.event.domain.role.RoleEvent;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -91,6 +92,16 @@ public class EventParser {
 								"permission",
 								event.getGuild().block().getEveryoneRole().block());
 					}
+				});
+
+		client.on(ChatInputAutoCompleteEvent.class)
+				.subscribe(event -> {
+
+					event.respondWithSuggestions(List.of(
+							ApplicationCommandOptionChoiceData.builder().name("win").value("win").build(),
+							ApplicationCommandOptionChoiceData.builder().name("draw").value("draw").build(),
+							ApplicationCommandOptionChoiceData.builder().name("undo").value("undo").build()
+					)).subscribe();
 				});
 	}
 

@@ -16,29 +16,22 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple7;
 
 import java.util.Arrays;
 
 public class Setup extends SlashCommand {
 
 	private Guild guild;
-	private long botId;
 	private Role adminRole;
 	private Role modRole;
-	private ApplicationService applicationService;
 	private MessageContent reply;
 
 	public Setup(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.applicationService = client.getRestClient().getApplicationService();
-		this.guild = event.getInteraction().getGuild().block();
-		this.botId = client.getSelfId().asLong();
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -64,6 +57,7 @@ public class Setup extends SlashCommand {
 
 	public void execute() {
 		reply = new MessageContent("Setup performed. Here is what I did:");
+		guild = event.getInteraction().getGuild().block();
 		game = new Game(guild.getId().asLong(),
 				event.getOption("nameofgame").get().getValue().get().asString());
 
@@ -137,21 +131,17 @@ public class Setup extends SlashCommand {
 				"It is only visible to Elo Admins and Moderators.", disputeCategory.getMention()));
 	}
 
-	private Mono<Tuple7<Void, ApplicationCommandData, ApplicationCommandData, ApplicationCommandData,
-			ApplicationCommandData, ApplicationCommandData, ApplicationCommandData>> updateCommands() {
+	private Mono<Object> updateCommands() {
 		// TODO vielleicht verallgemeinern, auslagern in SlashCommand, mit nem array an relevanten classes in jeder subklasse
 		Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
-		Mono<ApplicationCommandData> deployForcedraw = game.isAllowDraw() ?
-				bot.deployCommand(guildId, Forcedraw.getRequest())
-				: Mono.just(null);
-		Mono<ApplicationCommandData> deployForcewin = bot.deployCommand(guildId, Forcewin.getRequest());
+		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, Forcematch.getRequest(game.isAllowDraw()));
 		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
 		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.Permission.getRequest());
-		reply.addLine("- I updated my commands on this server. This may take a minute to update on the server.");
-		return Mono.zip(deleteSetup, deployForcedraw, deployForcewin, deployChallenge, deployUserInteractionChallenge,
-				deployReset, deployPermission);
+		reply.addLine("- I updated my commands on this server. This may take a minute to update.");
+		return Mono.zip(deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
+				deployReset, deployPermission).map(allTheReturnValues -> null);
 	}
 
 	private void setPermissionsForAdminCommands() {
