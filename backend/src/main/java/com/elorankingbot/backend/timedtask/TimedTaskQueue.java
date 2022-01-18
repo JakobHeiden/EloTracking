@@ -44,11 +44,11 @@ public class TimedTaskQueue {
 	}
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int delay, long relationId, long otherId, Object value) {
-		Optional<TimeSlot> maybeTimeSlot =
-				timeSlotDao.findById(Integer.valueOf((currentIndex + delay) % numberOfTimeSlots));
+		int targetTimeSlotIndex = (currentIndex + delay) % numberOfTimeSlots;
+		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(targetTimeSlotIndex);
 		Set<TimedTask> timedTasks = maybeTimeSlot.isPresent() ? maybeTimeSlot.get().getTimedTasks() : new HashSet<>();
 		timedTasks.add(new TimedTask(type, delay, relationId, otherId, value));
-		timeSlotDao.save(new TimeSlot(currentIndex + delay, timedTasks));
+		timeSlotDao.save(new TimeSlot(targetTimeSlotIndex, timedTasks));
 	}
 
 	@Scheduled(fixedRate = 60000)
