@@ -7,6 +7,7 @@ import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.TimedTaskService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+@Slf4j
 @Component
 public class TimedTaskQueue {
 
@@ -66,8 +68,9 @@ public class TimedTaskQueue {
 			}
 
 			currentIndex++;
-			if (currentIndex == numberOfTimeSlots) currentIndex = 0;
+			if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
 			timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
+			log.debug("tick " + currentIndex);
 		} catch (Exception e) {
 			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
 			throw e;
@@ -77,6 +80,7 @@ public class TimedTaskQueue {
 	private void processTimedTask(TimedTask task) {
 		long id = task.relationId();
 		int time = task.time();
+		log.debug(String.format("executing %s %s after %s", task.type().name(), id, time));
 		switch (task.type()) {
 			case OPEN_CHALLENGE_DECAY:
 				timedTaskService.timedDecayOpenChallenge(id, time);
