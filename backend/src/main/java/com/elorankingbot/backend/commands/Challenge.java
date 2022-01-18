@@ -97,7 +97,8 @@ public class Challenge extends SlashCommand {
 				TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY,
 				game.getOpenChallengeDecayTime(),
 				challenge.getId(),
-				0L, null);
+				challenge.getChallengerChannelId(),
+				null);
 		service.saveChallenge(challenge);
 		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",
 						bot.getPlayerName(acceptorId)))
