@@ -44,9 +44,7 @@ public class DevTools {
 		this.applicationService = client.getRestClient().getApplicationService();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
-		if (props.isDeleteDataOnStartup()) {
-			service.deleteAllData();
-		}
+		if (props.isDeleteDataOnStartup()) service.deleteAllData();
 		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 	}

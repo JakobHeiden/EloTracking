@@ -66,7 +66,7 @@ public class Win extends ButtonCommandForChallenge {
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic();
 		parentMessage.edit().withContent(parentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
+				.withComponents(none).subscribe();
 
 		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
 				.makeAllNotBold()

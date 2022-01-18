@@ -9,8 +9,10 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
@@ -62,9 +64,9 @@ public class DiscordBotService {
 		ownerPrivateChannel.createMessage(text).subscribe();
 	}
 
-	public void sendToChannel(long channelId, String text) {
-		TextChannel channel = (TextChannel) client.getChannelById(Snowflake.of(channelId)).block();
-		channel.createMessage(text).subscribe();
+	public MessageCreateMono sendToChannel(long channelId, String text) {
+		MessageChannel channel = (MessageChannel) client.getChannelById(Snowflake.of(channelId)).block();
+		return channel.createMessage(text);
 	}
 
 	public Mono<PrivateChannel> getPrivateChannelByUserId(long userId) {

@@ -44,6 +44,7 @@ public class TimedTaskQueue {
 	}
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int delay, long relationId, long otherId, Object value) {
+		log.debug(String.format("adding timed task for %s of type %s with timer %s", relationId, type.name(), delay));
 		int targetTimeSlotIndex = (currentIndex + delay) % numberOfTimeSlots;
 		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(targetTimeSlotIndex);
 		Set<TimedTask> timedTasks = maybeTimeSlot.isPresent() ? maybeTimeSlot.get().getTimedTasks() : new HashSet<>();
@@ -53,6 +54,7 @@ public class TimedTaskQueue {
 
 	@Scheduled(fixedRate = 60000)
 	public void tick() {
+		log.debug("tick " + currentIndex);
 		try {
 			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
 			if (maybeTimeSlot.isPresent()) {
@@ -70,10 +72,9 @@ public class TimedTaskQueue {
 			currentIndex++;
 			if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
 			timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
-			log.debug("tick " + currentIndex);
 		} catch (Exception e) {
 			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
-			throw e;
+			e.printStackTrace();
 		}
 	}
 
@@ -83,22 +84,22 @@ public class TimedTaskQueue {
 		log.debug(String.format("executing %s %s after %s", task.type().name(), id, time));
 		switch (task.type()) {
 			case OPEN_CHALLENGE_DECAY:
-				timedTaskService.timedDecayOpenChallenge(id, time);
+				timedTaskService.decayOpenChallenge(id, time);
 				break;
 			case ACCEPTED_CHALLENGE_DECAY:
-				timedTaskService.timedDecayAcceptedChallenge(id, time);
+				timedTaskService.decayAcceptedChallenge(id, time);
 				break;
 			case MATCH_AUTO_RESOLVE:
-				timedTaskService.timedAutoResolveMatch(id, time);
+				timedTaskService.autoResolveMatch(id, time);
 				break;
 			case MATCH_SUMMARIZE:
-				timedTaskService.timedSummarizeMatch(id, task.otherId(), task.value());
+				timedTaskService.summarizeMatch(id, task.otherId(), task.value());
 				break;
 			case MESSAGE_DELETE:
-				timedTaskService.timedDeleteMessage(id, task.otherId());
+				timedTaskService.deleteMessage(id, task.otherId());
 				break;
 			case CHANNEL_DELETE:
-				timedTaskService.timedDeleteChannel(id);
+				timedTaskService.deleteChannel(id);
 				break;
 		}
 	}

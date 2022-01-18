@@ -1,10 +1,7 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.dao.ChallengeDao;
-import com.elorankingbot.backend.dao.GameDao;
-import com.elorankingbot.backend.dao.MatchDao;
-import com.elorankingbot.backend.dao.PlayerDao;
+import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
@@ -34,12 +31,14 @@ public class EloRankingService {
 	private final ChallengeDao challengeDao;
 	private final MatchDao matchDao;
 	private final PlayerDao playerDao;
+	private final TimeSlotDao timeSlotDao;
 	@Getter
 	private ApplicationPropertiesLoader propertiesLoader;
 
 	public EloRankingService(@Lazy DiscordBotService discordBotService, @Lazy GatewayDiscordClient client,
 							 ApplicationPropertiesLoader propertiesLoader,
-							 GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao) {
+							 GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
+							 TimeSlotDao timeSlotDao) {
 		this.bot = discordBotService;
 		this.client = client;
 		this.propertiesLoader = propertiesLoader;
@@ -48,6 +47,7 @@ public class EloRankingService {
 		this.matchDao = matchDao;
 		this.playerDao = playerDao;
 
+		this.timeSlotDao = timeSlotDao;
 	}
 
 	public void deleteAllData() {
@@ -59,20 +59,22 @@ public class EloRankingService {
 		challengeDao.deleteAll();
 		matchDao.deleteAll();
 		playerDao.deleteAll();
+		timeSlotDao.deleteAll();
 	}
 
-	public void deleteAllDataForGameExceptGame(Game game) {
-		matchDao.deleteAllByGuildId(game.getGuildId());
-		challengeDao.deleteAllByGuildId(game.getGuildId());
-		playerDao.deleteAllByGuildId(game.getGuildId());
+	public void deleteAllDataForGame(long guildId) {
+		matchDao.deleteAllByGuildId(guildId);
+		challengeDao.deleteAllByGuildId(guildId);
+		playerDao.deleteAllByGuildId(guildId);
+		gameDao.deleteById(guildId);
+	}
+
+	public void resetAllPlayerRatings() {
+
+		// TODO!
 	}
 
 	// Game
-	public void deleteGame(Game game) {
-		gameDao.deleteById(game.getGuildId());
-		bot.sendToOwner(String.format("deleting game %s", game.getName()));// TODO remove
-	}
-
 	public Optional<Game> findGameByGuildId(long guildId) {// TODO kein optional zurueckgeben, fehler hier behandeln
 		return gameDao.findById(guildId);
 	}
@@ -84,6 +86,10 @@ public class EloRankingService {
 
 	public List<Game> findAllGames() {
 		return gameDao.findAll();
+	}
+
+	public void deleteGame(long guildId) {
+		gameDao.deleteById(guildId);
 	}
 
 	// Challenge

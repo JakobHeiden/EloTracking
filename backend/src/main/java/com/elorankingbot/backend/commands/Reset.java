@@ -56,22 +56,19 @@ public class Reset extends SlashCommand {
 
 		guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
 
-		service.deleteAllDataForGameExceptGame(game);
 
 		if (event.getOption("factoryreset").get().getValue().get().asBoolean()) {
 			event.reply("Deleting match data.\n" +
 					"Deleting challenge data.\n" +
 					"Deleting player data.\n" +
 					"Deleting game data.").subscribe();// TODO createFollowup Done! wenn subscribes durch sind
-			service.deleteGame(game);
+			service.deleteAllDataForGame(guildId);
 			deleteResultChannel();
 			deleteDisputeCategory();
 			resetGuildCommands();
 		} else {
-			event.reply("Deleting match data.\n" +
-					"Deleting challenge data.\n" +
-					"Deleting player data.").subscribe();
-			clearResultChannel();
+			event.reply("Resetting all player ratings.").subscribe();
+			service.resetAllPlayerRatings();
 		}
 	}
 
@@ -91,18 +88,6 @@ public class Reset extends SlashCommand {
 		bot.deleteAllGuildCommands(guildId).blockLast();
 		bot.deployCommand(guildId, Setup.getRequest()).subscribe();
 		channel.createMessage("Resetting server commands. This may take a minute to update on the server.").subscribe();
-	}
-
-	private void clearResultChannel() {
-		guild.getChannelById(Snowflake.of(game.getResultChannelId()))
-				.map(channel -> (TextChannel) channel)
-				.subscribe(textChannel -> textChannel.getLastMessage().subscribe(
-						lastMessage -> {
-							textChannel.getMessagesBefore(lastMessage.getId()).subscribe(
-									message -> message.delete().subscribe());
-							lastMessage.delete().subscribe();
-						}));
-		channel.createMessage("Deleting result messages.").subscribe();
 	}
 
 	private void cleanCorruptState() {

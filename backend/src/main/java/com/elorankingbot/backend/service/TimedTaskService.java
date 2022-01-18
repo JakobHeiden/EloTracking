@@ -26,6 +26,8 @@ public class TimedTaskService {
 	private final TimedTaskQueue queue;
 	private final GatewayDiscordClient client;
 
+	protected final List none = new ArrayList<>();
+
 	public TimedTaskService(EloRankingService service, @Lazy DiscordBotService bot,
 							@Lazy TimedTaskQueue queue, GatewayDiscordClient client) {
 		this.service = service;
@@ -46,10 +48,10 @@ public class TimedTaskService {
 	public void deleteGamesMarkedForDeletion() {
 		service.findAllGames().stream()
 				.filter(game -> game.isMarkedForDeletion())
-				.forEach(game -> service.deleteGame(game));
+				.forEach(game -> service.deleteGame(game.getGuildId()));
 	}
 
-	public void timedSummarizeMatch(long messageId, long channelId, Object value) {
+	public void summarizeMatch(long messageId, long channelId, Object value) {
 		Match match = (Match) value;
 		Message message = client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
 		boolean isWinnerMessage = ((PrivateChannel) message.getChannel().block())
@@ -65,19 +67,18 @@ public class TimedTaskService {
 				.subscribe();
 	}
 
-	public void timedDeleteMessage(long messageId, long channelId) {
+	public void deleteMessage(long messageId, long channelId) {
 		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block().delete().subscribe();
 	}
 
-	public void timedDeleteChannel(long channelId) {
+	public void deleteChannel(long channelId) {
 		try {
-			client.getChannelById(Snowflake.of(channelId)).block()
-					.delete().subscribe();
+			client.getChannelById(Snowflake.of(channelId)).block().delete().subscribe();
 		} catch (ClientException ignored) {
 		}
 	}
 
-	public void timedDecayOpenChallenge(long challengeId, int time) {
+	public void decayOpenChallenge(long challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = service.getChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
@@ -87,11 +88,32 @@ public class TimedTaskService {
 		Optional<Game> maybeGame = service.findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your open challenge towards <@%s> has expired after %s minutes",
-				challenge.getChallengerId(), challenge.getAcceptorId(), time));
+		Snowflake challengerMessageId = Snowflake.of(challengeId);
+		Snowflake challengerChannelId = Snowflake.of(challenge.getChallengerChannelId());
+		Message challengerMessage = client.getMessageById(challengerChannelId, challengerMessageId).block();
+		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+				.addLine(String.format("This challenge has expired after not getting accepted within %s minutes.", time))
+				.makeAllItalic();
+		challengerMessage.edit().withContent(challengerMessageContent.get()).subscribe();
+
+		Snowflake acceptorMessageId = Snowflake.of(challenge.getAcceptorMessageId());
+		Snowflake acceptorChannelId = Snowflake.of(challenge.getAcceptorChannelId());
+		Message acceptorMessage = client.getMessageById(acceptorChannelId, acceptorMessageId).block();
+		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+				.makeAllNotBold()
+				.addLine(String.format("This challenge has expired after not getting accepted within %s minutes.", time))
+				.makeAllItalic();
+		acceptorMessage.edit().withContent(acceptorMessageContent.get())
+				.withComponents(none).subscribe();
+
+		int timer = service.findGameByGuildId(challenge.getGuildId()).get().getMessageCleanupTime();
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
+				challengerMessageId.asLong(), challengerChannelId.asLong(), null);
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
+				acceptorMessageId.asLong(), acceptorChannelId.asLong(), null);
 	}
 
-	public void timedDecayAcceptedChallenge(long challengeId, int time) {
+	public void decayAcceptedChallenge(long challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = service.getChallengeByChallengerMessageId(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
@@ -101,10 +123,10 @@ public class TimedTaskService {
 		if (maybeGame.isEmpty()) return;
 
 		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",// TODO wochen, tage, etc
-				challenge.getChallengerId(), challenge.getAcceptorId(), time));
+				challenge.getChallengerId(), challenge.getAcceptorId(), time)).subscribe();
 	}
 
-	public void timedAutoResolveMatch(long challengeId, int time) {
+	public void autoResolveMatch(long challengeId, int time) {
 		Optional<ChallengeModel> maybeChallenge = service.getChallengeById(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
@@ -136,7 +158,7 @@ public class TimedTaskService {
 				isDraw = true;
 				break;
 			case CANCEL:
-				timedAutoResolveMatchAsCancel(challenge, hasChallengerReported);
+				autoResolveMatchAsCancel(challenge, hasChallengerReported);
 		}
 
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
@@ -195,7 +217,7 @@ public class TimedTaskService {
 				reportAbsentMessage.getId().asLong(), reportAbsentMessage.getChannelId().asLong(), match);
 	}
 
-	private void timedAutoResolveMatchAsCancel(ChallengeModel challenge, boolean hasChallengerReported) {
+	private void autoResolveMatchAsCancel(ChallengeModel challenge, boolean hasChallengerReported) {
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		service.deleteChallenge(challenge);
 
