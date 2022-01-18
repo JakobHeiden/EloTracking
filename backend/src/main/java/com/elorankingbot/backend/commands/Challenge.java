@@ -93,7 +93,10 @@ public class Challenge extends SlashCommand {
 				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(),
 				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong());
 
-		queue.addTimedTask(TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY, game.getOpenChallengeDecayTime(), guildId,
+		queue.addTimedTask(
+				TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY,
+				game.getOpenChallengeDecayTime(),
+				challenge.getId(),
 				0L, null);
 		service.saveChallenge(challenge);
 		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",

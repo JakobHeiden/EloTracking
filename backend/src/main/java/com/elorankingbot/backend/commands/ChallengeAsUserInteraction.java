@@ -35,19 +35,14 @@ public class ChallengeAsUserInteraction {
 	}
 
 	public void execute() {
-		Optional<Game> maybeGame = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong());
-		if (maybeGame.isEmpty()) {
-			event.reply("Please run /setup first.").withEphemeral(true).subscribe();
-			return;
-		}
 		if (event.getTargetUser().block().isBot()) {
 			event.reply("You cannot challenge a bot.").withEphemeral(true).subscribe();
 			return;
 		}
 
+		Game game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		long acceptorId = event.getTargetId().asLong();
 		long guildId = event.getInteraction().getGuildId().get().asLong();
-		Game game = maybeGame.get();
 		Challenge.staticExecute(
 				acceptorId, guildId, game,
 				event, service, bot, queue);
