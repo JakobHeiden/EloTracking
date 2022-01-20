@@ -1,15 +1,15 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
-public class Ruleaswin extends ButtonCommandForDispute {
+public class Ruleaswin extends ButtonCommandRelatedToDispute {
 
 	private long winnerId;
 	private long loserId;
@@ -37,28 +37,24 @@ public class Ruleaswin extends ButtonCommandForDispute {
 				"%s has ruled the match a win :arrow_up: for <@%s> and a loss :arrow_down: for <@%s>.",
 				moderatorName, winnerId, loserId));
 		bot.postToResultChannel(game, match);
-		postToWinnerAndLoserChannels();
-		addMatchSummarizeToQueue(match);
-		event.acknowledge().subscribe();
-	}
-
-	private void postToWinnerAndLoserChannels() {
 		Message winnerMessage = isChallengerWin ? challengerMessage : acceptorMessage;
-		MessageContent winnerMessageContent = new MessageContent(winnerMessage.getContent())
+		new MessageUpdater(winnerMessage)
 				.addLine(String.format("%s has ruled this as a win :arrow_up: for you.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
-				.makeAllItalic();
-		winnerMessage.edit().withContent(winnerMessageContent.get())
+				.makeAllItalic()
+				.update()
 				.withComponents(none).subscribe();
-
 		Message loserMessage = isChallengerWin ? acceptorMessage : challengerMessage;
-		MessageContent loserMessageContent = new MessageContent(loserMessage.getContent())
+		new MessageUpdater(loserMessage)
 				.addLine(String.format("%s has ruled this as a loss :arrow_down: for you.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
-				.makeAllItalic();
-		loserMessage.edit().withContent(loserMessageContent.get())
+				.makeAllItalic()
+				.update()
 				.withComponents(none).subscribe();
+
+		addMatchSummarizeToQueue(match);
+		event.acknowledge().subscribe();
 	}
 }

@@ -1,15 +1,15 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
-import com.elorankingbot.backend.command.MessageContent;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Redoorcancel extends ButtonCommandForChallenge {
+public class Redoorcancel extends ButtonCommandRelatedToChallenge {
 
 	public Redoorcancel(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
@@ -53,20 +53,19 @@ public class Redoorcancel extends ButtonCommandForChallenge {
 	private void opponentDidNotCallEither() {
 		service.saveChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You called for a redo or a cancel :person_shrugging:. You can still file a dispute.");
-		parentMessage.edit().withContent(parentMessageContent.get())
+				.addLine("You called for a redo or a cancel :person_shrugging:. You can still file a dispute.")
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.makeLastLineStrikeThrough()
 				.addLine("Your opponent called for a redo or a cancel :person_shrugging:. " +
 						"You can accept either, or file a dispute")
-				.makeLastLineBold();
-		targetMessage.edit().withContent(targetMessageContent.get())
+				.makeLastLineBold()
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.agreeToRedo(parentMessage.getChannelId().asLong()),
 						Buttons.agreeToCancelOnConflict(parentMessage.getChannelId().asLong()),

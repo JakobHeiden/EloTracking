@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -100,11 +99,11 @@ public class Forcematch extends SlashCommand {
 		double[] eloResults = service.updateRatings(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?
-				"%s has forced a draw with %s. Your rating went from %s to %s.%s"
-				: "%s has forced a win over %s. Your rating went from %s to %s.%s";
+				"*%s has forced a draw with %s. Your rating went from %s to %s.%s*"
+				: "*%s has forced a win over %s. Your rating went from %s to %s.%s*";
 		templatePlayer2 = isDraw ?
-				"%s has forced a draw with %s. Your rating went from %s to %s.%s"
-				: "%s has forced a loss to %s. Your rating went from %s to %s.%s";
+				"*%s has forced a draw with %s. Your rating went from %s to %s.%s*"
+				: "*%s has forced a loss to %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
 		String template = isDraw ? "Forced a draw between %s and %s.%s" : "Forced a win for %s over %s.%s";
@@ -112,24 +111,20 @@ public class Forcematch extends SlashCommand {
 	}
 
 	private void informPlayers(double[] eloResults) {
-		MessageContent player1MessageContent = new MessageContent(
-				String.format(templatePlayer1,
+		String player1MessageContent = String.format(templatePlayer1,
 						event.getInteraction().getUser().getTag(), user2.getTag(),
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2]),
-						reason))
-				.makeAllItalic();
+						reason);
 		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
-				.content(player1MessageContent.get()).build();
+				.content(player1MessageContent).build();
 		user1.getPrivateChannel().subscribe(channel -> channel.createMessage(player1MessageSpec).subscribe());
 
-		MessageContent player2MessageContent = new MessageContent(
-				String.format(templatePlayer2,
+		String player2MessageContent = String.format(templatePlayer2,
 						event.getInteraction().getUser().getTag(), user1.getTag(),
 						service.formatRating(eloResults[1]), service.formatRating(eloResults[3]),
-						reason))
-				.makeAllItalic();
+						reason);
 		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
-				.content(player2MessageContent.get()).build();
+				.content(player2MessageContent).build();
 		user2.getPrivateChannel().subscribe(channel -> channel.createMessage(player2MessageSpec).subscribe());
 	}
 
@@ -148,8 +143,8 @@ public class Forcematch extends SlashCommand {
 		}
 		double[] eloResultsfromUndo = updateRatingsForUndo();
 		service.deleteMatch(match);
-		templatePlayer1 = "%s has reverted your most recent match with %s. Your rating went from %s to %s.%s";
-		templatePlayer2 = "%s has reverted your most recent match with %s. Your rating went from %s to %s.%s";
+		templatePlayer1 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";
+		templatePlayer2 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResultsfromUndo);
 		event.reply(String.format("Reverted the last recorded match between %s and %s.",
 				user1.getTag(), user2.getTag())).subscribe();

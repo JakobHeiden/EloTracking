@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -27,7 +26,7 @@ public class Setup extends SlashCommand {
 	private Guild guild;
 	private Role adminRole;
 	private Role modRole;
-	private MessageContent reply;
+	private String reply;
 
 	public Setup(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				 TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -56,7 +55,7 @@ public class Setup extends SlashCommand {
 	}
 
 	public void execute() {
-		reply = new MessageContent("Setup performed. Here is what I did:");
+		reply = "Setup performed. Here is what I did:";
 		guild = event.getInteraction().getGuild().block();
 		game = new Game(guild.getId().asLong(),
 				event.getOption("nameofgame").get().getValue().get().asString());
@@ -70,11 +69,11 @@ public class Setup extends SlashCommand {
 		setPermissionsForAdminCommands();
 		setPermissionsForModCommands();
 
-		reply.addLine(String.format("- I created a web page with rankings: http://%s/%s",
-				service.getPropertiesLoader().getBaseUrl(), guildId));
-		reply.addLine(String.format("Follow my announcement channel: <#%s>",
-				service.getPropertiesLoader().getAnnouncementChannelId()));
-		event.reply(reply.get()).doOnError(error -> System.out.println(error.getMessage())).subscribe();
+		reply += String.format("\n- I created a web page with rankings: http://%s/%s",
+				service.getPropertiesLoader().getBaseUrl(), guildId);
+		reply += String.format("\nFollow my announcement channel: <#%s>",
+				service.getPropertiesLoader().getAnnouncementChannelId());
+		event.reply(reply).doOnError(error -> System.out.println(error.getMessage())).subscribe();
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
 				guild.getId(), guild.getName(), guild.getMemberCount()));
@@ -88,19 +87,19 @@ public class Setup extends SlashCommand {
 
 		if (adminRolePresent) {
 			adminRole = event.getOption("adminrole").get().getValue().get().asRole().block();
-			reply.addLine(String.format("- I assigned Elo Admin permissions to %s", adminRole.getName()));
+			reply += String.format("\n- I assigned Elo Admin permissions to %s", adminRole.getName());
 		} else {
 			adminRole = everyoneRole;
-			reply.addLine("- I assigned Elo Admin permissions to @everyone. I suggest you use /addpermission soon.");
+			reply += "\n- I assigned Elo Admin permissions to @everyone. I suggest you use /addpermission soon.";
 		}
 		game.setAdminRoleId(adminRole.getId().asLong());
 
 		if (modRolePresent) {
 			modRole = event.getOption("moderatorrole").get().getValue().get().asRole().block();
-			reply.addLine(String.format("- I assigned Elo Moderator permissions to %s", modRole.getName()));
+			reply += String.format("\n- I assigned Elo Moderator permissions to %s", modRole.getName());
 		} else {
 			modRole = everyoneRole;
-			reply.addLine("- I assigned Elo Moderator permissions to @everyone. I suggest you use /addpermission soon.");
+			reply += "\n- I assigned Elo Moderator permissions to @everyone. I suggest you use /addpermission soon.";
 		}
 		game.setModRoleId(modRole.getId().asLong());
 	}
@@ -115,7 +114,7 @@ public class Setup extends SlashCommand {
 						PermissionSet.of(Permission.SEND_MESSAGES)))
 				.block();
 		game.setResultChannelId(resultChannel.getId().asLong());
-		reply.addLine(String.format("- I created %s where I will post all match results.", resultChannel.getMention()));
+		reply += String.format("\n- I created %s where I will post all match results.", resultChannel.getMention());
 	}
 
 	private void createDisputeCategory() {
@@ -127,8 +126,8 @@ public class Setup extends SlashCommand {
 				PermissionOverwrite.forRole(modRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
 						PermissionSet.none())).block();
 		game.setDisputeCategoryId(disputeCategory.getId().asLong());
-		reply.addLine(String.format("- I created a category %s where I will create dispute channels as needed. " +
-				"It is only visible to Elo Admins and Moderators.", disputeCategory.getMention()));
+		reply += String.format("\n- I created a category %s where I will create dispute channels as needed. " +
+				"It is only visible to Elo Admins and Moderators.", disputeCategory.getMention());
 	}
 
 	private Mono<Object> updateCommands() {
@@ -139,7 +138,7 @@ public class Setup extends SlashCommand {
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
 		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.Permission.getRequest());
-		reply.addLine("- I updated my commands on this server. This may take a minute to update.");
+		reply += "\n- I updated my commands on this server. This may take a minute to update.";
 		return Mono.zip(deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
 				deployReset, deployPermission).map(allTheReturnValues -> null);
 	}

@@ -11,7 +11,7 @@ import discord4j.core.object.entity.Message;
 
 import java.util.Optional;
 
-public abstract class ButtonCommandForChallenge extends ButtonCommand {
+public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
 
 	protected final Message parentMessage;
 	protected final Message targetMessage;
@@ -20,8 +20,8 @@ public abstract class ButtonCommandForChallenge extends ButtonCommand {
 	protected final ChallengeModel challenge;
 	protected final boolean isChallengerCommand;
 
-	protected ButtonCommandForChallenge(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
-										TimedTaskQueue queue, GatewayDiscordClient client) {
+	protected ButtonCommandRelatedToChallenge(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
+											  TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 
 		Optional<ChallengeModel> maybeChallengeByChallengerMessageId = service.getChallengeByChallengerMessageId(event.getMessageId().asLong());

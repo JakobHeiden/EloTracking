@@ -1,14 +1,14 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class Ruleasdraw extends ButtonCommandForDispute {
+public class Ruleasdraw extends ButtonCommandRelatedToDispute {
 
 	private double[] eloResults;
 	private Match match;
@@ -29,26 +29,22 @@ public class Ruleasdraw extends ButtonCommandForDispute {
 				"%s has ruled the match a draw :left_right_arrow: for <@%s> and <@%s>.",
 				moderatorName, challenge.getChallengerId(), challenge.getAcceptorId()));
 		bot.postToResultChannel(game, match);
-		postToChallengerAndAcceptorChannels();
-		addMatchSummarizeToQueue(match);
-		event.acknowledge().subscribe();
-	}
-
-	private void postToChallengerAndAcceptorChannels() {
-		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+		new MessageUpdater(challengerMessage)
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
-				.makeAllItalic();
-		challengerMessage.edit().withContent(challengerMessageContent.get())
+				.makeAllItalic()
+				.update()
 				.withComponents(none).subscribe();
-
-		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+		new MessageUpdater(acceptorMessage)
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
-				.makeAllItalic();
-		acceptorMessage.edit().withContent(acceptorMessageContent.get())
+				.makeAllItalic()
+				.update()
 				.withComponents(none).subscribe();
+
+		addMatchSummarizeToQueue(match);
+		event.acknowledge().subscribe();
 	}
 }

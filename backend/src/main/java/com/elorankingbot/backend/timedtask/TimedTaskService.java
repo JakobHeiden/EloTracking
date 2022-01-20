@@ -1,11 +1,11 @@
-package com.elorankingbot.backend.service;
+package com.elorankingbot.backend.timedtask;
 
-import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.service.DiscordBotService;
+import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
@@ -88,29 +88,22 @@ public class TimedTaskService {
 		Optional<Game> maybeGame = service.findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		Snowflake challengerMessageId = Snowflake.of(challengeId);
-		Snowflake challengerChannelId = Snowflake.of(challenge.getChallengerChannelId());
-		Message challengerMessage = client.getMessageById(challengerChannelId, challengerMessageId).block();
-		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+		new MessageUpdater(challengeId, challenge.getChallengerChannelId(), client)
 				.addLine(String.format("This challenge has expired after not getting accepted within %s minutes.", time))
-				.makeAllItalic();
-		challengerMessage.edit().withContent(challengerMessageContent.get()).subscribe();
-
-		Snowflake acceptorMessageId = Snowflake.of(challenge.getAcceptorMessageId());
-		Snowflake acceptorChannelId = Snowflake.of(challenge.getAcceptorChannelId());
-		Message acceptorMessage = client.getMessageById(acceptorChannelId, acceptorMessageId).block();
-		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+				.makeAllItalic()
+				.update().subscribe();
+		new MessageUpdater(challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), client)
 				.makeAllNotBold()
 				.addLine(String.format("This challenge has expired after not getting accepted within %s minutes.", time))
-				.makeAllItalic();
-		acceptorMessage.edit().withContent(acceptorMessageContent.get())
+				.makeAllItalic()
+				.update()
 				.withComponents(none).subscribe();
 
 		int timer = service.findGameByGuildId(challenge.getGuildId()).get().getMessageCleanupTime();
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
-				challengerMessageId.asLong(), challengerChannelId.asLong(), null);
+				challengeId, challenge.getChallengerChannelId(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
-				acceptorMessageId.asLong(), acceptorChannelId.asLong(), null);
+				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}
 
 	public void decayAcceptedChallenge(long challengeId, int time) {
@@ -122,8 +115,24 @@ public class TimedTaskService {
 		Optional<Game> maybeGame = service.findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		bot.sendToChannel(challenge.getGuildId(), String.format("<@%s> your match with <@%s> has expired after %s minutes",// TODO wochen, tage, etc
-				challenge.getChallengerId(), challenge.getAcceptorId(), time)).subscribe();
+		new MessageUpdater(challengeId, challenge.getChallengerChannelId(), client)
+				.makeAllNotBold()
+				.addLine(String.format("This match has expired after not getting reports within %s minutes.", time))
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
+		new MessageUpdater(challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), client)
+				.makeAllNotBold()
+				.addLine(String.format("This challenge has expired after not getting reports within %s minutes.", time))
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
+
+		int timer = service.findGameByGuildId(challenge.getGuildId()).get().getMessageCleanupTime();
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
+				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
+				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}
 
 	public void autoResolveMatch(long challengeId, int time) {
@@ -180,16 +189,16 @@ public class TimedTaskService {
 		String reportPresentNewRating = service.formatRating(isDraw ?
 				hasChallengerReported ? match.getWinnerNewRating() : match.getLoserNewRating()
 				: isWin ? match.getWinnerNewRating() : match.getLoserNewRating());
-		MessageContent reportPresentMessageContent = new MessageContent(reportPresentMessage.getContent())
+		new MessageUpdater(reportPresentMessage)
 				.makeAllNotBold()
 				.addLine(String.format("Your opponent has failed to report within %s minutes. " +
 								"The match is getting resolved according to your report now.",
 						game.getMatchAutoResolveTime()))
 				.addLine(String.format("Your rating went from %s to %s.",
 						reportPresentOldRating, reportPresentNewRating))
-				.makeAllItalic();
-		reportPresentMessage.edit().withContent(reportPresentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
 
 		Message reportAbsentMessage = hasChallengerReported ?
 				bot.getAcceptorMessage(challenge).block()
@@ -200,16 +209,16 @@ public class TimedTaskService {
 		String reportAbsentNewRating = service.formatRating(isDraw ?
 				hasChallengerReported ? match.getLoserNewRating() : match.getWinnerNewRating()
 				: isWin ? match.getLoserNewRating() : match.getWinnerNewRating());
-		MessageContent reportAbsentMessageContent = new MessageContent(reportAbsentMessage.getContent())
+		new MessageUpdater(reportAbsentMessage)
 				.makeAllNotBold()
 				.addLine(String.format("You have failed to report within %s minutes. " +
 								"The match is getting resolved according to your opponent's report now.",
 						game.getMatchAutoResolveTime()))
 				.addLine(String.format("Your rating went from %s to %s.",
 						reportAbsentOldRating, reportAbsentNewRating))
-				.makeAllItalic();
-		reportAbsentMessage.edit().withContent(reportAbsentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				reportPresentMessage.getId().asLong(), reportPresentMessage.getChannelId().asLong(), match);
@@ -224,24 +233,23 @@ public class TimedTaskService {
 		Message reportPresentMessage = hasChallengerReported ?
 				bot.getChallengerMessage(challenge).block()
 				: bot.getAcceptorMessage(challenge).block();
-		MessageContent reportPresentMessageContent = new MessageContent(reportPresentMessage.getContent())
+		new MessageUpdater(reportPresentMessage)
 				.makeAllNotBold()
 				.addLine("Your opponent has failed to report within %s minutes. " +
 						"The match is canceled.")
-				.makeAllItalic();
-		reportPresentMessage.edit().withContent(reportPresentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
-
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
 		Message reportAbsentMessage = hasChallengerReported ?
 				bot.getAcceptorMessage(challenge).block()
 				: bot.getChallengerMessage(challenge).block();
-		MessageContent reportAbsentMessageContent = new MessageContent(reportAbsentMessage.getContent())
+		new MessageUpdater(reportAbsentMessage)
 				.makeAllNotBold()
 				.addLine("You have failed to report within %s minutes. " +
 						"The match is canceled.")
-				.makeAllItalic();
-		reportAbsentMessage.edit().withContent(reportAbsentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				reportPresentMessage.getId().asLong(), reportPresentMessage.getChannelId().asLong(), null);

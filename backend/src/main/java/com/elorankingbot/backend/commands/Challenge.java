@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
-import com.elorankingbot.backend.command.MessageContent;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -71,18 +70,14 @@ public class Challenge extends SlashCommand {
 			return;
 		}
 
-		MessageContent challengerMessageContent = new MessageContent(
-				String.format("You have challenged <@%s> to a match. I'll let you know when they react.", acceptorId));
 		MessageCreateSpec challengerMessageSpec = MessageCreateSpec.builder()
-				.content(challengerMessageContent.get())
+				.content(String.format("You have challenged <@%s> to a match. I'll let you know when they react.",
+						acceptorId))
 				.build();
 		Message challengerMessage = bot.sendToUser(challengerId, challengerMessageSpec).block();
 
-		MessageContent acceptorMessageContent = new MessageContent(
-				String.format("You have been challenged to a match by <@%s>. Accept?", challengerId))
-				.makeLastLineBold();
 		MessageCreateSpec acceptorMessageSpec = MessageCreateSpec.builder()
-				.content(acceptorMessageContent.get())
+				.content(String.format("**You have been challenged to a match by <@%s>. Accept?**", challengerId))
 				.addComponent(ActionRow.of(
 						Buttons.accept(challengerMessage.getChannelId().asLong()),
 						Buttons.decline(challengerMessage.getChannelId().asLong())
