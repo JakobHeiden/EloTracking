@@ -8,8 +8,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import java.util.Optional;
-
 public class ChallengeAsUserInteraction {
 
 	private final UserInteractionEvent event;

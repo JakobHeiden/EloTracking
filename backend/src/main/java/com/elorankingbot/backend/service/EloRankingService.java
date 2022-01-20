@@ -69,9 +69,10 @@ public class EloRankingService {
 		gameDao.deleteById(guildId);
 	}
 
-	public void resetAllPlayerRatings() {
-
-		// TODO!
+	public void resetAllPlayerRatings(long guildId) {
+		List<Player> players = playerDao.findAllByGuildId(guildId);
+		players.forEach(player -> player.setRating(1200));
+		playerDao.saveAll(players);
 	}
 
 	// Game

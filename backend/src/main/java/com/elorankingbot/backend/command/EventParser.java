@@ -115,7 +115,7 @@ public class EventParser {
 							DiscordBotService.class, TimedTaskQueue.class, GatewayDiscordClient.class)
 					.newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
 		} catch (Exception e) {
-			wrapper.bot().sendToOwner(e.getMessage());
+			wrapper.bot().sendToOwner("exception occurred while instantiating command " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
@@ -131,7 +131,7 @@ public class EventParser {
 							TimedTaskQueue.class, GatewayDiscordClient.class)
 					.newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
 		} catch (Exception e) {
-			wrapper.bot().sendToOwner(e.toString());
+			wrapper.bot().sendToOwner("exception occurred while instantiating command " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}

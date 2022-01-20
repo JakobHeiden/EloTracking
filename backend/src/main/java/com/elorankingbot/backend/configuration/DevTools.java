@@ -1,22 +1,21 @@
 package com.elorankingbot.backend.configuration;
 
-import com.elorankingbot.backend.commands.Createresultchannel;
+import com.elorankingbot.backend.commands.Challenge;
+import com.elorankingbot.backend.commands.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.Forcematch;
+import com.elorankingbot.backend.commands.Reset;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.spec.RoleCreateSpec;
-import discord4j.rest.service.ApplicationService;
-import discord4j.rest.util.PermissionSet;
+import discord4j.discordjson.json.ApplicationCommandData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.util.Arrays;
 
 @Component
 @Slf4j
@@ -25,27 +24,14 @@ public class DevTools {
 	private final EloRankingService service;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
-	private final ApplicationService applicationService;
-
-	private long entenwieseId;
-	private Guild entenwieseGuild;
-	private long botId;
-	private Game game;
-	private Role modRole;
-	private Role adminRole;
 
 	public DevTools(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client) {
 		this.service = service;
 		this.bot = bot;
 		this.client = client;
-		this.botId = client.getSelfId().asLong();
-		entenwieseId = Long.parseLong(service.getPropertiesLoader().getEntenwieseId());
-		//this.entenwieseGuild = client.getGuildById(Snowflake.of(entenwieseId)).block();
-		this.applicationService = client.getRestClient().getApplicationService();
 
 		ApplicationPropertiesLoader props = service.getPropertiesLoader();
 		if (props.isDeleteDataOnStartup()) service.deleteAllData();
-		if (props.isSetupDevGame()) setupDevGame();
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 	}
 
@@ -54,10 +40,10 @@ public class DevTools {
 		service.findAllGames().forEach(
 				game -> {
 					try {
-						Guild guild = client.getGuildById(Snowflake.of(game.getGuildId())).block();
-						Role currentAdminRole = guild.getRoleById(Snowflake.of(game.getAdminRoleId())).block();
-						Role currentModRole = guild.getRoleById(Snowflake.of(game.getModRoleId())).block();
-						bot.deployCommand(game.getGuildId(), Forcematch.getRequest(false)).subscribe();
+						bot.deleteAllGuildCommands(game.getGuildId()).blockLast();
+						updateCommands(game).block();
+						setPermissionsForAdminCommands(game);
+						setPermissionsForModCommands(game);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
@@ -65,50 +51,30 @@ public class DevTools {
 		);
 	}
 
-	private void setupDevGame() {
-		log.info("Setting up Dev Game...");
-		game = new Game(entenwieseId, "Dev Game");
-		game.setAllowDraw(true);
-		game.setDisputeCategoryId(924062376871989248L);
-		game.setMatchAutoResolveTime(1);
-		game.setOpenChallengeDecayTime(1);
-		game.setAcceptedChallengeDecayTime(1);
-		game.setMessageCleanupTime(3);
-
-		deleteOldEloChannelsAndCategories();
-		Createresultchannel.staticExecute(service, entenwieseGuild, game);
-		deleteOldRoles();
-		makeOwnerAdmin();
-
-		service.saveGame(game);
+	private Mono<Object> updateCommands(Game game) {
+		long guildId = game.getGuildId();
+		//Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
+		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, Forcematch.getRequest(game.isAllowDraw()));
+		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
+		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
+		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.Permission.getRequest());
+		return Mono.zip(deployForcematch, deployChallenge, deployUserInteractionChallenge,
+				deployReset, deployPermission).map(allTheReturnValues -> "");
 	}
 
-	private void deleteOldEloChannelsAndCategories() {
-		List<GuildChannel> channels = entenwieseGuild.getChannels()
-				.filter(channel -> channel.getName().equals("elotracking-results")
-						|| channel.getName().equals("elo disputes"))
-				.collectList().block();
-		for (GuildChannel channel : channels) {
-			channel.delete().block();
-		}
+	private void setPermissionsForAdminCommands(Game game) {
+		long guildId = game.getGuildId();
+		Role adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getAdminRoleId())).block();
+		Arrays.stream(com.elorankingbot.backend.commands.Permission.adminCommands)
+				.forEach(commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
 	}
 
-	private void deleteOldRoles() {
-		entenwieseGuild.getRoles().filter(role -> role.getName().equals("Elo Admin")
-						|| role.getName().equals("Elo Moderator"))
-				.subscribe(role -> role.delete().subscribe());
-		adminRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elo Admin")
-				.permissions(PermissionSet.none()).build()).block();
-		game.setAdminRoleId(adminRole.getId().asLong());
-		modRole = entenwieseGuild.createRole(RoleCreateSpec.builder().name("Elo Moderator")
-				.permissions(PermissionSet.none()).build()).block();
-		game.setModRoleId(modRole.getId().asLong());
-	}
-
-	private void makeOwnerAdmin() {
-		long ownerId = Long.valueOf(service.getPropertiesLoader().getOwnerId());
-		entenwieseGuild.getMemberById(Snowflake.of(ownerId)).block()
-				.asFullMember().block()
-				.addRole(adminRole.getId()).subscribe();
+	private void setPermissionsForModCommands(Game game) {
+		long guildId = game.getGuildId();
+		Role modRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getModRoleId())).block();
+		Role adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getAdminRoleId())).block();
+		Arrays.stream(com.elorankingbot.backend.commands.Permission.modCommands).forEach(
+				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
 }
