@@ -17,7 +17,7 @@ public abstract class ButtonCommand {
 	protected final GatewayDiscordClient client;
 	protected final ButtonInteractionEvent event;
 
-	protected final List none = new ArrayList<>();
+	protected static final List none = new ArrayList<>();
 
 	protected ButtonCommand(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
 							GatewayDiscordClient client) {

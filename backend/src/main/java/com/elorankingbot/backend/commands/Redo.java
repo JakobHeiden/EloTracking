@@ -1,18 +1,18 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
-import com.elorankingbot.backend.command.MessageContent;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 
-public class Redo extends ButtonCommandForChallenge {
+public class Redo extends ButtonCommandRelatedToChallenge {
 
 	public Redo(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -37,21 +37,20 @@ public class Redo extends ButtonCommandForChallenge {
 	private void oneCalledForRedo() {
 		service.saveChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a redo :leftwards_arrow_with_hook:. If your opponent does as well, " +
-						"reports will be redone. You can still file a dispute.");
-		parentMessage.edit().withContent(parentMessageContent.get())
+						"reports will be redone. You can still file a dispute.")
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.makeLastLineStrikeThrough()
 				.addLine("Your opponent called for a redo :leftwards_arrow_with_hook:. " +
 						"You can agree to a redo or file a dispute.")
-				.makeLastLineBold();
-		targetMessage.edit().withContent(targetMessageContent.get())
+				.makeLastLineBold()
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.agreeToRedo(parentMessage.getChannelId().asLong()),
 						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
@@ -62,20 +61,19 @@ public class Redo extends ButtonCommandForChallenge {
 		challenge.redo();
 		service.saveChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine(String.format("You agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
 						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
-				.makeLastLineBold();
-		parentMessage.edit().withContent(parentMessageContent.get()).withComponents(
-				createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+				.makeLastLineBold()
+				.update()
+				.withComponents(createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
+		new MessageUpdater(targetMessage)
 				.addLine(String.format("Your opponent agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
 						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
-				.makeLastLineBold();
-		targetMessage.edit().withContent(targetMessageContent.get()).withComponents(
-				createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
+				.makeLastLineBold()
+				.update()
+				.withComponents(createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
 	}
 
 	private static ActionRow createActionRow(long channelId, boolean allowDraw) {

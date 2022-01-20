@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
@@ -15,7 +15,7 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
-public abstract class ButtonCommandForDispute extends ButtonCommand {
+public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 
 	protected ChallengeModel challenge;
 	protected Game game;
@@ -25,7 +25,7 @@ public abstract class ButtonCommandForDispute extends ButtonCommand {
 	protected Message acceptorMessage;
 
 
-	protected ButtonCommandForDispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 
 		this.challenge = service.getChallengeByChallengerMessageId(Long.parseLong(

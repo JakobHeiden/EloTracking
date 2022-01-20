@@ -6,7 +6,6 @@ import com.elorankingbot.backend.model.CurrentIndex;
 import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.service.TimedTaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,8 +43,9 @@ public class TimedTaskQueue {
 	}
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int delay, long relationId, long otherId, Object value) {
-		log.debug(String.format("adding timed task for %s of type %s with timer %s", relationId, type.name(), delay));
 		int targetTimeSlotIndex = (currentIndex + delay) % numberOfTimeSlots;
+		log.debug(String.format("adding timed task for %s of type %s with timer %s to slot %s",
+				relationId, type.name(), delay, targetTimeSlotIndex));
 		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(targetTimeSlotIndex);
 		Set<TimedTask> timedTasks = maybeTimeSlot.isPresent() ? maybeTimeSlot.get().getTimedTasks() : new HashSet<>();
 		timedTasks.add(new TimedTask(type, delay, relationId, otherId, value));

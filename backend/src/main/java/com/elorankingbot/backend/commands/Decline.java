@@ -1,18 +1,16 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.MessageContent;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
-import java.util.ArrayList;
-
-public class Decline extends ButtonCommandForChallenge {
+public class Decline extends ButtonCommandRelatedToChallenge {
 
 	public Decline(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				   TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -25,23 +23,21 @@ public class Decline extends ButtonCommandForChallenge {
 
 		service.deleteChallengeById(challenge.getChallengerMessageId());
 
-		MessageContent acceptorMessageContent = new MessageContent(acceptorMessage.getContent())
+		new MessageUpdater(acceptorMessage)
 				.makeAllNotBold()
 				.addLine("You have declined :negative_squared_cross_mark: their challenge.")
-				.makeAllItalic();
-		acceptorMessage.edit().withContent(acceptorMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
-
-		Message challengerMessage = bot.getMessageById(
-				Long.parseLong(event.getCustomId().split(":")[1]), challenge.getChallengerMessageId()).block();
-		MessageContent challengerMessageContent = new MessageContent(challengerMessage.getContent())
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
+		new MessageUpdater(challenge.getChallengerMessageId(),
+				Long.parseLong(event.getCustomId().split(":")[1]), client)
 				.addLine("They have declined :negative_squared_cross_mark: your challenge.")
-				.makeAllItalic();
-		challengerMessage.edit().withContent(challengerMessageContent.get()).subscribe();
+				.makeAllItalic()
+				.update().subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(), null);
+				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong(), null);
+				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}
 }

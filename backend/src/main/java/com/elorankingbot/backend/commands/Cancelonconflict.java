@@ -1,11 +1,11 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
-import com.elorankingbot.backend.command.MessageContent;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
@@ -13,9 +13,7 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 
-import java.util.ArrayList;
-
-public class Cancelonconflict extends ButtonCommandForChallenge {
+public class Cancelonconflict extends ButtonCommandRelatedToChallenge {
 
 	public Cancelonconflict(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
@@ -40,23 +38,21 @@ public class Cancelonconflict extends ButtonCommandForChallenge {
 								   EloRankingService service) {
 		service.saveChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a cancel :negative_squared_cross_mark:. If your opponent does as well, " +
 						"the match will be canceled. You can still file a dispute.")
-				.makeLastLineBold();
-		parentMessage.edit().withContent(parentMessageContent.get())
+				.makeLastLineBold()
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+		new MessageUpdater(targetMessage)
 				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
-						"You can agree to a cancel or file a dispute.");
-		targetMessage.edit().withContent(targetMessageContent.get())
+						"You can agree to a cancel or file a dispute.")
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.agreeToCancelOnConflict(parentMessage.getChannelId().asLong()),
-						Buttons.dispute(parentMessage.getChannelId().asLong())
-				)).subscribe();
+						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
 	}
 
 	static void bothCalledForCancel(Message parentMessage, Message targetMessage,
@@ -64,17 +60,16 @@ public class Cancelonconflict extends ButtonCommandForChallenge {
 									EloRankingService service, TimedTaskQueue queue) {
 		service.deleteChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You agreed to a cancel :negative_squared_cross_mark:. The match is canceled.");
-		parentMessage.edit().withContent(parentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+				.addLine("You agreed to a cancel :negative_squared_cross_mark:. The match is canceled.")
+				.update()
+				.withComponents(none).subscribe();
+		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
-				.addLine("Your opponent agreed to a cancel :negative_squared_cross_mark:. The match is canceled.");
-		targetMessage.edit().withContent(targetMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
+				.addLine("Your opponent agreed to a cancel :negative_squared_cross_mark:. The match is canceled.")
+				.update()
+				.withComponents(none).subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);

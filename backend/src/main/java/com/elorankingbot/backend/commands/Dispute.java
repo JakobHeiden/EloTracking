@@ -1,9 +1,9 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
-import com.elorankingbot.backend.command.MessageContent;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -16,13 +16,13 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
-public class Dispute extends ButtonCommandForChallenge {
+public class Dispute extends ButtonCommandRelatedToChallenge {
 
-	TextChannel disputeChannel;
-	MessageContent parentMessageContent;
-	MessageContent targetMessageContent;
-	String challengerName;
-	String acceptorName;
+	private TextChannel disputeChannel;
+	private String parentMessageContent;
+	private String targetMessageContent;
+	private String challengerName;
+	private String acceptorName;
 
 	public Dispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				   TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -43,19 +43,20 @@ public class Dispute extends ButtonCommandForChallenge {
 	}
 
 	private void editChallengeMessages() {
-		parentMessageContent = new MessageContent(parentMessage.getContent())
+		parentMessageContent = new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine(String.format("You filed a dispute :exclamation:. For resolution, please go to <#%s>.",
-						disputeChannel.getId().asString()));
-		parentMessage.edit().withContent(parentMessageContent.get())
-				.withComponents(none).block();
-
-		targetMessageContent = new MessageContent(targetMessage.getContent())
+						disputeChannel.getId().asString()))
+				.update()
+				.withComponents(none).block()
+				.getContent();
+		targetMessageContent = new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.addLine(String.format("Your opponent filed a dispute :exclamation:. For resolution, please go to <#%s>.",
-						disputeChannel.getId().asString()));
-		targetMessage.edit().withContent(targetMessageContent.get())
-				.withComponents(none).block();
+						disputeChannel.getId().asString()))
+				.update()
+				.withComponents(none).block()
+				.getContent();
 	}
 
 	private void createDisputeChannel() {
@@ -81,11 +82,11 @@ public class Dispute extends ButtonCommandForChallenge {
 				.withEmbeds(EmbedCreateSpec.builder()
 						.addField(EmbedCreateFields.Field.of(
 								"My message with " + challengerName,
-								isChallengerCommand ? parentMessageContent.get() : targetMessageContent.get(),
+								isChallengerCommand ? parentMessageContent : targetMessageContent,
 								true))
 						.addField(EmbedCreateFields.Field.of(
 								"My message with " + acceptorName,
-								isChallengerCommand ? targetMessageContent.get() : parentMessageContent.get(),
+								isChallengerCommand ? targetMessageContent : parentMessageContent,
 								true))
 						.build())
 				.withComponents(createActionRow(game.isAllowDraw()))

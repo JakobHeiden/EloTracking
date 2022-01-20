@@ -1,20 +1,18 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.Buttons;
-import com.elorankingbot.backend.command.MessageContent;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-import java.util.ArrayList;
-
-public class Lose extends ButtonCommandForChallenge {
+public class Lose extends ButtonCommandRelatedToChallenge {
 
 	public Lose(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
 				GatewayDiscordClient client) {
@@ -35,15 +33,14 @@ public class Lose extends ButtonCommandForChallenge {
 	private void processFirstToReport() {
 		service.saveChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a loss :arrow_down:. I'll let you know when your opponent reports.");
-		parentMessage.edit().withContent(parentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
-				.addLine("Your opponent reported a loss :arrow_down:.");
-		targetMessage.edit().withContent(targetMessageContent.get()).subscribe();
+				.addLine("You reported a loss :arrow_down:. I'll let you know when your opponent reports.")
+				.update()
+				.withComponents(none).subscribe();
+		new MessageUpdater(targetMessage)
+				.addLine("Your opponent reported a loss :arrow_down:.")
+				.update().subscribe();
 	}
 
 	private void processHarmony() {
@@ -55,23 +52,22 @@ public class Lose extends ButtonCommandForChallenge {
 		service.saveMatch(match);
 		service.deleteChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a loss :arrow_down:. The match has been resolved:")
 				.addLine(String.format("Your rating went from %s to %s.",
 						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
-				.makeAllItalic();
-		parentMessage.edit().withContent(parentMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
+		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.addLine("Your opponent reported a loss :arrow_down:. The match has been resolved:")
 				.addLine(String.format("Your rating went from %s to %s.",
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
-				.makeAllItalic();
-		targetMessage.edit().withContent(targetMessageContent.get())
-				.withComponents(new ArrayList<>()).subscribe();
+				.makeAllItalic()
+				.update()
+				.withComponents(none).subscribe();
 
 		bot.postToResultChannel(game, match);
 
@@ -84,26 +80,25 @@ public class Lose extends ButtonCommandForChallenge {
 	private void processConflict() {
 		service.saveChallenge(challenge);
 
-		MessageContent parentMessageContent = new MessageContent(parentMessage.getContent())
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a loss :arrow_down:. Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
 						"or file a dispute.")
-				.makeLastLineBold();
-		parentMessage.edit().withContent(parentMessageContent.get())
+				.makeLastLineBold()
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.redo(targetMessage.getChannelId().asLong()),
 						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
 						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
-
-		MessageContent targetMessageContent = new MessageContent(targetMessage.getContent())
+		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a loss :arrow_down:. " +
 						"Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
 						"or file a dispute.")
-				.makeLastLineBold();
-		targetMessage.edit().withContent(targetMessageContent.get())
+				.makeLastLineBold()
+				.update()
 				.withComponents(ActionRow.of(
 						Buttons.redo(targetMessage.getChannelId().asLong()),
 						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
