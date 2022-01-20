@@ -68,7 +68,7 @@ public class Reset extends SlashCommand {
 			resetGuildCommands();
 		} else {
 			event.reply("Resetting all player ratings.").subscribe();
-			service.resetAllPlayerRatings();
+			service.resetAllPlayerRatings(guildId);
 		}
 	}
 

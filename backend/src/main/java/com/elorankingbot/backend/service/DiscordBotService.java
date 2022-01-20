@@ -34,7 +34,7 @@ import java.util.Arrays;
 public class DiscordBotService {
 
 	@Getter
-	private final GatewayDiscordClient client;// TODO vllt refaktorieren und den commands die referenz geben
+	private final GatewayDiscordClient client;
 	private final EloRankingService service;
 	private final TimedTaskQueue queue;
 	private final ApplicationService applicationService;
@@ -139,8 +139,6 @@ public class DiscordBotService {
 				.doOnNext(commandData -> applicationService.deleteGuildApplicationCommand(
 						botId, guildId, Long.parseLong(commandData.id())).subscribe());
 	}
-
-	// TODO permissions fuer server-owner setzen?
 
 	public void setDiscordCommandPermissions(long guildId, String commandName, Role... roles) {
 		var requestBuilder = ApplicationCommandPermissionsRequest.builder();
