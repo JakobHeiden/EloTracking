@@ -86,7 +86,7 @@ public class DiscordBotService {
 	}
 
 	public String getPlayerName(long playerId) {
-		return client.getUserById(Snowflake.of(playerId)).block().getUsername();
+		return client.getUserById(Snowflake.of(playerId)).block().getTag();
 	}
 
 	public Mono<Message> getMessageById(long channelId, long messageId) {
