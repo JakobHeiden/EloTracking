@@ -7,9 +7,10 @@ import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
-import discord4j.core.GatewayDiscordClient;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -19,28 +20,27 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
 @Slf4j
 @Service
 public class EloRankingService {
 
 	private static float initialRating = 1200;
 	private static float k = 16;
-	private final DiscordBotService bot;
-	private final GatewayDiscordClient client;
-	private final GameDao gameDao;
-	private final ChallengeDao challengeDao;
-	private final MatchDao matchDao;
-	private final PlayerDao playerDao;
-	private final TimeSlotDao timeSlotDao;
+	private DiscordBotService bot;
+	private GameDao gameDao;
+	private ChallengeDao challengeDao;
+	private MatchDao matchDao;
+	private PlayerDao playerDao;
+	private TimeSlotDao timeSlotDao;
 	@Getter
 	private ApplicationPropertiesLoader propertiesLoader;
 
-	public EloRankingService(@Lazy DiscordBotService discordBotService, @Lazy GatewayDiscordClient client,
-							 ApplicationPropertiesLoader propertiesLoader,
+	@Autowired
+	public EloRankingService(@Lazy DiscordBotService discordBotService, ApplicationPropertiesLoader propertiesLoader,
 							 GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
 							 TimeSlotDao timeSlotDao) {
 		this.bot = discordBotService;
-		this.client = client;
 		this.propertiesLoader = propertiesLoader;
 		this.gameDao = gameDao;
 		this.challengeDao = challengeDao;

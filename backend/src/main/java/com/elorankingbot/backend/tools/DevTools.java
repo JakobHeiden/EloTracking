@@ -1,10 +1,11 @@
-package com.elorankingbot.backend.configuration;
+package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.commands.admin.Permission;
 import com.elorankingbot.backend.commands.admin.Reset;
 import com.elorankingbot.backend.commands.challenge.Challenge;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
+import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
