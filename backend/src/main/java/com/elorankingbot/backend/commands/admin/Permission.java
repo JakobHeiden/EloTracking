@@ -1,5 +1,6 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
