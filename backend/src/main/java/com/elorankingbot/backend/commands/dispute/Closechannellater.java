@@ -1,16 +1,18 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.dispute;
 
+import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class Closechannelnow extends ButtonCommand {
+public class Closechannellater extends ButtonCommand {
 
-	public Closechannelnow(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	public Closechannellater(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
@@ -22,7 +24,15 @@ public class Closechannelnow extends ButtonCommand {
 			return;
 		}
 
-		event.getInteraction().getChannel().block().delete().subscribe();
+		event.getInteraction().getMessage().get().edit()
+				.withComponents(none).subscribe();
+		event.getInteraction().getChannel().block()
+				.createMessage("I will delete this channel in 24 hours.").subscribe();
+
+		queue.addTimedTask(
+				TimedTask.TimedTaskType.CHANNEL_DELETE, 24 * 60,
+				event.getInteraction().getChannelId().asLong(),
+				0L, null);
 		event.acknowledge().subscribe();
 	}
 }

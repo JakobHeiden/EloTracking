@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.tools;
 
-import com.elorankingbot.backend.tools.Emojis;
 import discord4j.core.object.component.Button;
 
 public class Buttons {

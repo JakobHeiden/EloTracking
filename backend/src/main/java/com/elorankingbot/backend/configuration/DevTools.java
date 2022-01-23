@@ -1,9 +1,10 @@
 package com.elorankingbot.backend.configuration;
 
-import com.elorankingbot.backend.commands.Challenge;
-import com.elorankingbot.backend.commands.ChallengeAsUserInteraction;
-import com.elorankingbot.backend.commands.Forcematch;
-import com.elorankingbot.backend.commands.Reset;
+import com.elorankingbot.backend.commands.admin.Permission;
+import com.elorankingbot.backend.commands.admin.Reset;
+import com.elorankingbot.backend.commands.challenge.Challenge;
+import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
+import com.elorankingbot.backend.commands.mod.ForceMatch;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -54,11 +55,11 @@ public class DevTools {
 	private Mono<Object> updateCommands(Game game) {
 		long guildId = game.getGuildId();
 		//Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
-		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, Forcematch.getRequest(game.isAllowDraw()));
+		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw()));
 		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
-		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.Permission.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, Permission.getRequest());
 		return Mono.zip(deployForcematch, deployChallenge, deployUserInteractionChallenge,
 				deployReset, deployPermission).map(allTheReturnValues -> "");
 	}
@@ -66,7 +67,7 @@ public class DevTools {
 	private void setPermissionsForAdminCommands(Game game) {
 		long guildId = game.getGuildId();
 		Role adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getAdminRoleId())).block();
-		Arrays.stream(com.elorankingbot.backend.commands.Permission.adminCommands)
+		Arrays.stream(Permission.adminCommands)
 				.forEach(commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
 	}
 
@@ -74,7 +75,7 @@ public class DevTools {
 		long guildId = game.getGuildId();
 		Role modRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getModRoleId())).block();
 		Role adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getAdminRoleId())).block();
-		Arrays.stream(com.elorankingbot.backend.commands.Permission.modCommands).forEach(
+		Arrays.stream(Permission.modCommands).forEach(
 				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
 }

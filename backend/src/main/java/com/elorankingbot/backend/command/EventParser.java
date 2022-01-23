@@ -1,9 +1,9 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.commands.ChallengeAsUserInteraction;
-import com.elorankingbot.backend.commands.Setup;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.admin.Setup;
+import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -11,19 +11,18 @@ import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.tools.ButtonInteractionEventWrapper;
 import com.elorankingbot.backend.tools.ChatInputInteractionEventWrapper;
 import com.elorankingbot.backend.tools.UserInteractionEventWrapper;
+import com.google.common.collect.ImmutableMap;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.event.domain.interaction.ChatInputAutoCompleteEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
-import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -31,29 +30,39 @@ import java.util.function.Function;
 @Component
 public class EventParser {
 
-	private final GatewayDiscordClient client;
-	private final Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory;
-	private final Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory;
-	private final Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory;
-	private final EloRankingService service;
-	private final DiscordBotService bot;
-	private final ApplicationService applicationService;
-	private final TimedTaskQueue queue;
-	private final long botId;
+	static Map<String, String> commandStringToClassName = ImmutableMap.<String, String>builder()
+			.put("permission", "admin.Permission")
+			.put("reset", "admin.Reset")
+			.put("setup", "admin.Setup")
+
+			.put("forcematch", "mod.ForceMatch")
+
+			.put("accept", "challenge.Accept")
+			.put("cancel", "challenge.Cancel")
+			.put("cancelonconflict", "challenge.CancelOnConflict")
+			.put("challenge", "challenge.Challenge")
+			.put("decline", "challenge.Decline")
+			.put("dispute", "challenge.Dispute")
+			.put("draw", "challenge.Draw")
+			.put("lose", "challenge.Lose")
+			.put("redo", "challenge.Redo")
+			.put("redoorcancel", "challenge.RedoOrCancel")
+			.put("win", "challenge.Win")
+
+			.put("closechannellater", "dispute.CloseChannelLater")
+			.put("closechannelnow", "dispute.CloseChannelNow")
+			.put("ruleascancel", "dispute.RuleAsCancel")
+			.put("ruleasdraw", "dispute.RuleAsDraw")
+			.put("ruleaswin", "dispute.RuleAsWin")
+
+			.build();
 
 	public EventParser(GatewayDiscordClient client, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
 					   Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory,
 					   Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory,
 					   Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
-		this.client = client;
-		this.slashCommandFactory = slashCommandFactory;
-		this.buttonCommandFactory = buttonCommandFactory;
-		this.service = service;
-		this.bot = bot;
-		this.applicationService = client.getRestClient().getApplicationService();
-		this.botId = client.getSelfId().asLong();
-		this.queue = queue;
-		this.userInteractionChallengeFactory = userInteractionChallengeFactory;
+		ApplicationService applicationService = client.getRestClient().getApplicationService();
+		long botId = client.getSelfId().asLong();
 
 		client.on(ChatInputInteractionEvent.class)
 				.map(event -> new ChatInputInteractionEventWrapper(event, service, bot, queue, client))
@@ -96,21 +105,10 @@ public class EventParser {
 								event.getGuild().block().getEveryoneRole().block());
 					}
 				});
-
-		client.on(ChatInputAutoCompleteEvent.class)
-				.subscribe(event -> {
-
-					event.respondWithSuggestions(List.of(
-							ApplicationCommandOptionChoiceData.builder().name("win").value("win").build(),
-							ApplicationCommandOptionChoiceData.builder().name("draw").value("draw").build(),
-							ApplicationCommandOptionChoiceData.builder().name("undo").value("undo").build()
-					)).subscribe();
-				});
 	}
 
 	public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
-		String commandClassName = wrapper.event().getCommandName();
-		commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
+		String commandClassName = commandStringToClassName.get(wrapper.event().getCommandName());
 		log.trace("commandString = " + commandClassName);
 		try {
 			return (SlashCommand) Class.forName("com.elorankingbot.backend.commands." + commandClassName)
@@ -125,8 +123,8 @@ public class EventParser {
 	}
 
 	public static ButtonCommand createButtonCommand(ButtonInteractionEventWrapper wrapper) {
-		String commandClassName = wrapper.event().getCustomId().split(":")[0];
-		commandClassName = commandClassName.substring(0, 1).toUpperCase() + commandClassName.substring(1);
+		String commandName = wrapper.event().getCustomId().split(":")[0];
+		String commandClassName = commandStringToClassName.get(commandName);
 		log.trace("commandString = " + commandClassName);
 		try {
 			return (ButtonCommand) Class.forName("com.elorankingbot.backend.commands." + commandClassName)

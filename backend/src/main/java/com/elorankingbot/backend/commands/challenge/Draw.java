@@ -1,28 +1,28 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.challenge;
 
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.tools.Buttons;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Lose extends ButtonCommandRelatedToChallenge {
+public class Draw extends ButtonCommandRelatedToChallenge {
 
-	public Lose(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
-				GatewayDiscordClient client) {
+	public Draw(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
+				TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {
 		ChallengeModel.ReportIntegrity reportIntegrity;
-		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.LOSE);
-		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.LOSE);
+		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.DRAW);
+		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.DRAW);
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) processFirstToReport();
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) processHarmony();
@@ -35,36 +35,33 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a loss :arrow_down:. I'll let you know when your opponent reports.")
+				.addLine("You reported a draw :left_right_arrow:. I'll let you know when your opponent reports.")
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a loss :arrow_down:.")
+				.addLine("Your opponent reported a draw :left_right_arrow:.")
 				.update().subscribe();
 	}
 
 	private void processHarmony() {
-		Match match = new Match(guildId,
-				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
-				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
-				false);
+		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(), true);
 		double[] eloResults = service.updateRatings(match);// TODO transaction machen?
 		service.saveMatch(match);
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a loss :arrow_down:. The match has been resolved:")
+				.addLine("You reported a draw :left_right_arrow:. The match has been resolved:")
 				.addLine(String.format("Your rating went from %s to %s.",
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
-				.addLine("Your opponent reported a loss :arrow_down:. The match has been resolved:")
+				.addLine("Your opponent reported a draw :left_right_arrow:. The match has been resolved:")
 				.addLine(String.format("Your rating went from %s to %s.",
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
@@ -82,9 +79,9 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a loss :arrow_down:. Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
-						"or file a dispute.")
+				.addLine("You reported a draw :left_right_arrow:.")
+				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
+						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
 				.withComponents(ActionRow.of(
@@ -93,10 +90,9 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a loss :arrow_down:. " +
-						"Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
-						"or file a dispute.")
+				.addLine("Your opponent reported a draw :left_right_arrow:.")
+				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
+						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
 				.withComponents(ActionRow.of(

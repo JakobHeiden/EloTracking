@@ -1,28 +1,27 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.challenge;
 
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.tools.Buttons;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Draw extends ButtonCommandRelatedToChallenge {
+public class Cancel extends ButtonCommandRelatedToChallenge {
 
-	public Draw(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
-				TimedTaskQueue queue, GatewayDiscordClient client) {
+	public Cancel(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
+				  TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {
 		ChallengeModel.ReportIntegrity reportIntegrity;
-		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.DRAW);
-		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.DRAW);
+		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.CANCEL);
+		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.CANCEL);
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) processFirstToReport();
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) processHarmony();
@@ -35,43 +34,37 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a draw :left_right_arrow:. I'll let you know when your opponent reports.")
+				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
+						"I'll let you know when your opponent reacts.")
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a draw :left_right_arrow:.")
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
 				.update().subscribe();
 	}
 
 	private void processHarmony() {
-		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(), true);
-		double[] eloResults = service.updateRatings(match);// TODO transaction machen?
-		service.saveMatch(match);
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a draw :left_right_arrow:. The match has been resolved:")
-				.addLine(String.format("Your rating went from %s to %s.",
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
+				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
+						"The challenge has been canceled.")
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
-				.addLine("Your opponent reported a draw :left_right_arrow:. The match has been resolved:")
-				.addLine(String.format("Your rating went from %s to %s.",
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+						"The challenge has been canceled.")
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
 
-		bot.postToResultChannel(game, match);
-
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
 	}
 
 	private void processConflict() {
@@ -79,9 +72,9 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You reported a draw :left_right_arrow:.")
-				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
-						"and/or call for a cancel, or file a dispute.")
+				.addLine("You called for a cancel :negative_squared_cross_mark:. Your report and that of your " +
+						"opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
 				.withComponents(ActionRow.of(
@@ -90,8 +83,9 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a draw :left_right_arrow:.")
-				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
+				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+						"Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, " +
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()

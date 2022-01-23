@@ -1,27 +1,28 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.challenge;
 
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.model.ChallengeModel;
+import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.tools.Buttons;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Cancel extends ButtonCommandRelatedToChallenge {
+public class Lose extends ButtonCommandRelatedToChallenge {
 
-	public Cancel(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
-				  TimedTaskQueue queue, GatewayDiscordClient client) {
+	public Lose(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
+				GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {
 		ChallengeModel.ReportIntegrity reportIntegrity;
-		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.CANCEL);
-		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.CANCEL);
+		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.LOSE);
+		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.LOSE);
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) processFirstToReport();
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) processHarmony();
@@ -34,37 +35,46 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
-						"I'll let you know when your opponent reacts.")
+				.addLine("You reported a loss :arrow_down:. I'll let you know when your opponent reports.")
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
+				.addLine("Your opponent reported a loss :arrow_down:.")
 				.update().subscribe();
 	}
 
 	private void processHarmony() {
+		Match match = new Match(guildId,
+				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
+				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
+				false);
+		double[] eloResults = service.updateRatings(match);// TODO transaction machen?
+		service.saveMatch(match);
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
-						"The challenge has been canceled.")
+				.addLine("You reported a loss :arrow_down:. The match has been resolved:")
+				.addLine(String.format("Your rating went from %s to %s.",
+						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
-						"The challenge has been canceled.")
+				.addLine("Your opponent reported a loss :arrow_down:. The match has been resolved:")
+				.addLine(String.format("Your rating went from %s to %s.",
+						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
 
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
+		bot.postToResultChannel(game, match);
+
+		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
+				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
+		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
+				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
 	}
 
 	private void processConflict() {
@@ -72,9 +82,9 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You called for a cancel :negative_squared_cross_mark:. Your report and that of your " +
-						"opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
+				.addLine("You reported a loss :arrow_down:. Your report and that of your opponent is in conflict.")
+				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
+						"or file a dispute.")
 				.makeLastLineBold()
 				.update()
 				.withComponents(ActionRow.of(
@@ -83,10 +93,10 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
 						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
 		new MessageUpdater(targetMessage)
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+				.addLine("Your opponent reported a loss :arrow_down:. " +
 						"Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, " +
-						"and/or call for a cancel, or file a dispute.")
+				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
+						"or file a dispute.")
 				.makeLastLineBold()
 				.update()
 				.withComponents(ActionRow.of(

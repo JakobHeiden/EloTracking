@@ -1,5 +1,9 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.challenge.Challenge;
+import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
+import com.elorankingbot.backend.commands.mod.ForceMatch;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -76,7 +80,7 @@ public class Setup extends SlashCommand {
 		event.reply(reply).doOnError(error -> System.out.println(error.getMessage())).subscribe();
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
-				guild.getId(), guild.getName(), guild.getMemberCount()));
+				guild.getId().asLong(), guild.getName(), guild.getMemberCount()));
 	}
 
 	private void assignModAndAdminRole() {
@@ -133,23 +137,23 @@ public class Setup extends SlashCommand {
 	private Mono<Object> updateCommands() {
 		// TODO vielleicht verallgemeinern, auslagern in SlashCommand, mit nem array an relevanten classes in jeder subklasse
 		Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
-		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, Forcematch.getRequest(game.isAllowDraw()));
+		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw()));
 		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
-		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.Permission.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest());
 		reply += "\n- I updated my commands on this server. This may take a minute to update.";
 		return Mono.zip(deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
 				deployReset, deployPermission).map(allTheReturnValues -> null);
 	}
 
 	private void setPermissionsForAdminCommands() {
-		Arrays.stream(com.elorankingbot.backend.commands.Permission.adminCommands)
+		Arrays.stream(com.elorankingbot.backend.commands.admin.Permission.adminCommands)
 				.forEach(commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
 	}
 
 	private void setPermissionsForModCommands() {
-		Arrays.stream(com.elorankingbot.backend.commands.Permission.modCommands).forEach(
+		Arrays.stream(com.elorankingbot.backend.commands.admin.Permission.modCommands).forEach(
 				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
 }

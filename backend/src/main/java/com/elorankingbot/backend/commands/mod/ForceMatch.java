@@ -1,5 +1,6 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.mod;
 
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -16,7 +17,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
 
-public class Forcematch extends SlashCommand {
+public class ForceMatch extends SlashCommand {
 
 	private User user1;
 	private User user2;
@@ -26,7 +27,7 @@ public class Forcematch extends SlashCommand {
 	private String templatePlayer1;
 	private String templatePlayer2;
 
-	public Forcematch(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
+	public ForceMatch(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
 					  TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
