@@ -9,7 +9,6 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
 import java.util.Optional;
 
-// Subclasses must start with a capital letter and have no other capital letters to be recognized by the parser
 public abstract class SlashCommand {
 
 	protected final EloRankingService service;
