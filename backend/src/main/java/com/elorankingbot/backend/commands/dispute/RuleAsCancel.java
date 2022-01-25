@@ -26,12 +26,14 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 				.addLine(String.format("%s has ruled this match to be canceled :negative_squared_cross_mark:.", moderatorName))
 				.makeAllItalic()
 				.resend()
-				.withComponents(none).subscribe();
+				.withComponents(none)
+				.block();
 		new MessageUpdater(acceptorMessage)
 				.addLine(String.format("%s has ruled this match to be canceled :negative_squared_cross_mark:.", moderatorName))
 				.makeAllItalic()
 				.resend()
-				.withComponents(none).subscribe();
+				.withComponents(none)
+				.subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(), null);

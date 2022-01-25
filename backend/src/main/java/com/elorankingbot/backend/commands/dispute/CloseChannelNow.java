@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.commands.ButtonCommandRelatedToChallengeOrDispute;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -11,7 +12,8 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 public class CloseChannelNow extends ButtonCommand {
 
-	public CloseChannelNow(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	public CloseChannelNow(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
+						   TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 

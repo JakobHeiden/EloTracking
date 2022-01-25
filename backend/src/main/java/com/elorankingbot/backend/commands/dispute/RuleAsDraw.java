@@ -22,13 +22,14 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 		Match match = new Match(challenge.getGuildId(), challenge.getChallengerId(), challenge.getAcceptorId(), true);
 		eloResults = service.updateRatingsAndSaveMatch(match);
 		service.saveMatch(match);
-		service.deleteChallenge(challenge);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled the match a draw :left_right_arrow: for <@%s> and <@%s>.",
 				moderatorName, challenge.getChallengerId(), challenge.getAcceptorId()));
 		bot.postToResultChannel(game, match);
 		updateMessages();
+
+		service.deleteChallenge(challenge);
 
 		addMatchSummarizeToQueue(match);
 		event.acknowledge().subscribe();
@@ -41,13 +42,16 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic()
 				.resend()
-				.withComponents(none).subscribe();
+				.withComponents(none)
+				.doOnNext(super::updateChallengerMessageIdAndSaveChallenge)
+				.block();
 		new MessageUpdater(acceptorMessage)
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic()
 				.resend()
-				.withComponents(none).subscribe();
+				.withComponents(none)
+				.subscribe(super::updateAcceptorMessageIdAndSaveChallenge);
 	}
 }

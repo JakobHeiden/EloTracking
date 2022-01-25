@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.commands.ButtonCommandRelatedToChallengeOrDispute;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -30,7 +31,7 @@ public class CloseChannelLater extends ButtonCommand {
 				.createMessage("I will delete this channel in 24 hours.").subscribe();
 
 		queue.addTimedTask(
-				TimedTask.TimedTaskType.CHANNEL_DELETE, 24 * 60,
+				TimedTask.TimedTaskType.CHANNEL_DELETE, 1,// 24 * 60,
 				event.getInteraction().getChannelId().asLong(),
 				0L, null);
 		event.acknowledge().subscribe();

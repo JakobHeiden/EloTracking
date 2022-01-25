@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.commands.challenge;
 
-import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
