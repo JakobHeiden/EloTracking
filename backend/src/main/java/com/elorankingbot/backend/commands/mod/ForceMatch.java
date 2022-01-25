@@ -97,7 +97,7 @@ public class ForceMatch extends SlashCommand {
 
 	private void forceResolveMatch() {
 		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), isDraw);
-		double[] eloResults = service.updateRatings(match);
+		double[] eloResults = service.updateRatingsAndSaveMatch(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?
 				"*%s has forced a draw with %s. Your rating went from %s to %s.%s*"

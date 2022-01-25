@@ -80,8 +80,8 @@ public class Challenge extends SlashCommand {
 				.content(String.format("**You have been challenged to a match by %s. Accept?**",
 						event.getInteraction().getUser().getTag()))
 				.addComponent(ActionRow.of(
-						Buttons.accept(challengerMessage.getChannelId().asLong()),
-						Buttons.decline(challengerMessage.getChannelId().asLong())
+						Buttons.accept(challengerMessage.getId().asLong()),
+						Buttons.decline(challengerMessage.getId().asLong())
 				)).build();
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 
@@ -97,7 +97,7 @@ public class Challenge extends SlashCommand {
 				TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY,
 				game.getOpenChallengeDecayTime(),
 				challenge.getId(),
-				challenge.getChallengerChannelId(),
+				0L,
 				null);
 	}
 }

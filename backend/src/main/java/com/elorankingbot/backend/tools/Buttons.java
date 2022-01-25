@@ -5,72 +5,70 @@ import discord4j.core.object.component.Button;
 public class Buttons {
 
 	// Challenge
-	public static Button accept(long channelId) {
-		return Button.primary("accept:" + channelId,
+	public static Button accept(long id) {
+		return Button.primary("accept:" + id,
 				Emojis.checkMark, "Accept");// TODO evtl U+2694 crossed swords?
 	}
 
-	public static Button decline(long channelId) {
-		return Button.danger("decline:" + channelId,
+	public static Button decline(long id) {
+		return Button.danger("decline:" + id,
 				Emojis.crossMark, "Decline");
 	}
 
-	public static Button win(long channelId) {
-		return Button.primary("win:" + channelId,
+	public static Button win(long id) {
+		return Button.primary("win:" + id,
 				Emojis.arrowUp, "Win");
 	}
 
-	public static Button lose(long channelId) {
-		return Button.primary("lose:" + channelId,
+	public static Button lose(long id) {
+		return Button.primary("lose:" + id,
 				Emojis.arrowDown, "Lose");
 	}
 
-	public static Button draw(long channelId) {
-		return Button.primary("draw:" + channelId,
+	public static Button draw(long id) {
+		return Button.primary("draw:" + id,
 				Emojis.leftRightArrow, "Draw");
 	}
 
-	public static Button cancel(long channelId) {
-		return Button.danger("cancel:" + channelId,
+	public static Button cancel(long id) {
+		return Button.danger("cancel:" + id,
 				Emojis.crossMark, "Cancel match");
 	}
 
-	public static Button redo(long channelId) {
-		return Button.primary("redo:" + channelId,
+	public static Button redo(long id) {
+		return Button.primary("redo:" + id,
 				Emojis.redoArrow, "Call for a redo");
 	}
 
-	public static Button cancelOnConflict(long channelId) {
-		return Button.danger("cancelonconflict:" + channelId,
-				Emojis.crossMark, "Cancel match");
+	public static Button cancelOnConflict(long id) {
+		return Button.danger("cancelonconflict:" + id,
+				Emojis.crossMark, "Call for a cancel");
 	}
 
-	public static Button redoOrCancelOnConflict(long channelId) {
-		return Button.primary("redoorcancel:" + channelId,
+	public static Button redoOrCancelOnConflict(long id) {
+		return Button.primary("redoorcancel:" + id,
 				Emojis.shrug, "Redo or Cancel");
 	}
 
-	public static Button agreeToRedo(long channelId) {
-		return Button.primary("redo:" + channelId,
+	public static Button agreeToRedo(long id) {
+		return Button.primary("redo:" + id,
 				Emojis.redoArrow, "Agree to a redo");
 	}
 
-	public static Button agreeToCancelOnConflict(long channelId) {
-		return Button.danger("cancelonconflict:" + channelId,
-				Emojis.crossMark, "Cancel match");
+	public static Button agreeToCancelOnConflict(long id) {
+		return Button.danger("cancelonconflict:" + id,
+				Emojis.crossMark, "Agree to a cancel");
 	}
 
-	public static Button dispute(long channelId) {
-		return Button.secondary("dispute:" + channelId,
+	public static Button dispute(long id) {
+		return Button.secondary("dispute:" + id,
 				Emojis.exclamation, "File a dispute");
 	}
 
 	// Dispute
-	public static Button ruleAsWin(long challengeId, boolean isChallengerWin, String winnerName,
-								   long challengerChannelId, long acceptorChannelId) {
-		return Button.primary(String.format("ruleaswin:%s:%s:%s:%s",
-						challengeId, String.valueOf(isChallengerWin),
-						challengerChannelId, acceptorChannelId),
+	public static Button ruleAsWin(long challengeId, boolean isChallengerWin, String winnerName) {
+		return Button.primary(String.format("ruleaswin:%s:%s",
+						challengeId, isChallengerWin),
 				Emojis.arrowUp, "Rule the match a win for " + winnerName);
 	}
 

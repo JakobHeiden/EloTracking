@@ -6,11 +6,9 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.component.ActionRow;
 
 public class Lose extends ButtonCommandRelatedToChallenge {
 
@@ -31,8 +29,6 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processFirstToReport() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a loss :arrow_down:. I'll let you know when your opponent reports.")
@@ -40,7 +36,7 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a loss :arrow_down:.")
-				.update().subscribe();
+				.resend().subscribe(super::updateAndSaveChallenge);
 	}
 
 	private void processHarmony() {
@@ -48,8 +44,7 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
 				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 				false);
-		double[] eloResults = service.updateRatings(match);// TODO transaction machen?
-		service.saveMatch(match);
+		double[] eloResults = service.updateRatingsAndSaveMatch(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -68,7 +63,6 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
-
 		bot.postToResultChannel(game, match);
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
@@ -78,8 +72,6 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processConflict() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a loss :arrow_down:. Your report and that of your opponent is in conflict.")
@@ -87,22 +79,15 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 						"or file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(ActionRow.of(
-						Buttons.redo(targetMessage.getChannelId().asLong()),
-						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+				.withComponents(Win.createActionRow(challenge.getId())).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a loss :arrow_down:. " +
 						"Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
 						"or file a dispute.")
 				.makeLastLineBold()
-				.update()
-				.withComponents(ActionRow.of(
-						Buttons.redo(targetMessage.getChannelId().asLong()),
-						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+				.resend()
+				.withComponents(Win.createActionRow(challenge.getId()))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 }

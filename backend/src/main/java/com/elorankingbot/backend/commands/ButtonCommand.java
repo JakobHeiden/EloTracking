@@ -19,8 +19,8 @@ public abstract class ButtonCommand {
 
 	protected static final List none = new ArrayList<>();
 
-	protected ButtonCommand(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
-							GatewayDiscordClient client) {
+	protected ButtonCommand(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
+							TimedTaskQueue queue, GatewayDiscordClient client) {
 		this.event = event;
 		this.service = service;
 		this.bot = bot;

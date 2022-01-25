@@ -30,18 +30,19 @@ public class ChallengeModel {
         CONFLICT
     }
 
+    @Id
+    private long id;
     private long guildId;
     private long challengerId;
-    @Id
     private long challengerMessageId;
     private long challengerChannelId;
     private long acceptorId;
     private long acceptorMessageId;
     private long acceptorChannelId;
 
-    private boolean isAccepted;
-    private ReportStatus challengerReported;
-    private ReportStatus acceptorReported;
+    private boolean isAccepted = false;
+    private ReportStatus challengerReported = ReportStatus.NOT_YET_REPORTED;
+    private ReportStatus acceptorReported = ReportStatus.NOT_YET_REPORTED;
     private boolean challengerCalledForCancel = false;
     private boolean acceptorCalledForCancel = false;
     private boolean challengerCalledForRedo = false;
@@ -51,6 +52,7 @@ public class ChallengeModel {
     public ChallengeModel(long guildId,
                           long challengerId, long challengerMessageId, long challengerChannelId,
                           long acceptorId, long acceptorMessageId, long acceptorChannelId) {
+        this.id = challengerMessageId;
         this.guildId = guildId;
         this.challengerId = challengerId;
         this.challengerMessageId = challengerMessageId;
@@ -58,14 +60,6 @@ public class ChallengeModel {
         this.acceptorId = acceptorId;
         this.acceptorMessageId = acceptorMessageId;
         this.acceptorChannelId = acceptorChannelId;
-
-        this.isAccepted = false;
-        this.challengerReported = ReportStatus.NOT_YET_REPORTED;
-        this.acceptorReported = ReportStatus.NOT_YET_REPORTED;
-    }
-
-    public long getId() {
-        return getChallengerMessageId();
     }
 
     public ReportIntegrity setChallengerReported(ReportStatus challengerReported) {

@@ -20,7 +20,7 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 	}
 
 	public void execute() {
-		boolean bothCalledForRedo = false;
+		boolean bothCalledForRedo;
 		if (isChallengerCommand) {
 			challenge.setChallengerCalledForRedo(true);
 			bothCalledForRedo = challenge.isAcceptorCalledForRedo();
@@ -35,31 +35,29 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void oneCalledForRedo() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a redo :leftwards_arrow_with_hook:. If your opponent does as well, " +
 						"reports will be redone. You can still file a dispute.")
 				.update()
 				.withComponents(ActionRow.of(
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+						Buttons.dispute(challenge.getId()))).subscribe();
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.makeLastLineStrikeThrough()
 				.addLine("Your opponent called for a redo :leftwards_arrow_with_hook:. " +
 						"You can agree to a redo or file a dispute.")
 				.makeLastLineBold()
-				.update()
+				.resend()
 				.withComponents(ActionRow.of(
-						Buttons.agreeToRedo(parentMessage.getChannelId().asLong()),
-						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
+						Buttons.agreeToRedo(challenge.getId()),
+						Buttons.dispute(challenge.getId())))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 
-	static void bothCalledForRedo(Message parentMessage, Message targetMessage, ChallengeModel challenge, Game game,
+	private void bothCalledForRedo(Message parentMessage, Message targetMessage, ChallengeModel challenge, Game game,
 								  EloRankingService service) {
 		challenge.redo();
-		service.saveChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
@@ -67,16 +65,17 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
 				.makeLastLineBold()
 				.update()
-				.withComponents(createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
+				.withComponents(createActionRow(challenge.getId(), game.isAllowDraw())).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine(String.format("Your opponent agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
 						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
 				.makeLastLineBold()
-				.update()
-				.withComponents(createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
+				.resend()
+				.withComponents(createActionRow(challenge.getId(), game.isAllowDraw()))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 
-	private static ActionRow createActionRow(long channelId, boolean allowDraw) {
+	static ActionRow createActionRow(long channelId, boolean allowDraw) {
 		if (allowDraw) return ActionRow.of(
 				Buttons.win(channelId),
 				Buttons.lose(channelId),

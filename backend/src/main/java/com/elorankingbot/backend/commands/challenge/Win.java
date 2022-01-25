@@ -11,7 +11,6 @@ import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.entity.Message;
 
 public class Win extends ButtonCommandRelatedToChallenge {
 
@@ -32,8 +31,6 @@ public class Win extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processFirstToReport() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a win :arrow_up:. I'll let you know when your opponent reports.")
@@ -41,7 +38,7 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a win :arrow_up:.")
-				.update().subscribe();
+				.resend().subscribe(super::updateAndSaveChallenge);
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
 				challenge.getId(), 0L, null);
@@ -52,8 +49,7 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
 				false);
-		double[] eloResults = service.updateRatings(match);// TODO transaction machen?
-		service.saveMatch(match);
+		double[] eloResults = service.updateRatingsAndSaveMatch(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -81,29 +77,28 @@ public class Win extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processConflict() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(createActionRow(targetMessage)).subscribe();
+				.withComponents(createActionRow(challenge.getId())).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
 						"or file a dispute.")
 				.makeLastLineBold()
-				.update()
-				.withComponents(createActionRow(parentMessage)).subscribe();
+				.resend()
+				.withComponents(createActionRow(challenge.getId()))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 
-	private static ActionRow createActionRow(Message otherMessage) {
+	static ActionRow createActionRow(long challengeId) {
 		return ActionRow.of(
-				Buttons.redo(otherMessage.getChannelId().asLong()),
-				Buttons.cancelOnConflict(otherMessage.getChannelId().asLong()),
-				Buttons.redoOrCancelOnConflict(otherMessage.getChannelId().asLong()),
-				Buttons.dispute(otherMessage.getChannelId().asLong()));
+				Buttons.redo(challengeId),
+				Buttons.cancelOnConflict(challengeId),
+				Buttons.redoOrCancelOnConflict(challengeId),
+				Buttons.dispute(challengeId));
 	}
 }

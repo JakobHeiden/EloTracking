@@ -79,7 +79,7 @@ public class TimedTaskService {
 	}
 
 	public void decayOpenChallenge(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = service.getChallengeByChallengerMessageId(challengeId);
+		Optional<ChallengeModel> maybeChallenge = service.findChallengeById(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
 		if (challenge.isAccepted()) return;
@@ -88,7 +88,7 @@ public class TimedTaskService {
 		Optional<Game> maybeGame = service.findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		new MessageUpdater(challengeId, challenge.getChallengerChannelId(), client)
+		new MessageUpdater(challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), client)
 				.addLine(String.format("This challenge has expired after not getting accepted within %s minutes.", time))
 				.makeAllItalic()
 				.update().subscribe();
@@ -101,13 +101,13 @@ public class TimedTaskService {
 
 		int timer = service.findGameByGuildId(challenge.getGuildId()).get().getMessageCleanupTime();
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
-				challengeId, challenge.getChallengerChannelId(), null);
+				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
 				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}
 
 	public void decayAcceptedChallenge(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = service.getChallengeByChallengerMessageId(challengeId);
+		Optional<ChallengeModel> maybeChallenge = service.findChallengeById(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 
 		ChallengeModel challenge = maybeChallenge.get();
@@ -115,7 +115,7 @@ public class TimedTaskService {
 		Optional<Game> maybeGame = service.findGameByGuildId(challenge.getGuildId());
 		if (maybeGame.isEmpty()) return;
 
-		new MessageUpdater(challengeId, challenge.getChallengerChannelId(), client)
+		new MessageUpdater(challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), client)
 				.makeAllNotBold()
 				.addLine(String.format("This match has expired after not getting reports within %s minutes.", time))
 				.makeAllItalic()
@@ -136,7 +136,7 @@ public class TimedTaskService {
 	}
 
 	public void autoResolveMatch(long challengeId, int time) {
-		Optional<ChallengeModel> maybeChallenge = service.getChallengeById(challengeId);
+		Optional<ChallengeModel> maybeChallenge = service.findChallengeById(challengeId);
 		if (maybeChallenge.isEmpty()) return;
 		ChallengeModel challenge = maybeChallenge.get();
 		if (challenge.isDispute()) return;
@@ -172,7 +172,7 @@ public class TimedTaskService {
 
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, isDraw);
-		service.updateRatings(match);
+		service.updateRatingsAndSaveMatch(match);
 		service.deleteChallengeById(challenge.getId());
 		postToInvolvedChannelsAndAddTimedTask(challenge, match, game, hasChallengerReported, isDraw, isWin);
 		bot.postToResultChannel(game, match);

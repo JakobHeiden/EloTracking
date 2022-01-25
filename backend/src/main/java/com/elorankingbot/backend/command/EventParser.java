@@ -109,7 +109,7 @@ public class EventParser {
 
 	public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
 		String commandClassName = commandStringToClassName.get(wrapper.event().getCommandName());
-		log.trace("commandString = " + commandClassName);
+		log.trace("commandClassName = " + commandClassName);
 		try {
 			return (SlashCommand) Class.forName("com.elorankingbot.backend.commands." + commandClassName)
 					.getConstructor(ChatInputInteractionEvent.class, EloRankingService.class,
@@ -125,7 +125,7 @@ public class EventParser {
 	public static ButtonCommand createButtonCommand(ButtonInteractionEventWrapper wrapper) {
 		String commandName = wrapper.event().getCustomId().split(":")[0];
 		String commandClassName = commandStringToClassName.get(commandName);
-		log.trace("commandString = " + commandClassName);
+		log.trace("commandClassName = " + commandClassName);
 		try {
 			return (ButtonCommand) Class.forName("com.elorankingbot.backend.commands." + commandClassName)
 					.getConstructor(ButtonInteractionEvent.class, EloRankingService.class, DiscordBotService.class,

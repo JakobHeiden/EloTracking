@@ -18,25 +18,21 @@ public class Decline extends ButtonCommandRelatedToChallenge {
 	}
 
 	public void execute() {
-		Message acceptorMessage = event.getMessage().get();
-		ChallengeModel challenge = service.getChallengeByAcceptorMessageId(acceptorMessage.getId().asLong()).get();
+		service.deleteChallengeById(challenge.getId());
 
-		service.deleteChallengeById(challenge.getChallengerMessageId());
-
-		new MessageUpdater(acceptorMessage)
+		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You have declined :negative_squared_cross_mark: their challenge.")
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
-		new MessageUpdater(challenge.getChallengerMessageId(),
-				Long.parseLong(event.getCustomId().split(":")[1]), client)
+		new MessageUpdater(targetMessage)
 				.addLine("They have declined :negative_squared_cross_mark: your challenge.")
 				.makeAllItalic()
-				.update().subscribe();
-
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
+				.resend()
+				.subscribe(message ->
+						queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+						message.getId().asLong(), message.getChannelId().asLong(), null));
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}

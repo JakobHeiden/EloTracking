@@ -19,12 +19,13 @@ import java.util.Set;
 @Component
 public class TimedTaskQueue {
 
-	private int numberOfTimeSlots;
+	private final int numberOfTimeSlots;
 	private int currentIndex;
 	private final DiscordBotService bot;
 	private final TimedTaskService timedTaskService;
 	private final TimeSlotDao timeSlotDao;
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
+	private boolean runQueue;
 
 	public TimedTaskQueue(EloRankingService service, @Lazy DiscordBotService bot,
 						  TimedTaskService timedTaskService, TimeSlotDao timeSlotDao,
@@ -34,6 +35,7 @@ public class TimedTaskQueue {
 		this.timeSlotDao = timeSlotDao;
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
 		this.numberOfTimeSlots = service.getPropertiesLoader().getNumberOfTimeSlots();
+		this.runQueue = service.getPropertiesLoader().isRunQueue();
 
 		if (!timedTaskQueueCurrentIndexDao.existsById(1)) {
 			currentIndex = 0;
@@ -43,6 +45,8 @@ public class TimedTaskQueue {
 	}
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int delay, long relationId, long otherId, Object value) {
+		if (!runQueue) return;
+
 		int targetTimeSlotIndex = (currentIndex + delay) % numberOfTimeSlots;
 		log.debug(String.format("adding timed task for %s of type %s with timer %s to slot %s",
 				relationId, type.name(), delay, targetTimeSlotIndex));
@@ -54,6 +58,8 @@ public class TimedTaskQueue {
 
 	@Scheduled(fixedRate = 60000)
 	public void tick() {
+		if (!runQueue) return;
+
 		log.debug("tick " + currentIndex);
 		try {
 			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);

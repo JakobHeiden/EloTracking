@@ -30,8 +30,6 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processFirstToReport() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
@@ -40,7 +38,7 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:.")
-				.update().subscribe();
+				.resend().subscribe(super::updateAndSaveChallenge);
 	}
 
 	private void processHarmony() {
@@ -48,17 +46,17 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
-				.addLine("You called for a cancel :negative_squared_cross_mark:. " +
+				.addLine("You agreed to a cancel :negative_squared_cross_mark:. " +
 						"The challenge has been canceled.")
 				.makeAllItalic()
 				.update()
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
-				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
+				.addLine("Your opponent agreed to a cancel :negative_squared_cross_mark:. " +
 						"The challenge has been canceled.")
 				.makeAllItalic()
-				.update()
+				.resend()
 				.withComponents(none).subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
@@ -68,8 +66,6 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processConflict() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a cancel :negative_squared_cross_mark:. Your report and that of your " +
@@ -77,22 +73,23 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(ActionRow.of(
-						Buttons.redo(targetMessage.getChannelId().asLong()),
-						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+				.withComponents(createActionrow(challenge.getId())).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
 						"Your report and that of your opponent is in conflict.")
 				.addLine("You can call for a redo of the reporting, " +
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
-				.update()
-				.withComponents(ActionRow.of(
-						Buttons.redo(targetMessage.getChannelId().asLong()),
-						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+				.resend()
+				.withComponents(createActionrow(challenge.getId()))
+				.subscribe(super::updateAndSaveChallenge);
+	}
+
+	private static ActionRow createActionrow(long challengeId) {
+		return ActionRow.of(
+				Buttons.redo(challengeId),
+				Buttons.cancelOnConflict(challengeId),
+				Buttons.redoOrCancelOnConflict(challengeId),
+				Buttons.dispute(challengeId));
 	}
 }

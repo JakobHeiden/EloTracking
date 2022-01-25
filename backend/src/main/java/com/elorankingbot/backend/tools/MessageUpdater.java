@@ -3,6 +3,8 @@ package com.elorankingbot.backend.tools;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageEditMono;
 
 public class MessageUpdater {
@@ -50,5 +52,11 @@ public class MessageUpdater {
 
 	public MessageEditMono update() {
 		return message.edit().withContent(content);
+	}
+
+	public MessageCreateMono resend() {
+		MessageChannel channel = message.getChannel().block();
+		message.delete().subscribe();
+		return channel.createMessage(content).withComponents(message.getComponents());
 	}
 }

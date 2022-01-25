@@ -29,15 +29,12 @@ public class CancelOnConflict extends ButtonCommandRelatedToChallenge {
 			bothCalledForCancel = challenge.isChallengerCalledForCancel();
 		}
 
-		if (!bothCalledForCancel) oneCalledForCancel(parentMessage, targetMessage, challenge, service);
+		if (!bothCalledForCancel) oneCalledForCancel();
 		if (bothCalledForCancel) bothCalledForCancel(parentMessage, targetMessage, challenge, game, service, queue);
 		event.acknowledge().subscribe();
 	}
 
-	static void oneCalledForCancel(Message parentMessage, Message targetMessage, ChallengeModel challenge,
-								   EloRankingService service) {
-		service.saveChallenge(challenge);
-
+	private void oneCalledForCancel() {
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a cancel :negative_squared_cross_mark:. If your opponent does as well, " +
@@ -45,14 +42,15 @@ public class CancelOnConflict extends ButtonCommandRelatedToChallenge {
 				.makeLastLineBold()
 				.update()
 				.withComponents(ActionRow.of(
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+						Buttons.dispute(challenge.getId()))).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
 						"You can agree to a cancel or file a dispute.")
-				.update()
+				.resend()
 				.withComponents(ActionRow.of(
-						Buttons.agreeToCancelOnConflict(parentMessage.getChannelId().asLong()),
-						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
+						Buttons.agreeToCancelOnConflict(challenge.getId()),
+						Buttons.dispute(challenge.getId())))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 
 	static void bothCalledForCancel(Message parentMessage, Message targetMessage,
@@ -68,7 +66,7 @@ public class CancelOnConflict extends ButtonCommandRelatedToChallenge {
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.addLine("Your opponent agreed to a cancel :negative_squared_cross_mark:. The match is canceled.")
-				.update()
+				.resend()
 				.withComponents(none).subscribe();
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),

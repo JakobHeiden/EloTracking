@@ -31,8 +31,6 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processFirstToReport() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a draw :left_right_arrow:. I'll let you know when your opponent reports.")
@@ -40,13 +38,12 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 				.withComponents(none).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a draw :left_right_arrow:.")
-				.update().subscribe();
+				.resend().subscribe(super::updateAndSaveChallenge);
 	}
 
 	private void processHarmony() {
 		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(), true);
-		double[] eloResults = service.updateRatings(match);// TODO transaction machen?
-		service.saveMatch(match);
+		double[] eloResults = service.updateRatingsAndSaveMatch(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -75,8 +72,6 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processConflict() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a draw :left_right_arrow:.")
@@ -84,21 +79,14 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(ActionRow.of(
-						Buttons.redo(targetMessage.getChannelId().asLong()),
-						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+				.withComponents(Win.createActionRow(challenge.getId())).subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a draw :left_right_arrow:.")
 				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
-				.update()
-				.withComponents(ActionRow.of(
-						Buttons.redo(targetMessage.getChannelId().asLong()),
-						Buttons.cancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.redoOrCancelOnConflict(targetMessage.getChannelId().asLong()),
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+				.resend()
+				.withComponents(Win.createActionRow(challenge.getId()))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 }
