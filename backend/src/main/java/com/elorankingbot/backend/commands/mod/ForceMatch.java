@@ -100,14 +100,14 @@ public class ForceMatch extends SlashCommand {
 		double[] eloResults = service.updateRatingsAndSaveMatch(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?
-				"*%s has forced a draw with %s. Your rating went from %s to %s.%s*"
-				: "*%s has forced a win over %s. Your rating went from %s to %s.%s*";
+				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
+				: "*%s has forced a win :arrow_up: over %s. Your rating went from %s to %s.%s*";
 		templatePlayer2 = isDraw ?
-				"*%s has forced a draw with %s. Your rating went from %s to %s.%s*"
-				: "*%s has forced a loss to %s. Your rating went from %s to %s.%s*";
+				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
+				: "*%s has forced a loss :arrow_down: to %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
-		String template = isDraw ? "Forced a draw between %s and %s.%s" : "Forced a win for %s over %s.%s";
+		String template = isDraw ? "Forced a draw :left_right_arrow: between %s and %s.%s" : "Forced a win :arrow_up: for %s over %s.%s";
 		event.reply(String.format(template, user1.getTag(), user2.getTag(), reason)).subscribe();
 	}
 
@@ -144,7 +144,7 @@ public class ForceMatch extends SlashCommand {
 		}
 		double[] eloResultsfromUndo = updateRatingsForUndo();
 		service.deleteMatch(match);
-		templatePlayer1 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";
+		templatePlayer1 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";// TODO anzeigen ob win oder loss
 		templatePlayer2 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResultsfromUndo);
 		event.reply(String.format("Reverted the last recorded match between %s and %s.",

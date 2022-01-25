@@ -90,6 +90,10 @@ public class ChallengeModel {
         return ReportIntegrity.CONFLICT;
     }
 
+    public boolean hasAReport() {
+        return (acceptorReported != ReportStatus.NOT_YET_REPORTED) || (challengerReported != ReportStatus.NOT_YET_REPORTED);
+    }
+
     public void redo() {
         challengerReported = ReportStatus.NOT_YET_REPORTED;
         acceptorReported = ReportStatus.NOT_YET_REPORTED;

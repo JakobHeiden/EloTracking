@@ -6,11 +6,9 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.component.ActionRow;
 
 public class Draw extends ButtonCommandRelatedToChallenge {
 

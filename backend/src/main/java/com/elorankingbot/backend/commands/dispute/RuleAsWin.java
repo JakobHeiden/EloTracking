@@ -28,7 +28,6 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, false);
 		eloResults = service.updateRatingsAndSaveMatch(match);
 		service.saveMatch(match);
-		service.deleteChallenge(challenge);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled this match a win :arrow_up: for <@%s> and a loss :arrow_down: for <@%s>.",
@@ -36,26 +35,37 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		bot.postToResultChannel(game, match);
 		updateMessages();
 
+		service.deleteChallenge(challenge);
+
 		addMatchSummarizeToQueue(match);
 		event.acknowledge().subscribe();
 	}
 
 	private void updateMessages() {
 		Message winnerMessage = isChallengerWin ? challengerMessage : acceptorMessage;
-		new MessageUpdater(winnerMessage)
+		winnerMessage = new MessageUpdater(winnerMessage)
 				.addLine(String.format("%s has ruled this match as a win :arrow_up: for you.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
 				.makeAllItalic()
 				.resend()
-				.withComponents(none).subscribe();
+				.withComponents(none)
+				.block();
 		Message loserMessage = isChallengerWin ? acceptorMessage : challengerMessage;
-		new MessageUpdater(loserMessage)
+		loserMessage = new MessageUpdater(loserMessage)
 				.addLine(String.format("%s has ruled this match as a loss :arrow_down: for you.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
 						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
 				.makeAllItalic()
 				.resend()
-				.withComponents(none).subscribe();
+				.withComponents(none)
+				.block();
+		if (isChallengerWin) {
+			super.updateChallengerMessageIdAndSaveChallenge(winnerMessage);
+			super.updateAcceptorMessageIdAndSaveChallenge(loserMessage);
+		} else {
+			super.updateChallengerMessageIdAndSaveChallenge(loserMessage);
+			super.updateAcceptorMessageIdAndSaveChallenge(winnerMessage);
+		}
 	}
 }

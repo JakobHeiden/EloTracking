@@ -1,11 +1,15 @@
 package com.elorankingbot.backend.timedtask;
 
+import com.elorankingbot.backend.commands.timed.AutoResolveMatch;
+import com.elorankingbot.backend.commands.timed.DecayAcceptedChallenge;
+import com.elorankingbot.backend.commands.timed.DecayOpenChallenge;
 import com.elorankingbot.backend.dao.TimeSlotDao;
 import com.elorankingbot.backend.dao.TimedTaskQueueCurrentIndexDao;
 import com.elorankingbot.backend.model.CurrentIndex;
 import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,16 +25,20 @@ public class TimedTaskQueue {
 
 	private final int numberOfTimeSlots;
 	private int currentIndex;
+	private final EloRankingService service;
 	private final DiscordBotService bot;
+	private final GatewayDiscordClient client;
 	private final TimedTaskService timedTaskService;
 	private final TimeSlotDao timeSlotDao;
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
 	private boolean runQueue;
 
 	public TimedTaskQueue(EloRankingService service, @Lazy DiscordBotService bot,
-						  TimedTaskService timedTaskService, TimeSlotDao timeSlotDao,
+						  GatewayDiscordClient client, TimedTaskService timedTaskService, TimeSlotDao timeSlotDao,
 						  TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
+		this.service = service;
 		this.bot = bot;
+		this.client = client;
 		this.timedTaskService = timedTaskService;
 		this.timeSlotDao = timeSlotDao;
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
@@ -90,13 +98,13 @@ public class TimedTaskQueue {
 		log.debug(String.format("executing %s %s after %s", task.type().name(), id, time));
 		switch (task.type()) {
 			case OPEN_CHALLENGE_DECAY:
-				timedTaskService.decayOpenChallenge(id, time);
+				new DecayOpenChallenge(service, bot, client, this, id, time).execute();
 				break;
 			case ACCEPTED_CHALLENGE_DECAY:
-				timedTaskService.decayAcceptedChallenge(id, time);
+				new DecayAcceptedChallenge(service, bot, client, this, id, time).execute();
 				break;
 			case MATCH_AUTO_RESOLVE:
-				timedTaskService.autoResolveMatch(id, time);
+				new AutoResolveMatch(service, bot, client, this, id, time).execute();
 				break;
 			case MATCH_SUMMARIZE:
 				timedTaskService.summarizeMatch(id, task.otherId(), task.value());

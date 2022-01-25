@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.commands.ButtonCommandRelatedToChallengeOrDispute;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.Setup;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;

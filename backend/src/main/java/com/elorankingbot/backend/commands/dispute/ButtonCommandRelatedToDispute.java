@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.dispute;
 
-import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.commands.ButtonCommandRelatedToChallengeOrDispute;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
@@ -16,21 +16,15 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 
-public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
+public abstract class ButtonCommandRelatedToDispute extends ButtonCommandRelatedToChallengeOrDispute {
 
-	protected ChallengeModel challenge;
-	protected Game game;
 	protected TextChannel disputeChannel;
 	protected String moderatorName;
 	protected Message challengerMessage;
 	protected Message acceptorMessage;
 
-
 	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-
-		this.challenge = service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
-		this.game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		this.disputeChannel = (TextChannel) event.getInteraction().getChannel().block();
 		this.moderatorName = event.getInteraction().getUser().getUsername();
 		this.challengerMessage = client.getMessageById(Snowflake.of(challenge.getChallengerChannelId()),
@@ -58,8 +52,8 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 
 	protected void addMatchSummarizeToQueue(Match match) {
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(), match);
+				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong(), match);
+				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), match);
 	}
 }
