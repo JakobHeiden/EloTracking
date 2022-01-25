@@ -9,14 +9,14 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Redoorcancel extends ButtonCommandRelatedToChallenge {
+public class RedoOrCancel extends ButtonCommandRelatedToChallenge {
 
-	public Redoorcancel(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	public RedoOrCancel(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
 	public void execute() {
-		boolean bothCalledForRedo = false;
+		boolean bothCalledForRedo;
 		if (isChallengerCommand) {
 			challenge.setChallengerCalledForRedo(true);
 			bothCalledForRedo = challenge.isAcceptorCalledForRedo();
@@ -25,7 +25,7 @@ public class Redoorcancel extends ButtonCommandRelatedToChallenge {
 			bothCalledForRedo = challenge.isChallengerCalledForRedo();
 		}
 
-		boolean bothCalledForCancel = false;
+		boolean bothCalledForCancel;
 		if (isChallengerCommand) {
 			challenge.setChallengerCalledForCancel(true);
 			bothCalledForCancel = challenge.isAcceptorCalledForCancel();
@@ -40,7 +40,7 @@ public class Redoorcancel extends ButtonCommandRelatedToChallenge {
 		// this should be dead code, but might get accessed by simultaneous button presses by both parties...?
 		// TODO figure this out
 		else if (bothCalledForRedo) {
-			Redo.bothCalledForRedo(parentMessage, targetMessage, challenge, game, service);
+			bothCalledForRedo();
 			bot.sendToOwner("Redo.bothCalledForRedo()");
 		}
 		else if (bothCalledForCancel) {
@@ -51,25 +51,43 @@ public class Redoorcancel extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void opponentDidNotCallEither() {
-		service.saveChallenge(challenge);
-
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a redo or a cancel :person_shrugging:. You can still file a dispute.")
 				.update()
 				.withComponents(ActionRow.of(
-						Buttons.dispute(targetMessage.getChannelId().asLong()))).subscribe();
+						Buttons.dispute(challenge.getId()))).subscribe();
 		new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.makeLastLineStrikeThrough()
 				.addLine("Your opponent called for a redo or a cancel :person_shrugging:. " +
 						"You can accept either, or file a dispute")
 				.makeLastLineBold()
-				.update()
+				.resend()
 				.withComponents(ActionRow.of(
-						Buttons.agreeToRedo(parentMessage.getChannelId().asLong()),
-						Buttons.agreeToCancelOnConflict(parentMessage.getChannelId().asLong()),
-						Buttons.dispute(parentMessage.getChannelId().asLong()))).subscribe();
+						Buttons.agreeToRedo(challenge.getId()),
+						Buttons.agreeToCancelOnConflict(challenge.getId()),
+						Buttons.dispute(challenge.getId())))
+				.subscribe(super::updateAndSaveChallenge);
+	}
+
+	private void bothCalledForRedo() {
+		challenge.redo();
+
+		new MessageUpdater(parentMessage)
+				.makeAllNotBold()
+				.addLine(String.format("You agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
+						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
+				.makeLastLineBold()
+				.update()
+				.withComponents(Redo.createActionRow(targetMessage.getChannelId().asLong(), game.isAllowDraw())).subscribe();
+		new MessageUpdater(targetMessage)
+				.addLine(String.format("Your opponent agreed to a redo :leftwards_arrow_with_hook:. Reports are redone. " +
+						"Did you win or lose%s?", game.isAllowDraw() ? " or draw" : ""))
+				.makeLastLineBold()
+				.resend()
+				.withComponents(Redo.createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw()))
+				.subscribe(super::updateAndSaveChallenge);
 	}
 }
 

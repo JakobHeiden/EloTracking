@@ -10,8 +10,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
-import java.util.Optional;
-
 public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
 
 	protected final Message parentMessage;
@@ -25,21 +23,35 @@ public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
 											  TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 
-		Optional<ChallengeModel> maybeChallengeByChallengerMessageId = service.getChallengeByChallengerMessageId(event.getMessageId().asLong());
-		if (maybeChallengeByChallengerMessageId.isPresent()) {
-			this.challenge = maybeChallengeByChallengerMessageId.get();
-			this.guildId = challenge.getGuildId();
+		long challengeId = Long.parseLong(event.getCustomId().split(":")[1]);
+		this.challenge = service.findChallengeById(challengeId).get();
+		this.guildId = challenge.getGuildId();
+		if (event.getInteraction().getChannelId().asLong() == challenge.getChallengerChannelId()) {
 			this.isChallengerCommand = true;
 		} else {
-			this.challenge = service.getChallengeByAcceptorMessageId(event.getMessageId().asLong()).get();
-			this.guildId = challenge.getGuildId();
 			this.isChallengerCommand = false;
 		}
 		this.game = service.findGameByGuildId(guildId).get();
 		this.parentMessage = event.getMessage().get();
-		long targetUserPrivateChannelId = Long.parseLong(event.getCustomId().split(":")[1]);
 		this.targetMessage = isChallengerCommand ?
-				bot.getMessageById(targetUserPrivateChannelId, challenge.getAcceptorMessageId()).block()
-				: bot.getMessageById(targetUserPrivateChannelId, challenge.getChallengerMessageId()).block();
+				bot.getMessageById(challenge.getAcceptorChannelId(), challenge.getAcceptorMessageId()).block()
+				: bot.getMessageById(challenge.getChallengerChannelId(), challenge.getChallengerMessageId()).block();
+	}
+
+	protected void updateAndSaveChallenge(Message message) {
+		if (isChallengerCommand) updateAcceptorMessageIdsAndSaveChallenge(message);
+		else updateChallengerMessageIdsAndSaveChallenge(message);
+	}
+
+	private void updateChallengerMessageIdsAndSaveChallenge(Message message) {
+		challenge.setChallengerMessageId(message.getId().asLong());
+		challenge.setChallengerChannelId(message.getChannelId().asLong());
+		service.saveChallenge(challenge);
+	}
+
+	private void updateAcceptorMessageIdsAndSaveChallenge(Message message) {
+		challenge.setAcceptorMessageId(message.getId().asLong());
+		challenge.setAcceptorChannelId(message.getChannelId().asLong());
+		service.saveChallenge(challenge);
 	}
 }

@@ -101,33 +101,17 @@ public class EloRankingService {
 				.findAny();
 	}
 
-	public boolean challengeExistsByAcceptorMessageId(long messageId) {
-		return challengeDao.existsByAcceptorMessageId(messageId);
-	}
-
-	public boolean challengeExistsByChallengerMessageId(long messageId) {
-		return challengeDao.existsByChallengerMessageId(messageId);
-	}
-
-	public Optional<ChallengeModel> getChallengeByChallengerMessageId(long messageId) {
-		return challengeDao.findByChallengerMessageId(messageId);
-	}
-
-	public Optional<ChallengeModel> getChallengeById(long id) {
-		return getChallengeByChallengerMessageId(id);
-	}
-
-	public Optional<ChallengeModel> getChallengeByAcceptorMessageId(long messageId) {
-		return challengeDao.findByAcceptorMessageId(messageId);
+	public Optional<ChallengeModel> findChallengeById(long id) {
+		return challengeDao.findById(id);
 	}
 
 	public void saveChallenge(ChallengeModel challenge) {
-		log.debug("saving challenge " + challenge.getChallengerMessageId());
+		log.debug("saving challenge " + challenge.getId());
 		challengeDao.save(challenge);
 	}
 
 	public void deleteChallenge(ChallengeModel challenge) {
-		deleteChallengeById(challenge.getChallengerMessageId());
+		deleteChallengeById(challenge.getId());
 	}
 
 	public void deleteChallengeById(long id) {
@@ -194,7 +178,7 @@ public class EloRankingService {
 	}
 
 	// Rankings
-	public double[] updateRatings(Match match) {// TODO evtl match zurueckgeben
+	public double[] updateRatingsAndSaveMatch(Match match) {// TODO evtl match zurueckgeben
 		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getWinnerId());
 		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getLoserId());
 

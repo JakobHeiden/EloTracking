@@ -29,8 +29,7 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 
-		this.challenge = service.getChallengeByChallengerMessageId(Long.parseLong(
-				event.getCustomId().split(":")[1])).get();
+		this.challenge = service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
 		this.game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		this.disputeChannel = (TextChannel) event.getInteraction().getChannel().block();
 		this.moderatorName = event.getInteraction().getUser().getUsername();

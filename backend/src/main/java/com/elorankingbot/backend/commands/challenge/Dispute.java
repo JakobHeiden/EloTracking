@@ -10,6 +10,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -50,13 +51,14 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 				.update()
 				.withComponents(none).block()
 				.getContent();
-		targetMessageContent = new MessageUpdater(targetMessage)
+		Message resentTargetMessage = new MessageUpdater(targetMessage)
 				.makeAllNotBold()
 				.addLine(String.format("Your opponent filed a dispute :exclamation:. For resolution, please go to <#%s>.",
 						disputeChannel.getId().asString()))
-				.update()
-				.withComponents(none).block()
-				.getContent();
+				.resend()
+				.withComponents(none).block();
+		super.updateAndSaveChallenge(resentTargetMessage);
+		targetMessageContent = targetMessage.getContent();
 	}
 
 	private void createDisputeChannel() {
@@ -95,17 +97,13 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 
 	private ActionRow createActionRow(boolean allowDraw) {
 		if (allowDraw) return ActionRow.of(
-				Buttons.ruleAsWin(challenge.getChallengerMessageId(), true, challengerName,
-						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
-				Buttons.ruleAsWin(challenge.getChallengerMessageId(), false, acceptorName,
-						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
-				Buttons.ruleAsDraw(challenge.getChallengerMessageId()),
-				Buttons.ruleAsCancel(challenge.getChallengerMessageId()));
+				Buttons.ruleAsWin(challenge.getId(), true, challengerName),
+				Buttons.ruleAsWin(challenge.getId(), false, acceptorName),
+				Buttons.ruleAsDraw(challenge.getId()),
+				Buttons.ruleAsCancel(challenge.getId()));
 		else return ActionRow.of(
-				Buttons.ruleAsWin(challenge.getChallengerMessageId(), true, challengerName,
-						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
-				Buttons.ruleAsWin(challenge.getChallengerMessageId(), false, acceptorName,
-						challenge.getChallengerChannelId(), challenge.getAcceptorChannelId()),
-				Buttons.ruleAsCancel(challenge.getChallengerMessageId()));
+				Buttons.ruleAsWin(challenge.getId(), true, challengerName),
+				Buttons.ruleAsWin(challenge.getId(), false, acceptorName),
+				Buttons.ruleAsCancel(challenge.getId()));
 	}
 }
