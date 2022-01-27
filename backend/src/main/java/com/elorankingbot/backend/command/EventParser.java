@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.commands.ButtonCommandRelatedToChallengeOrDispute;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.Setup;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
@@ -35,6 +34,7 @@ public class EventParser {
 			.put("permission", "admin.Permission")
 			.put("reset", "admin.Reset")
 			.put("setup", "admin.Setup")
+			.put("set", "admin.Set")
 
 			.put("forcematch", "mod.ForceMatch")
 
