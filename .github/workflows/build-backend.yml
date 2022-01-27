@@ -2,6 +2,11 @@ name: Run backend build
 
 on: push
 
+env:
+  DEV_BOT_TOKEN: ${{ secrets.DEV_BOT_TOKEN }}
+  MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+  PORT: 8080
+
 jobs:
   build:
 
@@ -14,7 +19,4 @@ jobs:
         with:
           java-version: 17
       - name: Build with Maven
-        env:
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
-          PORT: 8080
         run: mvn -B -Dspring-boot.run.profiles=dev package --file backend/pom.xml
