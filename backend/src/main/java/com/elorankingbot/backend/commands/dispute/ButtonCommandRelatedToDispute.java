@@ -1,8 +1,6 @@
 package com.elorankingbot.backend.commands.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommandRelatedToChallengeOrDispute;
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;

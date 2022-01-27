@@ -18,16 +18,15 @@ public class Game {
     private long guildId;
     private long adminRoleId;
     private long modRoleId;
-    private String name;
     private long resultChannelId;
     private long disputeCategoryId;
+    private String name;
     private boolean allowDraw = false;
-    private boolean isMarkedForDeletion = false;
-
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;
     private int messageCleanupTime;
+    private boolean isMarkedForDeletion = false;
 
     public Game(long guildId, String name) {
         this.guildId = guildId;

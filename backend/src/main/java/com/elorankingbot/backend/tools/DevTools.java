@@ -2,6 +2,7 @@ package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.commands.admin.Permission;
 import com.elorankingbot.backend.commands.admin.Reset;
+import com.elorankingbot.backend.commands.admin.Set;
 import com.elorankingbot.backend.commands.challenge.Challenge;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
@@ -42,10 +43,11 @@ public class DevTools {
 		service.findAllGames().forEach(
 				game -> {
 					try {
-						bot.deleteAllGuildCommands(game.getGuildId()).blockLast();
-						updateCommands(game).block();
-						setPermissionsForAdminCommands(game);
-						setPermissionsForModCommands(game);
+						log.info("updating " + game.getName());
+						bot.deployCommand(game.getGuildId(), Set.getRequest()).block();
+						Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
+						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
+						bot.setDiscordCommandPermissions(game.getGuildId(), "set", adminRole);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
