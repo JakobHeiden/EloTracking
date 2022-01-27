@@ -25,7 +25,7 @@ public class ApplicationPropertiesLoader {
 	private boolean useGlobalCommands;
 	private boolean setupDevGame;
 	private boolean doUpdateGuildCommands;
-	private boolean runQueue;
+	private boolean doRunQueue;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
 }
