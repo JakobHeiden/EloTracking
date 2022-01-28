@@ -4,6 +4,7 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.challenge.Challenge;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
+import com.elorankingbot.backend.commands.mod.Rating;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -135,16 +136,19 @@ public class Setup extends SlashCommand {
 	}
 
 	private Mono<Object> updateCommands() {
-		// TODO vielleicht verallgemeinern, auslagern in SlashCommand, mit nem array an relevanten classes in jeder subklasse
+		// TODO! vielleicht verallgemeinern, auslagern in SlashCommand, mit nem array an relevanten classes in jeder subklasse
+		// das hier ist gruselig.
 		Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
 		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw()));
 		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
 		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest());
+		Mono<ApplicationCommandData> deploySet = bot.deployCommand(guildId, Set.getRequest());
+		Mono<ApplicationCommandData> deployRating = bot.deployCommand(guildId, Rating.getRequest());
 		reply += "\n- I updated my commands on this server. This may take a minute to update.";
 		return Mono.zip(deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
-				deployReset, deployPermission).map(allTheReturnValues -> null);
+				deployReset, deployPermission, deploySet, deployRating).map(allTheReturnValues -> null);
 	}
 
 	private void setPermissionsForAdminCommands() {

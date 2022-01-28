@@ -21,7 +21,7 @@ public class ForceMatch extends SlashCommand {
 
 	private User user1;
 	private User user2;
-	private String reason;
+	private String reasonGiven;
 	private Match match;
 	private boolean isDraw;
 	private String templatePlayer1;
@@ -77,7 +77,7 @@ public class ForceMatch extends SlashCommand {
 			return;
 		}
 
-		reason = event.getOption("reason").isPresent() ?
+		reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
 				: "";
 
@@ -108,22 +108,22 @@ public class ForceMatch extends SlashCommand {
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
 		String template = isDraw ? "Forced a draw :left_right_arrow: between %s and %s.%s" : "Forced a win :arrow_up: for %s over %s.%s";
-		event.reply(String.format(template, user1.getTag(), user2.getTag(), reason)).subscribe();
+		event.reply(String.format(template, user1.getTag(), user2.getTag(), reasonGiven)).subscribe();
 	}
 
 	private void informPlayers(double[] eloResults) {
 		String player1MessageContent = String.format(templatePlayer1,
-						event.getInteraction().getUser().getTag(), user2.getTag(),
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2]),
-						reason);
+				event.getInteraction().getUser().getTag(), user2.getTag(),
+				service.formatRating(eloResults[0]), service.formatRating(eloResults[2]),
+				reasonGiven);
 		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
 				.content(player1MessageContent).build();
 		user1.getPrivateChannel().subscribe(channel -> channel.createMessage(player1MessageSpec).subscribe());
 
 		String player2MessageContent = String.format(templatePlayer2,
-						event.getInteraction().getUser().getTag(), user1.getTag(),
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3]),
-						reason);
+				event.getInteraction().getUser().getTag(), user1.getTag(),
+				service.formatRating(eloResults[1]), service.formatRating(eloResults[3]),
+				reasonGiven);
 		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
 				.content(player2MessageContent).build();
 		user2.getPrivateChannel().subscribe(channel -> channel.createMessage(player2MessageSpec).subscribe());

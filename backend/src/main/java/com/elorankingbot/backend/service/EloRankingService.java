@@ -202,7 +202,7 @@ public class EloRankingService {
 		return ratings;
 	}
 
-	private void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {
+	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {
 		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
 			playerDao.insert(new Player(guildId, userId, initialRating));
 		}
