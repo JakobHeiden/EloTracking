@@ -37,6 +37,7 @@ public class EventParser {
 			.put("set", "admin.Set")
 
 			.put("forcematch", "mod.ForceMatch")
+			.put("rating", "mod.Rating")
 
 			.put("accept", "challenge.Accept")
 			.put("cancel", "challenge.Cancel")

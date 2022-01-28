@@ -2,10 +2,10 @@ package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.commands.admin.Permission;
 import com.elorankingbot.backend.commands.admin.Reset;
-import com.elorankingbot.backend.commands.admin.Set;
 import com.elorankingbot.backend.commands.challenge.Challenge;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
+import com.elorankingbot.backend.commands.mod.Rating;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -44,10 +44,10 @@ public class DevTools {
 				game -> {
 					try {
 						log.info("updating " + game.getName());
-						bot.deployCommand(game.getGuildId(), Set.getRequest()).block();
+						bot.deployCommand(game.getGuildId(), Rating.getRequest()).block();
 						Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
-						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
-						bot.setDiscordCommandPermissions(game.getGuildId(), "set", adminRole);
+						Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
+						bot.setDiscordCommandPermissions(game.getGuildId(), "rating", adminRole, modRole);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
