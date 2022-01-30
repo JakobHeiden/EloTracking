@@ -3,11 +3,13 @@ package com.elorankingbot.backend.commands.challenge;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.tools.Buttons;
+import com.elorankingbot.backend.tools.DurationParser;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -56,18 +58,38 @@ public class Challenge extends SlashCommand {
 		long challengerId = event.getInteraction().getUser().getId().asLong();
 		long acceptorId = acceptorUser.getId().asLong();
 
+		Optional<Player> maybeChallenger = service.findPlayerByGuildIdAndUserId(guildId, challengerId);
+		if (maybeChallenger.isPresent() && maybeChallenger.get().isBanned()) {
+			Player challenger = maybeChallenger.get();
+			event.reply(String.format("You are %s and cannot challenge other players.",
+							challenger.getUnbanAtTimeSlot() == -1 ?
+									"banned permanently, or until unbanned,"
+									: "still banned for " +
+									DurationParser.minutesToString(queue.getRemainingDuration(challenger.getUnbanAtTimeSlot()))))
+					.subscribe();
+			return;
+		}
+		Optional<Player> maybeAcceptor = service.findPlayerByGuildIdAndUserId(guildId, acceptorId);
+		if (maybeAcceptor.isPresent() && maybeAcceptor.get().isBanned()) {
+			event.reply(String.format("%s is currently banned and cannot be challenged.",
+							acceptorUser.getTag())).subscribe();
+			return;
+		}
+
 		if (challengerId == acceptorId) {
 			event.reply("You cannot challenge yourself.")
 					.withEphemeral(true).subscribe();
 			return;
 		}
+
 		Optional<ChallengeModel> maybeChallenge = service.findChallengeByParticipants(guildId, challengerId, acceptorId);
 		if (maybeChallenge.isPresent()) {
 			if (maybeChallenge.get().isDispute())
 				event.reply("You cannot challenge that player again while there is an unresolved dispute")
 						.withEphemeral(true).subscribe();//TODO verlinken
-			else event.reply("You already challenged that player. You should have received a private message from me...")
-					.withEphemeral(true).subscribe();
+			else
+				event.reply("You already challenged that player. You should have received a private message from me...")
+						.withEphemeral(true).subscribe();
 			return;
 		}
 

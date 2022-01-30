@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class Permission extends SlashCommand {
 
 	public static String[] adminCommands = {"reset", "permission", "set"};
-	public static String[] modCommands = {"forcematch", "rating"};
+	public static String[] modCommands = {"forcematch", "rating", "ban"};
 
 	private Role adminRole;
 	private Role modRole;

@@ -15,14 +15,11 @@ public class DecayAcceptedChallenge extends TimedCommand {
 
 	public DecayAcceptedChallenge(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client,
 								  TimedTaskQueue queue, long challengeId, int time) {
-		super(service, bot, client, queue, challengeId, time);
+		super(service, bot, queue, client, challengeId, time);
 	}
 
 	public void execute() {
-		Optional<ChallengeModel> maybeChallenge = service.findChallengeById(relationId);
-		if (maybeChallenge.isEmpty()) return;
-
-		ChallengeModel challenge = maybeChallenge.get();
+		if (challenge == null) return;
 		if (challenge.hasAReport()) return;
 
 		service.deleteChallengeById(relationId);

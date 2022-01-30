@@ -7,11 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChallengeDao extends MongoRepository<ChallengeModel, Long> {
-    List<ChallengeModel> findAllByAcceptorId(long acceptorId);
-    List<ChallengeModel> findAllByChallengerId(long challengerId);
-    Boolean existsByChallengerMessageId(long challengerMessageId);
-    Optional<ChallengeModel> findByChallengerMessageId(long challengerMessageId);
-    Boolean existsByAcceptorMessageId(long acceptorMessageId);
-    Optional<ChallengeModel> findByAcceptorMessageId(long acceptorMessageId);
+    List<ChallengeModel> findAllByGuildIdAndAcceptorId(long guildId, long acceptorId);
+    List<ChallengeModel> findAllByGuildIdAndChallengerId(long guildId, long challengerId);
 	void deleteAllByGuildId(long guildId);
 }

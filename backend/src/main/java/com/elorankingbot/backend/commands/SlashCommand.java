@@ -7,6 +7,8 @@ import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class SlashCommand {
@@ -18,6 +20,8 @@ public abstract class SlashCommand {
 	protected final ChatInputInteractionEvent event;
 	protected long guildId;
 	protected Game game;
+
+	protected static final List none = new ArrayList<>();
 
 	protected SlashCommand(ChatInputInteractionEvent event, EloRankingService service,
 						   DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
