@@ -1,8 +1,10 @@
 package com.elorankingbot.backend.timedtask;
 
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.tools.DurationParser;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
@@ -64,6 +66,7 @@ public class TimedTaskService {
 	}
 
 	public void deleteMessage(long messageId, long channelId) {
+		// client uses messageId and channelId in reverse order
 		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block().delete().subscribe();
 	}
 
@@ -72,5 +75,18 @@ public class TimedTaskService {
 			client.getChannelById(Snowflake.of(channelId)).block().delete().subscribe();
 		} catch (ClientException ignored) {
 		}
+	}
+
+	public void unbanPlayer(long guildId, long userId, int duration) {
+		Player player = service.findPlayerByGuildIdAndUserId(guildId, userId).get();
+		if (!player.isBanned()) return;
+		if (player.getUnbanAtTimeSlot() != queue.getCurrentIndex()) return;
+
+		player.setUnbanAtTimeSlot(-2);
+		service.savePlayer(player);
+
+		bot.getPrivateChannelByUserId(userId).subscribe(privateChannel -> privateChannel
+				.createMessage(String.format("Your ban has run out after %s. You are no longer banned.",
+						DurationParser.minutesToString(duration))).subscribe());
 	}
 }

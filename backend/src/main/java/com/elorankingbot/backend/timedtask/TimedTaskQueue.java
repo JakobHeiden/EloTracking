@@ -10,6 +10,7 @@ import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import discord4j.core.GatewayDiscordClient;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,7 +24,9 @@ import java.util.Set;
 @Component
 public class TimedTaskQueue {
 
+	@Getter
 	private final int numberOfTimeSlots;
+	@Getter
 	private int currentIndex;
 	private final EloRankingService service;
 	private final DiscordBotService bot;
@@ -78,7 +81,7 @@ public class TimedTaskQueue {
 				timeSlotDao.delete(maybeTimeSlot.get());
 			}
 
-			if (currentIndex == 0) {
+			if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
 				timedTaskService.deleteGamesMarkedForDeletion();
 				timedTaskService.markGamesForDeletion();
 			}
@@ -94,27 +97,37 @@ public class TimedTaskQueue {
 
 	private void processTimedTask(TimedTask task) {
 		long id = task.relationId();
-		int time = task.time();
-		log.debug(String.format("executing %s %s after %s", task.type().name(), id, time));
+		long otherId = task.otherId();
+		int duration = task.duration();
+		log.debug(String.format("executing %s %s after %s", task.type().name(), id, duration));
 		switch (task.type()) {
 			case OPEN_CHALLENGE_DECAY:
-				new DecayOpenChallenge(service, bot, client, this, id, time).execute();
+				new DecayOpenChallenge(service, bot, client, this, id, duration).execute();
 				break;
 			case ACCEPTED_CHALLENGE_DECAY:
-				new DecayAcceptedChallenge(service, bot, client, this, id, time).execute();
+				new DecayAcceptedChallenge(service, bot, client, this, id, duration).execute();
 				break;
 			case MATCH_AUTO_RESOLVE:
-				new AutoResolveMatch(service, bot, client, this, id, time).execute();
+				new AutoResolveMatch(service, bot, client, this, id, duration).execute();
 				break;
 			case MATCH_SUMMARIZE:
-				timedTaskService.summarizeMatch(id, task.otherId(), task.value());
+				timedTaskService.summarizeMatch(id, otherId, task.value());
 				break;
 			case MESSAGE_DELETE:
-				timedTaskService.deleteMessage(id, task.otherId());
+				timedTaskService.deleteMessage(id, otherId);
 				break;
 			case CHANNEL_DELETE:
 				timedTaskService.deleteChannel(id);
 				break;
+			case PLAYER_UNBAN:
+				timedTaskService.unbanPlayer(id, otherId, duration);
+				break;
 		}
+	}
+
+	public int getRemainingDuration(int index) {
+		return index > currentIndex ?
+				index - currentIndex
+				: numberOfTimeSlots + index - currentIndex;
 	}
 }

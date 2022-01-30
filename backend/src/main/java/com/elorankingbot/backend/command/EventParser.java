@@ -38,6 +38,7 @@ public class EventParser {
 
 			.put("forcematch", "mod.ForceMatch")
 			.put("rating", "mod.Rating")
+			.put("ban", "mod.Ban")
 
 			.put("accept", "challenge.Accept")
 			.put("cancel", "challenge.Cancel")

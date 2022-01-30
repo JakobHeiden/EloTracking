@@ -28,7 +28,7 @@ public abstract class ButtonCommandRelatedToChallenge extends ButtonCommandRelat
 				: bot.getMessageById(challenge.getChallengerChannelId(), challenge.getChallengerMessageId()).block();
 	}
 
-	protected void updateAndSaveChallenge(Message message) {
+	protected void updateAndSaveChallenge(Message message) {// TODO vllt in interface, default method refaktorn
 		if (isChallengerCommand) updateAcceptorMessageIdAndSaveChallenge(message);
 		else updateChallengerMessageIdAndSaveChallenge(message);
 	}

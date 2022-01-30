@@ -17,20 +17,31 @@ import java.util.UUID;
 @UseToStringForLogging
 @Document(collection = "player")
 public class Player {
+
     @Id
     private UUID id;
     private long userId;
     private long guildId;
     private double rating;
+    private int unbanAtTimeSlot;
 
     public Player(long guildId, long userId, double rating) {
         this.id = generateId(guildId, userId);
         this.userId = userId;
         this.guildId = guildId;
         this.rating = rating;
+        this.unbanAtTimeSlot = -2;// not banned
     }
 
     public static UUID generateId(long guildId, long userId) {
         return new UUID(guildId, userId);
+    }
+
+    public boolean isBanned() {
+        return unbanAtTimeSlot != -2;
+    }
+
+    public boolean isPermaBanned() {
+        return unbanAtTimeSlot == -1;
     }
 }

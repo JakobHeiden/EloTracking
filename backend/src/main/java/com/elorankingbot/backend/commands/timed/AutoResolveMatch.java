@@ -20,13 +20,11 @@ public class AutoResolveMatch extends TimedCommand {
 
 	public AutoResolveMatch(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client,
 							TimedTaskQueue queue, long challengeId, int time) {
-		super(service, bot, client, queue, challengeId, time);
+		super(service, bot, queue, client, challengeId, time);
 	}
 
 	public void execute() {
-		Optional<ChallengeModel> maybeChallenge = service.findChallengeById(relationId);
-		if (maybeChallenge.isEmpty()) return;
-		ChallengeModel challenge = maybeChallenge.get();
+		if (challenge == null) return;
 		if (challenge.isDispute()) return;
 
 		boolean hasChallengerReported = challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED;

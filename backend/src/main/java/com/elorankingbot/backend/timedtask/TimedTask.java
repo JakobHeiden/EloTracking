@@ -2,7 +2,7 @@ package com.elorankingbot.backend.timedtask;
 
 public record TimedTask (
 		TimedTaskType type,
-		int time,
+		int duration,
 		long relationId,
 		long otherId,
 		Object value) {
@@ -13,6 +13,7 @@ public record TimedTask (
 		MATCH_AUTO_RESOLVE,
 		MATCH_SUMMARIZE,
 		MESSAGE_DELETE,
-		CHANNEL_DELETE
+		CHANNEL_DELETE,
+		PLAYER_UNBAN
 	}
 }

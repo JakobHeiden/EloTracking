@@ -95,9 +95,8 @@ public class EloRankingService {
 
 	// Challenge
 	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
-		return challengeDao.findAllByChallengerId(challengerId).stream()
+		return challengeDao.findAllByGuildIdAndChallengerId(guildId, challengerId).stream()
 				.filter(challenge -> challenge.getAcceptorId() == acceptorId)
-				.filter(challenge -> challenge.getGuildId() == guildId)
 				.findAny();
 	}
 
@@ -118,23 +117,11 @@ public class EloRankingService {
 		challengeDao.deleteById(id);
 	}
 
-	public List<ChallengeModel> findAllChallengesByAcceptorIdAndGuildId(long acceptorId, long channelId) {
-		List<ChallengeModel> allChallenges = challengeDao.findAllByAcceptorId(acceptorId);
-		List<ChallengeModel> filteredByChannel = allChallenges.stream().
-				filter(challenge -> challenge.getGuildId() == channelId)
-				.collect(Collectors.toList());
-		return filteredByChannel;
-	}
-
-	public List<ChallengeModel> findAllChallengesByPlayerIdAndChannelId(long playerId, long channelId) {
+	public List<ChallengeModel> findAllChallengesByGuildIdAndPlayerId(long guildId, long playerId) {
 		List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
-		allChallengesForPlayer.addAll(challengeDao.findAllByChallengerId(playerId));
-		allChallengesForPlayer.addAll(challengeDao.findAllByAcceptorId(playerId));
-
-		List<ChallengeModel> filteredByChannel = allChallengesForPlayer.stream().
-				filter(challenge -> challenge.getGuildId() == channelId)
-				.collect(Collectors.toList());
-		return filteredByChannel;
+		allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndChallengerId(guildId, playerId));
+		allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndAcceptorId(guildId, playerId));
+		return allChallengesForPlayer;
 	}
 
 	// Match

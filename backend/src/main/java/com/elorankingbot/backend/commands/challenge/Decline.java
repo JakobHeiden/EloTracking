@@ -28,10 +28,11 @@ public class Decline extends ButtonCommandRelatedToChallenge {
 				.addLine("They have declined :negative_squared_cross_mark: your challenge.")
 				.makeAllItalic()
 				.resend()
-				.subscribe(message ->
-						queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-						message.getId().asLong(), message.getChannelId().asLong(), null));
+				.subscribe();
+
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
+				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);;
 	}
 }

@@ -3,6 +3,7 @@ package com.elorankingbot.backend.commands.admin;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.challenge.Challenge;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
+import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
 import com.elorankingbot.backend.commands.mod.Rating;
 import com.elorankingbot.backend.model.Game;
@@ -146,6 +147,7 @@ public class Setup extends SlashCommand {
 		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest());
 		Mono<ApplicationCommandData> deploySet = bot.deployCommand(guildId, Set.getRequest());
 		Mono<ApplicationCommandData> deployRating = bot.deployCommand(guildId, Rating.getRequest());
+		bot.deployCommand(guildId, Ban.getRequest()).block();
 		reply += "\n- I updated my commands on this server. This may take a minute to update.";
 		return Mono.zip(deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
 				deployReset, deployPermission, deploySet, deployRating).map(allTheReturnValues -> null);
