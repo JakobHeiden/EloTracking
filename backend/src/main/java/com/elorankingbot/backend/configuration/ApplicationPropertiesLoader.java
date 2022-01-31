@@ -28,4 +28,5 @@ public class ApplicationPropertiesLoader {
 	private boolean doRunQueue;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
+	private String activityMessage;
 }
