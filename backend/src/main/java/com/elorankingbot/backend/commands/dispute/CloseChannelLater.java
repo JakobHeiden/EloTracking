@@ -30,7 +30,7 @@ public class CloseChannelLater extends ButtonCommand {
 				.createMessage("I will delete this channel in 24 hours.").subscribe();
 
 		queue.addTimedTask(
-				TimedTask.TimedTaskType.CHANNEL_DELETE, 1,// 24 * 60,
+				TimedTask.TimedTaskType.CHANNEL_DELETE, 24 * 60,
 				event.getInteraction().getChannelId().asLong(),
 				0L, null);
 		event.acknowledge().subscribe();

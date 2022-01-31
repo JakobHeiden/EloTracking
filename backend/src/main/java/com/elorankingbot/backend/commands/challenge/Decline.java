@@ -33,6 +33,6 @@ public class Decline extends ButtonCommandRelatedToChallenge {
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);;
+				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}
 }
