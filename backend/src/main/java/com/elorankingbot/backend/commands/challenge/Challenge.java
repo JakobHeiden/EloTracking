@@ -94,13 +94,13 @@ public class Challenge extends SlashCommand {
 		}
 
 		MessageCreateSpec challengerMessageSpec = MessageCreateSpec.builder()
-				.content(String.format("You have challenged %s to a match. I'll let you know when they react.",
-						acceptorUser.getTag()))
+				.content(String.format("You have challenged %s to a match of %s. I'll let you know when they react.",
+						acceptorUser.getTag(), game.getName()))
 				.build();
 		Message challengerMessage = bot.sendToUser(challengerId, challengerMessageSpec).block();
 		MessageCreateSpec acceptorMessageSpec = MessageCreateSpec.builder()
-				.content(String.format("**You have been challenged to a match by %s. Accept?**",
-						event.getInteraction().getUser().getTag()))
+				.content(String.format("**You have been challenged by %s to a match of %s. Accept?**",
+						event.getInteraction().getUser().getTag(), game.getName()))
 				.addComponent(ActionRow.of(
 						Buttons.accept(challengerMessage.getId().asLong()),
 						Buttons.decline(challengerMessage.getId().asLong())
