@@ -55,31 +55,4 @@ public class DevTools {
 				}
 		);
 	}
-
-	private Mono<Object> updateCommands(Game game) {
-		long guildId = game.getGuildId();
-		//Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
-		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw()));
-		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
-		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
-		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
-		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, Permission.getRequest());
-		return Mono.zip(deployForcematch, deployChallenge, deployUserInteractionChallenge,
-				deployReset, deployPermission).map(allTheReturnValues -> "");
-	}
-
-	private void setPermissionsForAdminCommands(Game game) {
-		long guildId = game.getGuildId();
-		Role adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getAdminRoleId())).block();
-		Arrays.stream(Permission.adminCommands)
-				.forEach(commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
-	}
-
-	private void setPermissionsForModCommands(Game game) {
-		long guildId = game.getGuildId();
-		Role modRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getModRoleId())).block();
-		Role adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(game.getAdminRoleId())).block();
-		Arrays.stream(Permission.modCommands).forEach(
-				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
-	}
 }
