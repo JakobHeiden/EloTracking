@@ -21,6 +21,24 @@ public class GatewayDiscordClientConfiguration {
 
 	@Bean
 	public GatewayDiscordClient createClient(EloRankingService service) {
+		String botToken = service.getPropertiesLoader().isUseDevBotToken() ?
+				System.getenv("DEV_BOT_TOKEN")
+				: System.getenv("DISCORD_BOT_TOKEN");
+		GatewayDiscordClient client = DiscordClientBuilder
+				.create(botToken)
+				.build()
+				.login()
+				.block();
+
+		client.getEventDispatcher().on(ReadyEvent.class)
+				.subscribe(event -> {
+					User self = event.getSelf();
+					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
+				});
+
+		return client;
+
+		/*
 		String token = service.getPropertiesLoader().isUseDevBotToken() ?
 				System.getenv("DEV_BOT_TOKEN")
 				: System.getenv("DISCORD_BOT_TOKEN");
@@ -37,5 +55,7 @@ public class GatewayDiscordClientConfiguration {
 				});
 
 		return client;
+
+		 */
 	}
 }
