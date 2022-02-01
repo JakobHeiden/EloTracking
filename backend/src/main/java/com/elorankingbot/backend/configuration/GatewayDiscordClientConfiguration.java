@@ -34,28 +34,19 @@ public class GatewayDiscordClientConfiguration {
 				.subscribe(event -> {
 					User self = event.getSelf();
 					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
+
+					String activityMessage = service.getPropertiesLoader().getActivityMessage();
+					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
 				});
 
 		return client;
 
-		/*
-		String token = service.getPropertiesLoader().isUseDevBotToken() ?
-				System.getenv("DEV_BOT_TOKEN")
-				: System.getenv("DISCORD_BOT_TOKEN");
+		/* TODO was ist hiermit?
 		String activityMessage = service.getPropertiesLoader().getActivityMessage();
 		GatewayDiscordClient client = GatewayBootstrap.create(DiscordClient.create(token))
 				.setInitialPresence(shardInfo -> ClientPresence.of(
 						Status.ONLINE, ClientActivity.of(Activity.Type.PLAYING, activityMessage, null)))
 				.login().block();
-
-		client.on(ReadyEvent.class)
-				.subscribe(event -> {
-					User self = event.getSelf();
-					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
-				});
-
-		return client;
-
 		 */
 	}
 }
