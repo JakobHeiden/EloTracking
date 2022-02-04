@@ -24,8 +24,8 @@ public abstract class ButtonCommandRelatedToChallenge extends ButtonCommandRelat
 		}
 		this.parentMessage = event.getMessage().get();
 		this.targetMessage = isChallengerCommand ?
-				bot.getMessageById(challenge.getAcceptorChannelId(), challenge.getAcceptorMessageId()).block()
-				: bot.getMessageById(challenge.getChallengerChannelId(), challenge.getChallengerMessageId()).block();
+				bot.getMessageById(challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId()).block()
+				: bot.getMessageById(challenge.getChallengerMessageId(), challenge.getChallengerChannelId()).block();
 	}
 
 	protected void updateAndSaveChallenge(Message message) {// TODO vllt in interface, default method refaktorn

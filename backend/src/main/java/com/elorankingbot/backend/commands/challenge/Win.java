@@ -49,7 +49,7 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
 				false);
-		double[] eloResults = service.updateRatingsAndSaveMatch(match);// TODO transaction machen?
+		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -69,8 +69,9 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				.update()
 				.withComponents(none).subscribe();
 		bot.postToResultChannel(game, match);
+		bot.updateLeaderboard(game);
 
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
+		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);

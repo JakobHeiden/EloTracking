@@ -20,13 +20,14 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 		if (!isByModeratorOrAdmin()) return;
 
 		Match match = new Match(challenge.getGuildId(), challenge.getChallengerId(), challenge.getAcceptorId(), true);
-		eloResults = service.updateRatingsAndSaveMatch(match);
+		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled the match a draw :left_right_arrow: for <@%s> and <@%s>.",
 				moderatorName, challenge.getChallengerId(), challenge.getAcceptorId()));
 		bot.postToResultChannel(game, match);
+		bot.updateLeaderboard(game);
 		updateMessages();
 
 		service.deleteChallenge(challenge);

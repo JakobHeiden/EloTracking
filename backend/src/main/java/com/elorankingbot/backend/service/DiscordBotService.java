@@ -1,18 +1,23 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.commands.admin.Setup;
+import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.MessageCreateMono;
+import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
@@ -28,6 +33,9 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.List;
+
+import static com.elorankingbot.backend.service.EloRankingService.formatRating;
 
 @Slf4j
 @Component
@@ -64,11 +72,6 @@ public class DiscordBotService {
 		ownerPrivateChannel.createMessage(text).subscribe();
 	}
 
-	public MessageCreateMono sendToChannel(long channelId, String text) {
-		MessageChannel channel = (MessageChannel) client.getChannelById(Snowflake.of(channelId)).block();
-		return channel.createMessage(text);
-	}
-
 	public Mono<PrivateChannel> getPrivateChannelByUserId(long userId) {
 		return client.getUserById(Snowflake.of(userId)).flatMap(User::getPrivateChannel);
 	}
@@ -89,24 +92,78 @@ public class DiscordBotService {
 		return client.getUserById(Snowflake.of(playerId)).block().getTag();
 	}
 
-	public Mono<Message> getMessageById(long channelId, long messageId) {
+	public Mono<Message> getMessageById(long messageId, long channelId) {
 		return client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId));
 	}
 
+	public Mono<Guild> getGuildById(long guildId) {
+		return client.getGuildById(Snowflake.of(guildId));
+	}
+
 	public void postToResultChannel(Game game, Match match) {
-		if (game.getResultChannelId() != 0L) {
-			try {
-				TextChannel resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
-				resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",
-								match.getWinnerTag(client), service.formatRating(match.getWinnerNewRating()),
-								match.isDraw() ? "drew" : "defeated",
-								match.getLoserTag(client), service.formatRating(match.getLoserNewRating())))
-						.subscribe();
-			} catch (ClientException e) {
-				game.setResultChannelId(0L);
-				service.saveGame(game);
-			}
+		TextChannel resultChannel;
+		try {
+			resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
+		} catch (ClientException e) {
+			resultChannel = Setup.createResultChannel(getGuildById(game.getGuildId()).block(), game);
+			game.setResultChannelId(resultChannel.getId().asLong());
+			service.saveGame(game);
 		}
+		resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",// TODO aenderung ausformulieren
+						match.getWinnerTag(client), formatRating(match.getWinnerNewRating()),
+						match.isDraw() ? "drew" : "defeated",
+						match.getLoserTag(client), formatRating(match.getLoserNewRating())))
+				.subscribe();
+	}
+
+	public void updateLeaderboard(Game game) {
+		Message leaderboardMessage;
+		try {
+			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+		} catch (ClientException e) {
+			sendToOwner("exception in updateLeaderBoard");
+			e.printStackTrace();
+
+			Setup.createLeaderboardChannelAndMessage(getGuildById(game.getGuildId()).block(), game);
+			service.saveGame(game);
+			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+		}
+
+		List<PlayerInRankingsDto> playerList = service.getRankings(game.getGuildId());
+		int numPlayers = playerList.size();
+		if (numPlayers > game.getLeaderboardLength())
+			playerList = playerList.subList(0, game.getLeaderboardLength());
+		String rankString = "";
+		String nameString = "";
+		String ratingString = "";
+		for (int i = 0; i < playerList.size(); i++) {
+			PlayerInRankingsDto player = playerList.get(i);
+			rankString += String.format("  %s\n", i + 1);
+			nameString += String.format("  %s\n", player.getName());
+			ratingString += String.format("  %s\n", formatRating(player.getRating()));
+		}
+		if (rankString.equals("")) {
+			rankString = "no matches";
+			nameString = "played";
+			ratingString = "so far";
+		}
+
+		leaderboardMessage.edit().withContent("\n").withEmbeds(EmbedCreateSpec.builder()
+				.title(game.getName() + " Rankings")
+				.addField(EmbedCreateFields.Field.of(
+						"Rank",
+						rankString,
+						true))
+				.addField(EmbedCreateFields.Field.of(
+						"Name",
+						nameString,
+						true))
+				.addField(EmbedCreateFields.Field.of(
+						"Rating",
+						ratingString,
+						true))
+				.footer(String.format("%s players total", numPlayers), null)
+				.build()).subscribe();
 	}
 
 	public Mono<Message> getChallengerMessage(ChallengeModel challenge) {// TODO schauen wo das noch uber client gemacht wird
@@ -143,7 +200,7 @@ public class DiscordBotService {
 	public void setDiscordCommandPermissions(long guildId, String commandName, Role... roles) {
 		var requestBuilder = ApplicationCommandPermissionsRequest.builder();
 		Arrays.stream(roles).forEach(role -> {
-			log.debug(String.format("setting permissions for command %s to role %s",commandName, role.getName()));
+			log.debug(String.format("setting permissions for command %s to role %s", commandName, role.getName()));
 			requestBuilder.addPermission(ApplicationCommandPermissionsData.builder()
 					.id(role.getId().asLong()).type(1).permission(true).build()).build();
 		});

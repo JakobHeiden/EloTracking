@@ -11,8 +11,6 @@ import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 
-import java.util.Optional;
-
 public class AutoResolveMatch extends TimedCommand {
 
 	private Message reportPresentMessage;
@@ -59,7 +57,7 @@ public class AutoResolveMatch extends TimedCommand {
 
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, isDraw);
-		service.updateRatingsAndSaveMatch(match);
+		service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.deleteChallenge(challenge);
 
 		postToInvolvedChannels(challenge, match, game, hasChallengerReported, isDraw, isWin);

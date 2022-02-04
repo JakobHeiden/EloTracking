@@ -15,6 +15,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -65,17 +66,22 @@ public class Setup extends SlashCommand {
 		guild = event.getInteraction().getGuild().block();
 		game = new Game(guild.getId().asLong(),
 				event.getOption("nameofgame").get().getValue().get().asString());
-
-		assignModAndAdminRole();
-		createResultChannel();
-		createDisputeCategory();
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
-		service.saveGame(game);
+
 		updateCommands().block();
+		assignModAndAdminRole();
 		setPermissionsForAdminCommands();
 		setPermissionsForModCommands();
+		TextChannel resultChannel = createResultChannel(guild, game);
+		reply += String.format("\n- I created %s where I will post all match results.", resultChannel.getMention());
+		createDisputeCategory();
+		TextChannel leaderboardChannel = createLeaderboardChannelAndMessage(guild, game);
+		bot.updateLeaderboard(game);
+		reply += String.format("\n- I created %s where I will display the leaderboard.", leaderboardChannel.getMention());
 
-		reply += String.format("\n- I created a web page with rankings: http://%s/%s",
+		service.saveGame(game);
+
+		reply += String.format("\n- I created a web page with full rankings: http://%s/%s",
 				service.getPropertiesLoader().getBaseUrl(), guildId);
 		reply += String.format("\nFollow my announcement channel: <#%s>",
 				service.getPropertiesLoader().getAnnouncementChannelId());
@@ -110,17 +116,28 @@ public class Setup extends SlashCommand {
 		game.setModRoleId(modRole.getId().asLong());
 	}
 
-	private void createResultChannel() {
-		TextChannel resultChannel = guild.createTextChannel("Elo Ranking results")
-				.withTopic(String.format("All resolved matches will be logged here. Leaderboard: http://%s/%s",
-						service.getPropertiesLoader().getBaseUrl(), guild.getId().asString()))
+	public static TextChannel createResultChannel(Guild guild, Game game) {
+		TextChannel resultChannel = guild.createTextChannel("Elo match results")
 				.withPermissionOverwrites(PermissionOverwrite.forRole(
-						Snowflake.of(guildId),
+						Snowflake.of(guild.getId().asLong()),
 						PermissionSet.none(),
 						PermissionSet.of(Permission.SEND_MESSAGES)))
 				.block();
 		game.setResultChannelId(resultChannel.getId().asLong());
-		reply += String.format("\n- I created %s where I will post all match results.", resultChannel.getMention());
+		return resultChannel;
+	}
+
+	public static TextChannel createLeaderboardChannelAndMessage(Guild guild, Game game) {
+		TextChannel leaderboardChannel = guild.createTextChannel("Elo Rankings")
+				.withPermissionOverwrites(PermissionOverwrite.forRole(
+						Snowflake.of(guild.getId().asLong()),
+						PermissionSet.none(),
+						PermissionSet.of(Permission.SEND_MESSAGES)))
+				.block();
+		Message leaderboardMessage = leaderboardChannel.createMessage("please wait").block();
+		game.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
+		game.setLeaderboardChannelId(leaderboardChannel.getId().asLong());
+		return leaderboardChannel;
 	}
 
 	private void createDisputeCategory() {

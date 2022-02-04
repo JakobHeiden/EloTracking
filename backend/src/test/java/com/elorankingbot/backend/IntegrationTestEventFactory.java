@@ -48,11 +48,11 @@ class IntegrationTestEventFactory {
 		if (isChallengerButtonEvent) {
 			when(event.getInteraction().getChannelId().asLong()).thenReturn(challenge.getChallengerChannelId());
 			when(event.getMessage().get()).thenReturn(bot.getMessageById(
-					challenge.getChallengerChannelId(), challenge.getChallengerMessageId()).block());
+					challenge.getChallengerMessageId(), challenge.getChallengerChannelId()).block());
 		} else {
 			when(event.getInteraction().getChannelId().asLong()).thenReturn(challenge.getAcceptorChannelId());
 			when(event.getMessage().get()).thenReturn(bot.getMessageById(
-					challenge.getAcceptorChannelId(), challenge.getAcceptorMessageId()).block());
+					challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId()).block());
 		}
 		when(event.getCustomId()).thenReturn(commandString + ":" + challenge.getId());
 		return event;

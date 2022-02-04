@@ -97,7 +97,7 @@ public class ForceMatch extends SlashCommand {
 
 	private void forceResolveMatch() {
 		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), isDraw);
-		double[] eloResults = service.updateRatingsAndSaveMatch(match);
+		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?
 				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
@@ -107,6 +107,7 @@ public class ForceMatch extends SlashCommand {
 				: "*%s has forced a loss :arrow_down: to %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResults);
 		bot.postToResultChannel(game, match);
+		bot.updateLeaderboard(game);
 		String template = isDraw ? "Forced a draw :left_right_arrow: between %s and %s.%s" : "Forced a win :arrow_up: for %s over %s.%s";
 		event.reply(String.format(template, user1.getTag(), user2.getTag(), reasonGiven)).subscribe();
 	}
@@ -147,6 +148,7 @@ public class ForceMatch extends SlashCommand {
 		templatePlayer1 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";// TODO anzeigen ob win oder loss
 		templatePlayer2 = "*%s has reverted your most recent match with %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResultsfromUndo);
+		bot.updateLeaderboard(game);
 		event.reply(String.format("Reverted the last recorded match between %s and %s.",
 				user1.getTag(), user2.getTag())).subscribe();
 	}

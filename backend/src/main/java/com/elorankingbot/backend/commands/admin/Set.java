@@ -19,7 +19,7 @@ import java.util.List;
 public class Set extends SlashCommand {
 
 	private static final List<String> integerVariables = List.of(
-			"openchallengedecay", "acceptedchallengedecay", "matchautoresolve", "messagecleanup");
+			"openchallengedecay", "acceptedchallengedecay", "matchautoresolve", "messagecleanup", "leaderboardlength");
 
 	public Set(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
@@ -39,6 +39,7 @@ public class Set extends SlashCommand {
 						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Accepted challenges decay after").value("acceptedchallengedecay").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Matches auto-resolve after").value("matchautoresolve").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Messages cleanup after").value("messagecleanup").build())
+						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Leaderboard number of ranks displayed").value("leaderboardlength").build())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("value").description("The value the variable should take, in minutes if applicable")// TODO eingaben in stunden, tagen etc
@@ -79,7 +80,7 @@ public class Set extends SlashCommand {
 				break;
 			case "openchallengedecay":
 				game.setOpenChallengeDecayTime(valueAsInt);
-				event.reply(String.format("Open challenges now decay after %s minutes.", value)).subscribe();
+				event.reply(String.format("Open challenges now decay after %s minutes.", value)).subscribe();// TODO ouputs besser formatieren
 				break;
 			case "acceptedchallengedecay":
 				game.setAcceptedChallengeDecayTime(valueAsInt);
@@ -92,6 +93,12 @@ public class Set extends SlashCommand {
 			case "messagecleanup":
 				game.setMessageCleanupTime(valueAsInt);
 				event.reply(String.format("Messages are now getting cleaned up after %s minutes.", value)).subscribe();
+				break;
+			case "leaderboardlength":
+				game.setLeaderboardLength(valueAsInt);
+				event.reply((String.format("Leaderboard length is now %s.", valueAsInt))).subscribe();
+				bot.updateLeaderboard(game);
+				break;
 		}
 		service.saveGame(game);
 	}
