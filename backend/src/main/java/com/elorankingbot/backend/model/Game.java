@@ -20,12 +20,15 @@ public class Game {
     private long modRoleId;
     private long resultChannelId;
     private long disputeCategoryId;
+    private long leaderboardChannelId;
+    private long leaderboardMessageId;
     private String name;
     private boolean allowDraw = false;
     private int openChallengeDecayTime;
     private int acceptedChallengeDecayTime;
     private int matchAutoResolveTime;
     private int messageCleanupTime;
+    private int leaderboardLength;
     private boolean isMarkedForDeletion = false;
 
     public Game(long guildId, String name) {
@@ -35,5 +38,6 @@ public class Game {
         this.acceptedChallengeDecayTime = 7 * 24 * 60;
         this.matchAutoResolveTime = 24 * 60;
         this.messageCleanupTime = 12 * 60;
+        this.leaderboardLength = 20;
     }
 }

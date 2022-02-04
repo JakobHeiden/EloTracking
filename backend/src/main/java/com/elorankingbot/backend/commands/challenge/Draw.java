@@ -41,7 +41,7 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 
 	private void processHarmony() {
 		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(), true);
-		double[] eloResults = service.updateRatingsAndSaveMatch(match);// TODO transaction machen?
+		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -62,6 +62,7 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 				.withComponents(none).subscribe();
 
 		bot.postToResultChannel(game, match);
+		bot.updateLeaderboard(game);
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);

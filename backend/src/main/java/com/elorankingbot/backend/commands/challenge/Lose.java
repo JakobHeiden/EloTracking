@@ -44,7 +44,7 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
 				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 				false);
-		double[] eloResults = service.updateRatingsAndSaveMatch(match);// TODO transaction machen?
+		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -64,6 +64,7 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				.update()
 				.withComponents(none).subscribe();
 		bot.postToResultChannel(game, match);
+		bot.updateLeaderboard(game);
 
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);

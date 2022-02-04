@@ -26,13 +26,14 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		long loserId = isChallengerWin ? challenge.getAcceptorId() : challenge.getChallengerId();
 
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, false);
-		eloResults = service.updateRatingsAndSaveMatch(match);
+		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled this match a win :arrow_up: for <@%s> and a loss :arrow_down: for <@%s>.",
 				moderatorName, winnerId, loserId));
 		bot.postToResultChannel(game, match);
+		bot.updateLeaderboard(game);
 		updateMessages();
 
 		service.deleteChallenge(challenge);

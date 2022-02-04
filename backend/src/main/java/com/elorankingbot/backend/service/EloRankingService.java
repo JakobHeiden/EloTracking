@@ -165,7 +165,7 @@ public class EloRankingService {
 	}
 
 	// Rankings
-	public double[] updateRatingsAndSaveMatch(Match match) {// TODO evtl match zurueckgeben
+	public double[] updateRatingsAndSaveMatchAndPlayers(Match match) {// TODO evtl match zurueckgeben
 		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getWinnerId());
 		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getLoserId());
 

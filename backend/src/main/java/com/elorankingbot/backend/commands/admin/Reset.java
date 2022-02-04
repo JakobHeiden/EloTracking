@@ -65,6 +65,7 @@ public class Reset extends SlashCommand {
 					"Deleting game data.").subscribe();// TODO createFollowup Done! wenn subscribes durch sind
 			service.deleteAllDataForGame(guildId);
 			deleteResultChannel();
+			deleteLeaderBoardChannel();
 			deleteDisputeCategory();
 			resetGuildCommands();
 		} else {
@@ -77,6 +78,12 @@ public class Reset extends SlashCommand {
 		guild.getChannelById(Snowflake.of(game.getResultChannelId())).subscribe(
 				guildChannel -> guildChannel.delete().subscribe());
 		channel.createMessage("Deleting result channel.").subscribe();
+	}
+
+	private void deleteLeaderBoardChannel() {
+		guild.getChannelById(Snowflake.of(game.getLeaderboardChannelId())).subscribe(
+				guildChannel -> guildChannel.delete().subscribe());
+		channel.createMessage("Deleting leaderboard channel.").subscribe();
 	}
 
 	private void deleteDisputeCategory() {
