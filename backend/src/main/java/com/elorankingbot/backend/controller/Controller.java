@@ -22,7 +22,7 @@ public class Controller {
 
     @GetMapping("rankings/{channelId}")
     public List<PlayerInRankingsDto> getRankings(@PathVariable long channelId) {
-        return service.getRankings(channelId);
+        return service.getRankingsAsDto(channelId);
     }
 
     @GetMapping("gamedata/{channelId}")

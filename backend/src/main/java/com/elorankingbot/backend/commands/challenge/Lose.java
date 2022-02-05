@@ -40,6 +40,8 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processHarmony() {
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
 		Match match = new Match(guildId,
 				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
 				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),

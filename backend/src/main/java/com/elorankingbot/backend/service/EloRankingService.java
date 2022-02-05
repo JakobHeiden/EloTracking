@@ -164,11 +164,20 @@ public class EloRankingService {
 		return playerDao.findById(Player.generateId(guildId, userId));
 	}
 
+	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {// TODO! schauen wo man den namen schon hat
+		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
+			playerDao.insert(new Player(guildId, userId, bot.getPlayerName(userId), initialRating));
+		}
+	}
+
+	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId, String name) {
+		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
+			playerDao.insert(new Player(guildId, userId, name, initialRating));
+		}
+	}
+
 	// Rankings
 	public double[] updateRatingsAndSaveMatchAndPlayers(Match match) {// TODO evtl match zurueckgeben
-		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getWinnerId());
-		addNewPlayerIfPlayerNotPresent(match.getGuildId(), match.getLoserId());
-
 		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();
 
@@ -181,18 +190,19 @@ public class EloRankingService {
 		match.setLoserOldRating(loser.getRating());
 		match.setLoserNewRating(ratings[3]);
 		loser.setRating(ratings[3]);
+		if (match.isDraw()) {
+			winner.addDraw();
+			loser.addDraw();
+		} else {
+			winner.addWin();
+			loser.addLoss();
+		}
 
 		savePlayer(winner);
 		savePlayer(loser);
 		saveMatch(match);
 
 		return ratings;
-	}
-
-	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {
-		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
-			playerDao.insert(new Player(guildId, userId, initialRating));
-		}
 	}
 
 	private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
@@ -208,12 +218,18 @@ public class EloRankingService {
 		return String.format("%.1f", Float.valueOf(Math.round(rating * 10)) / 10);
 	}
 
-	public List<PlayerInRankingsDto> getRankings(long guildId) {
+	public List<PlayerInRankingsDto> getRankingsAsDto(long guildId) {
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
 		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
 				.map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getUserId()), player.getRating()))
 				.collect(Collectors.toList());
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;
+	}
+
+	public List<Player> getRankings(long guildId) {
+		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
+		Collections.sort(allPlayers);
+		return allPlayers;
 	}
 }

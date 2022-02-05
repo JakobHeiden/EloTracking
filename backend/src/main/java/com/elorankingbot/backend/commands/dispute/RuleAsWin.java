@@ -21,6 +21,8 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 	public void execute() {
 		if (!isByModeratorOrAdmin()) return;
 
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
 		isChallengerWin = event.getCustomId().split(":")[2].equals("true");
 		long winnerId = isChallengerWin ? challenge.getChallengerId() : challenge.getAcceptorId();
 		long loserId = isChallengerWin ? challenge.getAcceptorId() : challenge.getChallengerId();

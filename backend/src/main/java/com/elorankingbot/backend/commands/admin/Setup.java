@@ -134,7 +134,7 @@ public class Setup extends SlashCommand {
 						PermissionSet.none(),
 						PermissionSet.of(Permission.SEND_MESSAGES)))
 				.block();
-		Message leaderboardMessage = leaderboardChannel.createMessage("please wait").block();
+		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();
 		game.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
 		game.setLeaderboardChannelId(leaderboardChannel.getId().asLong());
 		return leaderboardChannel;

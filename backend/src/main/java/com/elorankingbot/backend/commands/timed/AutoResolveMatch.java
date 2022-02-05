@@ -56,6 +56,8 @@ public class AutoResolveMatch extends TimedCommand {
 		}
 
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
+		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerId());
+		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorId());
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, isDraw);
 		service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.deleteChallenge(challenge);
