@@ -33,7 +33,7 @@ public class Set extends SlashCommand {
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("variable").description("The variable you wish to set")
 						.type(ApplicationCommandOption.Type.STRING.getValue())
-						.addChoice(ApplicationCommandOptionChoiceData.builder().name("The name of the game").value("name").build())
+						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Name of the game").value("name").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Allow for draws").value("allowdraw").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Open challenges decay after").value("openchallengedecay").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder().name("Accepted challenges decay after").value("acceptedchallengedecay").build())
