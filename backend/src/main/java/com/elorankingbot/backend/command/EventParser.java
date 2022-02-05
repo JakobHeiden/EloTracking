@@ -13,6 +13,7 @@ import com.elorankingbot.backend.tools.ChatInputInteractionEventWrapper;
 import com.elorankingbot.backend.tools.UserInteractionEventWrapper;
 import com.google.common.collect.ImmutableMap;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -108,6 +109,8 @@ public class EventParser {
 								event.getGuild().block().getEveryoneRole().block());
 					}
 				});
+
+		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
 	}
 
 	public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {

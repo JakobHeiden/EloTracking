@@ -1,11 +1,10 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.commands.admin.Setup;
-import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.model.Player;
 import com.google.common.base.Strings;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -49,7 +48,9 @@ public class DiscordBotService {
 
 	private static int embedRankSpaces = 6;
 	private static int embedRatingSpaces = 8;
-	private static String embedName = "`  Rank   Rating  Name`";
+	private static int embedWinsSpaces = 5;// TODO abhaengig von den daten
+	private static String embedName = "`   Rank  Rating   Wins Losses  Name`";
+	private static String embedNameWithDraws = "`   Rank  Rating    Wins Losses Draws Name`";
 
 	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloRankingService service) {
 		this.client = gatewayDiscordClient;
@@ -116,12 +117,13 @@ public class DiscordBotService {
 				.subscribe();
 	}
 
+	// TODO setting ob wins/losses angezeigt wird
 	public void updateLeaderboard(Game game) {
 		Message leaderboardMessage;
 		try {
 			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
 		} catch (ClientException e) {
-			sendToOwner("exception in updateLeaderBoard");
+			sendToOwner("exception in updateLeaderBoard");// TODO wird irgendwann nicht mehr gebraucht?
 			e.printStackTrace();
 
 			Setup.createLeaderboardChannelAndMessage(getGuildById(game.getGuildId()).block(), game);
@@ -129,35 +131,48 @@ public class DiscordBotService {
 			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
 		}
 
-		List<PlayerInRankingsDto> playerList = service.getRankings(game.getGuildId());
+		List<Player> playerList = service.getRankings(game.getGuildId());
 		int numPlayers = playerList.size();
 		if (numPlayers > game.getLeaderboardLength())
 			playerList = playerList.subList(0, game.getLeaderboardLength());
 
-		String leaderboardString = "";
-		for (int i = 0; i < playerList.size(); i++) {
-			leaderboardString += generateRankingsEntry(i + 1, playerList.get(i).getRating(), playerList.get(i).getName());
-		}
-		if (leaderboardString.equals("")) leaderboardString = "no games played so far";
-		leaderboardString = "```" + leaderboardString + "```";
-
 		leaderboardMessage.edit().withContent("\n").withEmbeds(EmbedCreateSpec.builder()
 				.title(game.getName() + " Rankings")
-				.addField(EmbedCreateFields.Field.of(embedName,	leaderboardString, false))
+				.addField(EmbedCreateFields.Field.of(
+						game.isAllowDraw() ? embedNameWithDraws : embedName,
+						generateLeaderboardString(playerList, game.isAllowDraw()),
+						false))
 				.footer(String.format("%s players total", numPlayers), null)
 				.build()).subscribe();
 	}
 
-	private String generateRankingsEntry(int rank, double rating, String name) {
-		String rankString = String.valueOf(rank);
-		rankString = Strings.padEnd(rankString, (embedRankSpaces +rankString.length())/2, ' ');
-		rankString = Strings.padStart(rankString, embedRankSpaces, ' ');
+	private String generateLeaderboardString(List<Player> playerList, boolean isAllowDraw) {
+		String leaderboardString = "";
+		for (int i = 0; i < playerList.size(); i++) {
+			Player player = playerList.get(i);
+			String numDrawsString = isAllowDraw ? entryOf(player.getDraws(), embedWinsSpaces) : "";
+			leaderboardString += entryOf(i + 1, embedRankSpaces)
+					+ entryOf(player.getRating(), embedRatingSpaces)
+					+ entryOf(player.getWins(), embedWinsSpaces)
+					+ entryOf(player.getLosses(), embedWinsSpaces)
+					+ numDrawsString
+					+ "  " + player.getName() + "\n";
+		}
+		if (leaderboardString.equals("")) leaderboardString = "no games played so far";
+		return  "```\n" + leaderboardString + "```";
+	}
 
-		String ratingString = EloRankingService.formatRating(rating);
-		ratingString = Strings.padEnd(ratingString, (embedRatingSpaces +ratingString.length())/2, ' ');
-		ratingString = Strings.padStart(ratingString, embedRatingSpaces, ' ');
+	private String entryOf(String data, int totalSpaces) {
+		data = Strings.padEnd(data, (totalSpaces + data.length())/2, ' ');
+		return Strings.padStart(data, totalSpaces, ' ');
+	}
 
-		return rankString + ratingString + name + "\n";
+	private String entryOf(int data, int totalSpaces) {
+		return entryOf(String.valueOf(data), totalSpaces);
+	}
+
+	private String entryOf(double data, int totalSpaces) {
+		return entryOf(EloRankingService.formatRating(data), totalSpaces);
 	}
 
 	public Mono<Message> getChallengerMessage(ChallengeModel challenge) {// TODO schauen wo das noch uber client gemacht wird

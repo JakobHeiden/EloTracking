@@ -97,6 +97,8 @@ public class ForceMatch extends SlashCommand {
 
 	private void forceResolveMatch() {
 		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), isDraw);
+		service.addNewPlayerIfPlayerNotPresent(guildId, user1.getId().asLong());
+		service.addNewPlayerIfPlayerNotPresent(guildId, user2.getId().asLong());
 		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?
@@ -158,12 +160,21 @@ public class ForceMatch extends SlashCommand {
 		double winnerOldRating = winner.getRating();
 		double winnerNewRating = winnerOldRating - (match.getWinnerNewRating() - match.getWinnerOldRating());
 		winner.setRating(winnerNewRating);
-		service.savePlayer(winner);
 
 		Player loser = service.findPlayerByGuildIdAndUserId(guildId, match.getLoserId()).get();
 		double loserOldRating = loser.getRating();
 		double loserNewRating = loserOldRating - (match.getLoserNewRating() - match.getLoserOldRating());
 		loser.setRating(loserNewRating);
+
+		if (isDraw) {
+			winner.setDraws(winner.getDraws() - 1);
+			loser.setDraws(loser.getDraws() - 1);
+		} else {
+			winner.setWins(winner.getWins() - 1);
+			loser.setLosses(loser.getLosses() - 1);
+		}
+
+		service.savePlayer(winner);
 		service.savePlayer(loser);
 
 		return new double[]{winnerOldRating, loserOldRating, winnerNewRating, loserNewRating};

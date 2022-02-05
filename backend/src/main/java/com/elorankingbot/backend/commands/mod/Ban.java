@@ -12,14 +12,13 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
 
-import static com.elorankingbot.backend.tools.DurationParser.*;
+import static com.elorankingbot.backend.tools.DurationParser.minutesToString;
 
 public class Ban extends SlashCommand {
 
