@@ -5,15 +5,14 @@ import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.google.common.base.Strings;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateFields;
@@ -44,16 +43,17 @@ public class DiscordBotService {
 	@Getter
 	private final GatewayDiscordClient client;
 	private final EloRankingService service;
-	private final TimedTaskQueue queue;
 	private final ApplicationService applicationService;
 	private PrivateChannel ownerPrivateChannel;
 	private final long botId;
 
+	private static int embedRankSpaces = 6;
+	private static int embedRatingSpaces = 8;
+	private static String embedName = "`  Rank   Rating  Name`";
 
-	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloRankingService service, TimedTaskQueue queue) {
+	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloRankingService service) {
 		this.client = gatewayDiscordClient;
 		this.service = service;
-		this.queue = queue;
 		this.botId = client.getSelfId().asLong();
 		applicationService = client.getRestClient().getApplicationService();
 	}
@@ -133,37 +133,31 @@ public class DiscordBotService {
 		int numPlayers = playerList.size();
 		if (numPlayers > game.getLeaderboardLength())
 			playerList = playerList.subList(0, game.getLeaderboardLength());
-		String rankString = "";
-		String nameString = "";
-		String ratingString = "";
+
+		String leaderboardString = "";
 		for (int i = 0; i < playerList.size(); i++) {
-			PlayerInRankingsDto player = playerList.get(i);
-			rankString += String.format("  %s\n", i + 1);
-			nameString += String.format("  %s\n", player.getName());
-			ratingString += String.format("  %s\n", formatRating(player.getRating()));
+			leaderboardString += generateRankingsEntry(i + 1, playerList.get(i).getRating(), playerList.get(i).getName());
 		}
-		if (rankString.equals("")) {
-			rankString = "no matches";
-			nameString = "played";
-			ratingString = "so far";
-		}
+		if (leaderboardString.equals("")) leaderboardString = "no games played so far";
+		leaderboardString = "```" + leaderboardString + "```";
 
 		leaderboardMessage.edit().withContent("\n").withEmbeds(EmbedCreateSpec.builder()
 				.title(game.getName() + " Rankings")
-				.addField(EmbedCreateFields.Field.of(
-						"Rank",
-						rankString,
-						true))
-				.addField(EmbedCreateFields.Field.of(
-						"Name",
-						nameString,
-						true))
-				.addField(EmbedCreateFields.Field.of(
-						"Rating",
-						ratingString,
-						true))
+				.addField(EmbedCreateFields.Field.of(embedName,	leaderboardString, false))
 				.footer(String.format("%s players total", numPlayers), null)
 				.build()).subscribe();
+	}
+
+	private String generateRankingsEntry(int rank, double rating, String name) {
+		String rankString = String.valueOf(rank);
+		rankString = Strings.padEnd(rankString, (embedRankSpaces +rankString.length())/2, ' ');
+		rankString = Strings.padStart(rankString, embedRankSpaces, ' ');
+
+		String ratingString = EloRankingService.formatRating(rating);
+		ratingString = Strings.padEnd(ratingString, (embedRatingSpaces +ratingString.length())/2, ' ');
+		ratingString = Strings.padStart(ratingString, embedRatingSpaces, ' ');
+
+		return rankString + ratingString + name + "\n";
 	}
 
 	public Mono<Message> getChallengerMessage(ChallengeModel challenge) {// TODO schauen wo das noch uber client gemacht wird
