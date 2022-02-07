@@ -22,6 +22,7 @@ import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Hooks;
 
 import java.util.Map;
 import java.util.Optional;
@@ -120,6 +121,11 @@ public class EventParser {
 				});
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
+
+		Hooks.onErrorDropped(throwable -> {
+			throwable.printStackTrace();
+			bot.sendToOwner("Hooks::onErrorDropped: " + throwable.getMessage());
+		});
 	}
 
 	private void handleError(Throwable throwable) {
