@@ -12,6 +12,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.http.client.ClientException;
 
 public class Reset extends SlashCommand {
 
@@ -64,9 +65,11 @@ public class Reset extends SlashCommand {
 					"Deleting player data.\n" +
 					"Deleting game data.").subscribe();// TODO createFollowup Done! wenn subscribes durch sind
 			service.deleteAllDataForGame(guildId);
-			deleteResultChannel();
-			deleteLeaderBoardChannel();
-			deleteDisputeCategory();
+			try {
+				deleteResultChannel();
+				deleteLeaderBoardChannel();
+				deleteDisputeCategory();
+			} catch (ClientException ignored) {}
 			resetGuildCommands();
 		} else {
 			event.reply("Resetting all player ratings.").subscribe();

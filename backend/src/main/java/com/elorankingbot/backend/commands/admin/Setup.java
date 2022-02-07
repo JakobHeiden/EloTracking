@@ -22,6 +22,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Mono;
@@ -68,16 +69,31 @@ public class Setup extends SlashCommand {
 				event.getOption("nameofgame").get().getValue().get().asString());
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 
-		updateCommands().block();
 		assignModAndAdminRole();
 		setPermissionsForAdminCommands();
 		setPermissionsForModCommands();
-		TextChannel resultChannel = createResultChannel(guild, game);
-		reply += String.format("\n- I created %s where I will post all match results.", resultChannel.getMention());
-		createDisputeCategory();
-		TextChannel leaderboardChannel = createLeaderboardChannelAndMessage(guild, game);
-		bot.updateLeaderboard(game);
+		TextChannel leaderboardChannel = null;
+		try {
+			TextChannel resultChannel = createResultChannel(guild, game);
+			reply += String.format("\n- I created %s where I will post all match results.", resultChannel.getMention());
+			createDisputeCategory();
+			leaderboardChannel = createLeaderboardChannelAndMessage(guild, game);
+			bot.updateLeaderboard(game);
+		} catch (ClientException e) {
+			if (e.getStatus().code() == 403) {
+				event.reply("Insufficient permissions error while trying to create channels. " +
+						"This can be caused by one of the following issues:\n" +
+						"- My assigned permissions aren't sufficient. Go to `Server Settings -> Roles` and give me permission to manage channels.\n" +
+						"- I do not meet the requirements of the verification level set for the server. " +
+						"The verification level can be found at `Server Settings -> Moderation`. You can assign me any role " +
+						"to get around the verification level requirements.").subscribe();
+				return;
+			} else {
+				throw e;
+			}
+		}
 		reply += String.format("\n- I created %s where I will display the leaderboard.", leaderboardChannel.getMention());
+		updateCommands().block();
 
 		service.saveGame(game);
 
