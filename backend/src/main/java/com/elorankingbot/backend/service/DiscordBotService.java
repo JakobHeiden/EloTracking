@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.Setup;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
@@ -45,6 +46,8 @@ public class DiscordBotService {
 	private final ApplicationService applicationService;
 	private PrivateChannel ownerPrivateChannel;
 	private final long botId;
+	@Getter
+	private String latestCommandLog;
 
 	private static int embedRankSpaces = 6;
 	private static int embedRatingSpaces = 8;
@@ -71,6 +74,11 @@ public class DiscordBotService {
 		if (text == null) text = "null";
 		if (text.equals("")) text = "empty String";
 		ownerPrivateChannel.createMessage(text).subscribe();
+	}
+
+	public void logCommand(Object command) {
+		latestCommandLog = command.getClass().getSimpleName() + "::execute";
+		log.debug(latestCommandLog);
 	}
 
 	public Mono<PrivateChannel> getPrivateChannelByUserId(long userId) {
@@ -123,9 +131,6 @@ public class DiscordBotService {
 		try {
 			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
 		} catch (ClientException e) {
-			sendToOwner("exception in updateLeaderBoard");// TODO wird irgendwann nicht mehr gebraucht?
-			e.printStackTrace();
-
 			Setup.createLeaderboardChannelAndMessage(getGuildById(game.getGuildId()).block(), game);
 			service.saveGame(game);
 			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
