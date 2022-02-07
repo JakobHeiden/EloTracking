@@ -31,6 +31,8 @@ import java.util.function.Function;
 @Component
 public class EventParser {
 
+	private final DiscordBotService bot;
+
 	static Map<String, String> commandStringToClassName = ImmutableMap.<String, String>builder()
 			.put("permission", "admin.Permission")
 			.put("reset", "admin.Reset")
@@ -65,26 +67,33 @@ public class EventParser {
 					   Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory,
 					   Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory,
 					   Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
+		this.bot = bot;
 		ApplicationService applicationService = client.getRestClient().getApplicationService();
 		long botId = client.getSelfId().asLong();
 
 		client.on(ChatInputInteractionEvent.class)
 				.map(event -> new ChatInputInteractionEventWrapper(event, service, bot, queue, client))
 				.map(slashCommandFactory::apply)
-				.doOnNext(slashCommand -> log.debug(slashCommand.getClass().getSimpleName() + "::execute"))
-				.subscribe(SlashCommand::execute);
+				.doOnNext(bot::logCommand)
+				.doOnNext(SlashCommand::execute)
+				.doOnError(this::handleError)
+				.subscribe();
 
 		client.on(ButtonInteractionEvent.class)
 				.map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue, client))
 				.map(buttonCommandFactory::apply)
-				.doOnNext(buttonCommand -> log.debug(buttonCommand.getClass().getSimpleName() + "::execute"))
-				.subscribe(ButtonCommand::execute);
+				.doOnNext(bot::logCommand)
+				.doOnNext(ButtonCommand::execute)
+				.doOnError(this::handleError)
+				.subscribe();
 
 		client.on(UserInteractionEvent.class)
 				.map(event -> new UserInteractionEventWrapper(event, service, bot, queue, client))
 				.map(userInteractionChallengeFactory::apply)
-				.doOnNext(userInteraction -> log.debug(userInteraction.getClass().getSimpleName() + "::execute"))
-				.subscribe(ChallengeAsUserInteraction::execute);
+				.doOnNext(bot::logCommand)
+				.doOnNext(ChallengeAsUserInteraction::execute)
+				.doOnError(this::handleError)
+				.subscribe();
 
 		client.on(GuildCreateEvent.class)
 				.subscribe(event -> {
@@ -111,6 +120,11 @@ public class EventParser {
 				});
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
+	}
+
+	private void handleError(Throwable throwable) {
+		bot.sendToOwner(String.format("Error in EventParser: %s\n" +
+				"Occured during %s", throwable.toString(), bot.getLatestCommandLog()));
 	}
 
 	public static SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
