@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface MatchDao extends MongoRepository<Match, Long> {
 	void deleteAllByGuildId(long guildId);
-	Optional<Match> findFirstByWinnerIdAndLoserIdOrderByDate(long winnerId, long loserId);
-	List<Match> findAllByWinnerIdAndGuildId(long winnerId, long guildId);
-	List<Match> findAllByLoserIdAndGuildId(long loserId, long guildId);
+	Optional<Match> findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(long guildId, long winnerId, long loserId);
+	List<Match> findAllByGuildIdAndWinnerId(long guildId, long winnerId);
+	List<Match> findAllByGuildIdAndLoserId(long guildId, long loserId);
 }

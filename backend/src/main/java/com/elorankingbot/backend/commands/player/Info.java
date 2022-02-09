@@ -21,9 +21,8 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import java.util.List;
 import java.util.Optional;
 
-import static java.lang.Integer.max;
-import static java.lang.Integer.min;
 import static com.elorankingbot.backend.service.EloRankingService.formatRating;
+import static java.lang.Integer.min;
 
 public class Info extends SlashCommand {
 
