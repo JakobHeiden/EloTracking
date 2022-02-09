@@ -1,11 +1,15 @@
 package com.elorankingbot.backend.tools;
 
+import com.elorankingbot.backend.commands.admin.Set;
+import com.elorankingbot.backend.commands.player.Info;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.MatchDao;
 import com.elorankingbot.backend.dao.PlayerDao;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -36,13 +40,10 @@ public class DevTools {
 		service.findAllGames().forEach(
 				game -> {
 					try {
-						/*
-						bot.deployCommand(game.getGuildId(), Set.getRequest()).block();
-						Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
-						Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
-						bot.setDiscordCommandPermissions(game.getGuildId(), "ban", adminRole, modRole);
-
-						 */
+						bot.deployCommand(game.getGuildId(), Info.getRequest()).block();
+						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
+						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
+						//bot.setDiscordCommandPermissions(game.getGuildId(), "ban", adminRole, modRole);
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

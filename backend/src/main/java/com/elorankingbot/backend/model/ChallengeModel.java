@@ -36,9 +36,11 @@ public class ChallengeModel {
     private long challengerId;
     private long challengerMessageId;
     private long challengerChannelId;
+    private String challengerTag;
     private long acceptorId;
     private long acceptorMessageId;
     private long acceptorChannelId;
+    private String acceptorTag;
 
     private boolean isAccepted = false;
     private ReportStatus challengerReported = ReportStatus.NOT_YET_REPORTED;
@@ -50,22 +52,24 @@ public class ChallengeModel {
     private boolean isDispute = false;
 
     public ChallengeModel(long guildId,
-                          long challengerId, long challengerMessageId, long challengerChannelId,
-                          long acceptorId, long acceptorMessageId, long acceptorChannelId) {
+                          long challengerId, long challengerMessageId, long challengerChannelId, String challengerTag,
+                          long acceptorId, long acceptorMessageId, long acceptorChannelId, String acceptorTag) {
         this.id = challengerMessageId;
         this.guildId = guildId;
         this.challengerId = challengerId;
         this.challengerMessageId = challengerMessageId;
         this.challengerChannelId = challengerChannelId;
+        this.challengerTag = challengerTag;
         this.acceptorId = acceptorId;
         this.acceptorMessageId = acceptorMessageId;
         this.acceptorChannelId = acceptorChannelId;
+        this.acceptorTag = acceptorTag;
     }
 
     public ReportIntegrity setChallengerReported(ReportStatus challengerReported) {
         this.challengerReported = challengerReported;
 
-        if (acceptorReported == ReportStatus.NOT_YET_REPORTED) return ReportIntegrity.FIRST_TO_REPORT;
+        if (acceptorReported == ReportStatus.NOT_YET_REPORTED) return ReportIntegrity.FIRST_TO_REPORT;// TODO duplizieren wegmachen?
 
         if (challengerReported == ReportStatus.WIN && acceptorReported == ReportStatus.LOSE) return ReportIntegrity.HARMONY;
         if (challengerReported == ReportStatus.LOSE && acceptorReported == ReportStatus.WIN) return ReportIntegrity.HARMONY;

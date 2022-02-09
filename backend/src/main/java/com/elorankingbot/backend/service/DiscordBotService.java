@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.Setup;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
@@ -97,7 +96,7 @@ public class DiscordBotService {
 				.createMessage(spec);
 	}
 
-	public String getPlayerName(long playerId) {
+	public String getPlayerTag(long playerId) {
 		return client.getUserById(Snowflake.of(playerId)).block().getTag();
 	}
 
@@ -119,9 +118,9 @@ public class DiscordBotService {
 			service.saveGame(game);
 		}
 		resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",// TODO aenderung ausformulieren
-						match.getWinnerTag(client), formatRating(match.getWinnerNewRating()),
+						match.getWinnerTag(), formatRating(match.getWinnerNewRating()),
 						match.isDraw() ? "drew" : "defeated",
-						match.getLoserTag(client), formatRating(match.getLoserNewRating())))
+						match.getLoserTag(), formatRating(match.getLoserNewRating())))
 				.subscribe();
 	}
 
@@ -137,38 +136,45 @@ public class DiscordBotService {
 		}
 
 		List<Player> playerList = service.getRankings(game.getGuildId());
-		int numPlayers = playerList.size();
-		if (numPlayers > game.getLeaderboardLength())
+		int numTotalPlayers = playerList.size();
+		if (numTotalPlayers > game.getLeaderboardLength())
 			playerList = playerList.subList(0, game.getLeaderboardLength());
 
-		leaderboardMessage.edit().withContent("\n").withEmbeds(EmbedCreateSpec.builder()
-				.title(game.getName() + " Rankings")
-				.addField(EmbedCreateFields.Field.of(
-						game.isAllowDraw() ? embedNameWithDraws : embedName,
-						generateLeaderboardString(playerList, game.isAllowDraw()),
-						false))
-				.footer(String.format("%s players total", numPlayers), null)
-				.build()).subscribe();
+		leaderboardMessage.edit().withContent("\n").withEmbeds(
+						generateLeaderboardEmbed(playerList, numTotalPlayers, game, 1, -1))
+				.subscribe();
 	}
 
-	private String generateLeaderboardString(List<Player> playerList, boolean isAllowDraw) {
+	public EmbedCreateSpec generateLeaderboardEmbed(List<Player> playerList, int numTotalPlayers, Game game,
+													int rankOffset, int rankToHighlight) {
 		String leaderboardString = "";
 		for (int i = 0; i < playerList.size(); i++) {
 			Player player = playerList.get(i);
-			String numDrawsString = isAllowDraw ? entryOf(player.getDraws(), embedWinsSpaces) : "";
-			leaderboardString += entryOf(i + 1, embedRankSpaces)
+			String numDrawsString = game.isAllowDraw() ? entryOf(player.getDraws(), embedWinsSpaces) : "";
+			String leaderboardEntry = entryOf(i + rankOffset, embedRankSpaces)
 					+ entryOf(player.getRating(), embedRatingSpaces)
 					+ entryOf(player.getWins(), embedWinsSpaces)
 					+ entryOf(player.getLosses(), embedWinsSpaces)
 					+ numDrawsString
 					+ "  " + player.getName() + "\n";
+			if (i == rankToHighlight) leaderboardEntry = "+" + leaderboardEntry.substring(1);
+			leaderboardString += leaderboardEntry;
 		}
 		if (leaderboardString.equals("")) leaderboardString = "no games played so far";
-		return  "```\n" + leaderboardString + "```";
+		leaderboardString = "```diff\n" + leaderboardString + "```";
+
+		return EmbedCreateSpec.builder()
+				.title(game.getName() + " Rankings")
+				.addField(EmbedCreateFields.Field.of(
+						game.isAllowDraw() ? embedNameWithDraws : embedName,
+						leaderboardString,
+						true))
+				.footer(String.format("%s players total", numTotalPlayers), null)
+				.build();
 	}
 
 	private String entryOf(String data, int totalSpaces) {
-		data = Strings.padEnd(data, (totalSpaces + data.length())/2, ' ');
+		data = Strings.padEnd(data, (totalSpaces + data.length()) / 2, ' ');
 		return Strings.padStart(data, totalSpaces, ' ');
 	}
 

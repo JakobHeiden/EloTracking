@@ -137,7 +137,7 @@ public class EloRankingService {
 		matchDao.delete(match);
 	}
 
-	public Optional<Match> findMostRecentMatch(long player1Id, long player2Id) {
+	public Optional<Match> findMostRecentMatch(long player1Id, long player2Id) {// TODO das hier prueft nicht auf guildId...
 		Optional<Match> search = matchDao.findFirstByWinnerIdAndLoserIdOrderByDate(player1Id, player2Id);
 		Optional<Match> searchReverseParams = matchDao.findFirstByWinnerIdAndLoserIdOrderByDate(player2Id, player1Id);
 
@@ -154,6 +154,13 @@ public class EloRankingService {
 		}
 	}
 
+	public List<Match> getMatchHistory(long playerId, long guildId) {
+		List<Match> matches = matchDao.findAllByWinnerIdAndGuildId(playerId, guildId);
+		matches.addAll(matchDao.findAllByLoserIdAndGuildId(playerId, guildId));
+		Collections.sort(matches);
+		return matches;
+	}
+
 	// Player
 	public void savePlayer(Player player) {
 		log.debug("saving player " + player.getUserId());
@@ -166,7 +173,7 @@ public class EloRankingService {
 
 	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {// TODO! schauen wo man den namen schon hat
 		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
-			playerDao.insert(new Player(guildId, userId, bot.getPlayerName(userId), initialRating));
+			playerDao.insert(new Player(guildId, userId, bot.getPlayerTag(userId), initialRating));
 		}
 	}
 
@@ -221,7 +228,7 @@ public class EloRankingService {
 	public List<PlayerInRankingsDto> getRankingsAsDto(long guildId) {
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
 		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
-				.map(player -> new PlayerInRankingsDto(bot.getPlayerName(player.getUserId()), player.getRating()))
+				.map(player -> new PlayerInRankingsDto(bot.getPlayerTag(player.getUserId()), player.getRating()))
 				.collect(Collectors.toList());
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;
@@ -229,7 +236,7 @@ public class EloRankingService {
 
 	public List<Player> getRankings(long guildId) {
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
-		Collections.sort(allPlayers);
+		Collections.sort(allPlayers, Collections.reverseOrder());
 		return allPlayers;
 	}
 }

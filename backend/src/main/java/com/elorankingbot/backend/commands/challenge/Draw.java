@@ -42,7 +42,8 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 	private void processHarmony() {
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
-		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(), true);
+		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(),
+				challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
 		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 

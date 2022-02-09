@@ -50,6 +50,8 @@ public class Win extends ButtonCommandRelatedToChallenge {
 		Match match = new Match(guildId,
 				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
 				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
+				isChallengerCommand ? challenge.getChallengerTag() : challenge.getAcceptorTag(),
+				isChallengerCommand ? challenge.getAcceptorTag() : challenge.getChallengerTag(),
 				false);
 		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);

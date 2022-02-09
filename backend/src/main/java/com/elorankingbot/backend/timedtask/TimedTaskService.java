@@ -4,7 +4,6 @@ import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.tools.DurationParser;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
@@ -55,7 +54,7 @@ public class TimedTaskService {
 		boolean isWinnerMessage = ((PrivateChannel) message.getChannel().block())
 				.getRecipientIds().contains(Snowflake.of(match.getWinnerId()));
 		System.out.println(isWinnerMessage);
-		String opponentName = bot.getPlayerName(isWinnerMessage ? match.getLoserId() : match.getWinnerId());
+		String opponentName = bot.getPlayerTag(isWinnerMessage ? match.getLoserId() : match.getWinnerId());
 		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block()
 				.edit().withContent(String.format("*You played a match against %s and %s. Your rating went from %s to %s.*",
 						opponentName,

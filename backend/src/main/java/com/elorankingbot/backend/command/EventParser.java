@@ -44,6 +44,8 @@ public class EventParser {
 			.put("rating", "mod.Rating")
 			.put("ban", "mod.Ban")
 
+			.put("info", "player.Info")
+
 			.put("accept", "challenge.Accept")
 			.put("cancel", "challenge.Cancel")
 			.put("cancelonconflict", "challenge.CancelOnConflict")

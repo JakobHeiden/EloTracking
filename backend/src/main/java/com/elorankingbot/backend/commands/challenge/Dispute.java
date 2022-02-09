@@ -22,8 +22,8 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 	private TextChannel disputeChannel;
 	private String parentMessageContent;
 	private String targetMessageContent;
-	private String challengerName;
-	private String acceptorName;
+	private String challengerTag;
+	private String acceptorTag;
 
 	public Dispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
 				   TimedTaskQueue queue, GatewayDiscordClient client) {
@@ -34,8 +34,8 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 		challenge.setDispute(true);
 		service.saveChallenge(challenge);
 
-		challengerName = bot.getPlayerName(challenge.getChallengerId());
-		acceptorName = bot.getPlayerName(challenge.getAcceptorId());
+		challengerTag = challenge.getChallengerTag();
+		acceptorTag = challenge.getAcceptorTag();
 
 		createDisputeChannel();
 		editChallengeMessages();
@@ -63,7 +63,7 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 
 	private void createDisputeChannel() {
 		disputeChannel = client.getGuildById(Snowflake.of(game.getGuildId())).block()
-				.createTextChannel(String.format("%s vs %s", challengerName, acceptorName))
+				.createTextChannel(String.format("%s vs %s", challengerTag, acceptorTag))
 				.withParentId(Snowflake.of(game.getDisputeCategoryId()))
 				.withPermissionOverwrites(
 						PermissionOverwrite.forMember(
@@ -83,11 +83,11 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 						"Note that the Buttons in this channel can only be used by <@&%s>.", game.getModRoleId()))
 				.withEmbeds(EmbedCreateSpec.builder()
 						.addField(EmbedCreateFields.Field.of(
-								"My message with " + challengerName,
+								"My message with " + challengerTag,
 								isChallengerCommand ? parentMessageContent : targetMessageContent,
 								true))
 						.addField(EmbedCreateFields.Field.of(
-								"My message with " + acceptorName,
+								"My message with " + acceptorTag,
 								isChallengerCommand ? targetMessageContent : parentMessageContent,
 								true))
 						.build())
@@ -97,13 +97,13 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 
 	private ActionRow createActionRow(boolean allowDraw) {
 		if (allowDraw) return ActionRow.of(
-				Buttons.ruleAsWin(challenge.getId(), true, challengerName),
-				Buttons.ruleAsWin(challenge.getId(), false, acceptorName),
+				Buttons.ruleAsWin(challenge.getId(), true, challengerTag),
+				Buttons.ruleAsWin(challenge.getId(), false, acceptorTag),
 				Buttons.ruleAsDraw(challenge.getId()),
 				Buttons.ruleAsCancel(challenge.getId()));
 		else return ActionRow.of(
-				Buttons.ruleAsWin(challenge.getId(), true, challengerName),
-				Buttons.ruleAsWin(challenge.getId(), false, acceptorName),
+				Buttons.ruleAsWin(challenge.getId(), true, challengerTag),
+				Buttons.ruleAsWin(challenge.getId(), false, acceptorTag),
 				Buttons.ruleAsCancel(challenge.getId()));
 	}
 }

@@ -21,7 +21,9 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
-		Match match = new Match(challenge.getGuildId(), challenge.getChallengerId(), challenge.getAcceptorId(), true);
+
+		Match match = new Match(challenge.getGuildId(), challenge.getChallengerId(), challenge.getAcceptorId(),
+				challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
 		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 
