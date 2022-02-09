@@ -19,33 +19,39 @@ import java.util.UUID;
 @ToString
 @UseToStringForLogging
 @Document(collection = "match")
-public class Match {
+public class Match implements Comparable<Match> {
+
     @Id
     private UUID id;
     private Date date;
     private long guildId;
     private long winnerId;
+    private String winnerTag;
     private double winnerOldRating;
     private double winnerNewRating;
     private long loserId;
+    private String loserTag;
     private double loserOldRating;
     private double loserNewRating;
     private boolean isDraw;
 
-    public Match(long guildId, long winnerId, long loserId, boolean isDraw) {
+    public Match(long guildId, long winnerId, long loserId, String winnerTag, String loserTag, boolean isDraw) {
         this.guildId = guildId;
         this.winnerId = winnerId;
         this.loserId = loserId;
+        this.winnerTag = winnerTag;
+        this.loserTag = loserTag;
         this.isDraw = isDraw;
         this.id = UUID.randomUUID();
         this.date = new Date();
     }
 
-    public String getWinnerTag(GatewayDiscordClient client) {// TODO umziehen nach bot
+    public String getWinnerTag(GatewayDiscordClient client) {// TODO umziehen nach bot, oder mit persistieren?
         return client.getUserById(Snowflake.of(winnerId)).block().getTag();
     }
 
-    public String getLoserTag(GatewayDiscordClient client) {
-        return client.getUserById(Snowflake.of(loserId)).block().getTag();
+    @Override
+    public int compareTo(Match other) {
+        return date.compareTo(other.date);
     }
 }

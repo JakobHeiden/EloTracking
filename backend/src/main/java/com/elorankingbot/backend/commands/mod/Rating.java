@@ -68,6 +68,7 @@ public class Rating extends SlashCommand {
 		double newRating = isSetNewRating ? rating : oldRating + rating;
 		player.setRating(newRating);
 		service.savePlayer(player);
+		bot.updateLeaderboard(game);
 
 		String reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
@@ -76,7 +77,7 @@ public class Rating extends SlashCommand {
 				playerUser.getTag(), formatRating(newRating), formatRating(oldRating), reasonGiven)).subscribe();
 
 		String playerMessageContent = String.format("%s has set your rating to %s, from %s.%s",
-				event.getInteraction().getUser().getTag(), newRating, oldRating, reasonGiven);
+				event.getInteraction().getUser().getTag(), formatRating(newRating), formatRating(oldRating), reasonGiven);
 		MessageCreateSpec playerMessageSpec = MessageCreateSpec.builder().content(playerMessageContent).build();
 		playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(playerMessageSpec).subscribe());
 	}

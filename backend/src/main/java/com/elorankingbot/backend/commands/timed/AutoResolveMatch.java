@@ -31,23 +31,33 @@ public class AutoResolveMatch extends TimedCommand {
 				: challenge.getAcceptorReported();
 		long challengerId = challenge.getChallengerId();
 		long acceptorId = challenge.getAcceptorId();
+		String challengerTag = challenge.getChallengerTag();
+		String acceptorTag = challenge.getAcceptorTag();
 		long winnerId = 0L;
 		long loserId = 0L;
+		String winnerTag = null;
+		String loserTag = null;
 		boolean isDraw = false;
 		boolean isWin = false;
 		switch (report) {
 			case WIN:
 				winnerId = hasChallengerReported ? challengerId : acceptorId;
 				loserId = hasChallengerReported ? acceptorId : challengerId;
+				winnerTag = hasChallengerReported ? challengerTag : acceptorTag;
+				loserTag = hasChallengerReported ? acceptorTag : challengerTag;
 				isWin = true;
 				break;
 			case LOSE:
 				winnerId = hasChallengerReported ? acceptorId : challengerId;
 				loserId = hasChallengerReported ? challengerId : acceptorId;
+				winnerTag = hasChallengerReported ? acceptorTag : challengerTag;
+				loserTag = hasChallengerReported ? challengerTag : acceptorTag;
 				break;
 			case DRAW:
 				winnerId = challengerId;
 				loserId = acceptorId;
+				winnerTag = challengerTag;
+				loserTag = acceptorTag;
 				isDraw = true;
 				break;
 			case CANCEL:
@@ -58,7 +68,7 @@ public class AutoResolveMatch extends TimedCommand {
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerId());
 		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorId());
-		Match match = new Match(challenge.getGuildId(), winnerId, loserId, isDraw);
+		Match match = new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, isDraw);
 		service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.deleteChallenge(challenge);
 

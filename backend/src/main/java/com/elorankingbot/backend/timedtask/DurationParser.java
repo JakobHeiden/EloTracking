@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.tools;
+package com.elorankingbot.backend.timedtask;
 
 import com.google.common.primitives.Ints;
 

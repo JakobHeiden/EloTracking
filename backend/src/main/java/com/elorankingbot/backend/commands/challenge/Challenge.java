@@ -9,7 +9,7 @@ import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.tools.Buttons;
-import com.elorankingbot.backend.tools.DurationParser;
+import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -55,7 +55,8 @@ public class Challenge extends SlashCommand {
 
 	public static void staticExecute(User acceptorUser, long guildId, Game game, ApplicationCommandInteractionEvent event,
 									 EloRankingService service, DiscordBotService bot, TimedTaskQueue queue) {
-		long challengerId = event.getInteraction().getUser().getId().asLong();
+		User challengerUser = event.getInteraction().getUser();
+		long challengerId = challengerUser.getId().asLong();
 		long acceptorId = acceptorUser.getId().asLong();
 
 		Optional<Player> maybeChallenger = service.findPlayerByGuildIdAndUserId(guildId, challengerId);
@@ -72,7 +73,7 @@ public class Challenge extends SlashCommand {
 		Optional<Player> maybeAcceptor = service.findPlayerByGuildIdAndUserId(guildId, acceptorId);
 		if (maybeAcceptor.isPresent() && maybeAcceptor.get().isBanned()) {
 			event.reply(String.format("%s is currently banned and cannot be challenged.",
-							acceptorUser.getTag())).subscribe();
+					acceptorUser.getTag())).subscribe();
 			return;
 		}
 
@@ -100,7 +101,7 @@ public class Challenge extends SlashCommand {
 		Message challengerMessage = bot.sendToUser(challengerId, challengerMessageSpec).block();
 		MessageCreateSpec acceptorMessageSpec = MessageCreateSpec.builder()
 				.content(String.format("**You have been challenged by %s to a match of %s. Accept?**",
-						event.getInteraction().getUser().getTag(), game.getName()))
+						challengerUser.getTag(), game.getName()))
 				.addComponent(ActionRow.of(
 						Buttons.accept(challengerMessage.getId().asLong()),
 						Buttons.decline(challengerMessage.getId().asLong())
@@ -108,12 +109,11 @@ public class Challenge extends SlashCommand {
 		Message acceptorMessage = bot.sendToUser(acceptorId, acceptorMessageSpec).block();
 
 		ChallengeModel challenge = new ChallengeModel(guildId,
-				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(),
-				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong());
+				challengerId, challengerMessage.getId().asLong(), challengerMessage.getChannelId().asLong(), challengerUser.getTag(),
+				acceptorId, acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong(), acceptorUser.getTag());
 		service.saveChallenge(challenge);
 
-		event.reply(String.format("Challenge is registered. I have sent you and %s a message.",
-						event.getInteraction().getUser().getTag()))
+		event.reply(String.format("Challenge is registered. I have sent you and %s a message.", challengerUser.getTag()))
 				.withEphemeral(true).subscribe();
 		queue.addTimedTask(
 				TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY,

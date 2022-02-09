@@ -6,7 +6,7 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.DurationParser;
+import com.elorankingbot.backend.timedtask.DurationParser;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -18,7 +18,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
 
-import static com.elorankingbot.backend.tools.DurationParser.minutesToString;
+import static com.elorankingbot.backend.timedtask.DurationParser.minutesToString;
 
 public class Ban extends SlashCommand {
 

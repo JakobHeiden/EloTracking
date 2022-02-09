@@ -6,6 +6,7 @@ import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
 import com.elorankingbot.backend.commands.mod.Rating;
+import com.elorankingbot.backend.commands.player.Info;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -181,6 +182,7 @@ public class Setup extends SlashCommand {
 		Mono<ApplicationCommandData> deploySet = bot.deployCommand(guildId, Set.getRequest());
 		Mono<ApplicationCommandData> deployRating = bot.deployCommand(guildId, Rating.getRequest());
 		bot.deployCommand(guildId, Ban.getRequest()).block();
+		bot.deployCommand(guildId, Info.getRequest()).block();
 		reply += "\n- I updated my commands on this server. This may take a minute to update.";
 		return Mono.zip(deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
 				deployReset, deployPermission, deploySet, deployRating).map(allTheReturnValues -> null);
