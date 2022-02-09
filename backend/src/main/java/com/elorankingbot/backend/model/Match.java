@@ -8,17 +8,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor// TODO kann das weg?
+@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @UseToStringForLogging
 @Document(collection = "match")
+@CompoundIndex(def = "{'guildId': 1, 'winnerId': 1, 'date': -1}")
+@CompoundIndex(def = "{'guildId': 1, 'loserId': 1, 'date': -1}")
 public class Match implements Comparable<Match> {
 
     @Id

@@ -133,7 +133,7 @@ public class ForceMatch extends SlashCommand {
 	}
 
 	private void undoMatch() {
-		Optional<Match> maybeMostRecentMatch = service.findMostRecentMatch(user1.getId().asLong(), user2.getId().asLong());
+		Optional<Match> maybeMostRecentMatch = service.findMostRecentMatch(guildId, user1.getId().asLong(), user2.getId().asLong());
 		if (maybeMostRecentMatch.isEmpty()) {
 			event.reply("These players have no recorded matches.").subscribe();
 			return;

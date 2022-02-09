@@ -137,9 +137,9 @@ public class EloRankingService {
 		matchDao.delete(match);
 	}
 
-	public Optional<Match> findMostRecentMatch(long player1Id, long player2Id) {// TODO das hier prueft nicht auf guildId...
-		Optional<Match> search = matchDao.findFirstByWinnerIdAndLoserIdOrderByDate(player1Id, player2Id);
-		Optional<Match> searchReverseParams = matchDao.findFirstByWinnerIdAndLoserIdOrderByDate(player2Id, player1Id);
+	public Optional<Match> findMostRecentMatch(long guildId, long player1Id, long player2Id) {
+		Optional<Match> search = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player1Id, player2Id);
+		Optional<Match> searchReverseParams = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player2Id, player1Id);
 
 		if (search.isEmpty()) {
 			return searchReverseParams;
@@ -155,8 +155,8 @@ public class EloRankingService {
 	}
 
 	public List<Match> getMatchHistory(long playerId, long guildId) {
-		List<Match> matches = matchDao.findAllByWinnerIdAndGuildId(playerId, guildId);
-		matches.addAll(matchDao.findAllByLoserIdAndGuildId(playerId, guildId));
+		List<Match> matches = matchDao.findAllByGuildIdAndWinnerId(guildId, playerId);
+		matches.addAll(matchDao.findAllByGuildIdAndLoserId(guildId, playerId));
 		Collections.sort(matches);
 		return matches;
 	}
@@ -235,6 +235,8 @@ public class EloRankingService {
 	}
 
 	public List<Player> getRankings(long guildId) {
+		// TODO abfrage begrenzen und vorsortieren, der performance wegen
+		// ueber rating indexieren, dann ne heuristik bauen die effizient die naechsten x umliegenden player findet
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
 		Collections.sort(allPlayers, Collections.reverseOrder());
 		return allPlayers;
