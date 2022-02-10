@@ -96,9 +96,18 @@ public class ForceMatch extends SlashCommand {
 	}
 
 	private void forceResolveMatch() {
-		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
 		service.addNewPlayerIfPlayerNotPresent(guildId, user1.getId().asLong());
 		service.addNewPlayerIfPlayerNotPresent(guildId, user2.getId().asLong());
+
+		if (isDraw &&
+				service.findPlayerByGuildIdAndUserId(guildId, user1.getId().asLong()).get().getRating()
+						> service.findPlayerByGuildIdAndUserId(guildId, user2.getId().asLong()).get().getRating()) {
+			User tempUser1 = user1;
+			user1 = user2;
+			user2 = tempUser1;
+		}
+
+		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
 		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?

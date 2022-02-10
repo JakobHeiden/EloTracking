@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.challenge;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTask;
@@ -42,8 +43,17 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 	private void processHarmony() {
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
-		Match match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(),
-				challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
+
+		Player challengerPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getChallengerId()).get();
+		Player acceptorPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getAcceptorId()).get();
+		Match match;
+		if (challengerPlayer.getRating() < acceptorPlayer.getRating()) {// in a draw the lower ranked player will gain rating
+			match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(),
+					challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
+		} else {
+			match = new Match(guildId, challenge.getAcceptorId(), challenge.getChallengerId(),
+					challenge.getAcceptorTag(), challenge.getChallengerTag(), true);
+		}
 		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
 		service.deleteChallenge(challenge);
 
