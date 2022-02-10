@@ -49,11 +49,10 @@ public class TimedTaskService {
 	}
 
 	public void summarizeMatch(long messageId, long channelId, Object value) {
-		Match match = (Match) value;// TODO! hier haengt er
+		Match match = (Match) value;
 		Message message = client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
 		boolean isWinnerMessage = ((PrivateChannel) message.getChannel().block())
 				.getRecipientIds().contains(Snowflake.of(match.getWinnerId()));
-		System.out.println(isWinnerMessage);
 		String opponentName = bot.getPlayerTag(isWinnerMessage ? match.getLoserId() : match.getWinnerId());
 		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block()
 				.edit().withContent(String.format("*You played a match against %s and %s. Your rating went from %s to %s.*",

@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.dispute;
 
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -22,14 +23,22 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
 
-		Match match = new Match(challenge.getGuildId(), challenge.getChallengerId(), challenge.getAcceptorId(),
-				challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
+		Player challengerPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getChallengerId()).get();
+		Player acceptorPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getAcceptorId()).get();
+		Match match;
+		if (challengerPlayer.getRating() < acceptorPlayer.getRating()) {// in a draw the lower ranked player will gain rating
+			match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(),
+					challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
+		} else {
+			match = new Match(guildId, challenge.getAcceptorId(), challenge.getChallengerId(),
+					challenge.getAcceptorTag(), challenge.getChallengerTag(), true);
+		}
 		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled the match a draw :left_right_arrow: for <@%s> and <@%s>.",
-				moderatorName, challenge.getChallengerId(), challenge.getAcceptorId()));
+				moderatorName, match.getWinnerId(), match.getLoserId()));
 		bot.postToResultChannel(game, match);
 		bot.updateLeaderboard(game);
 		updateMessages();

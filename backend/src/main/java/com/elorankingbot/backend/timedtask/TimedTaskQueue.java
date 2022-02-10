@@ -67,33 +67,6 @@ public class TimedTaskQueue {
 		timeSlotDao.save(new TimeSlot(targetTimeSlotIndex, timedTasks));
 	}
 
-	@Scheduled(fixedRate = 60000)
-	public void tick() {
-		if (!doRunQueue) return;
-
-		log.debug("tick " + currentIndex);
-		try {
-			if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
-				timedTaskService.deleteGamesMarkedForDeletion();
-				timedTaskService.markGamesForDeletion();
-			}
-
-			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
-			if (maybeTimeSlot.isPresent()) {
-				for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
-					processTimedTask(task);
-				}
-				timeSlotDao.delete(maybeTimeSlot.get());
-			}
-		} catch (Exception e) {
-			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
-			e.printStackTrace();
-		}
-		currentIndex++;
-		if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
-		timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
-	}
-
 	private void processTimedTask(TimedTask task) {
 		long id = task.relationId();
 		long otherId = task.otherId();
@@ -122,6 +95,33 @@ public class TimedTaskQueue {
 				timedTaskService.unbanPlayer(id, otherId, duration);
 				break;
 		}
+	}
+
+	@Scheduled(fixedRate = 60000)
+	public void tick() {
+		if (!doRunQueue) return;
+
+		log.debug("tick " + currentIndex);
+		try {
+			if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
+				timedTaskService.deleteGamesMarkedForDeletion();
+				timedTaskService.markGamesForDeletion();
+			}
+
+			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
+			if (maybeTimeSlot.isPresent()) {
+				for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
+					processTimedTask(task);
+				}
+				timeSlotDao.delete(maybeTimeSlot.get());
+			}
+		} catch (Exception e) {
+			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
+			e.printStackTrace();
+		}
+		currentIndex++;
+		if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
+		timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
 	}
 
 	public int getRemainingDuration(int index) {

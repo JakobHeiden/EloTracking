@@ -117,10 +117,14 @@ public class DiscordBotService {
 			game.setResultChannelId(resultChannel.getId().asLong());
 			service.saveGame(game);
 		}
-		resultChannel.createMessage(String.format("%s (%s) %s %s (%s)",// TODO aenderung ausformulieren
-						match.getWinnerTag(), formatRating(match.getWinnerNewRating()),
+		resultChannel.createMessage(String.format("%s (%s, +%s) %s %s (%s, -%s)",
+						match.getWinnerTag(),
+						formatRating(match.getWinnerNewRating()),
+						formatRating(match.getWinnerNewRating() - match.getWinnerOldRating()),
 						match.isDraw() ? "drew" : "defeated",
-						match.getLoserTag(), formatRating(match.getLoserNewRating())))
+						match.getLoserTag(),
+						formatRating(match.getLoserNewRating()),
+						formatRating(match.getLoserOldRating() - match.getLoserNewRating())))
 				.subscribe();
 	}
 
