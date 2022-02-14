@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
@@ -14,6 +15,7 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.http.client.ClientException;
 
+@AdminCommand
 public class Reset extends SlashCommand {
 
 	private Guild guild;

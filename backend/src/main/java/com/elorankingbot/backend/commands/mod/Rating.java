@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.mod;
 
+import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -16,6 +17,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import static com.elorankingbot.backend.service.EloRankingService.formatRating;
 
+@ModCommand
 public class Rating extends SlashCommand {
 
 	public Rating(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {

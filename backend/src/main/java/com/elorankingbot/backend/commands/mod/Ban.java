@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.mod;
 
+import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 import static com.elorankingbot.backend.timedtask.DurationParser.minutesToString;
 
+@ModCommand
 public class Ban extends SlashCommand {
 
 	private User playerUser;

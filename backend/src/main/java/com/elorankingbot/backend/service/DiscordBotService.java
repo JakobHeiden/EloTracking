@@ -228,7 +228,7 @@ public class DiscordBotService {
 			requestBuilder.addPermission(ApplicationCommandPermissionsData.builder()
 					.id(role.getId().asLong()).type(1).permission(true).build()).build();
 		});
-		getCommandIdByName(guildId, commandName).subscribe(commandId ->
+		getCommandIdByName(guildId, commandName.toLowerCase()).subscribe(commandId ->
 				applicationService.modifyApplicationCommandPermissions(botId, guildId, commandId, requestBuilder.build())
 						.subscribe(permissionsData -> log.debug("...to command " + permissionsData.id())));
 	}

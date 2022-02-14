@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
+@AdminCommand
 public class Set extends SlashCommand {
 
 	private static final List<String> integerVariables = List.of(
