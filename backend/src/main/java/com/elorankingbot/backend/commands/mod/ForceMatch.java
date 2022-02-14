@@ -1,5 +1,7 @@
 package com.elorankingbot.backend.commands.mod;
 
+import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
@@ -17,6 +19,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.Optional;
 
+@ModCommand
 public class ForceMatch extends SlashCommand {
 
 	private User user1;

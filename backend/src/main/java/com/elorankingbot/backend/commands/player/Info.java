@@ -120,7 +120,6 @@ public class Info extends SlashCommand {
 		if (matchHistory.size() > numMatches) matchHistory = matchHistory.subList(0, numMatches);
 		String matchHistoryString = "";
 		for (Match match : matchHistory) {
-			System.out.println(generateMatchString(match, targetPlayer.getUserId()));
 			matchHistoryString += generateMatchString(match, targetPlayer.getUserId());
 		}
 		if (matchHistoryString.equals("")) matchHistoryString = "This player has not played any matches.";

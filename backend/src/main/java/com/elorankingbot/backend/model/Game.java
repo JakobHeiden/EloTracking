@@ -20,7 +20,7 @@ public class Game {
     private long modRoleId;
     private long resultChannelId;
     private long disputeCategoryId;
-    private long leaderboardChannelId;
+    private long leaderboardChannelId;// TODO kann weg?
     private long leaderboardMessageId;
     private String name;
     private boolean allowDraw = false;

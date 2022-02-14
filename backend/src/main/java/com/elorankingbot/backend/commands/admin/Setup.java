@@ -20,13 +20,15 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
+import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
+import java.util.List;
 
 public class Setup extends SlashCommand {
 
@@ -68,6 +70,7 @@ public class Setup extends SlashCommand {
 				event.getOption("nameofgame").get().getValue().get().asString());
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 
+		updateCommands().block();
 		assignModAndAdminRole();
 		setPermissionsForAdminCommands();
 		setPermissionsForModCommands();
@@ -92,7 +95,6 @@ public class Setup extends SlashCommand {
 			}
 		}
 		reply += String.format("\n- I created %s where I will display the leaderboard.", leaderboardChannel.getMention());
-		updateCommands();
 
 		service.saveGame(game);
 
@@ -168,27 +170,31 @@ public class Setup extends SlashCommand {
 				"It is only visible to Elo Admins and Moderators.", disputeCategory.getMention());
 	}
 
-	private void updateCommands() {
-		bot.deleteCommand(guildId, Setup.getRequest().name()).subscribe();
-		bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw())).subscribe();
-		bot.deployCommand(guildId, Challenge.getRequest()).subscribe();
-		bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest()).subscribe();
-		bot.deployCommand(guildId, Reset.getRequest()).subscribe();
-		bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest()).subscribe();
-		bot.deployCommand(guildId, Set.getRequest()).subscribe();
-		bot.deployCommand(guildId, Rating.getRequest()).subscribe();
-		bot.deployCommand(guildId, Ban.getRequest()).subscribe();
-		bot.deployCommand(guildId, Info.getRequest()).subscribe();
+	private Mono<Object> updateCommands() {
+		Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
+		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw()));
+		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
+		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
+		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest());
+		Mono<ApplicationCommandData> deploySet = bot.deployCommand(guildId, Set.getRequest());
+		Mono<ApplicationCommandData> deployRating = bot.deployCommand(guildId, Rating.getRequest());
+		Mono<ApplicationCommandData> deployBan =bot.deployCommand(guildId, Ban.getRequest());
+		Mono<ApplicationCommandData> deployInfo =bot.deployCommand(guildId, Info.getRequest());
 		reply += "\n- I updated my commands on this server. This may take a minute to update.";
+		return Mono.zip(List.of(
+				deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
+				deployReset, deployPermission, deploySet, deployRating, deployBan, deployInfo),
+				object -> null);
 	}
 
 	private void setPermissionsForAdminCommands() {
-		Arrays.stream(com.elorankingbot.backend.commands.admin.Permission.adminCommands)
-				.forEach(commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
+		service.getAdminCommands().forEach(commandName ->
+				bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
 	}
 
 	private void setPermissionsForModCommands() {
-		Arrays.stream(com.elorankingbot.backend.commands.admin.Permission.modCommands).forEach(
-				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
+		service.getModCommands().forEach(commandName ->
+				bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
 }

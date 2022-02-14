@@ -9,6 +9,7 @@ import com.elorankingbot.backend.tools.UserInteractionEventWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 
 import java.util.function.Function;
@@ -16,6 +17,12 @@ import java.util.function.Function;
 @Slf4j
 @Configuration
 public class CommandFactoryConfiguration {
+
+	private final EventParser eventParser;
+
+	public CommandFactoryConfiguration(@Lazy EventParser eventParser) {
+		this.eventParser = eventParser;
+	}
 
 	@Bean
 	public Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory() {
@@ -25,7 +32,7 @@ public class CommandFactoryConfiguration {
 	@Bean
 	@Scope("prototype")
 	public SlashCommand createSlashCommand(ChatInputInteractionEventWrapper eventWrapper) {
-		return EventParser.createSlashCommand(eventWrapper);
+		return eventParser.createSlashCommand(eventWrapper);
 	}
 
 	@Bean
@@ -36,7 +43,7 @@ public class CommandFactoryConfiguration {
 	@Bean
 	@Scope("prototype")
 	public ButtonCommand createButtonCommand(ButtonInteractionEventWrapper eventWrapper) {
-		return EventParser.createButtonCommand(eventWrapper);
+		return eventParser.createButtonCommand(eventWrapper);
 	}
 
 	@Bean
@@ -47,10 +54,6 @@ public class CommandFactoryConfiguration {
 	@Bean
 	@Scope("prototype")
 	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEventWrapper eventWrapper) {
-		return EventParser.createUserInteractionChallenge(eventWrapper);
+		return eventParser.createUserInteractionChallenge(eventWrapper);
 	}
-
-
-
-
 }

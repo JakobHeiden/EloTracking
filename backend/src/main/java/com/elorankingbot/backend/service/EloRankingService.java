@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.dto.PlayerInRankingsDto;
@@ -9,15 +10,13 @@ import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -35,9 +34,12 @@ public class EloRankingService {
 	private TimeSlotDao timeSlotDao;
 	@Getter
 	private ApplicationPropertiesLoader propertiesLoader;
+	@Getter
+	private Set<String> modCommands, adminCommands;
 
 	@Autowired
 	public EloRankingService(@Lazy DiscordBotService discordBotService, ApplicationPropertiesLoader propertiesLoader,
+							 CommandClassScanner scanner,
 							 GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
 							 TimeSlotDao timeSlotDao) {
 		this.bot = discordBotService;
@@ -46,8 +48,9 @@ public class EloRankingService {
 		this.challengeDao = challengeDao;
 		this.matchDao = matchDao;
 		this.playerDao = playerDao;
-
 		this.timeSlotDao = timeSlotDao;
+		this.adminCommands = scanner.getAdminCommands();
+		this.modCommands = scanner.getModCommands();
 	}
 
 	public void deleteAllData() {

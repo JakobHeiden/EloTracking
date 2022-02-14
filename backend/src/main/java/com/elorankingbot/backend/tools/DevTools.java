@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.tools;
 
+import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.MatchDao;
 import com.elorankingbot.backend.dao.PlayerDao;
