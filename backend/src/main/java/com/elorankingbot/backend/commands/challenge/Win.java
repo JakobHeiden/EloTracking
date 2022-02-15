@@ -45,11 +45,11 @@ public class Win extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processHarmony() {
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 		Match match = new Match(guildId,
-				isChallengerCommand ? challenge.getChallengerId() : challenge.getAcceptorId(),
-				isChallengerCommand ? challenge.getAcceptorId() : challenge.getChallengerId(),
+				isChallengerCommand ? challenge.getChallengerUserId() : challenge.getAcceptorUserId(),
+				isChallengerCommand ? challenge.getAcceptorUserId() : challenge.getChallengerUserId(),
 				isChallengerCommand ? challenge.getChallengerTag() : challenge.getAcceptorTag(),
 				isChallengerCommand ? challenge.getAcceptorTag() : challenge.getChallengerTag(),
 				false);

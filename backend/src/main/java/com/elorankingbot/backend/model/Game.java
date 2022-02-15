@@ -7,6 +7,10 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @ToString
@@ -14,30 +18,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "game")
 public class Game {
 
-    @Id
+    private UUID id;
     private long guildId;
-    private long adminRoleId;
-    private long modRoleId;
-    private long resultChannelId;
-    private long disputeCategoryId;
-    private long leaderboardChannelId;// TODO kann weg?
-    private long leaderboardMessageId;
+    private Set<MatchFinderModality> matchFindModalities;
     private String name;
-    private boolean allowDraw = false;
-    private int openChallengeDecayTime;
-    private int acceptedChallengeDecayTime;
-    private int matchAutoResolveTime;
-    private int messageCleanupTime;
+    private boolean allowDraw;
+    private long resultChannelId;
+    private long leaderboardMessageId;
     private int leaderboardLength;
-    private boolean isMarkedForDeletion = false;
 
-    public Game(long guildId, String name) {
-        this.guildId = guildId;
+    public Game(String name, long guildId, boolean allowDraw) {
+        this.id = UUID.randomUUID();
         this.name = name;
-        this.openChallengeDecayTime = 2 * 60;
-        this.acceptedChallengeDecayTime = 7 * 24 * 60;
-        this.matchAutoResolveTime = 24 * 60;
-        this.messageCleanupTime = 12 * 60;
+        this.guildId = guildId;
+        this.matchFindModalities = new HashSet<>();
+        this.allowDraw = allowDraw;
         this.leaderboardLength = 20;
     }
 }

@@ -125,9 +125,9 @@ public class Info extends SlashCommand {
 		if (matchHistoryString.equals("")) matchHistoryString = "This player has not played any matches.";
 
 		return EmbedCreateSpec.builder()
-				.title(targetPlayer.getName() + " match history")
+				.title(targetPlayer.getTag() + " match history")
 				.addField(EmbedCreateFields.Field.of(
-						targetPlayer.getName() + " match history",
+						targetPlayer.getTag() + " match history",
 						matchHistoryString,
 						true))
 				.build();

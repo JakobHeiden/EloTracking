@@ -20,17 +20,17 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 	public void execute() {
 		if (!isByModeratorOrAdmin()) return;
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 
-		Player challengerPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getChallengerId()).get();
-		Player acceptorPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getAcceptorId()).get();
+		Player challengerPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getChallengerUserId()).get();
+		Player acceptorPlayer = service.findPlayerByGuildIdAndUserId(guildId, challenge.getAcceptorUserId()).get();
 		Match match;
 		if (challengerPlayer.getRating() < acceptorPlayer.getRating()) {// in a draw the lower ranked player will gain rating
-			match = new Match(guildId, challenge.getChallengerId(), challenge.getAcceptorId(),
+			match = new Match(guildId, challenge.getChallengerUserId(), challenge.getAcceptorUserId(),
 					challenge.getChallengerTag(), challenge.getAcceptorTag(), true);
 		} else {
-			match = new Match(guildId, challenge.getAcceptorId(), challenge.getChallengerId(),
+			match = new Match(guildId, challenge.getAcceptorUserId(), challenge.getChallengerUserId(),
 					challenge.getAcceptorTag(), challenge.getChallengerTag(), true);
 		}
 		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
