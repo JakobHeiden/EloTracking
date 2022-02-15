@@ -175,7 +175,7 @@ public class Ban extends SlashCommand {
 
 					service.deleteChallenge(challenge);
 
-					boolean isChallengerBanned = challenge.getChallengerId() == player.getUserId();
+					boolean isChallengerBanned = challenge.getChallengerUserId() == player.getUserId();
 					bot.getChallengerMessage(challenge).subscribe(message ->
 							new MessageUpdater(message)
 									.makeAllNotBold()

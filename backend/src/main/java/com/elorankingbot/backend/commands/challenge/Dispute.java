@@ -67,11 +67,11 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 				.withParentId(Snowflake.of(game.getDisputeCategoryId()))
 				.withPermissionOverwrites(
 						PermissionOverwrite.forMember(
-								Snowflake.of(challenge.getChallengerId()),
+								Snowflake.of(challenge.getChallengerUserId()),
 								PermissionSet.of(Permission.VIEW_CHANNEL),
 								PermissionSet.none()),
 						PermissionOverwrite.forMember(
-								Snowflake.of(challenge.getAcceptorId()),
+								Snowflake.of(challenge.getAcceptorUserId()),
 								PermissionSet.of(Permission.VIEW_CHANNEL),
 								PermissionSet.none()))
 				.block();

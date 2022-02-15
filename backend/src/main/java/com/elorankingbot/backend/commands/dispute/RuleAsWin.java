@@ -21,11 +21,11 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 	public void execute() {
 		if (!isByModeratorOrAdmin()) return;
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerId());
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
+		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 		isChallengerWin = event.getCustomId().split(":")[2].equals("true");
-		long winnerId = isChallengerWin ? challenge.getChallengerId() : challenge.getAcceptorId();
-		long loserId = isChallengerWin ? challenge.getAcceptorId() : challenge.getChallengerId();
+		long winnerId = isChallengerWin ? challenge.getChallengerUserId() : challenge.getAcceptorUserId();
+		long loserId = isChallengerWin ? challenge.getAcceptorUserId() : challenge.getChallengerUserId();
 		String winnerTag = isChallengerWin ? challenge.getChallengerTag() : challenge.getAcceptorTag();
 		String loserTag = isChallengerWin ? challenge.getAcceptorTag() : challenge.getChallengerTag();
 

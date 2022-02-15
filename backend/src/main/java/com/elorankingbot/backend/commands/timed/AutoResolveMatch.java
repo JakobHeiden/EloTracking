@@ -29,8 +29,8 @@ public class AutoResolveMatch extends TimedCommand {
 		ChallengeModel.ReportStatus report = hasChallengerReported ?
 				challenge.getChallengerReported()
 				: challenge.getAcceptorReported();
-		long challengerId = challenge.getChallengerId();
-		long acceptorId = challenge.getAcceptorId();
+		long challengerId = challenge.getChallengerUserId();
+		long acceptorId = challenge.getAcceptorUserId();
 		String challengerTag = challenge.getChallengerTag();
 		String acceptorTag = challenge.getAcceptorTag();
 		long winnerId = 0L;
@@ -66,8 +66,8 @@ public class AutoResolveMatch extends TimedCommand {
 		}
 
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
-		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerId());
-		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorId());
+		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerUserId());
+		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorUserId());
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, isDraw);
 		service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.deleteChallenge(challenge);

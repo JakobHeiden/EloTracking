@@ -160,7 +160,7 @@ public class DiscordBotService {
 					+ entryOf(player.getWins(), embedWinsSpaces)
 					+ entryOf(player.getLosses(), embedWinsSpaces)
 					+ numDrawsString
-					+ "  " + player.getName() + "\n";
+					+ "  " + player.getTag() + "\n";
 			if (i == rankToHighlight) leaderboardEntry = "+" + leaderboardEntry.substring(1);
 			leaderboardString += leaderboardEntry;
 		}

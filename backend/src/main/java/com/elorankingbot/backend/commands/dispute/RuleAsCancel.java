@@ -21,7 +21,7 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 
 		postToDisputeChannel(String.format(
 				"%s has ruled the challenge to be canceled. <@%s> <@%s>",
-				moderatorName, challenge.getChallengerId(), challenge.getAcceptorId()));
+				moderatorName, challenge.getChallengerUserId(), challenge.getAcceptorUserId()));
 		new MessageUpdater(challengerMessage)
 				.addLine(String.format("%s has ruled this match to be canceled :negative_squared_cross_mark:.", moderatorName))
 				.makeAllItalic()
