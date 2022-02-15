@@ -4,7 +4,6 @@ import com.elorankingbot.backend.logging.UseToStringForLogging;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
@@ -16,7 +15,7 @@ import java.util.UUID;
 @ToString
 @UseToStringForLogging
 @Document(collection = "game")
-public class Game {
+public class Ranking {
 
     private UUID id;
     private long guildId;
@@ -27,7 +26,7 @@ public class Game {
     private long leaderboardMessageId;
     private int leaderboardLength;
 
-    public Game(String name, long guildId, boolean allowDraw) {
+    public Ranking(String name, long guildId, boolean allowDraw) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.guildId = guildId;
