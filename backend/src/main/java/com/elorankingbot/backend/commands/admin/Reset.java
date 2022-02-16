@@ -46,7 +46,7 @@ public class Reset extends SlashCommand {
 	}
 
 	public void execute() {
-		if (game == null) {
+		/*if (game == null) {
 			cleanCorruptState();
 			return;
 		}
@@ -108,5 +108,8 @@ public class Reset extends SlashCommand {
 				"I will reset the server as best I can. " +
 				"You may have to remove the result channel and the dispute category manually.").subscribe();
 		resetGuildCommands();
+	}
+
+		 */
 	}
 }

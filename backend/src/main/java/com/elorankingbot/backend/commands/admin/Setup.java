@@ -64,6 +64,7 @@ public class Setup extends SlashCommand {
 	}
 
 	public void execute() {
+		/*
 		reply = "Setup performed. Here is what I did:";
 		guild = event.getInteraction().getGuild().block();
 		game = new Game(event.getOption("nameofgame").get().getValue().get().asString(), guild.getId().asLong()
@@ -196,5 +197,8 @@ public class Setup extends SlashCommand {
 	private void setPermissionsForModCommands() {
 		service.getModCommands().forEach(commandName ->
 				bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
+	}
+
+		 */
 	}
 }

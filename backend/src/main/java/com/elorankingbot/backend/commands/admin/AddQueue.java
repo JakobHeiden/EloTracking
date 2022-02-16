@@ -16,6 +16,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
+import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 public class AddQueue extends SlashCommand {
 
@@ -26,7 +27,7 @@ public class AddQueue extends SlashCommand {
 	public static ApplicationCommandRequest getRequest(Server server) {
 		ImmutableApplicationCommandOptionData.Builder gameOptionBuilder = ApplicationCommandOptionData.builder()
 				.name("game").description("Which game to add a queue to?")
-				.type(ApplicationCommandOption.Type.STRING.getValue())
+				.type(STRING.getValue())
 				.required(true);
 		server.getGames().keySet().forEach(nameOfGame -> gameOptionBuilder
 				.addChoice(ApplicationCommandOptionChoiceData.builder()
@@ -39,15 +40,15 @@ public class AddQueue extends SlashCommand {
 				.addOption(gameOptionBuilder.build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("numberofplayers").description("How many players per team? Set to 1 if not a team game")
-						.type(ApplicationCommandOption.Type.INTEGER.getValue())
+						.type(INTEGER.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("numberofteams").description("How many teams per match? Use 2 for (team) versus, or 3 or higher for free-for-all")
-						.type(ApplicationCommandOption.Type.INTEGER.getValue())
+						.type(INTEGER.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("allowdraw").description("Allow draw results and not just win or lose?")
-						.type(ApplicationCommandOption.Type.STRING.getValue())
+						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("allow draws").value("allowdraw").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
@@ -55,11 +56,11 @@ public class AddQueue extends SlashCommand {
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("nameofqueue").description("What do you call this queue?")
-						.type(ApplicationCommandOption.Type.STRING.getValue())
+						.type(STRING.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("queuetype").description("Only if a team queue: is this a solo queue, or a premade team only queue, or a mixed queue?")
-						.type(ApplicationCommandOption.Type.STRING.getValue())
+						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("solo queue").value("solo").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
@@ -69,7 +70,7 @@ public class AddQueue extends SlashCommand {
 						.required(false).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("maxpremade").description("Only if a mixed queue: what is the maximum premade team size?")
-						.type(ApplicationCommandOption.Type.INTEGER.getValue())
+						.type(INTEGER.getValue())
 						.required(false).build())
 				.build();
 	}

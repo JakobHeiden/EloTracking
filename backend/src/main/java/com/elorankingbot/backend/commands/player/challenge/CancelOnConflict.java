@@ -41,15 +41,16 @@ public class CancelOnConflict extends ButtonCommandRelatedToChallenge {
 						"the match will be canceled. You can still file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(ActionRow.of(
-						Buttons.dispute(challenge.getId()))).subscribe();
+				//.withComponents(ActionRow.of(
+				//		Buttons.dispute(challenge.getId())))
+			.subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
 						"You can agree to a cancel or file a dispute.")
 				.resend()
-				.withComponents(ActionRow.of(
-						Buttons.agreeToCancelOnConflict(challenge.getId()),
-						Buttons.dispute(challenge.getId())))
+				//.withComponents(ActionRow.of(
+				//		Buttons.agreeToCancelOnConflict(challenge.getId()),
+				//		Buttons.dispute(challenge.getId())))
 				.subscribe(super::updateAndSaveChallenge);
 	}
 
@@ -69,9 +70,11 @@ public class CancelOnConflict extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.withComponents(none).subscribe();
 
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+				0,//game.getMessageCleanupTime(),
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+				0,//game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
 	}
 }

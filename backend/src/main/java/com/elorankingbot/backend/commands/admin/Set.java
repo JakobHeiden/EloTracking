@@ -70,6 +70,7 @@ public class Set extends SlashCommand {
 		if (integerVariables.contains(variable)) valueAsInt = Integer.parseInt(value);
 		if (variable.equals("allowdraw"))
 			valueAsBoolean = value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t");
+		/*
 		switch (variable) {
 			case "name":
 				game.setName(value);
@@ -103,5 +104,7 @@ public class Set extends SlashCommand {
 				break;
 		}
 		service.saveGame(game);
+
+		 */
 	}
 }

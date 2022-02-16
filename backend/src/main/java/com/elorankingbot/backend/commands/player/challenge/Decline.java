@@ -16,7 +16,7 @@ public class Decline extends ButtonCommandRelatedToChallenge {
 	}
 
 	public void execute() {
-		service.deleteChallengeById(challenge.getId());
+		//service.deleteChallengeById(challenge.getId());
 
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
@@ -30,9 +30,9 @@ public class Decline extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.subscribe();
 
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
+		//queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+		//		challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
+		//queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+		//		challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
 	}
 }

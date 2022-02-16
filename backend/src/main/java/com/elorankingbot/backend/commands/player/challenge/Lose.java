@@ -40,6 +40,7 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processHarmony() {
+		/*
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 		Match match = new Match(guildId,// TODO vllt per if umbauen
@@ -74,9 +75,12 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
+
+		 */
 	}
 
 	private void processConflict() {
+		/*
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a loss :arrow_down:. Your report and that of your opponent is in conflict.")
@@ -94,5 +98,7 @@ public class Lose extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.withComponents(Win.createActionRow(challenge.getId()))
 				.subscribe(super::updateAndSaveChallenge);
+
+		 */
 	}
 }

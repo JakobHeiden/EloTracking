@@ -64,7 +64,7 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 	private void createDisputeChannel() {
 		disputeChannel = client.getGuildById(Snowflake.of(game.getGuildId())).block()
 				.createTextChannel(String.format("%s vs %s", challengerTag, acceptorTag))
-				.withParentId(Snowflake.of(game.getDisputeCategoryId()))
+				//.withParentId(Snowflake.of(game.getDisputeCategoryId()))
 				.withPermissionOverwrites(
 						PermissionOverwrite.forMember(
 								Snowflake.of(challenge.getChallengerUserId()),
@@ -80,7 +80,7 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 	private void createDisputeMessage() {
 		disputeChannel.createMessage(String.format("Welcome everyone. Please use this channel to sort out your dispute. " +
 						"Only Moderators and affected parties can view this channel. " +
-						"Note that the Buttons in this channel can only be used by <@&%s>.", game.getModRoleId()))
+						"Note that the Buttons in this channel can only be used by <@&%s>."))//, game.getModRoleId()))
 				.withEmbeds(EmbedCreateSpec.builder()
 						.addField(EmbedCreateFields.Field.of(
 								"My message with " + challengerTag,
@@ -91,11 +91,12 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 								isChallengerCommand ? targetMessageContent : parentMessageContent,
 								true))
 						.build())
-				.withComponents(createActionRow(game.isAllowDraw()))
+				//.withComponents(createActionRow(game.isAllowDraw()))
 				.subscribe();
 	}
 
 	private ActionRow createActionRow(boolean allowDraw) {
+		/*
 		if (allowDraw) return ActionRow.of(
 				Buttons.ruleAsWin(challenge.getId(), true, challengerTag),
 				Buttons.ruleAsWin(challenge.getId(), false, acceptorTag),
@@ -105,5 +106,8 @@ public class Dispute extends ButtonCommandRelatedToChallenge {
 				Buttons.ruleAsWin(challenge.getId(), true, challengerTag),
 				Buttons.ruleAsWin(challenge.getId(), false, acceptorTag),
 				Buttons.ruleAsCancel(challenge.getId()));
+
+		 */
+		return null;
 	}
 }

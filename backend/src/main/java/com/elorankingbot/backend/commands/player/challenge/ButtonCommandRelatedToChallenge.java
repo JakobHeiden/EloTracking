@@ -22,8 +22,8 @@ public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
 	protected ButtonCommandRelatedToChallenge(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
 											  TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.challenge = service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
-		this.guildId = challenge.getGuildId();
+		this.challenge = null;// service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
+		this.guildId = 0;//challenge.getGuildId();
 		this.game = service.findGameByGuildId(guildId).get();
 		if (event.getInteraction().getChannelId().asLong() == challenge.getChallengerChannelId()) {
 			this.isChallengerCommand = true;

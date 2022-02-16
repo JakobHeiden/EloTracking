@@ -37,18 +37,19 @@ public class TimedTaskService {
 		List<Long> allGuildIds = client.getGuilds()
 				.map(guild -> guild.getId().asLong())
 				.collectList().block();
-		service.findAllGames().stream()
-				.filter(game -> !allGuildIds.contains(game.getGuildId()))
-				.forEach(game -> game.setMarkedForDeletion(true));
+		//service.findAllGames().stream()
+		//		.filter(game -> !allGuildIds.contains(game.getGuildId()))
+		//		.forEach(game -> game.setMarkedForDeletion(true));
 	}
 
 	public void deleteGamesMarkedForDeletion() {
-		service.findAllGames().stream()
-				.filter(game -> game.isMarkedForDeletion())
-				.forEach(game -> service.deleteGame(game.getGuildId()));
+		//service.findAllGames().stream()
+		//		.filter(game -> game.isMarkedForDeletion())
+		//		.forEach(game -> service.deleteGame(game.getGuildId()));
 	}
 
 	public void summarizeMatch(long messageId, long channelId, Object value) {
+		/*
 		Match match = (Match) value;
 		Message message = client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
 		boolean isWinnerMessage = ((PrivateChannel) message.getChannel().block())
@@ -61,6 +62,8 @@ public class TimedTaskService {
 						isWinnerMessage ? service.formatRating(match.getWinnerOldRating()) : service.formatRating(match.getLoserOldRating()),
 						isWinnerMessage ? service.formatRating(match.getWinnerNewRating()) : service.formatRating(match.getLoserNewRating())))
 				.subscribe();
+
+		 */
 	}
 
 	public void deleteMessage(long messageId, long channelId) {

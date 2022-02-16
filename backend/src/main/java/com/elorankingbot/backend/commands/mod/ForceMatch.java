@@ -109,7 +109,7 @@ public class ForceMatch extends SlashCommand {
 			user2 = tempUser1;
 		}
 
-		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
+		match = null;// new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
 		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 		templatePlayer1 = isDraw ?
@@ -119,8 +119,8 @@ public class ForceMatch extends SlashCommand {
 				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
 				: "*%s has forced a loss :arrow_down: to %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResults);
-		bot.postToResultChannel(game, match);
-		bot.updateLeaderboard(game);
+		//bot.postToResultChannel(game, match);
+		//bot.updateLeaderboard(game);
 		String template = isDraw ? "Forced a draw :left_right_arrow: between %s and %s.%s" : "Forced a win :arrow_up: for %s over %s.%s";
 		event.reply(String.format(template, user1.getTag(), user2.getTag(), reasonGiven)).subscribe();
 	}
@@ -144,6 +144,7 @@ public class ForceMatch extends SlashCommand {
 	}
 
 	private void undoMatch() {
+		/*
 		Optional<Match> maybeMostRecentMatch = service.findMostRecentMatch(guildId, user1.getId().asLong(), user2.getId().asLong());
 		if (maybeMostRecentMatch.isEmpty()) {
 			event.reply("These players have no recorded matches.").subscribe();
@@ -164,9 +165,13 @@ public class ForceMatch extends SlashCommand {
 		bot.updateLeaderboard(game);
 		event.reply(String.format("Reverted the last recorded match between %s and %s.",
 				user1.getTag(), user2.getTag())).subscribe();
+
+		 */
 	}
 
 	private double[] updateRatingsForUndo() {
+		return null;
+		/*
 		Player winner = service.findPlayerByGuildIdAndUserId(guildId, match.getWinnerId()).get();
 		double winnerOldRating = winner.getRating();
 		double winnerNewRating = winnerOldRating - (match.getWinnerNewRating() - match.getWinnerOldRating());
@@ -189,5 +194,7 @@ public class ForceMatch extends SlashCommand {
 		service.savePlayer(loser);
 
 		return new double[]{winnerOldRating, loserOldRating, winnerNewRating, loserNewRating};
+
+		 */
 	}
 }

@@ -28,8 +28,8 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 
 	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
-		this.challenge = service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
-		this.guildId = challenge.getGuildId();
+		this.challenge = null;//service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
+		this.guildId = 0;// challenge.getGuildId();
 		this.game = service.findGameByGuildId(guildId).get();
 		this.disputeChannel = (TextChannel) event.getInteraction().getChannel().block();
 		this.moderatorName = event.getInteraction().getUser().getUsername();
@@ -40,8 +40,8 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 	}
 
 	protected boolean isByModeratorOrAdmin() {
-		boolean result = (event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))
-				|| event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId())));
+		boolean result = true;// (event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))
+//				|| event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId())));
 		if (!result) event.reply("Only a Moderator can use this.").withEphemeral(true).subscribe();
 		return result;
 	}
@@ -57,10 +57,10 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 	}
 
 	protected void addMatchSummarizeToQueue(Match match) {
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), match);
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), match);
+//		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
+//				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), match);
+//		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
+//				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), match);
 	}
 
 	protected void updateChallengerMessageIdAndSaveChallenge(Message message) {

@@ -68,9 +68,9 @@ public class Rating extends SlashCommand {
 		Player player = service.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
 		double oldRating = player.getRating();
 		double newRating = isSetNewRating ? rating : oldRating + rating;
-		player.setRating(newRating);
+		//player.setRating(newRating);
 		service.savePlayer(player);
-		bot.updateLeaderboard(game);
+		//bot.updateLeaderboard(game);
 
 		String reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())

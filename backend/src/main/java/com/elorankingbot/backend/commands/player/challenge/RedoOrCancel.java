@@ -51,6 +51,7 @@ public class RedoOrCancel extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void opponentDidNotCallEither() {
+		/*
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a redo or a cancel :person_shrugging:. You can still file a dispute.")
@@ -69,9 +70,12 @@ public class RedoOrCancel extends ButtonCommandRelatedToChallenge {
 						Buttons.agreeToCancelOnConflict(challenge.getId()),
 						Buttons.dispute(challenge.getId())))
 				.subscribe(super::updateAndSaveChallenge);
+
+		 */
 	}
 
 	private void bothCalledForRedo() {
+		/*
 		challenge.redo();
 
 		new MessageUpdater(parentMessage)
@@ -88,6 +92,8 @@ public class RedoOrCancel extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.withComponents(Redo.createActionRow(parentMessage.getChannelId().asLong(), game.isAllowDraw()))
 				.subscribe(super::updateAndSaveChallenge);
+
+		 */
 	}
 }
 

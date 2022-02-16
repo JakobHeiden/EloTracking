@@ -17,6 +17,7 @@ public class CloseChannelNow extends ButtonCommand {
 	}
 
 	public void execute() {
+		/*
 		Game game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))
 				&& !event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId()))) {
@@ -26,5 +27,7 @@ public class CloseChannelNow extends ButtonCommand {
 
 		event.getInteraction().getChannel().block().delete().subscribe();
 		event.acknowledge().subscribe();
+
+		 */
 	}
 }

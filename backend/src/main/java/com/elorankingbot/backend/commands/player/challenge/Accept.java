@@ -20,6 +20,7 @@ public class Accept extends ButtonCommandRelatedToChallenge {
 	}
 
 	public void execute() {
+		/*
 		challenge.setAccepted(true);
 
 		new MessageUpdater(parentMessage)
@@ -42,6 +43,8 @@ public class Accept extends ButtonCommandRelatedToChallenge {
 		queue.addTimedTask(TimedTask.TimedTaskType.ACCEPTED_CHALLENGE_DECAY,
 				game.getAcceptedChallengeDecayTime(), challenge.getId(), 0L, null);
 		event.deferEdit().subscribe();// should work without, somehow is needed anyway...
+
+		 */
 	}
 
 	private static ActionRow createActionRow(long channelId, boolean allowDraw) {
