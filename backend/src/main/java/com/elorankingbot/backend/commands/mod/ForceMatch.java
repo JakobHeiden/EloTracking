@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.commands.mod;
 
-import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Match;

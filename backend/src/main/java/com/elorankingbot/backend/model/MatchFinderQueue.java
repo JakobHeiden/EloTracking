@@ -16,8 +16,8 @@ public class MatchFinderQueue extends MatchFinderModality {
 	private int minRating;
 	private int maxRating;
 
-	public MatchFinderQueue(String name, Game game, int numTeams, int playerPerTeam) {
-		super(name, game);
+	public MatchFinderQueue(Game game, String name, int numTeams, int playerPerTeam, boolean allowDraw) {
+		super(game, name, allowDraw);
 		this.numTeams = numTeams;
 		this.playerPerTeam = playerPerTeam;
 	}

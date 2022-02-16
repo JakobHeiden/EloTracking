@@ -7,8 +7,7 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -19,15 +18,28 @@ public class Server {
 
 	@Id
 	private long guildId;
-	private Set<Game> games;
+	private Map<String, Game> games;
 	private long adminRoleId;
 	private long modRoleId;
 	private long disputeCategoryId;
 	private boolean isMarkedForDeletion;
+	private boolean hasSetupRoles;
+	private boolean hasSetupGame;
+	private boolean hasSetupMatchFinderModality;// TODO! in /help einflechten
 
 	public Server(long guildId) {
 		this.guildId = guildId;
 		this.isMarkedForDeletion = false;
-		this.games = new HashSet<>();
+		this.games = new HashMap<>();
+		this.adminRoleId = 0L;
+		this.modRoleId = 0L;
+	}
+
+	public void addGame(Game game) {
+		games.put(game.getName(), game);
+	}
+
+	public void removeGame(Game game) {
+		games.remove(game.getName());
 	}
 }

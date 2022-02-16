@@ -5,15 +5,15 @@ import java.util.UUID;
 
 public class Rating implements Comparable<Rating> {
 
-	private final Ranking ranking;
+	private final Game game;
 	private double rating;
 	private int wins;
 	private int draws;
 	private int losses;
 	private List<UUID> matchHistory;
 
-	public Rating(Ranking ranking, double rating) {
-		this.ranking = ranking;
+	public Rating(Game game, double rating) {
+		this.game = game;
 		this.rating = rating;
 		this.wins = 0;
 		this.draws = 0;
