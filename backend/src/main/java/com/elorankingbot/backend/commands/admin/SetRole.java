@@ -60,8 +60,8 @@ public class SetRole extends SlashCommand {
 			updatePermissionsForAdminAndModCommands();
 			nameOfRole = adminRole.getName();
 		} else {
-			modRole = event.getOption("moderator").get().getOption("role").get().getValue().get().asRole()
-				.block();
+			modRole = event.getOption("role").get().getValue().get().asRole()
+					.block();
 			server.setModRoleId(modRole.getId().asLong());
 			updatePermissionsForModCommands();
 			nameOfRole = modRole.getName();
@@ -69,12 +69,16 @@ public class SetRole extends SlashCommand {
 		service.saveServer(server);
 
 		event.reply(String.format("Linked %s permissions to %s. This may take a minute to update on the server.",
-				 adminOrMod, nameOfRole)).subscribe();
+				adminOrMod, nameOfRole)).subscribe();
 	}
 
 	private void updatePermissionsForAdminAndModCommands() {
-		modRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(server.getModRoleId()))
-				.block();
+		if (server.getModRoleId() == 0L) {
+			modRole = adminRole;
+		} else {
+			modRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(server.getModRoleId()))
+					.block();
+		}
 		adminCommands.forEach(commandName ->
 				bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
 		modCommands.forEach(commandName ->

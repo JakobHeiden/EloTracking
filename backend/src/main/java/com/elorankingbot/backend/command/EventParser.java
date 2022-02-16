@@ -76,6 +76,8 @@ public class EventParser {
 					if (maybeServer.isEmpty()) {
 						long guildId = event.getGuild().getId().asLong();
 						bot.deployCommand(guildId, SetRole.getRequest()).subscribe();
+						bot.setDiscordCommandPermissions(guildId, "setrole",
+								event.getGuild().getEveryoneRole().block());
 						bot.deployCommand(guildId, CreateGame.getRequest()).subscribe();
 						Server server = new Server(guildId);
 						service.saveServer(server);

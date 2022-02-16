@@ -10,6 +10,7 @@ import com.elorankingbot.backend.dao.TimeSlotDao;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,10 +44,13 @@ public class DevTools {
 	}
 
 	private void updateGuildCommands() {
-		long guildId = props.getEntenwieseId();
-		bot.deployCommand(guildId, SetRole.getRequest()).subscribe();
-		bot.deployCommand(guildId, CreateGame.getRequest()).subscribe();
-		Server entenwieseServer = new Server(guildId);
+		long entenwieseId = props.getEntenwieseId();
+		bot.deleteAllGuildCommands(entenwieseId).blockLast();
+		bot.deployCommand(entenwieseId, SetRole.getRequest()).subscribe();
+		bot.setDiscordCommandPermissions(entenwieseId, "setrole",
+				client.getGuildById(Snowflake.of(entenwieseId)).block().getEveryoneRole().block());
+		bot.deployCommand(entenwieseId, CreateGame.getRequest()).subscribe();
+		Server entenwieseServer = new Server(entenwieseId);
 		service.saveServer(entenwieseServer);
 
 		log.warn("updating guild commands...");
