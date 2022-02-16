@@ -66,8 +66,8 @@ public class Setup extends SlashCommand {
 	public void execute() {
 		reply = "Setup performed. Here is what I did:";
 		guild = event.getInteraction().getGuild().block();
-		game = new Game(guild.getId().asLong(),
-				event.getOption("nameofgame").get().getValue().get().asString());
+		game = new Game(event.getOption("nameofgame").get().getValue().get().asString(), guild.getId().asLong()
+		);
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 
 		updateCommands().block();
@@ -176,7 +176,7 @@ public class Setup extends SlashCommand {
 		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
-		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.SetRole.getRequest());
 		Mono<ApplicationCommandData> deploySet = bot.deployCommand(guildId, Set.getRequest());
 		Mono<ApplicationCommandData> deployRating = bot.deployCommand(guildId, Rating.getRequest());
 		Mono<ApplicationCommandData> deployBan =bot.deployCommand(guildId, Ban.getRequest());

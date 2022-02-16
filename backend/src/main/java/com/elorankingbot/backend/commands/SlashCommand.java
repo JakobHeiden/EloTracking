@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -9,7 +9,6 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class SlashCommand {
 
@@ -19,7 +18,8 @@ public abstract class SlashCommand {
 	protected final GatewayDiscordClient client;
 	protected final ChatInputInteractionEvent event;
 	protected long guildId;
-	protected Game game;
+	protected Server server;
+	//protected Game game;
 
 	protected static final List none = new ArrayList<>();
 
@@ -32,8 +32,9 @@ public abstract class SlashCommand {
 		this.client = client;
 
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
-		Optional<Game> maybeGame = service.findGameByGuildId(guildId);
-		if (maybeGame.isPresent()) this.game = maybeGame.get();
+		this.server = service.findServerByGuildId(guildId).get();
+		//Optional<Game> maybeGame = service.findGameByGuildId(guildId);
+		//if (maybeGame.isPresent()) this.game = maybeGame.get();
 	}
 
 	public abstract void execute();

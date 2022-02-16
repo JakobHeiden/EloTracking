@@ -4,12 +4,8 @@ import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.dto.PlayerInRankingsDto;
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -18,32 +14,31 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@NoArgsConstructor
 @Slf4j
 @Service
 public class EloRankingService {
 
 	private static float initialRating = 1200;
 	private static float k = 16;
-	private DiscordBotService bot;
-	private GameDao gameDao;
-	private ChallengeDao challengeDao;
-	private MatchDao matchDao;
-	private PlayerDao playerDao;
-	private TimeSlotDao timeSlotDao;
+	private final DiscordBotService bot;
+	private final ServerDao serverDao;
+	private final ChallengeDao challengeDao;
+	private final MatchDao matchDao;
+	private final PlayerDao playerDao;
+	private final TimeSlotDao timeSlotDao;
 	@Getter
-	private ApplicationPropertiesLoader propertiesLoader;
+	private final ApplicationPropertiesLoader propertiesLoader;
 	@Getter
-	private Set<String> modCommands, adminCommands;
+	private final Set<String> modCommands, adminCommands;
 
 	@Autowired
-	public EloRankingService(@Lazy DiscordBotService discordBotService, ApplicationPropertiesLoader propertiesLoader,
+	public EloRankingService(@Lazy DiscordBotService discordBotService, ServerDao serverDao, ApplicationPropertiesLoader propertiesLoader,
 							 CommandClassScanner scanner,
-							 GameDao gameDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
+							 ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
 							 TimeSlotDao timeSlotDao) {
 		this.bot = discordBotService;
 		this.propertiesLoader = propertiesLoader;
-		this.gameDao = gameDao;
+		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
 		this.matchDao = matchDao;
 		this.playerDao = playerDao;
@@ -57,7 +52,6 @@ public class EloRankingService {
 			throw new RuntimeException("deleteAllData is being called on deploy database");
 		}
 		log.info(String.format("Deleting all data on %s...", propertiesLoader.getSpringDataMongodbDatabase()));
-		gameDao.deleteAll();
 		challengeDao.deleteAll();
 		matchDao.deleteAll();
 		playerDao.deleteAll();
@@ -77,7 +71,18 @@ public class EloRankingService {
 		playerDao.saveAll(players);
 	}
 
+	// Server
+	public Optional<Server> findServerByGuildId(long guildId) {
+		return serverDao.findById(guildId);
+	}
+
+	public void saveServer(Server server) {
+		serverDao.save(server);
+	}
+
 	// Game
+	// TODO das hier sollte obsolet sein, games sind teil von server
+	/*
 	public Optional<Game> findGameByGuildId(long guildId) {// TODO kein optional zurueckgeben, fehler hier behandeln
 		return gameDao.findById(guildId);
 	}
@@ -94,6 +99,8 @@ public class EloRankingService {
 	public void deleteGame(long guildId) {
 		gameDao.deleteById(guildId);
 	}
+
+	 */
 
 	// Challenge
 	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
@@ -243,4 +250,5 @@ public class EloRankingService {
 		Collections.sort(allPlayers, Collections.reverseOrder());
 		return allPlayers;
 	}
+
 }

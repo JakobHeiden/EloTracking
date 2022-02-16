@@ -2,9 +2,10 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.admin.Setup;
+import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -19,7 +20,6 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.rest.service.ApplicationService;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Hooks;
@@ -71,13 +71,14 @@ public class EventParser {
 
 		client.on(GuildCreateEvent.class)
 				.subscribe(event -> {
-					Optional<Game> maybeGame = service.findGameByGuildId(event.getGuild().getId().asLong());
-					if (maybeGame.isEmpty())
-						applicationService.createGuildApplicationCommand(
-										botId, event.getGuild().getId().asLong(), Setup.getRequest())
-								.subscribe();
-					else
-						maybeGame.get().setMarkedForDeletion(false);
+					Optional<Server> maybeServer = service.findServerByGuildId(event.getGuild().getId().asLong());
+					if (maybeServer.isEmpty()) {
+						applicationService.createGuildApplicationCommand(botId, event.getGuild().getId().asLong(),
+								SetRole.getRequest()).subscribe();
+						// TODO! commands deployen
+						Server server = new Server(event.getGuild().getId().asLong());
+						service.saveServer(server);
+					}
 				});
 
 		client.on(RoleDeleteEvent.class)

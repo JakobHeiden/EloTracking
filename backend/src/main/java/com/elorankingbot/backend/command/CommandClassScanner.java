@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.command;
 
-import com.elorankingbot.backend.service.EloRankingService;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import lombok.Getter;
