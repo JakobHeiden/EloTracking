@@ -19,7 +19,6 @@ public abstract class SlashCommand {
 	protected final ChatInputInteractionEvent event;
 	protected long guildId;
 	protected Server server;
-	//protected Game game;
 
 	protected static final List none = new ArrayList<>();
 
@@ -33,8 +32,6 @@ public abstract class SlashCommand {
 
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
 		this.server = service.findServerByGuildId(guildId).get();
-		//Optional<Game> maybeGame = service.findGameByGuildId(guildId);
-		//if (maybeGame.isPresent()) this.game = maybeGame.get();
 	}
 
 	public abstract void execute();

@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.challenge;
+package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;

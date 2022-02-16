@@ -2,7 +2,7 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
+import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.tools.ButtonInteractionEventWrapper;
 import com.elorankingbot.backend.tools.ChatInputInteractionEventWrapper;
 import com.elorankingbot.backend.tools.UserInteractionEventWrapper;

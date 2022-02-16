@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.challenge.Challenge;
-import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
+import com.elorankingbot.backend.commands.player.Challenge;
+import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.commands.mod.ForceMatch;
 import com.elorankingbot.backend.commands.mod.Rating;
