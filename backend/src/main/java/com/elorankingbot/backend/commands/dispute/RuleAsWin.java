@@ -29,7 +29,7 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		String winnerTag = isChallengerWin ? challenge.getChallengerTag() : challenge.getAcceptorTag();
 		String loserTag = isChallengerWin ? challenge.getAcceptorTag() : challenge.getChallengerTag();
 
-		Match match = new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, false);
+		Match match = null;//new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, false);
 		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.saveMatch(match);
 

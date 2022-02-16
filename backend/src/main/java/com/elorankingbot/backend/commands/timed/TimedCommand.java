@@ -32,9 +32,10 @@ public abstract class TimedCommand {
 
 		this.relationId = relationId;
 		this.time = time;
-		Optional<ChallengeModel> maybeChallenge = service.findChallengeById(relationId);
-		if (maybeChallenge.isPresent()) challenge = maybeChallenge.get();
-		else challenge = null;
+		//Optional<ChallengeModel> maybeChallenge = service.findChallengeById(relationId);
+		//if (maybeChallenge.isPresent()) challenge = maybeChallenge.get();
+		//else
+		challenge = null;
 	}
 
 	public abstract void execute();

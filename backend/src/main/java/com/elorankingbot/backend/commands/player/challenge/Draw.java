@@ -41,6 +41,7 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void processHarmony() {
+		/*
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 
@@ -81,6 +82,8 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
+
+		 */
 	}
 
 	private void processConflict() {
@@ -91,14 +94,15 @@ public class Draw extends ButtonCommandRelatedToChallenge {
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(Win.createActionRow(challenge.getId())).subscribe();
+				//.withComponents(Win.createActionRow(challenge.getId()))
+				.subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent reported a draw :left_right_arrow:.")
 				.addLine("Your report and that of your opponent is in conflict. You can call for a redo of the reporting, " +
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.resend()
-				.withComponents(Win.createActionRow(challenge.getId()))
+				//.withComponents(Win.createActionRow(challenge.getId()))
 				.subscribe(super::updateAndSaveChallenge);
 	}
 }

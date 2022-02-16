@@ -59,10 +59,10 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.withComponents(none).subscribe();
 
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
-		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
-				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
+		//queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+		//		parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), null);
+		//queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+		//		targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
 	}
 
 	private void processConflict() {
@@ -73,7 +73,8 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.update()
-				.withComponents(createActionrow(challenge.getId())).subscribe();
+				//.withComponents(createActionrow(challenge.getId()))
+				.subscribe();
 		new MessageUpdater(targetMessage)
 				.addLine("Your opponent called for a cancel :negative_squared_cross_mark:. " +
 						"Your report and that of your opponent is in conflict.")
@@ -81,7 +82,7 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 						"and/or call for a cancel, or file a dispute.")
 				.makeLastLineBold()
 				.resend()
-				.withComponents(createActionrow(challenge.getId()))
+				//.withComponents(createActionrow(challenge.getId()))
 				.subscribe(super::updateAndSaveChallenge);
 	}
 

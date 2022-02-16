@@ -46,4 +46,9 @@ public class Player  {
     public boolean isPermaBanned() {
         return unbanAtTimeSlot == -1;
     }
+
+    // weg
+	public double getRating() {
+        return 0;
+	}
 }

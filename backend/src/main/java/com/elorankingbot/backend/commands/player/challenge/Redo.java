@@ -35,6 +35,7 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 	}
 
 	private void oneCalledForRedo() {
+		/*
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a redo :leftwards_arrow_with_hook:. If your opponent does as well, " +
@@ -53,10 +54,13 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 						Buttons.agreeToRedo(challenge.getId()),
 						Buttons.dispute(challenge.getId())))
 				.subscribe(super::updateAndSaveChallenge);
+
+		 */
 	}
 
 	private void bothCalledForRedo(Message parentMessage, Message targetMessage, ChallengeModel challenge, Game game,
 								  EloRankingService service) {
+		/*
 		challenge.redo();
 
 		new MessageUpdater(parentMessage)
@@ -73,6 +77,8 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.withComponents(createActionRow(challenge.getId(), game.isAllowDraw()))
 				.subscribe(super::updateAndSaveChallenge);
+
+		 */
 	}
 
 	static ActionRow createActionRow(long channelId, boolean allowDraw) {

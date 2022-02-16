@@ -65,6 +65,7 @@ public class AutoResolveMatch extends TimedCommand {
 				return;
 		}
 
+		/*
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerUserId());
 		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorUserId());
@@ -79,10 +80,13 @@ public class AutoResolveMatch extends TimedCommand {
 				reportPresentMessage.getId().asLong(), reportPresentMessage.getChannelId().asLong(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				reportAbsentMessage.getId().asLong(), reportAbsentMessage.getChannelId().asLong(), match);
+
+		 */
 	}
 
 	private void postToInvolvedChannels(ChallengeModel challenge, Match match, Game game,
 										boolean hasChallengerReported, boolean isDraw, boolean isWin) {
+		/*
 		Message reportPresentMessage = hasChallengerReported ?
 				bot.getChallengerMessage(challenge).block()
 				: bot.getAcceptorMessage(challenge).block();
@@ -122,9 +126,12 @@ public class AutoResolveMatch extends TimedCommand {
 				.makeAllItalic()
 				.resend()
 				.withComponents(none).subscribe();
+
+		 */
 	}
 
 	private void autoResolveMatchAsCancel(ChallengeModel challenge, boolean isReportedByChallenger) {
+		/*
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		service.deleteChallenge(challenge);
 
@@ -153,5 +160,7 @@ public class AutoResolveMatch extends TimedCommand {
 				reportPresentMessage.getId().asLong(), reportPresentMessage.getChannelId().asLong(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				reportAbsentMessage.getId().asLong(), reportAbsentMessage.getChannelId().asLong(), null);
+
+		 */
 	}
 }

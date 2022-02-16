@@ -47,27 +47,17 @@ public class EloRankingService {
 		this.modCommands = scanner.getModCommands();
 	}
 
-	public void deleteAllData() {
-		if (propertiesLoader.getSpringDataMongodbDatabase().equals("deploy")) {
-			throw new RuntimeException("deleteAllData is being called on deploy database");
-		}
-		log.info(String.format("Deleting all data on %s...", propertiesLoader.getSpringDataMongodbDatabase()));
-		challengeDao.deleteAll();
-		matchDao.deleteAll();
-		playerDao.deleteAll();
-		timeSlotDao.deleteAll();
-	}
 
 	public void deleteAllDataForGame(long guildId) {
-		matchDao.deleteAllByGuildId(guildId);
-		challengeDao.deleteAllByGuildId(guildId);
-		playerDao.deleteAllByGuildId(guildId);
-		gameDao.deleteById(guildId);
+		//matchDao.deleteAllByGuildId(guildId);
+		//challengeDao.deleteAllByGuildId(guildId);
+		//playerDao.deleteAllByGuildId(guildId);
+		//gameDao.deleteById(guildId);
 	}
 
 	public void resetAllPlayerRatings(long guildId) {
 		List<Player> players = playerDao.findAllByGuildId(guildId);
-		players.forEach(player -> player.setRating(1200));
+		//players.forEach(player -> player.setRating(1200));
 		playerDao.saveAll(players);
 	}
 
@@ -78,6 +68,10 @@ public class EloRankingService {
 
 	public void saveServer(Server server) {
 		serverDao.save(server);
+	}
+
+	public List<Server> findAllServers() {
+		return serverDao.findAll();
 	}
 
 	// Game
@@ -104,12 +98,13 @@ public class EloRankingService {
 
 	// Challenge
 	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
-		return challengeDao.findAllByGuildIdAndChallengerId(guildId, challengerId).stream()
-				.filter(challenge -> challenge.getAcceptorUserId() == acceptorId)
-				.findAny();
+		//return challengeDao.findAllByGuildIdAndChallengerId(guildId, challengerId).stream()
+		//		.filter(challenge -> challenge.getAcceptorUserId() == acceptorId)
+		//		.findAny();
+		return null;
 	}
 
-	public Optional<ChallengeModel> findChallengeById(long id) {
+	public Optional<ChallengeModel> findChallengeById(UUID id) {
 		return challengeDao.findById(id);
 	}
 
@@ -119,34 +114,36 @@ public class EloRankingService {
 	}
 
 	public void deleteChallenge(ChallengeModel challenge) {
-		deleteChallengeById(challenge.getId());
+		//deleteChallengeById(challenge.getId());
 	}
 
-	public void deleteChallengeById(long id) {
+	public void deleteChallengeById(UUID id) {
 		challengeDao.deleteById(id);
 	}
 
 	public List<ChallengeModel> findAllChallengesByGuildIdAndPlayerId(long guildId, long playerId) {
 		List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
-		allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndChallengerId(guildId, playerId));
-		allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndAcceptorId(guildId, playerId));
+		//allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndChallengerId(guildId, playerId));
+		//allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndAcceptorId(guildId, playerId));
 		return allChallengesForPlayer;
 	}
 
 	// Match
 	public void saveMatch(Match match) {
-		log.debug(String.format("saving match %s %s %s",
-				match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
+		//log.debug(String.format("saving match %s %s %s",
+		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
 		matchDao.save(match);
 	}
 
 	public void deleteMatch(Match match) {
-		log.debug(String.format("deleting match %s %s %s",
-				match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
+		//log.debug(String.format("deleting match %s %s %s",
+		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
 		matchDao.delete(match);
 	}
 
 	public Optional<Match> findMostRecentMatch(long guildId, long player1Id, long player2Id) {
+		return null;
+		/*
 		Optional<Match> search = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player1Id, player2Id);
 		Optional<Match> searchReverseParams = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player2Id, player1Id);
 
@@ -161,13 +158,19 @@ public class EloRankingService {
 				return searchReverseParams;
 			}
 		}
+
+		 */
 	}
 
 	public List<Match> getMatchHistory(long playerId, long guildId) {
+		return null;
+		/*
 		List<Match> matches = matchDao.findAllByGuildIdAndWinnerId(guildId, playerId);
 		matches.addAll(matchDao.findAllByGuildIdAndLoserId(guildId, playerId));
 		Collections.sort(matches);
 		return matches;
+
+		 */
 	}
 
 	// Player
@@ -182,18 +185,19 @@ public class EloRankingService {
 
 	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {// TODO! schauen wo man den namen schon hat
 		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
-			playerDao.insert(new Player(guildId, userId, bot.getPlayerTag(userId), initialRating));
+		//	playerDao.insert(new Player(guildId, userId, bot.getPlayerTag(userId), initialRating));
 		}
 	}
 
 	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId, String name) {
 		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
-			playerDao.insert(new Player(guildId, userId, name, initialRating));
+		//	playerDao.insert(new Player(guildId, userId, name, initialRating));
 		}
 	}
 
 	// Rankings
 	public double[] updateRatingsAndSaveMatchAndPlayers(Match match) {// TODO evtl match zurueckgeben
+		/*
 		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();
 
@@ -219,6 +223,9 @@ public class EloRankingService {
 		saveMatch(match);
 
 		return ratings;
+
+		 */
+		return null;
 	}
 
 	private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
@@ -250,5 +257,11 @@ public class EloRankingService {
 		Collections.sort(allPlayers, Collections.reverseOrder());
 		return allPlayers;
 	}
+
+	// am ende weg
+	public Optional<Game> findGameByGuildId(long asLong) {
+		return null;
+	}
+
 
 }

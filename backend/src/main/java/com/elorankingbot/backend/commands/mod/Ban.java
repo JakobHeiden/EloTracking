@@ -185,7 +185,8 @@ public class Ban extends SlashCommand {
 									.makeAllItalic()
 									.resend()
 									.withComponents(none)
-									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+											0,//game.getMessageCleanupTime(),
 											msg.getId().asLong(), challenge.getChallengerChannelId(), null)));
 					bot.getAcceptorMessage(challenge).subscribe(message ->
 							new MessageUpdater(message)
@@ -196,7 +197,8 @@ public class Ban extends SlashCommand {
 									.makeAllItalic()
 									.resend()
 									.withComponents(none)
-									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+											0,//game.getMessageCleanupTime(),
 											msg.getId().asLong(), challenge.getAcceptorChannelId(), null)));
 				});
 	}

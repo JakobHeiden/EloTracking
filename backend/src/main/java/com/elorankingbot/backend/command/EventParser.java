@@ -2,6 +2,7 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.admin.CreateGame;
 import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.model.Game;
@@ -73,10 +74,10 @@ public class EventParser {
 				.subscribe(event -> {
 					Optional<Server> maybeServer = service.findServerByGuildId(event.getGuild().getId().asLong());
 					if (maybeServer.isEmpty()) {
-						applicationService.createGuildApplicationCommand(botId, event.getGuild().getId().asLong(),
-								SetRole.getRequest()).subscribe();
-						// TODO! commands deployen
-						Server server = new Server(event.getGuild().getId().asLong());
+						long guildId = event.getGuild().getId().asLong();
+						bot.deployCommand(guildId, SetRole.getRequest()).subscribe();
+						bot.deployCommand(guildId, CreateGame.getRequest()).subscribe();
+						Server server = new Server(guildId);
 						service.saveServer(server);
 					}
 				});
@@ -86,12 +87,15 @@ public class EventParser {
 					Optional<Game> maybeGame = service.findGameByGuildId(event.getGuildId().asLong());
 					if (maybeGame.isEmpty()) return;
 
+					/*
 					if (event.getRoleId().asLong() == maybeGame.get().getAdminRoleId()) {
 						bot.setDiscordCommandPermissions(
 								event.getGuildId().asLong(),
 								"permission",
 								event.getGuild().block().getEveryoneRole().block());
 					}
+
+					 */
 				});
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));

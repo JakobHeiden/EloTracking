@@ -50,7 +50,7 @@ public class Challenge extends SlashCommand {
 			return;
 		}
 
-		staticExecute(acceptorUser, guildId, game, event, service, bot, queue);
+		//staticExecute(acceptorUser, guildId, game, event, service, bot, queue);
 	}
 
 	public static void staticExecute(User acceptorUser, long guildId, Game game, ApplicationCommandInteractionEvent event,
@@ -117,8 +117,8 @@ public class Challenge extends SlashCommand {
 				.withEphemeral(true).subscribe();
 		queue.addTimedTask(
 				TimedTask.TimedTaskType.OPEN_CHALLENGE_DECAY,
-				game.getOpenChallengeDecayTime(),
-				challenge.getId(),
+				0,//game.getOpenChallengeDecayTime(),
+				0,//challenge.getId(),
 				0L,
 				null);
 	}

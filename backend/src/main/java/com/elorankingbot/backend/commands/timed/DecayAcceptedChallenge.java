@@ -18,6 +18,7 @@ public class DecayAcceptedChallenge extends TimedCommand {
 	}
 
 	public void execute() {
+		/*
 		if (challenge == null) return;
 		if (challenge.hasAReport()) return;
 
@@ -43,5 +44,7 @@ public class DecayAcceptedChallenge extends TimedCommand {
 				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
 				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
+
+		 */
 	}
 }

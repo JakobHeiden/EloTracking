@@ -40,11 +40,12 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				.addLine("Your opponent reported a win :arrow_up:.")
 				.resend().subscribe(super::updateAndSaveChallenge);
 
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
-				challenge.getId(), 0L, null);
+		//queue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
+		//		challenge.getId(), 0L, null);
 	}
 
 	private void processHarmony() {
+		/*
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 		Match match = new Match(guildId,
@@ -79,9 +80,12 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
+
+		 */
 	}
 
 	private void processConflict() {
+		/*
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
@@ -97,6 +101,8 @@ public class Win extends ButtonCommandRelatedToChallenge {
 				.resend()
 				.withComponents(createActionRow(challenge.getId()))
 				.subscribe(super::updateAndSaveChallenge);
+
+		 */
 	}
 
 	static ActionRow createActionRow(long challengeId) {

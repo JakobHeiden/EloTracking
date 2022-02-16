@@ -18,6 +18,7 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 	}
 
 	public void execute() {
+		/*
 		if (!isByModeratorOrAdmin()) return;
 
 		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
@@ -47,6 +48,8 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 
 		addMatchSummarizeToQueue(match);
 		event.acknowledge().subscribe();
+
+		 */
 	}
 
 	private void updateMessages() {

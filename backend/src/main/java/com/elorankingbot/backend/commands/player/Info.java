@@ -49,6 +49,7 @@ public class Info extends SlashCommand {
 	}
 
 	public void execute() {
+		/*
 		User targetUser;
 		User callingUser = event.getInteraction().getUser();
 		if (event.getOption("player").isEmpty()) {
@@ -86,6 +87,8 @@ public class Info extends SlashCommand {
 		event.reply().withContent("Information about player " + targetUser.getTag() + banString)
 				.withEmbeds(rankingsEmbed, matchHistoryEmbed)
 				.withEphemeral(isSelfInfo).subscribe();
+
+		 */
 	}
 
 	private List<Player> generatePlayerList() {
@@ -134,11 +137,15 @@ public class Info extends SlashCommand {
 	}
 
 	private String generateMatchString(Match match, long playerId) {
+		return null;
+		/*
 		boolean isWin = match.getWinnerId() == playerId;
 		return String.format("%s vs %s: %s -> %s\n",
 				match.isDraw() ? ":left_right_arrow:" : isWin ? ":arrow_up:" : ":arrow_down:",
 				isWin ? match.getLoserTag() : match.getWinnerTag(),
 				formatRating(isWin ? match.getWinnerOldRating() : match.getLoserOldRating()),
 				formatRating(isWin ? match.getWinnerNewRating() : match.getLoserNewRating()));
+
+		 */
 	}
 }

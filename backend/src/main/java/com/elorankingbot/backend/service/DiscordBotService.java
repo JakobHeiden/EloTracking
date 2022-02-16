@@ -109,6 +109,7 @@ public class DiscordBotService {
 	}
 
 	public void postToResultChannel(Game game, Match match) {
+		/*
 		TextChannel resultChannel;
 		try {
 			resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
@@ -126,10 +127,13 @@ public class DiscordBotService {
 						formatRating(match.getLoserNewRating()),
 						formatRating(match.getLoserOldRating() - match.getLoserNewRating())))
 				.subscribe();
+
+		 */
 	}
 
 	// TODO setting ob wins/losses angezeigt wird
 	public void updateLeaderboard(Game game) {
+		/*
 		Message leaderboardMessage;
 		try {
 			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
@@ -147,10 +151,14 @@ public class DiscordBotService {
 		leaderboardMessage.edit().withContent("\n").withEmbeds(
 						generateLeaderboardEmbed(playerList, numTotalPlayers, game, 1, -1))
 				.subscribe();
+
+		 */
 	}
 
 	public EmbedCreateSpec generateLeaderboardEmbed(List<Player> playerList, int numTotalPlayers, Game game,
 													int rankOffset, int rankToHighlight) {
+		return null;
+		/*
 		String leaderboardString = "";
 		for (int i = 0; i < playerList.size(); i++) {
 			Player player = playerList.get(i);
@@ -175,6 +183,8 @@ public class DiscordBotService {
 						true))
 				.footer(String.format("%s players total", numTotalPlayers), null)
 				.build();
+
+		 */
 	}
 
 	private String entryOf(String data, int totalSpaces) {

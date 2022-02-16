@@ -13,8 +13,8 @@ public class ChallengeModality extends MatchFinderModality {
 
 	private int openChallengeDecayTime;
 
-	public ChallengeModality(String name, Game game) {
-		super(name, game);
+	public ChallengeModality(String name, Game game, boolean allowDraw) {
+		super(game, name, allowDraw);
 		this.openChallengeDecayTime = 2 * 60;
 	}
 }
