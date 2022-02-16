@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.challenge;
+package com.elorankingbot.backend.commands.player.challenge;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Match;

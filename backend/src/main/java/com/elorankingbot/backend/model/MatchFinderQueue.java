@@ -8,17 +8,28 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @ToString
 @UseToStringForLogging
-@Document(collection = "matchfinderqueue")
 public class MatchFinderQueue extends MatchFinderModality {
 
+	public enum QueueType {
+		SOLO,
+		MIXED,
+		PREMADE,
+		NOT_A_TEAM_QUEUE
+	}
+
 	private final int numTeams;
-	private final int playerPerTeam;
+	private final int playersPerTeam;
 	private int minRating;
 	private int maxRating;
+	private QueueType queueType;
+	private int maxPremadeSize;
 
-	public MatchFinderQueue(Game game, String name, int numTeams, int playerPerTeam, boolean allowDraw) {
+	public MatchFinderQueue(Game game, String name, boolean allowDraw, int numTeams, int playersPerTeam,
+							QueueType queueType, int maxPremadeSize) {
 		super(game, name, allowDraw);
 		this.numTeams = numTeams;
-		this.playerPerTeam = playerPerTeam;
+		this.playersPerTeam = playersPerTeam;
+		this.queueType = queueType;
+		this.maxPremadeSize = maxPremadeSize;
 	}
 }
