@@ -9,8 +9,11 @@ import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+
+import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
 public class CreateGame extends SlashCommand {
@@ -28,16 +31,25 @@ public class CreateGame extends SlashCommand {
 						.name("nameofgame").description("What do you call this game?")
 						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.required(true).build())
+				.addOption(ApplicationCommandOptionData.builder()
+						.name("allowdraw").description("Allow draw results and not just win or lose?")
+						.type(STRING.getValue())
+						.addChoice(ApplicationCommandOptionChoiceData.builder()
+								.name("allow draws").value("allow").build())
+						.addChoice(ApplicationCommandOptionChoiceData.builder()
+								.name("no draws").value("nodraw").build())
+						.required(true).build())
 				.build();
 	}
 
 	public void execute() {
 		String nameOfGame = event.getOption("nameofgame").get().getValue().get().asString();
-		Game game = new Game(guildId, nameOfGame);
+		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
+		Game game = new Game(server, nameOfGame, allowDraw);
 		server.addGame(game);
 		service.saveServer(server);
 
-		bot.deployCommand(guildId, AddQueue.getRequest(server)).subscribe();
+		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
 		bot.setAdminPermissionToAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
 
 		event.reply(String.format("Game %s has been created. However, there is no way yet for players to find a match. " +

@@ -200,52 +200,54 @@ public class DiscordBotService {
 	}
 
 	// Commands
-	public Mono<ApplicationCommandData> deployCommand(long guildId, ApplicationCommandRequest request) {
-		return applicationService.createGuildApplicationCommand(botId, guildId, request)
+	public Mono<ApplicationCommandData> deployCommand(Server server, ApplicationCommandRequest request) {
+		return applicationService.createGuildApplicationCommand(botId, server.getGuildId(), request)
 				.doOnNext(commandData -> log.debug(String.format("deployed command %s:%s to %s",
-						commandData.name(), commandData.id(), guildId)));
+						commandData.name(), commandData.id(), server.getGuildId())));
 	}
 
-	public Mono<Void> deleteCommand(long guildId, String name) {
-		log.debug("deleting command " + name);
-		return getCommandIdByName(guildId, name)
-				.flatMap(commandId -> applicationService.deleteGuildApplicationCommand(botId, guildId, commandId));
+	public Mono<Void> deleteCommand(Server server, String commandName) {
+		log.debug("deleting command " + commandName);
+		return getCommandIdByName(server.getGuildId(), commandName)
+				.flatMap(commandId -> applicationService
+						.deleteGuildApplicationCommand(botId, server.getGuildId(), commandId));
 	}
 
-	public Flux<ApplicationCommandData> deleteAllGuildCommands(long guildId) {
+	public Flux<Object> deleteAllGuildCommands(long guildId) {
 		return applicationService.getGuildApplicationCommands(botId, guildId)
 				.doOnNext(commandData -> log.trace(String.format("deleting command %s:%s on %s",
 						commandData.name(), commandData.id(), guildId)))
-				.doOnNext(commandData -> applicationService.deleteGuildApplicationCommand(
-						botId, guildId, Long.parseLong(commandData.id())).subscribe());
+				.flatMap(commandData -> applicationService.deleteGuildApplicationCommand(
+						botId, guildId, Long.parseLong(commandData.id())));
 	}
 
-	public void setCommandPermissionForRole(long guildId, String commandName, long roleId) {
-		client.getRoleById(Snowflake.of(guildId), Snowflake.of(roleId))
+	public void setCommandPermissionForRole(Server server, String commandName, long roleId) {
+		client.getRoleById(Snowflake.of(server.getGuildId()), Snowflake.of(roleId))
 				.subscribe(role -> {
-					long commandId = getCommandIdByName(guildId, commandName).defaultIfEmpty(0L).block();
+					long commandId = getCommandIdByName(server.getGuildId(), commandName).defaultIfEmpty(0L).block();
 					if (commandId == 0L) return;
 
 					log.debug(String.format("setting permissions for command %s to role %s", commandName, role.getName()));
 					var request = ApplicationCommandPermissionsRequest.builder()
 							.addPermission(ApplicationCommandPermissionsData.builder()
 									.id(role.getId().asLong()).type(1).permission(true).build()).build();
-					applicationService.modifyApplicationCommandPermissions(botId,guildId,commandId,request).block();
+					applicationService
+							.modifyApplicationCommandPermissions(botId, server.getGuildId(), commandId, request).block();
 				});
 	}
 
 	public void setAdminAndModPermissionsToModCommand(Server server, String commandName) {
 		if (server.getAdminRoleId() != 0L) {
-			setCommandPermissionForRole(server.getGuildId(), commandName, server.getAdminRoleId());
+			setCommandPermissionForRole(server, commandName, server.getAdminRoleId());
 		}
 		if (server.getModRoleId() != 0L) {
-			setCommandPermissionForRole(server.getGuildId(), commandName, server.getModRoleId());
+			setCommandPermissionForRole(server, commandName, server.getModRoleId());
 		}
 	}
 
 	public void setAdminPermissionToAdminCommand(Server server, String commandName) {
 		if (server.getAdminRoleId() != 0L) {
-			setCommandPermissionForRole(server.getGuildId(), commandName, server.getAdminRoleId());
+			setCommandPermissionForRole(server, commandName, server.getAdminRoleId());
 		}
 	}
 

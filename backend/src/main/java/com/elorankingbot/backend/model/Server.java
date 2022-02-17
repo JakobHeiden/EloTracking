@@ -11,8 +11,6 @@ import java.util.*;
 
 @Data
 @NoArgsConstructor
-@ToString
-@UseToStringForLogging
 @Document(collection = "server")
 public class Server {
 

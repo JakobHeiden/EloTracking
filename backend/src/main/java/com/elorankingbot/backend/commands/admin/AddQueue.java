@@ -1,15 +1,16 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -39,27 +40,22 @@ public class AddQueue extends SlashCommand {
 				.defaultPermission(false)
 				.addOption(gameOptionBuilder.build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("numberofplayers").description("How many players per team? Set to 1 if not a team game")
+						.name("playersperteam").description("How many players per team? Set to 1 if not a team game")
 						.type(INTEGER.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("numberofteams").description("How many teams per match? Use 2 for (team) versus, or 3 or higher for free-for-all")
+						.name("numberofteams").description("How many teams per match? " +
+								"Use 2 for (team) versus, or 3 or higher for free-for-all")
 						.type(INTEGER.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("allowdraw").description("Allow draw results and not just win or lose?")
-						.type(STRING.getValue())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("allow draws").value("allowdraw").build())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("no draws").value("nodraw").build())
-						.required(true).build())
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("nameofqueue").description("What do you call this queue?")
+						.name("nameofqueue").description("What do you call this queue? " +
+								"Only relevant if there is more than one queue for this game")
 						.type(STRING.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("queuetype").description("Only if a team queue: is this a solo queue, or a premade team only queue, or a mixed queue?")
+						.name("queuetype").description("Only if a team queue: " +
+								"is this a solo queue, or a premade team only queue, or a mixed queue?")
 						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("solo queue").value("solo").build())
@@ -76,7 +72,7 @@ public class AddQueue extends SlashCommand {
 	}
 
 	public void execute() {
-		int playersPerTeam = (int) event.getOption("numberofplayers").get().getValue().get().asLong();
+		int playersPerTeam = (int) event.getOption("playersperteam").get().getValue().get().asLong();
 		if (playersPerTeam < 1) {
 			event.reply("Cannot create a game with less than 1 player per team").subscribe();
 			return;
@@ -88,7 +84,7 @@ public class AddQueue extends SlashCommand {
 		}
 		Game game = server.getGames().get(event.getOption("game").get().getValue().get().asString());
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
-		if (game.getMatchFindModalities().containsKey(nameOfQueue)) {
+		if (game.getQueues().containsKey(nameOfQueue)) {
 			event.reply("A queue of that name already exists for that game. " +
 					"Queue names must be unique for each game").subscribe();
 			return;
@@ -115,19 +111,20 @@ public class AddQueue extends SlashCommand {
 					return;
 				} else {
 					queueType = MIXED;
-					maxPremadeSize = (int) event.getOption("maxpremade").get().getValue().get().asDouble();
+					maxPremadeSize = (int) event.getOption("maxpremade").get().getValue().get().asLong();
 				}
 			}
 		}
 
-		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asBoolean();
-		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, allowDraw, numberOfTeams, playersPerTeam,
+		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
-		game.addMatchFinderModality(queue);
+		game.addQueue(queue);
 		service.saveServer(server);
 
+		bot.deleteCommand(server, Join.class.getSimpleName()).block();
+		bot.deployCommand(server, Join.getRequest(server)).subscribe();
 
-		// TODO deploy /queue command
-		// user aufklaeren
+		event.reply(String.format("Queue %s for game %s has been created. Command /join has been deployed or updated",
+				queue.getName(), game.getName())).subscribe();
 	}
 }

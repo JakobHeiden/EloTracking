@@ -74,12 +74,12 @@ public class EventParser {
 				.subscribe(event -> {
 					Optional<Server> maybeServer = service.findServerByGuildId(event.getGuild().getId().asLong());
 					if (maybeServer.isEmpty()) {
-						long guildId = event.getGuild().getId().asLong();
-						bot.deployCommand(guildId, SetRole.getRequest()).block();
-						bot.setCommandPermissionForRole(guildId, SetRole.getRequest().name(), guildId);
-						bot.deployCommand(guildId, CreateGame.getRequest()).subscribe();
-						Server server = new Server(guildId);
+						Server server = new Server(event.getGuild().getId().asLong());
 						service.saveServer(server);
+						bot.deployCommand(server, SetRole.getRequest()).block();
+						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), server.getGuildId());
+						bot.deployCommand(server, CreateGame.getRequest()).subscribe();
+
 					}
 				});
 
