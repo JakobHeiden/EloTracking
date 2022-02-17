@@ -3,6 +3,7 @@ package com.elorankingbot.backend.commands.player;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -20,35 +21,54 @@ public class Join extends SlashCommand {
 		super(event, service, bot, queue, client);
 	}
 
-	public static ApplicationCommandRequest getRequest(MatchFinderQueue queue) {
-		Game game = queue.getGame();
-		ImmutableApplicationCommandOptionData.Builder dynamicOptionBuilder = ApplicationCommandOptionData.builder()
-				.name(queue.getName()).description("queue name")
-				.type(SUB_COMMAND.getValue());
+	public static ApplicationCommandRequest getRequest(Server server) {
+		var requestBuilder = ApplicationCommandRequest.builder()
+				.name("join")
+				.description("Join a matchmaking queue")
+				.defaultPermission(true);
+		server.getGames().values().forEach(game -> {
+			if (game.getQueues().size() == 1) {
+				var queue = game.getQueues().values().stream().findAny().get();
+				var queueOptionBuilder = ApplicationCommandOptionData.builder()
+						.name(game.getName()).description(queue.getDescription())
+						.type(SUB_COMMAND.getValue());
+				addUserOptions(queue, queueOptionBuilder);
+				requestBuilder.addOption(queueOptionBuilder.build());
+			} else {
+				var gameOptionBuilder = ApplicationCommandOptionData.builder()
+						.name(game.getName()).description("game name")
+						.type(SUB_COMMAND_GROUP.getValue());
+				game.getQueues().values().stream()
+						.forEach(queue -> {
+							var queueOptionBuilder = ApplicationCommandOptionData.builder()
+									.name(queue.getName()).description(queue.getDescription())
+									.type(SUB_COMMAND.getValue());
+							addUserOptions(queue, queueOptionBuilder);
+							gameOptionBuilder.addOption(queueOptionBuilder.build());
+						});
+				requestBuilder.addOption(gameOptionBuilder.build());
+			}
+		});
+		return requestBuilder.build();
+	}
+
+	private static void addUserOptions(MatchFinderQueue queue, ImmutableApplicationCommandOptionData.Builder queueOptionBuilder) {
 		if (queue.getQueueType() != SOLO) {
-			for (int allyPlayerIndex = 1; allyPlayerIndex < queue.getPlayersPerTeam(); allyPlayerIndex++) {
-				dynamicOptionBuilder.addOption(ApplicationCommandOptionData.builder()
+			int maxPlayersInPremade = queue.getQueueType() == PREMADE ?
+					queue.getPlayersPerTeam() : queue.getMaxPremadeSize();
+			for (int allyPlayerIndex = 1; allyPlayerIndex < maxPlayersInPremade; allyPlayerIndex++) {
+				queueOptionBuilder.addOption(ApplicationCommandOptionData.builder()
 						.name("ally" + allyPlayerIndex).description("ally #" + allyPlayerIndex)
 						.type(USER.getValue())
 						.required(queue.getQueueType() == PREMADE)
 						.build());
 			}
 		}
-
-		return ApplicationCommandRequest.builder()
-				.name("join")
-				.description("Join a matchmaking queue")
-				.defaultPermission(true)
-				.addOption(ApplicationCommandOptionData.builder()
-						.name(game.getName()).description("game name")
-						.type(ApplicationCommandOption.Type.SUB_COMMAND_GROUP.getValue())
-						.required(true)
-						.addOption(dynamicOptionBuilder.build())
-						.build())
-				.build();
 	}
 
 	public void execute() {
+
+
 		// guards
 		// queue holen
 		// in der q ablegen

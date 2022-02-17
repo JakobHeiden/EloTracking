@@ -51,9 +51,9 @@ public class DevTools {
 		service.saveServer(entenwieseServer);
 
 		bot.deleteAllGuildCommands(entenwieseId).blockLast();
-		bot.deployCommand(entenwieseId, SetRole.getRequest()).block();
-		bot.setCommandPermissionForRole(entenwieseId, "setrole", entenwieseId);
-		bot.deployCommand(entenwieseId, CreateGame.getRequest()).subscribe();
+		bot.deployCommand(entenwieseServer, SetRole.getRequest()).block();
+		bot.setCommandPermissionForRole(entenwieseServer, "setrole", entenwieseId);
+		bot.deployCommand(entenwieseServer, CreateGame.getRequest()).subscribe();
 
 		service.findAllServers().forEach(
 				server -> {

@@ -1,35 +1,45 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.logging.UseToStringForLogging;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.*;
 
 @NoArgsConstructor
 @Data
-@ToString
-@UseToStringForLogging
 public class Game {
 
+    @Id
     private String name;
-    private long guildId;
-    private Map<String, MatchFinderModality> matchFindModalities;
+    @DBRef(lazy = true)
+    private Server server;
+    private Map<String, MatchFinderQueue> queues;
     private long resultChannelId;
     private long leaderboardMessageId;
     private int leaderboardLength;
+    private boolean allowDraw;
+    private int matchAutoResolveTime;
+    private int messageCleanupTime;
+    private int noReportsModalityDecayTime;
 
-    public Game(long guildId, String name) {
+    public Game(Server server, String name, boolean allowDraw) {
         this.name = name;
-        this.guildId = guildId;
-        this.matchFindModalities = new HashMap<>();
+        this.server = server;
+        this.queues = new HashMap<>();
         this.leaderboardLength = 20;
+        this.allowDraw = allowDraw;
+        this.matchAutoResolveTime = 24 * 60;
+        this.messageCleanupTime = 12 * 60;
+        this.noReportsModalityDecayTime = 7 * 24 * 60;
     }
 
-    public void addMatchFinderModality(MatchFinderModality matchFinderModality) {
-        matchFindModalities.put(matchFinderModality.getName(), matchFinderModality);
+    public void addQueue(MatchFinderQueue queue) {
+        queues.put(queue.getName(), queue);
+    }
+
+    public long getGuildId() {
+        return server.getGuildId();
     }
 }
