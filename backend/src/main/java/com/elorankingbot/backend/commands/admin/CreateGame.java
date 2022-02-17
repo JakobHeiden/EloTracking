@@ -38,6 +38,7 @@ public class CreateGame extends SlashCommand {
 		service.saveServer(server);
 
 		bot.deployCommand(guildId, AddQueue.getRequest(server)).subscribe();
+		bot.setAdminPermissionToAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
 
 		event.reply(String.format("Game %s has been created. However, there is no way yet for players to find a match. " +
 				"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the game.",

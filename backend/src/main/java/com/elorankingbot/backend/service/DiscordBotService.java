@@ -1,27 +1,19 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.commands.admin.Setup;
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.*;
 import com.google.common.base.Strings;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.PrivateChannel;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
 import java.util.List;
-
-import static com.elorankingbot.backend.service.EloRankingService.formatRating;
 
 @Slf4j
 @Component
@@ -231,21 +220,38 @@ public class DiscordBotService {
 						botId, guildId, Long.parseLong(commandData.id())).subscribe());
 	}
 
-	public void setDiscordCommandPermissions(long guildId, String commandName, Role... roles) {
-		var requestBuilder = ApplicationCommandPermissionsRequest.builder();
-		Arrays.stream(roles).forEach(role -> {
-			log.debug(String.format("setting permissions for command %s to role %s", commandName, role.getName()));
-			requestBuilder.addPermission(ApplicationCommandPermissionsData.builder()
-					.id(role.getId().asLong()).type(1).permission(true).build()).build();
-		});
-		getCommandIdByName(guildId, commandName.toLowerCase()).subscribe(commandId ->
-				applicationService.modifyApplicationCommandPermissions(botId, guildId, commandId, requestBuilder.build())
-						.subscribe(permissionsData -> log.debug("...to command " + permissionsData.id())));
+	public void setCommandPermissionForRole(long guildId, String commandName, long roleId) {
+		client.getRoleById(Snowflake.of(guildId), Snowflake.of(roleId))
+				.subscribe(role -> {
+					long commandId = getCommandIdByName(guildId, commandName).defaultIfEmpty(0L).block();
+					if (commandId == 0L) return;
+
+					log.debug(String.format("setting permissions for command %s to role %s", commandName, role.getName()));
+					var request = ApplicationCommandPermissionsRequest.builder()
+							.addPermission(ApplicationCommandPermissionsData.builder()
+									.id(role.getId().asLong()).type(1).permission(true).build()).build();
+					applicationService.modifyApplicationCommandPermissions(botId,guildId,commandId,request).block();
+				});
+	}
+
+	public void setAdminAndModPermissionsToModCommand(Server server, String commandName) {
+		if (server.getAdminRoleId() != 0L) {
+			setCommandPermissionForRole(server.getGuildId(), commandName, server.getAdminRoleId());
+		}
+		if (server.getModRoleId() != 0L) {
+			setCommandPermissionForRole(server.getGuildId(), commandName, server.getModRoleId());
+		}
+	}
+
+	public void setAdminPermissionToAdminCommand(Server server, String commandName) {
+		if (server.getAdminRoleId() != 0L) {
+			setCommandPermissionForRole(server.getGuildId(), commandName, server.getAdminRoleId());
+		}
 	}
 
 	private Mono<Long> getCommandIdByName(long guildid, String commandName) {
 		return applicationService.getGuildApplicationCommands(botId, guildid)
-				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName))
+				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName.toLowerCase()))
 				.next()
 				.map(commandData -> Long.parseLong(commandData.id()));
 	}

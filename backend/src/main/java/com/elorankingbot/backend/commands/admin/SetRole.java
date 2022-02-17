@@ -57,37 +57,19 @@ public class SetRole extends SlashCommand {
 			adminRole = event.getOption("role").get().getValue().get().asRole()
 					.block();
 			server.setAdminRoleId(adminRole.getId().asLong());
-			updatePermissionsForAdminAndModCommands();
+			adminCommands.forEach(commandName -> bot.setAdminPermissionToAdminCommand(server, commandName));
+			modCommands.forEach(commandName -> bot.setAdminAndModPermissionsToModCommand(server, commandName));
 			nameOfRole = adminRole.getName();
 		} else {
 			modRole = event.getOption("role").get().getValue().get().asRole()
 					.block();
 			server.setModRoleId(modRole.getId().asLong());
-			updatePermissionsForModCommands();
+			modCommands.forEach(commandName -> bot.setAdminAndModPermissionsToModCommand(server, commandName));
 			nameOfRole = modRole.getName();
 		}
 		service.saveServer(server);
 
 		event.reply(String.format("Linked %s permissions to %s. This may take a minute to update on the server.",
 				adminOrMod, nameOfRole)).subscribe();
-	}
-
-	private void updatePermissionsForAdminAndModCommands() {
-		if (server.getModRoleId() == 0L) {
-			modRole = adminRole;
-		} else {
-			modRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(server.getModRoleId()))
-					.block();
-		}
-		adminCommands.forEach(commandName ->
-				bot.setDiscordCommandPermissions(guildId, commandName, adminRole));
-		modCommands.forEach(commandName ->
-				bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
-	}
-
-	private void updatePermissionsForModCommands() {
-		adminRole = client.getRoleById(Snowflake.of(guildId), Snowflake.of(server.getAdminRoleId())).block();
-		modCommands.forEach(
-				commandName -> bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
 }

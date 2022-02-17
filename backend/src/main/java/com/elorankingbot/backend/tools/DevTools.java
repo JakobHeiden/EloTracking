@@ -44,16 +44,17 @@ public class DevTools {
 	}
 
 	private void updateGuildCommands() {
+		log.warn("updating guild commands...");
+
 		long entenwieseId = props.getEntenwieseId();
-		bot.deleteAllGuildCommands(entenwieseId).blockLast();
-		bot.deployCommand(entenwieseId, SetRole.getRequest()).subscribe();
-		bot.setDiscordCommandPermissions(entenwieseId, "setrole",
-				client.getGuildById(Snowflake.of(entenwieseId)).block().getEveryoneRole().block());
-		bot.deployCommand(entenwieseId, CreateGame.getRequest()).subscribe();
 		Server entenwieseServer = new Server(entenwieseId);
 		service.saveServer(entenwieseServer);
 
-		log.warn("updating guild commands...");
+		bot.deleteAllGuildCommands(entenwieseId).blockLast();
+		bot.deployCommand(entenwieseId, SetRole.getRequest()).block();
+		bot.setCommandPermissionForRole(entenwieseId, "setrole", entenwieseId);
+		bot.deployCommand(entenwieseId, CreateGame.getRequest()).subscribe();
+
 		service.findAllServers().forEach(
 				server -> {
 					try {
