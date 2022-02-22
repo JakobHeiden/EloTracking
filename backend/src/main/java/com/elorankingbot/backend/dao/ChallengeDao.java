@@ -3,7 +3,6 @@ package com.elorankingbot.backend.dao;
 import com.elorankingbot.backend.model.ChallengeModel;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface ChallengeDao extends MongoRepository<ChallengeModel, UUID> {

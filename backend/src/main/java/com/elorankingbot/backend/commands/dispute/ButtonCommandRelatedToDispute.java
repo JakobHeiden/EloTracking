@@ -4,12 +4,9 @@ import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchResult;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.Buttons;
 import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
@@ -25,8 +22,8 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 	protected final long guildId;
 	protected final Game game;
 
-	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, Services services) {
+		super(event, services);
 		this.challenge = null;//service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
 		this.guildId = 0;// challenge.getGuildId();
 		this.game = service.findGameByGuildId(guildId).get();

@@ -3,10 +3,10 @@ package com.elorankingbot.backend.timedtask;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.http.client.ClientException;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,12 +22,11 @@ public class TimedTaskService {
 
 	protected final List none = new ArrayList<>();
 
-	public TimedTaskService(EloRankingService service, @Lazy DiscordBotService bot,
-							@Lazy TimedTaskQueue queue, GatewayDiscordClient client) {
-		this.service = service;
-		this.bot = bot;
-		this.queue = queue;
-		this.client = client;
+	public TimedTaskService(Services services) {
+		this.service = services.service();
+		this.bot = services.bot();
+		this.queue = services.queue();
+		this.client = services.client();
 	}
 
 	public void markGamesForDeletion() {

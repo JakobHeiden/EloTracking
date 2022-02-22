@@ -5,28 +5,22 @@ import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
-import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
+import static discord4j.core.object.command.ApplicationCommandOption.Type.INTEGER;
+import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 public class AddQueue extends SlashCommand {
 
-	public AddQueue(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public AddQueue(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {

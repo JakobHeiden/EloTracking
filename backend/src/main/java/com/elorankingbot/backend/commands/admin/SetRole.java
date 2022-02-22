@@ -2,11 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Role;
@@ -22,9 +18,8 @@ public class SetRole extends SlashCommand {
 	private Set<String> adminCommands, modCommands;
 	private Role adminRole, modRole;
 
-	public SetRole(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
-				   TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public SetRole(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 		this.adminCommands = service.getAdminCommands();
 		this.modCommands = service.getModCommands();
 	}

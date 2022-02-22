@@ -3,10 +3,7 @@ package com.elorankingbot.backend.commands.mod;
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.MatchResult;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
@@ -26,9 +23,8 @@ public class ForceMatch extends SlashCommand {
 	private String templatePlayer1;
 	private String templatePlayer2;
 
-	public ForceMatch(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
-					  TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public ForceMatch(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest(boolean allowDraw) {

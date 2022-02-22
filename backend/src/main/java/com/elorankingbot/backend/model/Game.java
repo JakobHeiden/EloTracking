@@ -5,7 +5,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @NoArgsConstructor
 @Data

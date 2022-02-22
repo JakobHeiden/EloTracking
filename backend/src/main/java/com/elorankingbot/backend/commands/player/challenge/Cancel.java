@@ -1,21 +1,16 @@
 package com.elorankingbot.backend.commands.player.challenge;
 
 import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
 public class Cancel extends ButtonCommandRelatedToChallenge {
 
-	public Cancel(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
-				  TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Cancel(ButtonInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public void execute() {

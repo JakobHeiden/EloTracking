@@ -1,11 +1,8 @@
 package com.elorankingbot.backend.commands.dispute;
 
 import com.elorankingbot.backend.model.MatchResult;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
@@ -14,8 +11,8 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 	private double[] eloResults;
 	private boolean isChallengerWin;
 
-	public RuleAsWin(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public RuleAsWin(ButtonInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public void execute() {

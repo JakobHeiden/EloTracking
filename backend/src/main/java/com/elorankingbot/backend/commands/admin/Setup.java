@@ -1,34 +1,12 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.player.Challenge;
-import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
-import com.elorankingbot.backend.commands.mod.Ban;
-import com.elorankingbot.backend.commands.mod.ForceMatch;
-import com.elorankingbot.backend.commands.mod.Rating;
-import com.elorankingbot.backend.commands.player.Info;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.http.client.ClientException;
-import discord4j.rest.util.Permission;
-import discord4j.rest.util.PermissionSet;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public class Setup extends SlashCommand {
 
@@ -37,9 +15,8 @@ public class Setup extends SlashCommand {
 	private Role modRole;
 	private String reply;
 
-	public Setup(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
-				 TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Setup(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -100,9 +77,9 @@ public class Setup extends SlashCommand {
 		service.saveGame(game);
 
 		reply += String.format("\n- I created a web page with full rankings: http://%s/%s",
-				service.getPropertiesLoader().getBaseUrl(), guildId);
+				services.applicationPropertiesLoader().getBaseUrl(), guildId);
 		reply += String.format("\nFollow my announcement channel: <#%s>",
-				service.getPropertiesLoader().getAnnouncementChannelId());
+				services.applicationPropertiesLoader().getAnnouncementChannelId());
 		event.reply(reply).doOnError(error -> System.out.println(error.getMessage())).subscribe();
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",

@@ -3,12 +3,12 @@ package com.elorankingbot.backend.commands.timed;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public abstract class TimedCommand {
 
@@ -23,12 +23,11 @@ public abstract class TimedCommand {
 
 	protected static final List none = new ArrayList<>();
 
-	public TimedCommand(EloRankingService service, DiscordBotService bot, TimedTaskQueue queue,
-						GatewayDiscordClient client, long relationId, int time) {
-		this.service = service;
-		this.bot = bot;
-		this.queue = queue;
-		this.client = client;
+	public TimedCommand(Services services, long relationId, int time) {
+		this.service = services.service();
+		this.bot = services.bot();
+		this.queue = services.queue();
+		this.client = services.client();
 
 		this.relationId = relationId;
 		this.time = time;

@@ -2,25 +2,25 @@ package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.PREMADE;
+import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.SOLO;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
-import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
 
 public class Join extends SlashCommand {
 
-	public Join(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Join(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {
@@ -94,7 +94,7 @@ public class Join extends SlashCommand {
 						.map(user -> new Player(guildId, user.getId().asLong(), user.getTag()))
 						.collect(Collectors.toList()));
 		queue.addGroup(group);
-		Optional<Match> maybeMatch = queue.generateMatchIfPossible();
+		Optional<Match> maybeMatch = null;// TODO!
 		service.saveServer(server);
 
 

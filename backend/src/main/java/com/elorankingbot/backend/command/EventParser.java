@@ -9,10 +9,7 @@ import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.ButtonInteractionEventWrapper;
-import com.elorankingbot.backend.tools.ChatInputInteractionEventWrapper;
-import com.elorankingbot.backend.tools.UserInteractionEventWrapper;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
@@ -34,41 +31,42 @@ import java.util.function.Function;
 @Component
 public class EventParser {
 
+	private final Services services;
+	private final EloRankingService service;
 	private final DiscordBotService bot;
 	private final Map<String, String> commandStringToClassName;
 
-	public EventParser(GatewayDiscordClient client, EloRankingService service, DiscordBotService bot,
-					   TimedTaskQueue queue, CommandClassScanner scanner,
-					   Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory,
-					   Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory,
-					   Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
-		this.bot = bot;
+	public EventParser(Services services, CommandClassScanner scanner,
+					   Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory,
+					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
+					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
+		this.services = services;
+		this.service = services.service();
+		this.bot = services.bot();
+		GatewayDiscordClient client = services.client();
 		ApplicationService applicationService = client.getRestClient().getApplicationService();
 		long botId = client.getSelfId().asLong();
 		this.commandStringToClassName = scanner.getCommandStringToClassName();
 
 		client.on(ChatInputInteractionEvent.class)
-				.map(event -> new ChatInputInteractionEventWrapper(event, service, bot, queue, client))
 				.map(slashCommandFactory::apply)
 				.doOnNext(bot::logCommand)
 				.doOnNext(SlashCommand::execute)
-				.doOnError(this::handleError)
+				.doOnError(this::handleClientException)
 				.subscribe();
 
 		client.on(ButtonInteractionEvent.class)
-				.map(event -> new ButtonInteractionEventWrapper(event, service, bot, queue, client))
 				.map(buttonCommandFactory::apply)
 				.doOnNext(bot::logCommand)
 				.doOnNext(ButtonCommand::execute)
-				.doOnError(this::handleError)
+				.doOnError(this::handleClientException)
 				.subscribe();
 
 		client.on(UserInteractionEvent.class)
-				.map(event -> new UserInteractionEventWrapper(event, service, bot, queue, client))
 				.map(userInteractionChallengeFactory::apply)
 				.doOnNext(bot::logCommand)
 				.doOnNext(ChallengeAsUserInteraction::execute)
-				.doOnError(this::handleError)
+				.doOnError(this::handleClientException)
 				.subscribe();
 
 		client.on(GuildCreateEvent.class)
@@ -108,7 +106,7 @@ public class EventParser {
 		});
 	}
 
-	private void handleError(Throwable throwable) {
+	private void handleClientException(Throwable throwable) {
 		if (throwable instanceof ClientException) {
 			log.error(((ClientException) throwable).getRequest().toString());
 		}
@@ -116,38 +114,35 @@ public class EventParser {
 				"Occured during %s", throwable.toString(), bot.getLatestCommandLog()));
 	}
 
-	public SlashCommand createSlashCommand(ChatInputInteractionEventWrapper wrapper) {
-		String commandClassName = commandStringToClassName.get(wrapper.event().getCommandName());
+	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
+		String commandClassName = commandStringToClassName.get(event.getCommandName());
 		log.trace("commandClassName = " + commandClassName);
 		try {
 			return (SlashCommand) Class.forName(commandClassName)
-					.getConstructor(ChatInputInteractionEvent.class, EloRankingService.class,
-							DiscordBotService.class, TimedTaskQueue.class, GatewayDiscordClient.class)
-					.newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
+					.getConstructor(ChatInputInteractionEvent.class, Services.class)
+					.newInstance(event, services);
 		} catch (Exception e) {
-			wrapper.bot().sendToOwner("exception occurred while instantiating command " + e.getMessage());
+			bot.sendToOwner("exception occurred while instantiating command " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public ButtonCommand createButtonCommand(ButtonInteractionEventWrapper wrapper) {
-		String commandClassName = commandStringToClassName.get(wrapper.event().getCustomId().split(":")[0]);
+	public ButtonCommand createButtonCommand(ButtonInteractionEvent event) {
+		String commandClassName = commandStringToClassName.get(event.getCustomId().split(":")[0]);
 		log.trace("commandClassName = " + commandClassName);
 		try {
 			return (ButtonCommand) Class.forName(commandClassName)
-					.getConstructor(ButtonInteractionEvent.class, EloRankingService.class, DiscordBotService.class,
-							TimedTaskQueue.class, GatewayDiscordClient.class)
-					.newInstance(wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
+					.getConstructor(ButtonInteractionEvent.class, Services.class)
+					.newInstance(event, services);
 		} catch (Exception e) {
-			wrapper.bot().sendToOwner("exception occurred while instantiating command " + e.getMessage());
+			bot.sendToOwner("exception occurred while instantiating command " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEventWrapper wrapper) {
-		return new ChallengeAsUserInteraction(
-				wrapper.event(), wrapper.service(), wrapper.bot(), wrapper.queue(), wrapper.client());
+	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEvent event) {
+		return new ChallengeAsUserInteraction(event, services);
 	}
 }

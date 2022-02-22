@@ -10,6 +10,7 @@ import com.elorankingbot.backend.dao.TimeSlotDao;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,14 +28,13 @@ public class DevTools {
 	private final TimeSlotDao timeSlotDao;
 	private final ServerDao serverDao;
 
-	public DevTools(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client, PlayerDao playerDao,
-					MatchDao matchDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
-		this.service = service;
-		this.bot = bot;
-		this.client = client;
+	public DevTools(Services services,
+					PlayerDao playerDao, MatchDao matchDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
+		this.service = services.service();
+		this.bot = services.bot();		this.client = services.client();
 		this.playerDao = playerDao;
 		this.matchDao = matchDao;
-		this.props = service.getPropertiesLoader();
+		this.props = services.props();
 		this.timeSlotDao = timeSlotDao;
 		this.serverDao = serverDao;
 

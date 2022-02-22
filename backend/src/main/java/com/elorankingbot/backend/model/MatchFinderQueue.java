@@ -5,7 +5,11 @@ import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Data
 @ToString
@@ -58,11 +62,14 @@ public class MatchFinderQueue {
 	}
 
 	private Optional<Match> generateMatchFromPremadeQueue() {
-		if (queue.size() < 2) return Optional.empty();
+		if (queue.size() < numTeams) return Optional.empty();
 
-		// TODO!
+		List<List<Player>> allPlayers = queue.stream()
+				.map(Group::getPlayers)
+				.collect(Collectors.toList());
+		Match match = new Match(game, allPlayers);
 
-		return null;
+		return null;// TODO!
 
 	}
 
