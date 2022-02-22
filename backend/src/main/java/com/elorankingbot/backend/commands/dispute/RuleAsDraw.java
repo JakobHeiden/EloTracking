@@ -1,18 +1,15 @@
 package com.elorankingbot.backend.commands.dispute;
 
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 
 	private double[] eloResults;
 
-	public RuleAsDraw(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public RuleAsDraw(ButtonInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public void execute() {

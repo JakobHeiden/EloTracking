@@ -1,20 +1,11 @@
 package com.elorankingbot.backend.commands.timed;
 
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
-
-import java.util.Optional;
+import com.elorankingbot.backend.service.Services;
 
 public class DecayOpenChallenge extends TimedCommand {
 
-	public DecayOpenChallenge(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client, TimedTaskQueue queue,
-							  long challengeId, int time) {
-		super(service, bot, queue, client, challengeId, time);
+	public DecayOpenChallenge(Services services, long challengeId, int time) {
+		super(services, challengeId, time);;
 	}
 
 	public void execute() {

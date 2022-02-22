@@ -3,10 +3,7 @@ package com.elorankingbot.backend.commands.player.challenge;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
@@ -19,9 +16,8 @@ public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
 	protected final long guildId;
 	protected final Game game;
 
-	protected ButtonCommandRelatedToChallenge(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot,
-											  TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	protected ButtonCommandRelatedToChallenge(ButtonInteractionEvent event, Services services) {
+		super(event, services);
 		this.challenge = null;// service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
 		this.guildId = 0;//challenge.getGuildId();
 		this.game = service.findGameByGuildId(guildId).get();

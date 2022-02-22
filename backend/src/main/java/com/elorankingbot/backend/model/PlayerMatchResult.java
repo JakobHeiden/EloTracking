@@ -2,8 +2,6 @@ package com.elorankingbot.backend.model;
 
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.UUID;
-
 public class PlayerMatchResult {
 
 	@DBRef(lazy = true)

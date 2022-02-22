@@ -1,8 +1,6 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.logging.UseToStringForLogging;
 import lombok.Data;
-import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 

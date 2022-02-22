@@ -1,19 +1,13 @@
 package com.elorankingbot.backend.commands.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 public class CloseChannelLater extends ButtonCommand {
 
-	public CloseChannelLater(ButtonInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public CloseChannelLater(ButtonInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public void execute() {

@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
 import com.google.common.base.Strings;
 import discord4j.common.util.Snowflake;
@@ -18,6 +19,7 @@ import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,6 +37,7 @@ public class DiscordBotService {
 	private final GatewayDiscordClient client;
 	private final EloRankingService service;
 	private final ApplicationService applicationService;
+	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
 	private final long botId;
 	@Getter
@@ -46,16 +49,17 @@ public class DiscordBotService {
 	private static String embedName = "`   Rank  Rating   Wins Losses  Name`";
 	private static String embedNameWithDraws = "`   Rank  Rating    Wins Losses Draws Name`";
 
-	public DiscordBotService(GatewayDiscordClient gatewayDiscordClient, EloRankingService service) {
-		this.client = gatewayDiscordClient;
-		this.service = service;
+	public DiscordBotService(@Lazy Services services) {
+		this.client = services.client();
+		this.service = services.service();
 		this.botId = client.getSelfId().asLong();
+		this.props = services.props();
 		applicationService = client.getRestClient().getApplicationService();
 	}
 
 	@PostConstruct
 	public void initAdminDm() {
-		long ownerId = Long.valueOf(service.getPropertiesLoader().getOwnerId());
+		long ownerId = Long.valueOf(props.getOwnerId());
 		User owner = client.getUserById(Snowflake.of(ownerId)).block();
 		this.ownerPrivateChannel = owner.getPrivateChannel().block();
 		sendToOwner("I am logged in and ready");

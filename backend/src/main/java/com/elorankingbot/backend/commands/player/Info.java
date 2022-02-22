@@ -3,11 +3,8 @@ package com.elorankingbot.backend.commands.player;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.spec.EmbedCreateFields;
@@ -25,8 +22,8 @@ public class Info extends SlashCommand {
 	private boolean isSelfInfo;
 	private int numTotalPlayers, targetPlayerIndex, numHigherRanksToDisplay;
 
-	public Info(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Info(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {

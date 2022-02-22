@@ -9,10 +9,10 @@ import com.elorankingbot.backend.model.CurrentIndex;
 import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +28,7 @@ public class TimedTaskQueue {
 	private final int numberOfTimeSlots;
 	@Getter
 	private int currentIndex;
+	private final Services services;
 	private final EloRankingService service;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
@@ -36,17 +37,17 @@ public class TimedTaskQueue {
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
 	private boolean doRunQueue;
 
-	public TimedTaskQueue(EloRankingService service, @Lazy DiscordBotService bot,
-						  GatewayDiscordClient client, TimedTaskService timedTaskService, TimeSlotDao timeSlotDao,
-						  TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
-		this.service = service;
-		this.bot = bot;
-		this.client = client;
-		this.timedTaskService = timedTaskService;
+	public TimedTaskQueue(Services services,
+						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
+		this.services = services;
+		this.service = services.service();
+		this.bot = services.bot();
+		this.client = services.client();
+		this.timedTaskService = services.timedTaskService();
 		this.timeSlotDao = timeSlotDao;
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
-		this.numberOfTimeSlots = service.getPropertiesLoader().getNumberOfTimeSlots();
-		this.doRunQueue = service.getPropertiesLoader().isDoRunQueue();
+		this.numberOfTimeSlots = services.props().getNumberOfTimeSlots();
+		this.doRunQueue = services.props().isDoRunQueue();
 
 		if (!timedTaskQueueCurrentIndexDao.existsById(1)) {
 			currentIndex = 0;
@@ -74,13 +75,13 @@ public class TimedTaskQueue {
 		log.debug(String.format("executing %s %s after %s", task.type().name(), id, duration));
 		switch (task.type()) {
 			case OPEN_CHALLENGE_DECAY:
-				new DecayOpenChallenge(service, bot, client, this, id, duration).execute();
+				new DecayOpenChallenge(services, id, duration).execute();
 				break;
 			case ACCEPTED_CHALLENGE_DECAY:
-				new DecayAcceptedChallenge(service, bot, client, this, id, duration).execute();
+				new DecayAcceptedChallenge(services, id, duration).execute();
 				break;
 			case MATCH_AUTO_RESOLVE:
-				new AutoResolveMatch(service, bot, client, this, id, duration).execute();
+				new AutoResolveMatch(services, id, duration).execute();
 				break;
 			case MATCH_SUMMARIZE:
 				timedTaskService.summarizeMatch(id, otherId, task.value());

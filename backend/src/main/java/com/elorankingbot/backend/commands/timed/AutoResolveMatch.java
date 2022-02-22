@@ -3,10 +3,7 @@ package com.elorankingbot.backend.commands.timed;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchResult;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.object.entity.Message;
 
 public class AutoResolveMatch extends TimedCommand {
@@ -14,9 +11,8 @@ public class AutoResolveMatch extends TimedCommand {
 	private Message reportPresentMessage;
 	private Message reportAbsentMessage;
 
-	public AutoResolveMatch(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client,
-							TimedTaskQueue queue, long challengeId, int time) {
-		super(service, bot, queue, client, challengeId, time);
+	public AutoResolveMatch(Services services, long challengeId, int time) {
+		super(services, challengeId, time);;
 	}
 
 	public void execute() {

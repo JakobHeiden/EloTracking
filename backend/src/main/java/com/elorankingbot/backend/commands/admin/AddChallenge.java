@@ -3,21 +3,16 @@ package com.elorankingbot.backend.commands.admin;
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Server;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.*;
 
-import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
-
 @AdminCommand
 public class AddChallenge extends SlashCommand {
 
-	public AddChallenge(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public AddChallenge(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {

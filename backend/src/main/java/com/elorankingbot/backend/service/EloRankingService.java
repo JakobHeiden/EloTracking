@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.*;
@@ -27,17 +26,13 @@ public class EloRankingService {
 	private final PlayerDao playerDao;
 	private final TimeSlotDao timeSlotDao;
 	@Getter
-	private final ApplicationPropertiesLoader propertiesLoader;
-	@Getter
 	private final Set<String> modCommands, adminCommands;
 
 	@Autowired
-	public EloRankingService(@Lazy DiscordBotService discordBotService, ServerDao serverDao, ApplicationPropertiesLoader propertiesLoader,
-							 CommandClassScanner scanner,
-							 ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
+	public EloRankingService(@Lazy Services services, CommandClassScanner scanner,
+							 ServerDao serverDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
 							 TimeSlotDao timeSlotDao) {
-		this.bot = discordBotService;
-		this.propertiesLoader = propertiesLoader;
+		this.bot = services.bot();
 		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
 		this.matchDao = matchDao;
