@@ -1,13 +1,10 @@
 package com.elorankingbot.backend.timedtask;
 
-import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.rest.http.client.ClientException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;

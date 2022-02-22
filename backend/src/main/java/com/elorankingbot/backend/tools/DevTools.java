@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.tools;
 
-import com.elorankingbot.backend.commands.admin.CreateGame;
+import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.MatchDao;
@@ -10,7 +10,6 @@ import com.elorankingbot.backend.dao.TimeSlotDao;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -53,7 +52,7 @@ public class DevTools {
 		bot.deleteAllGuildCommands(entenwieseId).blockLast();
 		bot.deployCommand(entenwieseServer, SetRole.getRequest()).block();
 		bot.setCommandPermissionForRole(entenwieseServer, "setrole", entenwieseId);
-		bot.deployCommand(entenwieseServer, CreateGame.getRequest()).subscribe();
+		bot.deployCommand(entenwieseServer, CreateRanking.getRequest()).subscribe();
 
 		service.findAllServers().forEach(
 				server -> {

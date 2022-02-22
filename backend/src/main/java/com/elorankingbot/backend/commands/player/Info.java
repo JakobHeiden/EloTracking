@@ -1,27 +1,22 @@
 package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.List;
-import java.util.Optional;
 
-import static com.elorankingbot.backend.service.EloRankingService.formatRating;
 import static java.lang.Integer.min;
 
 public class Info extends SlashCommand {
@@ -119,11 +114,11 @@ public class Info extends SlashCommand {
 	}
 
 	private EmbedCreateSpec generateMatchHistory(int numMatches) {
-		List<Match> matchHistory = service.getMatchHistory(targetPlayer.getUserId(), guildId);
-		if (matchHistory.size() > numMatches) matchHistory = matchHistory.subList(0, numMatches);
+		List<MatchResult> matchResultHistory = service.getMatchHistory(targetPlayer.getUserId(), guildId);
+		if (matchResultHistory.size() > numMatches) matchResultHistory = matchResultHistory.subList(0, numMatches);
 		String matchHistoryString = "";
-		for (Match match : matchHistory) {
-			matchHistoryString += generateMatchString(match, targetPlayer.getUserId());
+		for (MatchResult matchResult : matchResultHistory) {
+			matchHistoryString += generateMatchString(matchResult, targetPlayer.getUserId());
 		}
 		if (matchHistoryString.equals("")) matchHistoryString = "This player has not played any matches.";
 
@@ -136,7 +131,7 @@ public class Info extends SlashCommand {
 				.build();
 	}
 
-	private String generateMatchString(Match match, long playerId) {
+	private String generateMatchString(MatchResult matchResult, long playerId) {
 		return null;
 		/*
 		boolean isWin = match.getWinnerId() == playerId;

@@ -11,6 +11,7 @@ public class Rating implements Comparable<Rating> {
 	private int draws;
 	private int losses;
 	private List<UUID> matchHistory;
+	private List<PlayerMatchResult> recentMatches;
 
 	public Rating(Game game, double rating) {
 		this.game = game;

@@ -1,39 +1,24 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.logging.UseToStringForLogging;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.ToString;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
-@ToString
-@UseToStringForLogging
-@Document(collection = "match")
-public class Match implements Comparable<Match> {
+@Document
+public class Match {
 
-    @Id
-    private UUID id;
-    private UUID gameId;
-    private Date date;
-    private List<PlayerMatchResult> playerMatchResults;
-    private boolean isDraw;
+	private UUID id;
+	@DBRef(lazy = true)
+	private Game game;
+	private List<List<Player>> players;
 
-    public Match(UUID gameId, boolean isDraw) {
-        this.id = UUID.randomUUID();
-        this.gameId = gameId;
-        this.date = new Date();
-        this.isDraw = isDraw;
-    }
-
-    @Override
-    public int compareTo(Match other) {
-        return date.compareTo(other.date);
-    }
+	public Match(Game game, List<List<Player>> players) {
+		this.id = UUID.randomUUID();
+		this.game = game;
+		this.players = players;
+	}
 }

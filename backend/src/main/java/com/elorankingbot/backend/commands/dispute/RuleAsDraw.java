@@ -1,7 +1,5 @@
 package com.elorankingbot.backend.commands.dispute;
 
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;

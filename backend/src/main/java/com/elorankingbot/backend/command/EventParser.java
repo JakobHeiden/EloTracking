@@ -2,7 +2,7 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.admin.CreateGame;
+import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.model.Game;
@@ -20,6 +20,7 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -78,7 +79,7 @@ public class EventParser {
 						service.saveServer(server);
 						bot.deployCommand(server, SetRole.getRequest()).block();
 						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), server.getGuildId());
-						bot.deployCommand(server, CreateGame.getRequest()).subscribe();
+						bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
 
 					}
 				});
@@ -108,6 +109,9 @@ public class EventParser {
 	}
 
 	private void handleError(Throwable throwable) {
+		if (throwable instanceof ClientException) {
+			log.error(((ClientException) throwable).getRequest().toString());
+		}
 		bot.sendToOwner(String.format("Error in EventParser: %s\n" +
 				"Occured during %s", throwable.toString(), bot.getLatestCommandLog()));
 	}
