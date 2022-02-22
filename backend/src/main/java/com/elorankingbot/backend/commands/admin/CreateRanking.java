@@ -14,21 +14,22 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
+import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 
 @AdminCommand
-public class CreateGame extends SlashCommand {
+public class CreateRanking extends SlashCommand {
 
-	public CreateGame(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
+	public CreateRanking(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
 		super(event, service, bot, queue, client);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name("creategame")
-				.description("Create a game to track elo rating for")
+				.name("createranking")
+				.description("Create a ranking")
 				.defaultPermission(false)
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("nameofgame").description("What do you call this game?")
+						.name("nameofranking").description("What do you call this ranking?")
 						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
@@ -43,7 +44,11 @@ public class CreateGame extends SlashCommand {
 	}
 
 	public void execute() {
-		String nameOfGame = event.getOption("nameofgame").get().getValue().get().asString();
+		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
+		if (!isLegalDiscordName(nameOfGame)) {
+			event.reply("Illegal name. Please use only letters, digits, dash, and underscore").subscribe();
+			return;
+		}
 		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
 		Game game = new Game(server, nameOfGame, allowDraw);
 		server.addGame(game);
@@ -52,8 +57,8 @@ public class CreateGame extends SlashCommand {
 		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
 		bot.setAdminPermissionToAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
 
-		event.reply(String.format("Game %s has been created. However, there is no way yet for players to find a match. " +
-				"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the game.",
+		event.reply(String.format("Ranking %s has been created. However, there is no way yet for players to find a match. " +
+				"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the ranking.",
 				nameOfGame)).subscribe();
 	}
 }

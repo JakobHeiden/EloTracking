@@ -14,6 +14,7 @@ import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,8 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Component
@@ -97,7 +100,7 @@ public class DiscordBotService {
 		return client.getGuildById(Snowflake.of(guildId));
 	}
 
-	public void postToResultChannel(Game game, Match match) {
+	public void postToResultChannel(Game game, MatchResult matchResult) {
 		/*
 		TextChannel resultChannel;
 		try {
@@ -203,7 +206,10 @@ public class DiscordBotService {
 	public Mono<ApplicationCommandData> deployCommand(Server server, ApplicationCommandRequest request) {
 		return applicationService.createGuildApplicationCommand(botId, server.getGuildId(), request)
 				.doOnNext(commandData -> log.debug(String.format("deployed command %s:%s to %s",
-						commandData.name(), commandData.id(), server.getGuildId())));
+						commandData.name(), commandData.id(), server.getGuildId())))
+				.doOnError(ClientException.class, e ->
+						log.error("Error deploying command:\n" + e.getRequest().toString()
+								.replace(", ", ",\n")));
 	}
 
 	public Mono<Void> deleteCommand(Server server, String commandName) {
@@ -256,5 +262,12 @@ public class DiscordBotService {
 				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName.toLowerCase()))
 				.next()
 				.map(commandData -> Long.parseLong(commandData.id()));
+	}
+
+	public static boolean isLegalDiscordName(String string) {
+		Pattern p = Pattern.compile("[\\w-]{1,32}");
+		Matcher m = p.matcher(string);
+		if (m.find()) return true;
+		else return false;
 	}
 }

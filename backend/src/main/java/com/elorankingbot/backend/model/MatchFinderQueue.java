@@ -4,7 +4,8 @@ import com.elorankingbot.backend.logging.UseToStringForLogging;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.DBRef;
-import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.*;
 
 @Data
 @ToString
@@ -27,6 +28,7 @@ public class MatchFinderQueue {
 	private int maxRating;
 	private QueueType queueType;
 	private int maxPremadeSize;
+	private Set<Group> queue;
 
 	public MatchFinderQueue(Game game, String name, int numTeams, int playersPerTeam,
 							QueueType queueType, int maxPremadeSize) {
@@ -36,6 +38,32 @@ public class MatchFinderQueue {
 		this.playersPerTeam = playersPerTeam;
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
+		this.queue = new TreeSet<>();
+	}
+
+	public void addGroup(Group group) {
+		queue.add(group);
+	}
+
+	public Optional<Match> generateMatchIfPossible() {
+		if (queueType == QueueType.SOLO) return generateMatchFromSoloQueue();
+		if (queueType == QueueType.PREMADE) return generateMatchFromPremadeQueue();
+		return null;
+	}
+
+	private Optional<Match> generateMatchFromSoloQueue() {
+
+		// TODO!
+		return null;
+	}
+
+	private Optional<Match> generateMatchFromPremadeQueue() {
+		if (queue.size() < 2) return Optional.empty();
+
+		// TODO!
+
+		return null;
+
 	}
 
 	public String getDescription() {
@@ -65,7 +93,7 @@ public class MatchFinderQueue {
 								playersPerTeam, numTeams);
 					case MIXED:
 						return String.format("Join this teams of %s, %s way free for all queue for solo players " +
-										"and premade teams no larger than %s players",
+										"and premade teams < %s players",
 								playersPerTeam, numTeams, maxPremadeSize);
 				}
 			}

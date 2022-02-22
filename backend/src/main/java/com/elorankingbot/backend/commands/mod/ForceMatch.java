@@ -2,8 +2,7 @@ package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -16,15 +15,13 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import java.util.Optional;
-
 @ModCommand
 public class ForceMatch extends SlashCommand {
 
 	private User user1;
 	private User user2;
 	private String reasonGiven;
-	private Match match;
+	private MatchResult matchResult;
 	private boolean isDraw;
 	private String templatePlayer1;
 	private String templatePlayer2;
@@ -109,9 +106,9 @@ public class ForceMatch extends SlashCommand {
 			user2 = tempUser1;
 		}
 
-		match = null;// new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
-		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
-		service.saveMatch(match);
+		matchResult = null;// new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
+		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(matchResult);
+		service.saveMatch(matchResult);
 		templatePlayer1 = isDraw ?
 				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
 				: "*%s has forced a win :arrow_up: over %s. Your rating went from %s to %s.%s*";

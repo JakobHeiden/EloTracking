@@ -2,12 +2,10 @@ package com.elorankingbot.backend.commands.timed;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 
@@ -84,7 +82,7 @@ public class AutoResolveMatch extends TimedCommand {
 		 */
 	}
 
-	private void postToInvolvedChannels(ChallengeModel challenge, Match match, Game game,
+	private void postToInvolvedChannels(ChallengeModel challenge, MatchResult matchResult, Game game,
 										boolean hasChallengerReported, boolean isDraw, boolean isWin) {
 		/*
 		Message reportPresentMessage = hasChallengerReported ?

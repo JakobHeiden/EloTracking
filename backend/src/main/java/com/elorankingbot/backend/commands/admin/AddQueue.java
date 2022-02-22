@@ -16,8 +16,12 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
+import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 
 public class AddQueue extends SlashCommand {
 
@@ -27,7 +31,7 @@ public class AddQueue extends SlashCommand {
 
 	public static ApplicationCommandRequest getRequest(Server server) {
 		ImmutableApplicationCommandOptionData.Builder gameOptionBuilder = ApplicationCommandOptionData.builder()
-				.name("game").description("Which game to add a queue to?")
+				.name("ranking").description("Which ranking to add a queue to?")
 				.type(STRING.getValue())
 				.required(true);
 		server.getGames().keySet().forEach(nameOfGame -> gameOptionBuilder
@@ -36,7 +40,7 @@ public class AddQueue extends SlashCommand {
 
 		return ApplicationCommandRequest.builder()
 				.name("addqueue")
-				.description("Add a queue to a game")
+				.description("Add a queue to a ranking")
 				.defaultPermission(false)
 				.addOption(gameOptionBuilder.build())
 				.addOption(ApplicationCommandOptionData.builder()
@@ -50,43 +54,51 @@ public class AddQueue extends SlashCommand {
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("nameofqueue").description("What do you call this queue? " +
-								"Only relevant if there is more than one queue for this game")
+								"Only relevant if there is more than one queue for this ranking")
 						.type(STRING.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("queuetype").description("Only if a team queue: " +
-								"is this a solo queue, or a premade team only queue, or a mixed queue?")
+								"is this a solo queue, or a premade team only queue?")//, or a mixed queue
 						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("solo queue").value("solo").build())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("premade only").value("premade").build())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("mixed queue").value("mixed").build())
+						//.addChoice(ApplicationCommandOptionChoiceData.builder()
+						//		.name("mixed queue").value("mixed").build())
 						.required(false).build())
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("maxpremade").description("Only if a mixed queue: what is the maximum premade team size?")
-						.type(INTEGER.getValue())
-						.required(false).build())
+				//.addOption(ApplicationCommandOptionData.builder()
+				//		.name("maxpremade").description("Only if a mixed queue: what is the maximum premade team size?")
+				//		.type(INTEGER.getValue())
+				//		.required(false).build())
 				.build();
 	}
 
 	public void execute() {
 		int playersPerTeam = (int) event.getOption("playersperteam").get().getValue().get().asLong();
 		if (playersPerTeam < 1) {
-			event.reply("Cannot create a game with less than 1 player per team").subscribe();
+			event.reply("Cannot create a queue with less than 1 player per team").subscribe();
 			return;
 		}
 		int numberOfTeams = (int) event.getOption("numberofteams").get().getValue().get().asLong();
 		if (numberOfTeams < 2) {
-			event.reply("Cannot create a game with less than 2 teams per match").subscribe();
+			event.reply("Cannot create a queue with less than 2 teams per match").subscribe();
 			return;
 		}
-		Game game = server.getGames().get(event.getOption("game").get().getValue().get().asString());
+		Game game = server.getGames().get(event.getOption("ranking").get().getValue().get().asString());
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
+		if (!isLegalDiscordName(nameOfQueue)) {
+			event.reply("Illegal queue name. Please use only letters, digits, dash, and underscore").subscribe();
+			return;
+		}
+		if (nameOfQueue.length() > 32) {
+			event.reply("Queue name cannot exceed 32 characters").subscribe();
+			return;
+		}
 		if (game.getQueues().containsKey(nameOfQueue)) {
-			event.reply("A queue of that name already exists for that game. " +
-					"Queue names must be unique for each game").subscribe();
+			event.reply("A queue of that name already exists for that ranking. " +
+					"Queue names must be unique for each ranking").subscribe();
 			return;
 		}
 		MatchFinderQueue.QueueType queueType;
@@ -119,12 +131,14 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
 		game.addQueue(queue);
-		service.saveServer(server);
+		// TODO log
+		// TODO inputs nach quatsch filtern
 
 		bot.deleteCommand(server, Join.class.getSimpleName()).block();
-		bot.deployCommand(server, Join.getRequest(server)).subscribe();
+		bot.deployCommand(server, Join.getRequest(server)).block();
+		service.saveServer(server);
 
-		event.reply(String.format("Queue %s for game %s has been created. Command /join has been deployed or updated",
+		event.reply(String.format("Queue %s for ranking %s has been created. Command /join has been deployed or updated",
 				queue.getName(), game.getName())).subscribe();
 	}
 }

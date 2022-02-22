@@ -1,16 +1,18 @@
 package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.MatchFinderQueue;
-import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
@@ -67,12 +69,38 @@ public class Join extends SlashCommand {
 	}
 
 	public void execute() {
+		Game game = server.getGames().get(event.getOptions().get(0).getName());
+		MatchFinderQueue queue;
+		List<User> allyUsers;
+		var gameOptions = event.getOptions().get(0).getOptions();
+		// queue name is not in options
+		if (gameOptions.isEmpty() || gameOptions.get(0).getValue().isPresent()) {
+			queue = game.getQueues().values().stream().findAny().get();
+			allyUsers = gameOptions.stream()
+					.map(option -> option.getValue().get().asUser().block())
+					.collect(Collectors.toList());
+		// queue present in options
+		} else {
+			queue = game.getQueues().get(gameOptions.get(0).getName());
+			allyUsers = gameOptions.get(0).getOptions().stream()
+					.map(option -> option.getValue().get().asUser().block())
+					.collect(Collectors.toList());
+		}
+
+		allyUsers.add(event.getInteraction().getUser());
+		// TODO! accept-buttons
+		Group group = new Group(
+				allyUsers.stream()
+						.map(user -> new Player(guildId, user.getId().asLong(), user.getTag()))
+						.collect(Collectors.toList()));
+		queue.addGroup(group);
+		Optional<Match> maybeMatch = queue.generateMatchIfPossible();
+		service.saveServer(server);
 
 
-		// guards
-		// queue holen
-		// in der q ablegen
+
 		// schauen ob q voll
+		// pruefen ob player doppelt in der q
 		// q leeren, "match" generieren
 		// spieler messages bauen
 		// bei den buttoncommands weitermachen

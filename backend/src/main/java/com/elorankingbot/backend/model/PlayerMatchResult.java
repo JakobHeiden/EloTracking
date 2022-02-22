@@ -1,12 +1,19 @@
 package com.elorankingbot.backend.model;
 
+import org.springframework.data.mongodb.core.mapping.DBRef;
+
 import java.util.UUID;
 
 public class PlayerMatchResult {
 
-	private UUID playerId;
-	private boolean isWin;
-	private String tag;
+	@DBRef(lazy = true)
+	private MatchResult matchResult;
+	@DBRef(lazy = true)
+	private Rating rating;
+
+	private ResultStatus result;
 	private double oldRating;
 	private double newRating;
+	// redundant
+	private String tag;
 }

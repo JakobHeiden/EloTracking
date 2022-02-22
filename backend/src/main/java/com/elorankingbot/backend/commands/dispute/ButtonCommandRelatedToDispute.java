@@ -3,10 +3,9 @@ package com.elorankingbot.backend.commands.dispute;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.tools.Buttons;
 import discord4j.common.util.Snowflake;
@@ -56,7 +55,7 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 				)).subscribe();
 	}
 
-	protected void addMatchSummarizeToQueue(Match match) {
+	protected void addMatchSummarizeToQueue(MatchResult matchResult) {
 //		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 //				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), match);
 //		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),

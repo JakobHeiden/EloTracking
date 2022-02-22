@@ -129,19 +129,19 @@ public class EloRankingService {
 	}
 
 	// Match
-	public void saveMatch(Match match) {
+	public void saveMatch(MatchResult matchResult) {
 		//log.debug(String.format("saving match %s %s %s",
 		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
-		matchDao.save(match);
+		matchDao.save(matchResult);
 	}
 
-	public void deleteMatch(Match match) {
+	public void deleteMatch(MatchResult matchResult) {
 		//log.debug(String.format("deleting match %s %s %s",
 		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
-		matchDao.delete(match);
+		matchDao.delete(matchResult);
 	}
 
-	public Optional<Match> findMostRecentMatch(long guildId, long player1Id, long player2Id) {
+	public Optional<MatchResult> findMostRecentMatch(long guildId, long player1Id, long player2Id) {
 		return null;
 		/*
 		Optional<Match> search = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player1Id, player2Id);
@@ -162,7 +162,7 @@ public class EloRankingService {
 		 */
 	}
 
-	public List<Match> getMatchHistory(long playerId, long guildId) {
+	public List<MatchResult> getMatchHistory(long playerId, long guildId) {
 		return null;
 		/*
 		List<Match> matches = matchDao.findAllByGuildIdAndWinnerId(guildId, playerId);
@@ -196,7 +196,7 @@ public class EloRankingService {
 	}
 
 	// Rankings
-	public double[] updateRatingsAndSaveMatchAndPlayers(Match match) {// TODO evtl match zurueckgeben
+	public double[] updateRatingsAndSaveMatchAndPlayers(MatchResult matchResult) {// TODO evtl match zurueckgeben
 		/*
 		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
 		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();

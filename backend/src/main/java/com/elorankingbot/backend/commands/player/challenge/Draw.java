@@ -1,11 +1,8 @@
 package com.elorankingbot.backend.commands.player.challenge;
 
 import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.GatewayDiscordClient;

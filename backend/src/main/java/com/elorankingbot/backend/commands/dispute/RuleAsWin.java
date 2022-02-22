@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.dispute;
 
-import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -29,20 +29,20 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		String winnerTag = isChallengerWin ? challenge.getChallengerTag() : challenge.getAcceptorTag();
 		String loserTag = isChallengerWin ? challenge.getAcceptorTag() : challenge.getChallengerTag();
 
-		Match match = null;//new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, false);
-		eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
-		service.saveMatch(match);
+		MatchResult matchResult = null;//new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, false);
+		eloResults = service.updateRatingsAndSaveMatchAndPlayers(matchResult);
+		service.saveMatch(matchResult);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled this match a win :arrow_up: for <@%s> and a loss :arrow_down: for <@%s>.",
 				moderatorName, winnerId, loserId));
-		bot.postToResultChannel(game, match);
+		bot.postToResultChannel(game, matchResult);
 		bot.updateLeaderboard(game);
 		updateMessages();
 
 		service.deleteChallenge(challenge);
 
-		addMatchSummarizeToQueue(match);
+		addMatchSummarizeToQueue(matchResult);
 		event.acknowledge().subscribe();
 	}
 

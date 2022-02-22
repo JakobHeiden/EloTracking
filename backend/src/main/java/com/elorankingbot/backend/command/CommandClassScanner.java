@@ -13,12 +13,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class CommandClassScanner {
-	/*
-	Commands mit public static boolean isModCommand() versehen
-	Permission baut sich seine listen anhand der map und isModCommand selber
 
-	das ding mit der q nochmal anschauen und evtl umbauen
-	 */
 	@Getter
 	private final Map<String, String> commandStringToClassName;
 	@Getter
@@ -28,8 +23,11 @@ public class CommandClassScanner {
 		Set<Class> classes = ClassPath.from(ClassLoader.getSystemClassLoader())
 				.getAllClasses()
 				.stream()
-				.filter(clazz -> clazz.getPackageName()
-						.contains("com.elorankingbot.backend.commands"))
+				.filter(classInfo -> classInfo.getPackageName().contains("com.elorankingbot.backend.commands"))
+				// for some reason GitHub needs this
+				.filter(classInfo -> !classInfo.getPackageName().contains("target.classes"))
+				// for some reason Heroku needs this
+				.filter(classInfo -> !classInfo.getPackageName().contains("BOOT-INF.classes"))
 				.map(classInfo -> classInfo.load())
 				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
 				// apparently some reflected class by Spring is getting caught up in this...
