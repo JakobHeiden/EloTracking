@@ -25,10 +25,10 @@ public abstract class SlashCommand {
 
 	protected SlashCommand(ChatInputInteractionEvent event, Services services) {
 		this.event = event;
-		this.service = services.service();
-		this.bot = services.bot();
-		this.queue = services.queue();
-		this.client = services.client();
+		this.service = services.service;
+		this.bot = services.bot;
+		this.queue = services.queue;
+		this.client = services.client;
 
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
 		this.server = service.findServerByGuildId(guildId).get();

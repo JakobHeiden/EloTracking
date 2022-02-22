@@ -8,8 +8,8 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -26,7 +26,7 @@ public class Player  {
     private long guildId;
     private String tag;
     private int unbanAtTimeSlot;
-    private Set<Rating> ratings;
+    private Map<String, Rating> ratings;
 
     public Player(long guildId, long userId, String tag) {
         this.id = generateId(guildId, userId);
@@ -34,7 +34,7 @@ public class Player  {
         this.guildId = guildId;
         this.tag = tag;
         this.unbanAtTimeSlot = -2;// not banned
-        this.ratings = new HashSet<>();
+        this.ratings = new HashMap<>();
     }
 
     public static UUID generateId(long guildId, long userId) {
@@ -48,9 +48,4 @@ public class Player  {
     public boolean isPermaBanned() {
         return unbanAtTimeSlot == -1;
     }
-
-    // weg
-	public double getRating() {
-        return 0;
-	}
 }

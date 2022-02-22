@@ -18,7 +18,7 @@ public class GatewayDiscordClientConfiguration {
 
 	@Bean
 	public GatewayDiscordClient createClient(Services services) {
-		String botToken = services.props().isUseDevBotToken() ?
+		String botToken = services.props.isUseDevBotToken() ?
 				System.getenv("DEV_BOT_TOKEN")
 				: System.getenv("DISCORD_BOT_TOKEN");
 		GatewayDiscordClient client = DiscordClientBuilder
@@ -32,7 +32,7 @@ public class GatewayDiscordClientConfiguration {
 					User self = event.getSelf();
 					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
 
-					String activityMessage = services.props().getActivityMessage();
+					String activityMessage = services.props.getActivityMessage();
 					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
 				});
 

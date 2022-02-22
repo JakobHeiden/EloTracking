@@ -22,10 +22,10 @@ public abstract class ButtonCommand {
 
 	public ButtonCommand(ButtonInteractionEvent event, Services services) {
 		this.event = event;
-		this.service = services.service();
-		this.bot = services.bot();
-		this.queue = services.queue();
-		this.client = services.client();
+		this.service = services.service;
+		this.bot = services.bot;
+		this.queue = services.queue;
+		this.client = services.client;
 	}
 
 	public abstract void execute();
