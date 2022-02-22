@@ -41,9 +41,9 @@ public class EventParser {
 					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
 					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
 		this.services = services;
-		this.service = services.service();
-		this.bot = services.bot();
-		GatewayDiscordClient client = services.client();
+		this.service = services.service;
+		this.bot = services.bot;
+		GatewayDiscordClient client = services.client;
 		ApplicationService applicationService = client.getRestClient().getApplicationService();
 		long botId = client.getSelfId().asLong();
 		this.commandStringToClassName = scanner.getCommandStringToClassName();

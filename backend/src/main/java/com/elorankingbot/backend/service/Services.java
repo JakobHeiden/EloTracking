@@ -10,45 +10,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class Services {
 
-	private final ApplicationPropertiesLoader props;
-	private final EloRankingService service;
-	private final DiscordBotService bot;
-	private final GatewayDiscordClient client;
-	private final TimedTaskQueue queue;
-	private final TimedTaskService timedTaskService;
+	public final ApplicationPropertiesLoader props;
+	public final EloRankingService service;
+	public final DiscordBotService bot;
+	public final GatewayDiscordClient client;
+	public final TimedTaskQueue queue;
+	public final TimedTaskService timedTaskService;
+	public final QueueService queueService;
 
 	public Services(ApplicationPropertiesLoader props,
 					@Lazy EloRankingService service, @Lazy DiscordBotService bot, @Lazy GatewayDiscordClient client,
-					@Lazy TimedTaskQueue queue, @Lazy TimedTaskService timedTaskService) {
+					@Lazy TimedTaskQueue queue, @Lazy TimedTaskService timedTaskService, @Lazy QueueService queueService) {
 		this.props = props;
 		this.service = service;
 		this.bot = bot;
 		this.client = client;
 		this.queue = queue;
 		this.timedTaskService = timedTaskService;
-	}
-
-	public ApplicationPropertiesLoader props() {
-		return props;
-	}
-
-	public EloRankingService service() {
-		return service;
-	}
-
-	public DiscordBotService bot() {
-		return bot;
-	}
-
-	public GatewayDiscordClient client() {
-		return client;
-	}
-
-	public TimedTaskQueue queue() {
-		return queue;
-	}
-
-	public TimedTaskService timedTaskService() {
-		return timedTaskService;
+		this.queueService = queueService;
 	}
 }

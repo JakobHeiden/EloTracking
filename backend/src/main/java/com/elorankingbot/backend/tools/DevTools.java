@@ -30,11 +30,11 @@ public class DevTools {
 
 	public DevTools(Services services,
 					PlayerDao playerDao, MatchDao matchDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
-		this.service = services.service();
-		this.bot = services.bot();		this.client = services.client();
+		this.service = services.service;
+		this.bot = services.bot;		this.client = services.client;
 		this.playerDao = playerDao;
 		this.matchDao = matchDao;
-		this.props = services.props();
+		this.props = services.props;
 		this.timeSlotDao = timeSlotDao;
 		this.serverDao = serverDao;
 

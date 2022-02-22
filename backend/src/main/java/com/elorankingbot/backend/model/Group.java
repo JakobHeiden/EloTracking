@@ -9,10 +9,12 @@ import java.util.List;
 public class Group implements Comparable<Group> {
 
 	private List<Player> players;
+	private Game game;
 	private Date timestamp;
 
-	public Group(List<Player> players) {
+	public Group(List<Player> players, Game game) {
 		this.players = players;
+		this.game = game;
 		this.timestamp = new Date();
 	}
 

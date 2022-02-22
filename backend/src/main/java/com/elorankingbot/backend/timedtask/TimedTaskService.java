@@ -23,10 +23,10 @@ public class TimedTaskService {
 	protected final List none = new ArrayList<>();
 
 	public TimedTaskService(Services services) {
-		this.service = services.service();
-		this.bot = services.bot();
-		this.queue = services.queue();
-		this.client = services.client();
+		this.service = services.service;
+		this.bot = services.bot;
+		this.queue = services.queue;
+		this.client = services.client;
 	}
 
 	public void markGamesForDeletion() {

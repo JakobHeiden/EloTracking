@@ -24,10 +24,10 @@ public abstract class TimedCommand {
 	protected static final List none = new ArrayList<>();
 
 	public TimedCommand(Services services, long relationId, int time) {
-		this.service = services.service();
-		this.bot = services.bot();
-		this.queue = services.queue();
-		this.client = services.client();
+		this.service = services.service;
+		this.bot = services.bot;
+		this.queue = services.queue;
+		this.client = services.client;
 
 		this.relationId = relationId;
 		this.time = time;

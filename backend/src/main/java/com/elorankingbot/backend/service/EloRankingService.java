@@ -32,7 +32,7 @@ public class EloRankingService {
 	public EloRankingService(@Lazy Services services, CommandClassScanner scanner,
 							 ServerDao serverDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
 							 TimeSlotDao timeSlotDao) {
-		this.bot = services.bot();
+		this.bot = services.bot;
 		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
 		this.matchDao = matchDao;

@@ -5,11 +5,8 @@ import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 @Data
 @ToString
@@ -32,7 +29,8 @@ public class MatchFinderQueue {
 	private int maxRating;
 	private QueueType queueType;
 	private int maxPremadeSize;
-	private Set<Group> queue;
+	private Set<Group> groups;
+	private boolean isBuildMatchFromTopPlayer;
 
 	public MatchFinderQueue(Game game, String name, int numTeams, int playersPerTeam,
 							QueueType queueType, int maxPremadeSize) {
@@ -42,35 +40,12 @@ public class MatchFinderQueue {
 		this.playersPerTeam = playersPerTeam;
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
-		this.queue = new TreeSet<>();
+		this.groups = new TreeSet<>();
+		this.isBuildMatchFromTopPlayer = true;
 	}
 
 	public void addGroup(Group group) {
-		queue.add(group);
-	}
-
-	public Optional<Match> generateMatchIfPossible() {
-		if (queueType == QueueType.SOLO) return generateMatchFromSoloQueue();
-		if (queueType == QueueType.PREMADE) return generateMatchFromPremadeQueue();
-		return null;
-	}
-
-	private Optional<Match> generateMatchFromSoloQueue() {
-
-		// TODO!
-		return null;
-	}
-
-	private Optional<Match> generateMatchFromPremadeQueue() {
-		if (queue.size() < numTeams) return Optional.empty();
-
-		List<List<Player>> allPlayers = queue.stream()
-				.map(Group::getPlayers)
-				.collect(Collectors.toList());
-		Match match = new Match(game, allPlayers);
-
-		return null;// TODO!
-
+		groups.add(group);
 	}
 
 	public String getDescription() {

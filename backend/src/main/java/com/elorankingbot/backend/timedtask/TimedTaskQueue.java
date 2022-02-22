@@ -40,14 +40,14 @@ public class TimedTaskQueue {
 	public TimedTaskQueue(Services services,
 						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
 		this.services = services;
-		this.service = services.service();
-		this.bot = services.bot();
-		this.client = services.client();
-		this.timedTaskService = services.timedTaskService();
+		this.service = services.service;
+		this.bot = services.bot;
+		this.client = services.client;
+		this.timedTaskService = services.timedTaskService;
 		this.timeSlotDao = timeSlotDao;
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
-		this.numberOfTimeSlots = services.props().getNumberOfTimeSlots();
-		this.doRunQueue = services.props().isDoRunQueue();
+		this.numberOfTimeSlots = services.props.getNumberOfTimeSlots();
+		this.doRunQueue = services.props.isDoRunQueue();
 
 		if (!timedTaskQueueCurrentIndexDao.existsById(1)) {
 			currentIndex = 0;

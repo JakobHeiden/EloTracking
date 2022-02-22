@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.service.QueueService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
@@ -19,8 +20,11 @@ import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 public class Join extends SlashCommand {
 
+	private final QueueService queueService;
+
 	public Join(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
+		this.queueService = services.queueService;
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {
@@ -79,7 +83,7 @@ public class Join extends SlashCommand {
 			allyUsers = gameOptions.stream()
 					.map(option -> option.getValue().get().asUser().block())
 					.collect(Collectors.toList());
-		// queue present in options
+			// queue present in options
 		} else {
 			queue = game.getQueues().get(gameOptions.get(0).getName());
 			allyUsers = gameOptions.get(0).getOptions().stream()
@@ -92,11 +96,11 @@ public class Join extends SlashCommand {
 		Group group = new Group(
 				allyUsers.stream()
 						.map(user -> new Player(guildId, user.getId().asLong(), user.getTag()))
-						.collect(Collectors.toList()));
+						.collect(Collectors.toList()),
+				game);
 		queue.addGroup(group);
 		Optional<Match> maybeMatch = null;// TODO!
 		service.saveServer(server);
-
 
 
 		// schauen ob q voll

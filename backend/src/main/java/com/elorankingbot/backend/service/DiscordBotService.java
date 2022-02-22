@@ -50,10 +50,10 @@ public class DiscordBotService {
 	private static String embedNameWithDraws = "`   Rank  Rating    Wins Losses Draws Name`";
 
 	public DiscordBotService(@Lazy Services services) {
-		this.client = services.client();
-		this.service = services.service();
+		this.client = services.client;
+		this.service = services.service;
 		this.botId = client.getSelfId().asLong();
-		this.props = services.props();
+		this.props = services.props;
 		applicationService = client.getRestClient().getApplicationService();
 	}
 

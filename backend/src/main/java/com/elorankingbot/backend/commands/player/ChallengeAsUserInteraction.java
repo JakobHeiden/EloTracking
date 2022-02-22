@@ -17,9 +17,9 @@ public class ChallengeAsUserInteraction {
 
 	public ChallengeAsUserInteraction(UserInteractionEvent event, Services services) {
 		this.event = event;
-		this.service = services.service();
-		this.bot = services.bot();
-		this.queue = services.queue();
+		this.service = services.service;
+		this.bot = services.bot;
+		this.queue = services.queue;
 	}
 
 	public static ApplicationCommandRequest getRequest() {
