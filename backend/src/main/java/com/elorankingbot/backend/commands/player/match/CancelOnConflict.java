@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
@@ -10,7 +10,7 @@ import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
-public class CancelOnConflict extends ButtonCommandRelatedToChallenge {
+public class CancelOnConflict extends ButtonCommandRelatedToMatch {
 
 	public CancelOnConflict(ButtonInteractionEvent event, Services services) {
 		super(event, services);

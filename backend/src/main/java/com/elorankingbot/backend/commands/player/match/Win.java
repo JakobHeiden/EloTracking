@@ -1,20 +1,38 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
+import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Win extends ButtonCommandRelatedToChallenge {
+import java.util.UUID;
+
+import static com.elorankingbot.backend.model.Match.ReportIntegrity.*;
+
+public class Win {
+
+	private final ButtonInteractionEvent event;
+	private final EloRankingService service;
+	private Match match;
 
 	public Win(ButtonInteractionEvent event, Services services) {
-		super(event, services);
+		this.event = event;
+		this.service = services.service;
+		this.match = service.getMatch(UUID.fromString(event.getCustomId().split(":")[1]));
 	}
 
 	public void execute() {
-		ChallengeModel.ReportIntegrity reportIntegrity;
+		Match.ReportIntegrity reportIntegrity;
+
+		// TODO! zeile fuer zeile anpassen ab hier
+
+
+
+
+
 		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.WIN);
 		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.WIN);
 
@@ -100,10 +118,14 @@ public class Win extends ButtonCommandRelatedToChallenge {
 	}
 
 	static ActionRow createActionRow(long challengeId) {
+		return null;
+		/*
 		return ActionRow.of(
 				Buttons.redo(challengeId),
 				Buttons.cancelOnConflict(challengeId),
 				Buttons.redoOrCancelOnConflict(challengeId),
 				Buttons.dispute(challengeId));
+
+		 */
 	}
 }

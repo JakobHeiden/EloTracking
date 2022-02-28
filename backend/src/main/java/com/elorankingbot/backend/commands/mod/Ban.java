@@ -148,9 +148,9 @@ public class Ban extends SlashCommand {
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		}
 
-		player.setUnbanAtTimeSlot((queue.getCurrentIndex() + duration) % queue.getNumberOfTimeSlots());
+		player.setUnbanAtTimeSlot((timedTaskQueue.getCurrentIndex() + duration) % timedTaskQueue.getNumberOfTimeSlots());
 
-		queue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
+		timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
 				guildId, player.getUserId(), null);
 	}
 
@@ -182,7 +182,7 @@ public class Ban extends SlashCommand {
 									.makeAllItalic()
 									.resend()
 									.withComponents(none)
-									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+									.subscribe(msg -> timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
 											0,//game.getMessageCleanupTime(),
 											msg.getId().asLong(), challenge.getChallengerChannelId(), null)));
 					bot.getAcceptorMessage(challenge).subscribe(message ->
@@ -194,7 +194,7 @@ public class Ban extends SlashCommand {
 									.makeAllItalic()
 									.resend()
 									.withComponents(none)
-									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+									.subscribe(msg -> timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
 											0,//game.getMessageCleanupTime(),
 											msg.getId().asLong(), challenge.getAcceptorChannelId(), null)));
 				});

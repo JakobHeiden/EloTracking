@@ -3,17 +3,20 @@ package com.elorankingbot.backend.service;
 import com.elorankingbot.backend.model.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
 public class QueueService {
 
-	private class RatingComparator implements Comparator<Group> {
+	private final EloRankingService service;
+
+	public QueueService(Services services) {
+		this.service = services.service;
+	}
+
+	private class GroupRatingComparator implements Comparator<Group> {
 
 		public int compare(Group a, Group b) {
 			return (int) Math.ceil(getAverageRating(a, a.getGame()) - getAverageRating(b, b.getGame()));
@@ -29,31 +32,33 @@ public class QueueService {
 	private Optional<Match> generateMatchFromSoloQueue(MatchFinderQueue queue) {
 		if (queue.getGroups().size() < queue.getNumTeams() * queue.getPlayersPerTeam()) return Optional.empty();
 
-		List<Player> playersSortedByRating = queue.getGroups().stream()
-				.sorted(new RatingComparator())
-				.map(group -> group.getPlayers().get(0))
-				.toList();
+		List<Group> groupsSortedByRating = new LinkedList<>(
+				queue.getGroups().stream()
+						.sorted(new GroupRatingComparator())
+						.toList());
 
 		List<List<Player>> teams = new ArrayList<>();
 		for (int i = 0; i < queue.getNumTeams(); i++) {
 			teams.add(new ArrayList<>());
 		}
-		for (int i = 0; i < queue.getPlayersPerTeam(); i+=2) {
+		for (int i = 0; i < queue.getPlayersPerTeam(); i += 2) {
 			for (int j = 0; j < queue.getNumTeams(); j++) {
 				if (queue.getPlayersPerTeam() - i > 1) {
-					teams.get(j).add(playersSortedByRating.get(0));
-					playersSortedByRating.remove(0);
-					teams.get(j).add(playersSortedByRating.get(playersSortedByRating.size() - 1));
-					playersSortedByRating.remove(playersSortedByRating.size() - 1);
+					// take a player from top and bottom
+					teams.get(j).add(groupsSortedByRating.get(0).getPlayers().get(0));
+					groupsSortedByRating.remove(0);
+					teams.get(j).add(groupsSortedByRating.get(groupsSortedByRating.size() - 1).getPlayers().get(0));
+					groupsSortedByRating.remove(groupsSortedByRating.size() - 1);
 				} else {
-					int randomIndex = ThreadLocalRandom.current().nextInt(0, playersSortedByRating.size() + 1);
-					teams.get(j).add(playersSortedByRating.get(randomIndex));
-					playersSortedByRating.remove(randomIndex);
+					// take a random player
+					int randomIndex = ThreadLocalRandom.current().nextInt(0, groupsSortedByRating.size());
+					teams.get(j).add(groupsSortedByRating.get(randomIndex).getPlayers().get(0));
+					groupsSortedByRating.remove(randomIndex);
 				}
 			}
 		}
 
-		return Optional.of(new Match(queue.getGame(), teams));
+		return Optional.of(new Match(queue, teams));
 	}
 
 	private Optional<Match> generateMatchFromPremadeQueue(MatchFinderQueue queue) {
@@ -62,13 +67,26 @@ public class QueueService {
 		List<List<Player>> allPlayers = queue.getGroups().stream()
 				.map(Group::getPlayers)
 				.collect(Collectors.toList());
-		return Optional.of(new Match(queue.getGame(), allPlayers));
+		return Optional.of(new Match(queue, allPlayers));
 	}
 
 	private double getAverageRating(Group group, Game game) {
 		double sumOfRatings = group.getPlayers().stream()
-				.map(player -> player.getRatings().get(game.getName()).getValue())
+				.map(player -> player.getRating(game).getValue())
 				.reduce(0D, Double::sum);
 		return sumOfRatings / group.getPlayers().size();
+	}
+
+	public boolean isPlayerInQueue(Player player, MatchFinderQueue queue) {
+		return queue.getGroups().stream()
+				.filter(group -> group.hasPlayer(player))
+				.findAny().isPresent();
+	}
+
+	public void removePlayerFromAllQueues(Server server, Player player) {
+		server.getGames().values().stream()
+				.flatMap(game -> game.getQueues().values().stream())
+				.forEach(queue -> queue.removeGroupsContainingPlayer(player));
+		service.saveServer(server);
 	}
 }

@@ -98,7 +98,7 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue.QueueType queueType;
 		int maxPremadeSize = 0;
 		if (playersPerTeam == 1) {
-			queueType = NOT_A_TEAM_QUEUE;
+			queueType = SOLO;
 		} else {
 			if (event.getOption("queuetype").isEmpty()) {
 				event.reply("Please select an option for solo queue/premade queue/mixed queue " +

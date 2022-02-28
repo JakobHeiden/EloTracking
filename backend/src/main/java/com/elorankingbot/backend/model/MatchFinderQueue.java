@@ -5,8 +5,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
 @ToString
@@ -16,11 +15,11 @@ public class MatchFinderQueue {
 	public enum QueueType {
 		SOLO,
 		MIXED,
-		PREMADE,
-		NOT_A_TEAM_QUEUE
+		PREMADE
 	}
 
 	private String name;
+	private List<Group> groups;
 	@DBRef(lazy = true)
 	private Game game;
 	private final int numTeams;
@@ -29,7 +28,6 @@ public class MatchFinderQueue {
 	private int maxRating;
 	private QueueType queueType;
 	private int maxPremadeSize;
-	private Set<Group> groups;
 	private boolean isBuildMatchFromTopPlayer;
 
 	public MatchFinderQueue(Game game, String name, int numTeams, int playersPerTeam,
@@ -40,12 +38,25 @@ public class MatchFinderQueue {
 		this.playersPerTeam = playersPerTeam;
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
-		this.groups = new TreeSet<>();
+		this.groups = new ArrayList<>();
 		this.isBuildMatchFromTopPlayer = true;
 	}
 
 	public void addGroup(Group group) {
 		groups.add(group);
+	}
+
+	public void setGroups(List<Group> groups) {
+		this.groups = groups;
+	}
+
+	public void removeGroupsContainingPlayer(Player player) {
+		for (Iterator<Group> iterator = groups.iterator(); iterator.hasNext(); ) {
+			Group group = iterator.next();
+			if (group.hasPlayer(player)) {
+				iterator.remove();
+			}
+		}
 	}
 
 	public String getDescription() {

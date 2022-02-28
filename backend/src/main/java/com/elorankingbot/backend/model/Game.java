@@ -14,9 +14,9 @@ public class Game {
 
     @Id
     private String name;
+    private Map<String, MatchFinderQueue> queues;
     @DBRef(lazy = true)
     private Server server;
-    private Map<String, MatchFinderQueue> queues;
     private long resultChannelId;
     private long leaderboardMessageId;
     private int leaderboardLength;
@@ -42,5 +42,10 @@ public class Game {
 
     public long getGuildId() {
         return server.getGuildId();
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

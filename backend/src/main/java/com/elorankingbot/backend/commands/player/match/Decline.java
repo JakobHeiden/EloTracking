@@ -1,10 +1,10 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class Decline extends ButtonCommandRelatedToChallenge {
+public class Decline extends ButtonCommandRelatedToMatch {
 
 	public Decline(ButtonInteractionEvent event, Services services) {
 		super(event, services);

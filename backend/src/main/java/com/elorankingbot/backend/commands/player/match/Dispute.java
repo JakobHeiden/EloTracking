@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
@@ -13,7 +13,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 
-public class Dispute extends ButtonCommandRelatedToChallenge {
+public class Dispute extends ButtonCommandRelatedToMatch {
 
 	private TextChannel disputeChannel;
 	private String parentMessageContent;

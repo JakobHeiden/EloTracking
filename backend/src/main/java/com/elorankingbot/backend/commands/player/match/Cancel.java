@@ -1,13 +1,12 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
-public class Cancel extends ButtonCommandRelatedToChallenge {
+public class Cancel extends ButtonCommandRelatedToMatch {
 
 	public Cancel(ButtonInteractionEvent event, Services services) {
 		super(event, services);
@@ -82,10 +81,14 @@ public class Cancel extends ButtonCommandRelatedToChallenge {
 	}
 
 	private static ActionRow createActionrow(long challengeId) {
+		return null;
+		/*
 		return ActionRow.of(
 				Buttons.redo(challengeId),
 				Buttons.cancelOnConflict(challengeId),
 				Buttons.redoOrCancelOnConflict(challengeId),
 				Buttons.dispute(challengeId));
+
+		 */
 	}
 }

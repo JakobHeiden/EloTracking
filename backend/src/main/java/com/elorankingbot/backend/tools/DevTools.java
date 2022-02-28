@@ -3,7 +3,7 @@ package com.elorankingbot.backend.tools;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.dao.MatchDao;
+import com.elorankingbot.backend.dao.MatchResultDao;
 import com.elorankingbot.backend.dao.PlayerDao;
 import com.elorankingbot.backend.dao.ServerDao;
 import com.elorankingbot.backend.dao.TimeSlotDao;
@@ -24,16 +24,17 @@ public class DevTools {
 	private final GatewayDiscordClient client;
 	private final ApplicationPropertiesLoader props;
 	private final PlayerDao playerDao;
-	private final MatchDao matchDao;
+	private final MatchResultDao matchResultDao;
 	private final TimeSlotDao timeSlotDao;
 	private final ServerDao serverDao;
 
 	public DevTools(Services services,
-					PlayerDao playerDao, MatchDao matchDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
+					PlayerDao playerDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
 		this.service = services.service;
-		this.bot = services.bot;		this.client = services.client;
+		this.bot = services.bot;
+		this.client = services.client;
 		this.playerDao = playerDao;
-		this.matchDao = matchDao;
+		this.matchResultDao = matchResultDao;
 		this.props = services.props;
 		this.timeSlotDao = timeSlotDao;
 		this.serverDao = serverDao;

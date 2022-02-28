@@ -7,11 +7,9 @@ import com.elorankingbot.backend.model.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,24 +20,26 @@ public class EloRankingService {
 	private final DiscordBotService bot;
 	private final ServerDao serverDao;
 	private final ChallengeDao challengeDao;
-	private final MatchDao matchDao;
+	private final MatchResultDao matchResultDao;
 	private final PlayerDao playerDao;
 	private final TimeSlotDao timeSlotDao;
+	private final MatchDao matchDao;
 	@Getter
 	private final Set<String> modCommands, adminCommands;
 
 	@Autowired
-	public EloRankingService(@Lazy Services services, CommandClassScanner scanner,
-							 ServerDao serverDao, ChallengeDao challengeDao, MatchDao matchDao, PlayerDao playerDao,
-							 TimeSlotDao timeSlotDao) {
+	public EloRankingService(Services services, CommandClassScanner scanner,
+							 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao, PlayerDao playerDao,
+							 TimeSlotDao timeSlotDao, MatchDao matchDao) {
 		this.bot = services.bot;
 		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
-		this.matchDao = matchDao;
+		this.matchResultDao = matchResultDao;
 		this.playerDao = playerDao;
 		this.timeSlotDao = timeSlotDao;
 		this.adminCommands = scanner.getAdminCommands();
 		this.modCommands = scanner.getModCommands();
+		this.matchDao = matchDao;
 	}
 
 
@@ -67,6 +67,11 @@ public class EloRankingService {
 
 	public List<Server> findAllServers() {
 		return serverDao.findAll();
+	}
+
+	// Match
+	public Match getMatch(UUID matchId) {
+		return matchDao.findById(matchId).get();
 	}
 
 	// Game
@@ -127,13 +132,13 @@ public class EloRankingService {
 	public void saveMatch(MatchResult matchResult) {
 		//log.debug(String.format("saving match %s %s %s",
 		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
-		matchDao.save(matchResult);
+		matchResultDao.save(matchResult);
 	}
 
 	public void deleteMatch(MatchResult matchResult) {
 		//log.debug(String.format("deleting match %s %s %s",
 		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
-		matchDao.delete(matchResult);
+		matchResultDao.delete(matchResult);
 	}
 
 	public Optional<MatchResult> findMostRecentMatch(long guildId, long player1Id, long player2Id) {
@@ -190,6 +195,15 @@ public class EloRankingService {
 		}
 	}
 
+	public Player getPlayerOrGenerateIfNotPresent(long guildId, long userId, String tag) {
+		Optional<Player> maybePlayer = playerDao.findById(Player.generateId(guildId, userId));
+		if (maybePlayer.isPresent()) return maybePlayer.get();
+
+		Player player = new Player(guildId, userId, tag);
+		playerDao.save(player);
+		return player;
+	}
+
 	// Rankings
 	public double[] updateRatingsAndSaveMatchAndPlayers(MatchResult matchResult) {// TODO evtl match zurueckgeben
 		/*
@@ -237,12 +251,16 @@ public class EloRankingService {
 	}
 
 	public List<PlayerInRankingsDto> getRankingsAsDto(long guildId) {
+		/*
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
 		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
 				.map(player -> new PlayerInRankingsDto(bot.getPlayerTag(player.getUserId()), player.getRating()))
 				.collect(Collectors.toList());
 		Collections.sort(allPlayersAsDto);
 		return allPlayersAsDto;
+
+		 */
+		return null;
 	}
 
 	public List<Player> getRankings(long guildId) {

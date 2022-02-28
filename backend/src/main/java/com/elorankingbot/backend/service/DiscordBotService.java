@@ -49,7 +49,7 @@ public class DiscordBotService {
 	private static String embedName = "`   Rank  Rating   Wins Losses  Name`";
 	private static String embedNameWithDraws = "`   Rank  Rating    Wins Losses Draws Name`";
 
-	public DiscordBotService(@Lazy Services services) {
+	public DiscordBotService(Services services) {
 		this.client = services.client;
 		this.service = services.service;
 		this.botId = client.getSelfId().asLong();

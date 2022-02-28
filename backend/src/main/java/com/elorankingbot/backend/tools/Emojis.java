@@ -12,4 +12,5 @@ public class Emojis {
 	public static final ReactionEmoji redoArrow = ReactionEmoji.codepoints("U+21A9");
 	public static final ReactionEmoji shrug = ReactionEmoji.codepoints("U+1F937");
 	public static final ReactionEmoji hourglass = ReactionEmoji.codepoints("U+23F3");
+	public static final ReactionEmoji notReported = ReactionEmoji.codepoints("U+2754");
 }

@@ -15,7 +15,7 @@ public abstract class SlashCommand {
 
 	protected final EloRankingService service;
 	protected final DiscordBotService bot;
-	protected final TimedTaskQueue queue;
+	protected final TimedTaskQueue timedTaskQueue;
 	protected final GatewayDiscordClient client;
 	protected final ChatInputInteractionEvent event;
 	protected long guildId;
@@ -27,7 +27,7 @@ public abstract class SlashCommand {
 		this.event = event;
 		this.service = services.service;
 		this.bot = services.bot;
-		this.queue = services.queue;
+		this.timedTaskQueue = services.queue;
 		this.client = services.client;
 
 		this.guildId = event.getInteraction().getGuildId().get().asLong();

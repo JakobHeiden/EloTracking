@@ -1,15 +1,14 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 
-public class Redo extends ButtonCommandRelatedToChallenge {
+public class Redo extends ButtonCommandRelatedToMatch {
 
 	public Redo(ButtonInteractionEvent event, Services services) {
 		super(event, services);
@@ -78,6 +77,8 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 	}
 
 	static ActionRow createActionRow(long channelId, boolean allowDraw) {
+		return null;
+		/*
 		if (allowDraw) return ActionRow.of(
 				Buttons.win(channelId),
 				Buttons.lose(channelId),
@@ -85,5 +86,7 @@ public class Redo extends ButtonCommandRelatedToChallenge {
 		else return ActionRow.of(
 				Buttons.win(channelId),
 				Buttons.lose(channelId));
+
+		 */
 	}
 }

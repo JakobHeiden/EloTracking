@@ -54,6 +54,7 @@ public class Challenge extends SlashCommand {
 
 	public static void staticExecute(User acceptorUser, long guildId, Game game, ApplicationCommandInteractionEvent event,
 									 EloRankingService service, DiscordBotService bot, TimedTaskQueue queue) {
+		/*
 		User challengerUser = event.getInteraction().getUser();
 		long challengerId = challengerUser.getId().asLong();
 		long acceptorId = acceptorUser.getId().asLong();
@@ -120,5 +121,7 @@ public class Challenge extends SlashCommand {
 				0,//challenge.getId(),
 				0L,
 				null);
+
+		 */
 	}
 }

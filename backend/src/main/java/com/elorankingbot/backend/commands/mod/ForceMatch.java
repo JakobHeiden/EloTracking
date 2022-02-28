@@ -91,6 +91,7 @@ public class ForceMatch extends SlashCommand {
 	}
 
 	private void forceResolveMatch() {
+		/*
 		service.addNewPlayerIfPlayerNotPresent(guildId, user1.getId().asLong());
 		service.addNewPlayerIfPlayerNotPresent(guildId, user2.getId().asLong());
 
@@ -116,6 +117,8 @@ public class ForceMatch extends SlashCommand {
 		//bot.updateLeaderboard(game);
 		String template = isDraw ? "Forced a draw :left_right_arrow: between %s and %s.%s" : "Forced a win :arrow_up: for %s over %s.%s";
 		event.reply(String.format(template, user1.getTag(), user2.getTag(), reasonGiven)).subscribe();
+
+		 */
 	}
 
 	private void informPlayers(double[] eloResults) {

@@ -1,11 +1,11 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class Lose extends ButtonCommandRelatedToChallenge {
+public class Lose extends ButtonCommandRelatedToMatch {
 
 	public Lose(ButtonInteractionEvent event, Services services) {
 		super(event, services);
