@@ -1,11 +1,9 @@
 package com.elorankingbot.backend.dao;
 
-import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.model.Match;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface MatchDao extends MongoRepository<MatchResult, Long> {
-	//void deleteAllByGuildId(long guildId);
-	//Optional<Match> findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(long guildId, long winnerId, long loserId);
-	//List<Match> findAllByGuildIdAndWinnerId(long guildId, long winnerId);
-	//List<Match> findAllByGuildIdAndLoserId(long guildId, long loserId);
+import java.util.UUID;
+
+public interface MatchDao extends MongoRepository<Match, UUID> {
 }

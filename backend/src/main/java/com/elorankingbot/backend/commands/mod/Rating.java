@@ -52,6 +52,7 @@ public class Rating extends SlashCommand {
 	}
 
 	public void execute() {
+		/*
 		User playerUser = event.getOption("player").get().getValue().get().asUser().block();
 		if (playerUser.isBot()) {
 			event.reply("Bots don't have ratings.").subscribe();
@@ -79,5 +80,7 @@ public class Rating extends SlashCommand {
 				event.getInteraction().getUser().getTag(), formatRating(newRating), formatRating(oldRating), reasonGiven);
 		MessageCreateSpec playerMessageSpec = MessageCreateSpec.builder().content(playerMessageContent).build();
 		playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(playerMessageSpec).subscribe());
+
+		 */
 	}
 }

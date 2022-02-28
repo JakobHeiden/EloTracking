@@ -1,9 +1,9 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class RedoOrCancel extends ButtonCommandRelatedToChallenge {
+public class RedoOrCancel extends ButtonCommandRelatedToMatch {
 
 	public RedoOrCancel(ButtonInteractionEvent event, Services services) {
 		super(event, services);

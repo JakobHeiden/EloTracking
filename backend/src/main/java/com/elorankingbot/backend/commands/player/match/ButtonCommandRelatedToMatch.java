@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.player.challenge;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.ChallengeModel;
@@ -7,7 +7,7 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 
-public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
+public abstract class ButtonCommandRelatedToMatch extends ButtonCommand {
 
 	protected final Message parentMessage;
 	protected final Message targetMessage;
@@ -16,7 +16,7 @@ public abstract class ButtonCommandRelatedToChallenge extends ButtonCommand {
 	protected final long guildId;
 	protected final Game game;
 
-	protected ButtonCommandRelatedToChallenge(ButtonInteractionEvent event, Services services) {
+	protected ButtonCommandRelatedToMatch(ButtonInteractionEvent event, Services services) {
 		super(event, services);
 		this.challenge = null;// service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
 		this.guildId = 0;//challenge.getGuildId();

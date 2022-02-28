@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.model;
 
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.List;
 import java.util.UUID;
@@ -8,6 +9,7 @@ import java.util.UUID;
 @Data
 public class Rating implements Comparable<Rating> {
 
+	@DBRef(lazy = true)
 	private final Game game;
 	private double value;
 	private int wins;

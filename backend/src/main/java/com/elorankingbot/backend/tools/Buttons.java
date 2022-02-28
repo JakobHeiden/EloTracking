@@ -2,66 +2,68 @@ package com.elorankingbot.backend.tools;
 
 import discord4j.core.object.component.Button;
 
+import java.util.UUID;
+
 public class Buttons {
 
 	// Challenge
-	public static Button accept(long id) {
-		return Button.primary("accept:" + id,
+	public static Button accept(UUID matchId) {
+		return Button.primary("accept:" + matchId.toString(),
 				Emojis.checkMark, "Accept");// TODO evtl U+2694 crossed swords?
 	}
 
-	public static Button decline(long id) {
-		return Button.danger("decline:" + id,
+	public static Button decline(UUID matchId) {
+		return Button.danger("decline:" + matchId.toString(),
 				Emojis.crossMark, "Decline");
 	}
 
-	public static Button win(long id) {
-		return Button.primary("win:" + id,
+	public static Button win(UUID matchId) {
+		return Button.primary("win:" + matchId.toString(),
 				Emojis.arrowUp, "Win");
 	}
 
-	public static Button lose(long id) {
-		return Button.primary("lose:" + id,
+	public static Button lose(UUID matchId) {
+		return Button.primary("lose:" + matchId.toString(),
 				Emojis.arrowDown, "Lose");
 	}
 
-	public static Button draw(long id) {
-		return Button.primary("draw:" + id,
+	public static Button draw(UUID matchId) {
+		return Button.primary("draw:" + matchId.toString(),
 				Emojis.leftRightArrow, "Draw");
 	}
 
-	public static Button cancel(long id) {
-		return Button.danger("cancel:" + id,
+	public static Button cancel(UUID matchId) {
+		return Button.danger("cancel:" + matchId.toString(),
 				Emojis.crossMark, "Cancel match");
 	}
 
-	public static Button redo(long id) {
-		return Button.primary("redo:" + id,
+	public static Button redo(UUID matchId) {
+		return Button.primary("redo:" + matchId.toString(),
 				Emojis.redoArrow, "Call for a redo");
 	}
 
-	public static Button cancelOnConflict(long id) {
-		return Button.danger("cancelonconflict:" + id,
+	public static Button cancelOnConflict(UUID matchId) {
+		return Button.danger("cancelonconflict:" + matchId.toString(),
 				Emojis.crossMark, "Call for a cancel");
 	}
 
-	public static Button redoOrCancelOnConflict(long id) {
-		return Button.primary("redoorcancel:" + id,
+	public static Button redoOrCancelOnConflict(UUID matchId) {
+		return Button.primary("redoorcancel:" + matchId.toString(),
 				Emojis.shrug, "Redo or Cancel");
 	}
 
-	public static Button agreeToRedo(long id) {
-		return Button.primary("redo:" + id,
+	public static Button agreeToRedo(UUID matchId) {
+		return Button.primary("redo:" + matchId.toString(),
 				Emojis.redoArrow, "Agree to a redo");
 	}
 
-	public static Button agreeToCancelOnConflict(long id) {
-		return Button.danger("cancelonconflict:" + id,
+	public static Button agreeToCancelOnConflict(UUID matchId) {
+		return Button.danger("cancelonconflict:" + matchId.toString(),
 				Emojis.crossMark, "Agree to a cancel");
 	}
 
-	public static Button dispute(long id) {
-		return Button.secondary("dispute:" + id,
+	public static Button dispute(UUID matchId) {
+		return Button.secondary("dispute:" + matchId.toString(),
 				Emojis.exclamation, "File a dispute");
 	}
 
