@@ -2,39 +2,33 @@ package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.elorankingbot.backend.model.Match.ReportIntegrity.*;
+import static com.elorankingbot.backend.model.Match.ReportStatus.*;
 
-public class Win {
-
-	private final ButtonInteractionEvent event;
-	private final EloRankingService service;
-	private Match match;
+public class Win extends ButtonCommandRelatedToMatch {
 
 	public Win(ButtonInteractionEvent event, Services services) {
-		this.event = event;
-		this.service = services.service;
-		this.match = service.getMatch(UUID.fromString(event.getCustomId().split(":")[1]));
+		super(event, services);
 	}
 
 	public void execute() {
-		Match.ReportIntegrity reportIntegrity;
-
-		// TODO! zeile fuer zeile anpassen ab hier
-
+		match.report(player.getId(), WIN);
+		List<Player> conflictingReports = match.getConflictingReports();
 
 
 
 
-		if (isChallengerCommand) reportIntegrity = challenge.setChallengerReported(ChallengeModel.ReportStatus.WIN);
-		else reportIntegrity = challenge.setAcceptorReported(ChallengeModel.ReportStatus.WIN);
+
 
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) processFirstToReport();
 		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) processHarmony();
