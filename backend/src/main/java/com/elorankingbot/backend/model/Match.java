@@ -1,14 +1,18 @@
 package com.elorankingbot.backend.model;
 
+import com.elorankingbot.backend.commands.player.match.Win;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.web.client.HttpClientErrorException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.elorankingbot.backend.model.Match.ReportStatus.*;
 
 @Data
 @Document
@@ -33,6 +37,12 @@ public class Match {
 	private MatchFinderQueue queue;
 	private List<List<Player>> groups;
 	private Map<UUID, ReportStatus> playerIdToReportStatus;
+	@Transient
+	@Setter(AccessLevel.NONE)
+	private List<Player> conflictingReports;
+	@Transient
+	@Setter(AccessLevel.NONE)
+	private ReportIntegrity reportIntegrity;
 
 	public Match(MatchFinderQueue queue, List<List<Player>> groups) {
 		this.id = UUID.randomUUID();
@@ -43,6 +53,94 @@ public class Match {
 
 	public void report(UUID playerId, ReportStatus reportStatus) {
 		playerIdToReportStatus.put(playerId, reportStatus);
+		setConflictingReports();
+		setReportIntegrity();
+	}
+
+	private void setConflictingReports() {
+		conflictingReports = new ArrayList<>();
+		List<ReportStatus> teamReports = new ArrayList<>(queue.getNumTeams());
+
+		// check for team internal conflicts
+		List<Player> teamInternalConflicts = new ArrayList<>(queue.getPlayersPerTeam());
+		for (List<Player> team : groups) {
+			ReportStatus teamReported = null;
+			for (Player player : team) {
+				boolean teamInternalConflict = false;
+				ReportStatus playerReported = playerIdToReportStatus.get(player.getId());
+				if (playerReported != null) {
+					if (teamReported == null) {
+						teamReported = playerReported;
+					} else {
+						if (playerReported != teamReported) {
+							teamInternalConflict = true;
+						}
+					}
+				}
+				if (teamInternalConflict) {
+					teamInternalConflicts.addAll(team);
+				}
+			}
+			teamReports.add(teamReported);
+		}
+		if (teamInternalConflicts.size() > 0) {
+			conflictingReports = teamInternalConflicts;
+			return;
+		}
+
+		// check for conflicts involving draws and non-draws
+		List<Player> playersReportedDraw = new ArrayList<>(getNumPlayers());
+		List<Player> playersReportedCancel = new ArrayList<>(getNumPlayers());
+		List<Player> playersReportedWinOrLoss = new ArrayList<>(getNumPlayers());
+		for (Player player : getPlayers()) {
+			ReportStatus reportStatus = playerIdToReportStatus.get(player.getId());
+			if (reportStatus == DRAW) playersReportedDraw.add(player);
+			if (reportStatus == CANCEL) playersReportedCancel.add(player);
+			if (reportStatus == WIN || reportStatus == LOSE) playersReportedWinOrLoss.add(player);
+		}
+		if ((playersReportedDraw.size() > 0 && playersReportedCancel.size() > 0)
+				|| (playersReportedDraw.size() > 0 && playersReportedWinOrLoss.size() > 0)
+				|| (playersReportedCancel.size() > 0 && playersReportedWinOrLoss.size() > 0)) {
+			// Only mark reports coming from a minority of players
+			if (playersReportedDraw.size() <= getNumPlayers() / 2) {
+				conflictingReports.addAll(playersReportedDraw);
+			}
+			if (playersReportedCancel.size() <= getNumPlayers() / 2) {
+				conflictingReports.addAll(playersReportedCancel);
+			}
+			if (playersReportedWinOrLoss.size() <= getNumPlayers() / 2) {
+				conflictingReports.addAll(playersReportedWinOrLoss);
+			}
+			return;
+		}
+
+		// check for conflicts with more than one team reporting win
+		int numberOfTeamsReportingWin = 0;
+		for (ReportStatus reportStatus : teamReports) {
+			if (reportStatus == WIN) numberOfTeamsReportingWin++;
+		}
+		if (numberOfTeamsReportingWin > 1) {
+			conflictingReports = getPlayers().stream()
+					.filter(player -> playerIdToReportStatus.get(player.getId()) == WIN)
+					.collect(Collectors.toList());
+			return;
+		}
+	}
+
+	private void setReportIntegrity() {
+		if (conflictingReports.size() > 0) {
+			reportIntegrity = ReportIntegrity.CONFLICT;
+		} else {
+			if (playerIdToReportStatus.size() < getNumPlayers()) {
+				reportIntegrity = ReportIntegrity.INCOMPLETE;
+			} else {
+				reportIntegrity = ReportIntegrity.COMPLETE;
+			}
+		}
+	}
+
+	public int getNumPlayers() {// TODO vllt private?
+		return getPlayers().size();
 	}
 
 	public List<Player> getPlayers() {

@@ -1,49 +1,50 @@
 package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+
+import java.util.UUID;
 
 public abstract class ButtonCommandRelatedToMatch extends ButtonCommand {
 
-	protected final Message parentMessage;
-	protected final Message targetMessage;
-	protected final boolean isChallengerCommand;
-	protected final ChallengeModel challenge;
+	protected final Server server;
 	protected final long guildId;
 	protected final Game game;
+	protected final MatchFinderQueue queue;
+	protected final Match match;
+	protected final User user;
+	protected final long userId;
+	protected final Player player;
 
 	protected ButtonCommandRelatedToMatch(ButtonInteractionEvent event, Services services) {
 		super(event, services);
-		this.challenge = null;// service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
-		this.guildId = 0;//challenge.getGuildId();
-		this.game = service.findGameByGuildId(guildId).get();
-		if (event.getInteraction().getChannelId().asLong() == challenge.getChallengerChannelId()) {
-			this.isChallengerCommand = true;
-		} else {
-			this.isChallengerCommand = false;
-		}
-		this.parentMessage = event.getMessage().get();
-		this.targetMessage = isChallengerCommand ?
-				bot.getMessageById(challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId()).block()
-				: bot.getMessageById(challenge.getChallengerMessageId(), challenge.getChallengerChannelId()).block();
+		this.match = service.getMatch(UUID.fromString(event.getCustomId().split(":")[1]));
+		this.queue = match.getQueue();
+		this.game = queue.getGame();
+		this.server = game.getServer();
+		this.guildId = server.getGuildId();
+		this.user = event.getInteraction().getUser();
+		this.userId = user.getId().asLong();
+		this.player = service.findPlayerByGuildIdAndUserId(guildId, userId).get();
 	}
 
 	protected void updateAndSaveChallenge(Message message) {// TODO vllt in interface, default method refaktorn
-		if (isChallengerCommand) updateAcceptorMessageIdAndSaveChallenge(message);
-		else updateChallengerMessageIdAndSaveChallenge(message);
+		//if (isChallengerCommand) updateAcceptorMessageIdAndSaveChallenge(message);
+
+		//else updateChallengerMessageIdAndSaveChallenge(message);
 	}
 
 	protected void updateChallengerMessageIdAndSaveChallenge(Message message) {
-		challenge.setChallengerMessageId(message.getId().asLong());
-		service.saveChallenge(challenge);
+		//challenge.setChallengerMessageId(message.getId().asLong());
+		//service.saveChallenge(challenge);
 	}
 
 	protected void updateAcceptorMessageIdAndSaveChallenge(Message message) {
-		challenge.setAcceptorMessageId(message.getId().asLong());
-		service.saveChallenge(challenge);
+		//challenge.setAcceptorMessageId(message.getId().asLong());
+		//service.saveChallenge(challenge);
 	}
 }
