@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 public class Decline extends ButtonCommandRelatedToMatch {
@@ -13,6 +12,7 @@ public class Decline extends ButtonCommandRelatedToMatch {
 	public void execute() {
 		//service.deleteChallengeById(challenge.getId());
 
+		/*
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You have declined :negative_squared_cross_mark: their challenge.")
@@ -29,5 +29,7 @@ public class Decline extends ButtonCommandRelatedToMatch {
 		//		challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
 		//queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 		//		challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
+
+		 */
 	}
 }

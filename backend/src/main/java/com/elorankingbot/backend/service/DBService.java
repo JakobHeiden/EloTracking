@@ -13,7 +13,7 @@ import java.util.*;
 
 @Slf4j
 @Service
-public class EloRankingService {
+public class DBService {
 
 	private static float initialRating = 1200;
 	private static float k = 16;
@@ -24,13 +24,14 @@ public class EloRankingService {
 	private final PlayerDao playerDao;
 	private final TimeSlotDao timeSlotDao;
 	private final MatchDao matchDao;
+	private final RankingsEntryDao rankingsEntryDao;
 	@Getter
 	private final Set<String> modCommands, adminCommands;
 
 	@Autowired
-	public EloRankingService(Services services, CommandClassScanner scanner,
-							 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao, PlayerDao playerDao,
-							 TimeSlotDao timeSlotDao, MatchDao matchDao) {
+	public DBService(Services services, CommandClassScanner scanner,
+					 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao, PlayerDao playerDao,
+					 TimeSlotDao timeSlotDao, MatchDao matchDao, RankingsEntryDao rankingsEntryDao) {
 		this.bot = services.bot;
 		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
@@ -40,6 +41,7 @@ public class EloRankingService {
 		this.adminCommands = scanner.getAdminCommands();
 		this.modCommands = scanner.getModCommands();
 		this.matchDao = matchDao;
+		this.rankingsEntryDao = rankingsEntryDao;
 	}
 
 
@@ -73,6 +75,23 @@ public class EloRankingService {
 	public Match getMatch(UUID matchId) {
 		return matchDao.findById(matchId).get();
 	}
+
+	public void saveMatch(Match match) {
+		log.debug("Saving match " + match.getId());
+		matchDao.save(match);
+	}
+
+	public void deleteMatch(Match match) {
+		log.debug("Deleting match " + match.getId());
+		matchDao.delete(match);
+	}
+
+	// MatchResult
+	public void saveMatchResult(MatchResult matchResult) {
+		log.debug(String.format("saving match result %s", matchResult.getId()));
+		matchResultDao.save(matchResult);
+	}
+
 
 	// Game
 	// TODO das hier sollte obsolet sein, games sind teil von server
@@ -128,20 +147,16 @@ public class EloRankingService {
 		return allChallengesForPlayer;
 	}
 
-	// Match
-	public void saveMatch(MatchResult matchResult) {
-		//log.debug(String.format("saving match %s %s %s",
-		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
-		matchResultDao.save(matchResult);
-	}
+	// Match legacy
 
-	public void deleteMatch(MatchResult matchResult) {
+
+	public void deleteMatchResult(MatchResult matchResult) {
 		//log.debug(String.format("deleting match %s %s %s",
 		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
 		matchResultDao.delete(matchResult);
 	}
 
-	public Optional<MatchResult> findMostRecentMatch(long guildId, long player1Id, long player2Id) {
+	public Optional<MatchResult> findMostRecentMatchResult(long guildId, long player1Id, long player2Id) {
 		return null;
 		/*
 		Optional<Match> search = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player1Id, player2Id);
@@ -246,10 +261,6 @@ public class EloRankingService {
 		return new double[]{rating1, rating2, newRating1, newRating2};
 	}
 
-	public static String formatRating(double rating) {
-		return String.format("%.1f", Float.valueOf(Math.round(rating * 10)) / 10);
-	}
-
 	public List<PlayerInRankingsDto> getRankingsAsDto(long guildId) {
 		/*
 		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
@@ -263,12 +274,32 @@ public class EloRankingService {
 		return null;
 	}
 
-	public List<Player> getRankings(long guildId) {
-		// TODO abfrage begrenzen und vorsortieren, der performance wegen
-		// ueber rating indexieren, dann ne heuristik bauen die effizient die naechsten x umliegenden player findet
-		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
-		Collections.sort(allPlayers, Collections.reverseOrder());
-		return allPlayers;
+	public RankingsExcerpt getLeaderboard(Game game) {
+		// TODO nur ausschnitte abrufen, wahrscheinlich mit PagingAndSortingRepository?
+		List<RankingsEntry> allEntries = rankingsEntryDao.getAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
+		int numTotalPlayers = allEntries.size();
+		Collections.sort(allEntries);
+		return new RankingsExcerpt(game, allEntries.subList(0, Math.min(game.getLeaderboardLength(), allEntries.size())),
+				1, Optional.empty(), numTotalPlayers);
+	}
+
+	public boolean updateAndPersistRankingsAndPlayers(MatchResult matchResult) {
+		long guildId = matchResult.getGame().getServer().getGuildId();
+		String gameName = matchResult.getGame().getName();
+		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
+			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
+					.findByGuildIdAndGameNameAndPlayerTag(guildId, gameName, playerMatchResult.getPlayerTag());
+			if (maybeRankingsEntry.isPresent()) rankingsEntryDao.delete(maybeRankingsEntry.get());
+			rankingsEntryDao.save(new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer()));
+		}
+
+		matchResult.getAllPlayerMatchResults().forEach(playerMatchResult -> {
+			PlayerGameStats gameStats = playerMatchResult.getPlayer().getGameStats(matchResult.getGame());
+			gameStats.setRating(playerMatchResult.getNewRating());
+			gameStats.addResultStatus(playerMatchResult.getResultStatus());
+			savePlayer(playerMatchResult.getPlayer());
+		});
+		return true;// TODO! pagination etc
 	}
 
 	// am ende weg

@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.dispute;
+package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.service.Services;

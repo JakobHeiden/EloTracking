@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Service
 public class QueueService {
 
-	private final EloRankingService service;
+	private final DBService service;
 
 	public QueueService(Services services) {
 		this.service = services.service;
@@ -30,7 +30,7 @@ public class QueueService {
 	}
 
 	private Optional<Match> generateMatchFromSoloQueue(MatchFinderQueue queue) {
-		if (queue.getGroups().size() < queue.getNumTeams() * queue.getPlayersPerTeam()) return Optional.empty();
+		if (queue.getGroups().size() < queue.getNumTeams() * queue.getNumPlayersPerTeam()) return Optional.empty();
 
 		List<Group> groupsSortedByRating = new LinkedList<>(
 				queue.getGroups().stream()
@@ -41,9 +41,9 @@ public class QueueService {
 		for (int i = 0; i < queue.getNumTeams(); i++) {
 			teams.add(new ArrayList<>());
 		}
-		for (int i = 0; i < queue.getPlayersPerTeam(); i += 2) {
+		for (int i = 0; i < queue.getNumPlayersPerTeam(); i += 2) {
 			for (int j = 0; j < queue.getNumTeams(); j++) {
-				if (queue.getPlayersPerTeam() - i > 1) {
+				if (queue.getNumPlayersPerTeam() - i > 1) {
 					// take a player from top and bottom
 					teams.get(j).add(groupsSortedByRating.get(0).getPlayers().get(0));
 					groupsSortedByRating.remove(0);
@@ -72,7 +72,7 @@ public class QueueService {
 
 	private double getAverageRating(Group group, Game game) {
 		double sumOfRatings = group.getPlayers().stream()
-				.map(player -> player.getRating(game).getValue())
+				.map(player -> player.getGameStats(game).getRating())
 				.reduce(0D, Double::sum);
 		return sumOfRatings / group.getPlayers().size();
 	}

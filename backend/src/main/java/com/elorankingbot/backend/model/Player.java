@@ -23,13 +23,14 @@ public class Player  {
     private static final int PERMABANNED = -1;
     private static final int NOT_BANNED = -2;
 
+    // TODO! tag als id? modelle nochmal anschauen
     @Id
     private UUID id;
     private long userId;
     private long guildId;// TODO vllt stattdessen DBRef auf Server
     private String tag;
     private int unbanAtTimeSlot;
-    private Map<String, Rating> ratings;
+    private Map<String, PlayerGameStats> gameNameToPlayerGameStats;
 
     public Player(long guildId, long userId, String tag) {
         this.id = generateId(guildId, userId);
@@ -37,7 +38,7 @@ public class Player  {
         this.guildId = guildId;
         this.tag = tag;
         this.unbanAtTimeSlot = NOT_BANNED;
-        this.ratings = new HashMap<>();
+        this.gameNameToPlayerGameStats = new HashMap<>();
     }
 
     public static UUID generateId(long guildId, long userId) {
@@ -52,14 +53,14 @@ public class Player  {
         return unbanAtTimeSlot == PERMABANNED;
     }
 
-    public Rating getRating(Game game) {
-        Rating rating = ratings.get(game.getName());
-        if (rating == null) {
-            Rating newRating = new Rating(game, 1200);
-            ratings.put(game.getName(), newRating);
-            rating = newRating;
+    public PlayerGameStats getGameStats(Game game) {
+        PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
+        if (playerGameStats == null) {
+            PlayerGameStats newPlayerGameStats = new PlayerGameStats(1200);
+            gameNameToPlayerGameStats.put(game.getName(), newPlayerGameStats);
+            playerGameStats = newPlayerGameStats;
         }
-        return rating;
+        return playerGameStats;
     }
 
     @Override

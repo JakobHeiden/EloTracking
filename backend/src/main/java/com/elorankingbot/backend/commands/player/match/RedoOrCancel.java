@@ -10,6 +10,8 @@ public class RedoOrCancel extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
+
+		/*
 		boolean bothCalledForRedo;
 		if (isChallengerCommand) {
 			challenge.setChallengerCalledForRedo(true);
@@ -38,7 +40,7 @@ public class RedoOrCancel extends ButtonCommandRelatedToMatch {
 			bot.sendToOwner("Redo.bothCalledForRedo()");
 		}
 		else if (bothCalledForCancel) {
-			CancelOnConflict.bothCalledForCancel(parentMessage, targetMessage, challenge, game, service, queue);
+			CancelOnConflict.bothCalledForCancel(parentMessage, targetMessage, challenge, game, dbservice, queue);
 			bot.sendToOwner("Redo.bothCalledForRedo()");
 		}
 		event.acknowledge().subscribe();

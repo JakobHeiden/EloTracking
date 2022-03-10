@@ -7,8 +7,8 @@ import com.elorankingbot.backend.dao.TimeSlotDao;
 import com.elorankingbot.backend.dao.TimedTaskQueueCurrentIndexDao;
 import com.elorankingbot.backend.model.CurrentIndex;
 import com.elorankingbot.backend.model.TimeSlot;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class TimedTaskQueue {
 	@Getter
 	private int currentIndex;
 	private final Services services;
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
 	private final TimedTaskService timedTaskService;

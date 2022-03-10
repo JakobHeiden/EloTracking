@@ -1,28 +1,18 @@
 package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.timedtask.DurationParser;
-import com.elorankingbot.backend.timedtask.TimedTask;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.Buttons;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Optional;
 
 @Slf4j
 public class Challenge extends SlashCommand {
@@ -53,7 +43,7 @@ public class Challenge extends SlashCommand {
 	}
 
 	public static void staticExecute(User acceptorUser, long guildId, Game game, ApplicationCommandInteractionEvent event,
-									 EloRankingService service, DiscordBotService bot, TimedTaskQueue queue) {
+									 DBService service, DiscordBotService bot, TimedTaskQueue queue) {
 		/*
 		User challengerUser = event.getInteraction().getUser();
 		long challengerId = challengerUser.getId().asLong();

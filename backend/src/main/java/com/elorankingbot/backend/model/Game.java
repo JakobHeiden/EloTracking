@@ -17,8 +17,6 @@ public class Game {
     private Map<String, MatchFinderQueue> queues;
     @DBRef(lazy = true)
     private Server server;
-    private long resultChannelId;
-    private long leaderboardMessageId;
     private int leaderboardLength;
     private boolean allowDraw;
     private int matchAutoResolveTime;
@@ -38,6 +36,10 @@ public class Game {
 
     public void addQueue(MatchFinderQueue queue) {
         queues.put(queue.getName(), queue);
+    }
+
+    public MatchFinderQueue getQueue(String name) {
+        return queues.get(name);
     }
 
     public long getGuildId() {

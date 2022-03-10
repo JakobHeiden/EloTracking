@@ -2,17 +2,12 @@ package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.User;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-
-import static com.elorankingbot.backend.service.EloRankingService.formatRating;
 
 @ModCommand
 public class Rating extends SlashCommand {

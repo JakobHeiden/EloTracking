@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.timedtask;
 
 import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class TimedTaskService {
 
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final TimedTaskQueue queue;
 	private final GatewayDiscordClient client;

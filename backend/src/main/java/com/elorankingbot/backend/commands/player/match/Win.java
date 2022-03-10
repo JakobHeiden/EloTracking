@@ -1,125 +1,13 @@
 package com.elorankingbot.backend.commands.player.match;
 
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.component.ActionRow;
 
-import java.util.List;
-import java.util.UUID;
+import static com.elorankingbot.backend.model.ReportStatus.WIN;
 
-import static com.elorankingbot.backend.model.Match.ReportIntegrity.*;
-import static com.elorankingbot.backend.model.Match.ReportStatus.*;
-
-public class Win extends ButtonCommandRelatedToMatch {
+public class Win extends Report {
 
 	public Win(ButtonInteractionEvent event, Services services) {
-		super(event, services);
-	}
-
-	public void execute() {
-		match.report(player.getId(), WIN);
-		List<Player> conflictingReports = match.getConflictingReports();
-
-
-
-
-
-
-		if (reportIntegrity == ChallengeModel.ReportIntegrity.FIRST_TO_REPORT) processFirstToReport();
-		if (reportIntegrity == ChallengeModel.ReportIntegrity.HARMONY) processHarmony();
-		if (reportIntegrity == ChallengeModel.ReportIntegrity.CONFLICT) processConflict();
-		event.acknowledge().subscribe();
-	}
-
-	private void processFirstToReport() {
-		new MessageUpdater(parentMessage)
-				.makeAllNotBold()
-				.addLine("You reported a win :arrow_up:. I'll let you know when your opponent reports.")
-				.update()
-				.withComponents(none).subscribe();
-		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a win :arrow_up:.")
-				.resend().subscribe(super::updateAndSaveChallenge);
-
-		//queue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
-		//		challenge.getId(), 0L, null);
-	}
-
-	private void processHarmony() {
-		/*
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
-		Match match = new Match(guildId,
-				isChallengerCommand ? challenge.getChallengerUserId() : challenge.getAcceptorUserId(),
-				isChallengerCommand ? challenge.getAcceptorUserId() : challenge.getChallengerUserId(),
-				isChallengerCommand ? challenge.getChallengerTag() : challenge.getAcceptorTag(),
-				isChallengerCommand ? challenge.getAcceptorTag() : challenge.getChallengerTag(),
-				false);
-		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);// TODO transaction machen?
-		service.deleteChallenge(challenge);
-
-		new MessageUpdater(parentMessage)
-				.makeAllNotBold()
-				.addLine("You reported a win :arrow_up:. The match has been resolved:")
-				.addLine(String.format("Your rating went from %s to %s.",
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
-				.makeAllItalic()
-				.update()
-				.withComponents(none).subscribe();
-		new MessageUpdater(targetMessage)
-				.makeAllNotBold()
-				.addLine("Your opponent reported a win :arrow_up:. The match has been resolved:")
-				.addLine(String.format("Your rating went from %s to %s.",
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
-				.makeAllItalic()
-				.update()
-				.withComponents(none).subscribe();
-		bot.postToResultChannel(game, match);
-		bot.updateLeaderboard(game);
-
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern
-				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
-
-		 */
-	}
-
-	private void processConflict() {
-		/*
-		new MessageUpdater(parentMessage)
-				.makeAllNotBold()
-				.addLine("You reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
-				.makeLastLineBold()
-				.update()
-				.withComponents(createActionRow(challenge.getId())).subscribe();
-		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
-						"or file a dispute.")
-				.makeLastLineBold()
-				.resend()
-				.withComponents(createActionRow(challenge.getId()))
-				.subscribe(super::updateAndSaveChallenge);
-
-		 */
-	}
-
-	static ActionRow createActionRow(long challengeId) {
-		return null;
-		/*
-		return ActionRow.of(
-				Buttons.redo(challengeId),
-				Buttons.cancelOnConflict(challengeId),
-				Buttons.redoOrCancelOnConflict(challengeId),
-				Buttons.dispute(challengeId));
-
-		 */
+		super(event, services, WIN);
 	}
 }

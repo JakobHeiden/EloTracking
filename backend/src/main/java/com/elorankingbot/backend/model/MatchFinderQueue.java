@@ -3,9 +3,12 @@ package com.elorankingbot.backend.model;
 import com.elorankingbot.backend.logging.UseToStringForLogging;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Data
 @ToString
@@ -18,24 +21,25 @@ public class MatchFinderQueue {
 		PREMADE
 	}
 
+	@Id
 	private String name;
 	private List<Group> groups;
 	@DBRef(lazy = true)
 	private Game game;
 	private final int numTeams;
-	private final int playersPerTeam;
+	private final int numPlayersPerTeam;
 	private int minRating;
 	private int maxRating;
 	private QueueType queueType;
 	private int maxPremadeSize;
 	private boolean isBuildMatchFromTopPlayer;
 
-	public MatchFinderQueue(Game game, String name, int numTeams, int playersPerTeam,
+	public MatchFinderQueue(Game game, String name, int numTeams, int numPlayersPerTeam,
 							QueueType queueType, int maxPremadeSize) {
 		this.game = game;
 		this.name = name;
 		this.numTeams = numTeams;
-		this.playersPerTeam = playersPerTeam;
+		this.numPlayersPerTeam = numPlayersPerTeam;
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
 		this.groups = new ArrayList<>();
@@ -59,35 +63,39 @@ public class MatchFinderQueue {
 		}
 	}
 
+	public int getNumPlayers() {
+		return numTeams * numPlayersPerTeam;
+	}
+
 	public String getDescription() {
 		if (numTeams == 2) {
-			if (playersPerTeam == 1) return "Join this 1v1 queue";
+			if (numPlayersPerTeam == 1) return "Join this 1v1 queue";
 			else {
 				switch (queueType) {
 					case SOLO:
-						return String.format("Join this %sv%s queue for solo players", playersPerTeam, playersPerTeam);
+						return String.format("Join this %sv%s queue for solo players", numPlayersPerTeam, numPlayersPerTeam);
 					case PREMADE:
-						return String.format("Join this %sv%s queue for full premade teams", playersPerTeam, playersPerTeam);
+						return String.format("Join this %sv%s queue for full premade teams", numPlayersPerTeam, numPlayersPerTeam);
 					case MIXED:
 						return String.format("Join this %sv%s queue for solo players " +
 										"and premade teams no larger than %s players",
-								playersPerTeam, playersPerTeam, maxPremadeSize);
+								numPlayersPerTeam, numPlayersPerTeam, maxPremadeSize);
 				}
 			}
 		} else {
-			if (playersPerTeam == 1) return String.format("Join this %s way free for all queue", numTeams);
+			if (numPlayersPerTeam == 1) return String.format("Join this %s way free for all queue", numTeams);
 			else {
 				switch (queueType) {
 					case SOLO:
 						return String.format("Join this teams of %s, %s way free for all queue for solo players",
-								playersPerTeam, numTeams);
+								numPlayersPerTeam, numTeams);
 					case PREMADE:
 						return String.format("Join this teams of %s, %s way free for all queue for full premade teams",
-								playersPerTeam, numTeams);
+								numPlayersPerTeam, numTeams);
 					case MIXED:
 						return String.format("Join this teams of %s, %s way free for all queue for solo players " +
 										"and premade teams < %s players",
-								playersPerTeam, numTeams, maxPremadeSize);
+								numPlayersPerTeam, numTeams, maxPremadeSize);
 				}
 			}
 		}

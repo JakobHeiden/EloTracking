@@ -1,30 +1,22 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.commands.player.match.Win;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.elorankingbot.backend.model.Match.ReportStatus.*;
+import static com.elorankingbot.backend.model.ReportStatus.*;
 
 @Data
-@Document
+@Document(collection = "match")
 public class Match {
-
-	public enum ReportStatus {
-		NOT_YET_REPORTED,
-		WIN,
-		LOSE,
-		DRAW,
-		CANCEL
-	}
 
 	public enum ReportIntegrity {
 		INCOMPLETE,
@@ -32,11 +24,17 @@ public class Match {
 		CONFLICT
 	}
 
+	@Id
 	private UUID id;
 	@DBRef(lazy = true)
-	private MatchFinderQueue queue;
-	private List<List<Player>> groups;
+	private Server server;
+	private String gameId, queueId;
+	private List<List<Player>> teams;
 	private Map<UUID, ReportStatus> playerIdToReportStatus;
+	private Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
+	@Transient
+	private MatchFinderQueue queue;
+
 	@Transient
 	@Setter(AccessLevel.NONE)
 	private List<Player> conflictingReports;
@@ -44,11 +42,37 @@ public class Match {
 	@Setter(AccessLevel.NONE)
 	private ReportIntegrity reportIntegrity;
 
-	public Match(MatchFinderQueue queue, List<List<Player>> groups) {
+	public Match(MatchFinderQueue queue, List<List<Player>> teams) {
 		this.id = UUID.randomUUID();
+		this.server = queue.getGame().getServer();
+		this.gameId = queue.getGame().getName();
+		this.queueId = queue.getName();
 		this.queue = queue;
-		this.groups = groups;
-		this.playerIdToReportStatus = new HashMap<>();
+		this.teams = teams;
+		this.playerIdToReportStatus = new HashMap<>(queue.getNumPlayers());
+		for (Player player : this.teams.stream().flatMap(Collection::stream).toList()) {
+			this.playerIdToReportStatus.put(player.getId(), NOT_YET_REPORTED);
+		}
+		this.playerIdToMessageId = new HashMap<>(queue.getNumPlayers());
+		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayers());
+
+		this.conflictingReports = new ArrayList<>();
+	}
+
+	// there is no db collection for MatchFinderQueue, so queue must be extracted from server
+	@PersistenceConstructor
+	public Match(UUID id, Server server, String gameId, String queueId, List<List<Player>> teams, Map<UUID,
+			ReportStatus> playerIdToReportStatus, Map<UUID, Long> playerIdToMessageId,
+				 Map<UUID, Long> playerIdToPrivateChannelId) {
+		this.queue = server.getGame(gameId).getQueue(queueId);
+		this.id = id;
+		this.server = server;
+		this.gameId = gameId;
+		this.queueId = queueId;
+		this.teams = teams;
+		this.playerIdToReportStatus = playerIdToReportStatus;
+		this.playerIdToMessageId = playerIdToMessageId;
+		this.playerIdToPrivateChannelId = playerIdToPrivateChannelId;
 	}
 
 	public void report(UUID playerId, ReportStatus reportStatus) {
@@ -62,8 +86,8 @@ public class Match {
 		List<ReportStatus> teamReports = new ArrayList<>(queue.getNumTeams());
 
 		// check for team internal conflicts
-		List<Player> teamInternalConflicts = new ArrayList<>(queue.getPlayersPerTeam());
-		for (List<Player> team : groups) {
+		List<Player> teamInternalConflicts = new ArrayList<>(queue.getNumPlayersPerTeam());
+		for (List<Player> team : teams) {
 			ReportStatus teamReported = null;
 			for (Player player : team) {
 				boolean teamInternalConflict = false;
@@ -123,7 +147,6 @@ public class Match {
 			conflictingReports = getPlayers().stream()
 					.filter(player -> playerIdToReportStatus.get(player.getId()) == WIN)
 					.collect(Collectors.toList());
-			return;
 		}
 	}
 
@@ -131,7 +154,10 @@ public class Match {
 		if (conflictingReports.size() > 0) {
 			reportIntegrity = ReportIntegrity.CONFLICT;
 		} else {
-			if (playerIdToReportStatus.size() < getNumPlayers()) {
+			long numPlayersAlreadyReported = playerIdToReportStatus.values().stream()
+					.filter(reportStatus -> !reportStatus.equals(NOT_YET_REPORTED))
+					.count();
+			if (numPlayersAlreadyReported < getNumPlayers()) {
 				reportIntegrity = ReportIntegrity.INCOMPLETE;
 			} else {
 				reportIntegrity = ReportIntegrity.COMPLETE;
@@ -144,6 +170,18 @@ public class Match {
 	}
 
 	public List<Player> getPlayers() {
-		return getGroups().stream().flatMap(groups -> groups.stream()).collect(Collectors.toList());
+		return this.getTeams().stream().flatMap(groups -> groups.stream()).collect(Collectors.toList());
+	}
+
+	public ReportStatus getReportStatus(UUID playerId) {
+		return playerIdToReportStatus.get(playerId);
+	}
+
+	public long getMessageId(UUID playerId) {
+		return playerIdToMessageId.get(playerId);
+	}
+
+	public long getPrivateChannelId(UUID playerId) {
+		return playerIdToPrivateChannelId.get(playerId);
 	}
 }

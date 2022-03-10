@@ -2,7 +2,7 @@ package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
@@ -15,6 +15,7 @@ public class Redo extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
+		/*
 		boolean bothCalledForRedo;
 		if (isChallengerCommand) {
 			challenge.setChallengerCalledForRedo(true);
@@ -25,7 +26,7 @@ public class Redo extends ButtonCommandRelatedToMatch {
 		}
 
 		if (!bothCalledForRedo) oneCalledForRedo();
-		if (bothCalledForRedo) bothCalledForRedo(parentMessage, targetMessage, challenge, game, service);
+		if (bothCalledForRedo) bothCalledForRedo(parentMessage, targetMessage, challenge, game, dbservice);
 		event.acknowledge().subscribe();
 	}
 
@@ -54,7 +55,7 @@ public class Redo extends ButtonCommandRelatedToMatch {
 	}
 
 	private void bothCalledForRedo(Message parentMessage, Message targetMessage, ChallengeModel challenge, Game game,
-								  EloRankingService service) {
+								  DBService service) {
 		/*
 		challenge.redo();
 

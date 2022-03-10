@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class Services {
 
 	public final ApplicationPropertiesLoader props;
-	public final EloRankingService service;
+	public final DBService service;
 	public final DiscordBotService bot;
 	public final GatewayDiscordClient client;
 	public final TimedTaskQueue queue;
@@ -19,7 +19,7 @@ public class Services {
 	public final QueueService queueService;
 
 	public Services(ApplicationPropertiesLoader props,
-					@Lazy EloRankingService service, @Lazy DiscordBotService bot, @Lazy GatewayDiscordClient client,
+					@Lazy DBService service, @Lazy DiscordBotService bot, @Lazy GatewayDiscordClient client,
 					@Lazy TimedTaskQueue queue, @Lazy TimedTaskService timedTaskService, @Lazy QueueService queueService) {
 		this.props = props;
 		this.service = service;

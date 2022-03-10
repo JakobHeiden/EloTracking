@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.dispute;
+package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.ChallengeModel;
@@ -26,7 +26,7 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 		super(event, services);
 		this.challenge = null;//service.findChallengeById(Long.parseLong(event.getCustomId().split(":")[1])).get();
 		this.guildId = 0;// challenge.getGuildId();
-		this.game = service.findGameByGuildId(guildId).get();
+		this.game = dbservice.findGameByGuildId(guildId).get();
 		this.disputeChannel = (TextChannel) event.getInteraction().getChannel().block();
 		this.moderatorName = event.getInteraction().getUser().getUsername();
 		this.challengerMessage = client.getMessageById(Snowflake.of(challenge.getChallengerChannelId()),
@@ -61,11 +61,11 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 
 	protected void updateChallengerMessageIdAndSaveChallenge(Message message) {
 		challenge.setChallengerMessageId(message.getId().asLong());
-		service.saveChallenge(challenge);
+		dbservice.saveChallenge(challenge);
 	}
 
 	protected void updateAcceptorMessageIdAndSaveChallenge(Message message) {
 		challenge.setAcceptorMessageId(message.getId().asLong());
-		service.saveChallenge(challenge);
+		dbservice.saveChallenge(challenge);
 	}
 }

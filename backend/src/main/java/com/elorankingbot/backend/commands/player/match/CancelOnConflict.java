@@ -1,14 +1,7 @@
 package com.elorankingbot.backend.commands.player.match;
 
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.entity.Message;
 
 public class CancelOnConflict extends ButtonCommandRelatedToMatch {
 
@@ -17,6 +10,7 @@ public class CancelOnConflict extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
+		/*
 		boolean bothCalledForCancel = false;
 		if (isChallengerCommand) {
 			challenge.setChallengerCalledForCancel(true);
@@ -27,7 +21,7 @@ public class CancelOnConflict extends ButtonCommandRelatedToMatch {
 		}
 
 		if (!bothCalledForCancel) oneCalledForCancel();
-		if (bothCalledForCancel) bothCalledForCancel(parentMessage, targetMessage, challenge, game, service, queue);
+		if (bothCalledForCancel) bothCalledForCancel(parentMessage, targetMessage, challenge, game, dbservice, queue);
 		event.acknowledge().subscribe();
 	}
 
@@ -53,7 +47,7 @@ public class CancelOnConflict extends ButtonCommandRelatedToMatch {
 
 	static void bothCalledForCancel(Message parentMessage, Message targetMessage,
 									ChallengeModel challenge, Game game,
-									EloRankingService service, TimedTaskQueue queue) {
+									DBService service, TimedTaskQueue queue) {
 		service.deleteChallenge(challenge);
 
 		new MessageUpdater(parentMessage)
@@ -73,5 +67,7 @@ public class CancelOnConflict extends ButtonCommandRelatedToMatch {
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
 				0,//game.getMessageCleanupTime(),
 				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), null);
+
+		 */
 	}
 }

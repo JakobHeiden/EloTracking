@@ -1,17 +1,9 @@
 package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateFields;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.util.Permission;
-import discord4j.rest.util.PermissionSet;
 
 public class Dispute extends ButtonCommandRelatedToMatch {
 
@@ -26,8 +18,9 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
+		/*
 		challenge.setDispute(true);
-		service.saveChallenge(challenge);
+		dbservice.saveChallenge(challenge);
 
 		challengerTag = challenge.getChallengerTag();
 		acceptorTag = challenge.getAcceptorTag();
@@ -36,6 +29,7 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 		editChallengeMessages();
 		createDisputeMessage();
 		event.acknowledge().subscribe();
+
 	}
 
 	private void editChallengeMessages() {
@@ -88,6 +82,8 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 						.build())
 				//.withComponents(createActionRow(game.isAllowDraw()))
 				.subscribe();
+
+		 */
 	}
 
 	private ActionRow createActionRow(boolean allowDraw) {

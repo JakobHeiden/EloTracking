@@ -14,8 +14,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.List;
 
-import static java.lang.Integer.min;
-
 public class Info extends SlashCommand {
 
 	private Player targetPlayer;
@@ -84,7 +82,9 @@ public class Info extends SlashCommand {
 	}
 
 	private List<Player> generatePlayerList() {
-		List<Player> playerList = service.getRankings(guildId);
+		return  null;
+		/*
+		List<Player> playerList = service.getLeaderboard(guildId);
 		numTotalPlayers = playerList.size();
 		targetPlayerIndex = playerList.indexOf(targetPlayer);
 		numHigherRanksToDisplay = min(10, targetPlayerIndex);
@@ -92,6 +92,8 @@ public class Info extends SlashCommand {
 		return playerList.subList(
 				targetPlayerIndex - numHigherRanksToDisplay,
 				targetPlayerIndex + numLowerRanksToDisplay + 1);
+
+		 */
 	}
 
 	private String generateBanString() {

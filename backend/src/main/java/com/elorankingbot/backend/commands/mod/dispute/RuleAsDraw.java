@@ -1,6 +1,7 @@
-package com.elorankingbot.backend.commands.dispute;
+package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.FormatTools;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
@@ -51,7 +52,7 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 		new MessageUpdater(challengerMessage)
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
+						FormatTools.formatRating(eloResults[0]), FormatTools.formatRating(eloResults[2])))
 				.makeAllItalic()
 				.resend()
 				.withComponents(none)
@@ -60,7 +61,7 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 		new MessageUpdater(acceptorMessage)
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
+						FormatTools.formatRating(eloResults[1]), FormatTools.formatRating(eloResults[3])))
 				.makeAllItalic()
 				.resend()
 				.withComponents(none)

@@ -19,6 +19,9 @@ public class Server {
 	private long adminRoleId;
 	private long modRoleId;
 	private long disputeCategoryId;
+	private long leaderboardMessageId;
+	private long leaderboardChannelId;
+	private long resultChannelId;
 	private boolean isMarkedForDeletion;
 	private boolean hasSetupRoles;
 	private boolean hasSetupGame;
@@ -38,5 +41,9 @@ public class Server {
 
 	public void removeGame(Game game) {
 		games.remove(game.getName());
+	}
+
+	public Game getGame(String name) {
+		return games.get(name);
 	}
 }

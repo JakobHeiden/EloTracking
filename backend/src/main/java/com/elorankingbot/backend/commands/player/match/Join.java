@@ -1,15 +1,17 @@
-package com.elorankingbot.backend.commands.player;
+package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.QueueService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.Buttons;
+import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -30,6 +32,7 @@ public class Join extends SlashCommand {
 	private Game game;
 	private Match match;
 	private List<User> allyUsers;
+	private List<User> allUsers;
 
 	public Join(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
@@ -53,7 +56,7 @@ public class Join extends SlashCommand {
 				var gameOptionBuilder = ApplicationCommandOptionData.builder()
 						.name(game.getName()).description("game name")
 						.type(SUB_COMMAND_GROUP.getValue());
-				game.getQueues().values().stream()
+				game.getQueues().values()
 						.forEach(queue -> {
 							var queueOptionBuilder = ApplicationCommandOptionData.builder()
 									.name(queue.getName()).description(queue.getDescription())
@@ -70,7 +73,7 @@ public class Join extends SlashCommand {
 	private static void addUserOptions(MatchFinderQueue queue, ImmutableApplicationCommandOptionData.Builder queueOptionBuilder) {
 		if (queue.getQueueType() != SOLO) {
 			int maxPlayersInPremade = queue.getQueueType() == PREMADE ?
-					queue.getPlayersPerTeam() : queue.getMaxPremadeSize();
+					queue.getNumPlayersPerTeam() : queue.getMaxPremadeSize();
 			for (int allyPlayerIndex = 1; allyPlayerIndex < maxPlayersInPremade; allyPlayerIndex++) {
 				queueOptionBuilder.addOption(ApplicationCommandOptionData.builder()
 						.name("ally" + allyPlayerIndex).description("ally #" + allyPlayerIndex)
@@ -142,8 +145,10 @@ public class Join extends SlashCommand {
 		for (Player player : match.getPlayers()) {
 			queueService.removePlayerFromAllQueues(server, player);
 		}
-		service.saveServer(server);
+		gatherAllUsers();
 		sendPlayerMessages();
+		service.saveMatch(match);
+		service.saveServer(server);
 		// buttons:
 		// accept
 		// win
@@ -156,12 +161,11 @@ public class Join extends SlashCommand {
 
 	}
 
-	private void sendPlayerMessages() {
-		List<List<Player>> teams = match.getGroups();
+	private void gatherAllUsers() {
 		List<Player> allPlayers = match.getPlayers();
 		Set<Long> allyUserIds = allyUsers.stream().map(user -> user.getId().asLong()).collect(Collectors.toSet());
 		Set<Long> allUserIds = allPlayers.stream().map(player -> player.getUserId()).collect(Collectors.toSet());
-		List<User> allUsers = allyUsers;
+		allUsers = allyUsers;
 		List<Mono<User>> userMonos = new ArrayList<>(allUserIds.size() - allyUserIds.size());
 		for (long userId : allUserIds) {
 			if (!allyUserIds.contains(userId)) {
@@ -171,34 +175,27 @@ public class Join extends SlashCommand {
 			}
 		}
 		Mono.when(userMonos).block();
+	}
 
-		List<String> embedTexts = new ArrayList<>();
-		for (List<Player> players : teams) {
-			String embedText = "";
-			for (Player player : players) {
-				embedText += String.format("%s (%s)\n", player.getTag(), player.getRatings().get(game.getName()).getValue());
-			}
-			embedTexts.add(embedText);
-		}
-
+	private void sendPlayerMessages() {
+		String embedTitle = String.format("Your match of %s %s is starting. " +// TODO queue-name weg wenn nur 1 queue
+						"I removed you from all other queues you joined on this server, if any. " + // TODO auflisten welche queues
+						"Please play the match and come back to report the result afterwards.",
+				match.getQueue().getGame().getName(),
+				match.getQueue().getName());
+		List<Mono<PrivateChannel>> monos = new ArrayList<>();
 		for (User user : allUsers) {
-			var embedBuilder = EmbedCreateSpec.builder()
-					.title(String.format("Your match of %s %s is starting. " +
-									"I removed you from all other queues you joined on this server, if any. " + // TODO auflisten welche queues
-									"Please play the match and come back to report the result afterwards.",
-							match.getQueue().getGame().getName(),
-							match.getQueue().getGame().getName()));
-			for (int i = 0; i < queue.getNumTeams(); i++) {
-				embedBuilder.addField(EmbedCreateFields.Field.of(
-								"Team #" + (i + 1),
-								embedTexts.get(i).replace(user.getTag(), "**" + user.getTag() + "**"),
-								true));
-			}
-			bot.getPrivateChannelByUserId(user.getId().asLong())
-					.subscribe(privateChannel -> privateChannel
-							.createMessage(embedBuilder.build())
-							.withComponents(createActionRow(match.getId(), game.isAllowDraw())).subscribe());
+			EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, activeUser.getTag());
+			monos.add(bot.getPrivateChannelByUserId(user.getId().asLong())
+					.doOnNext(privateChannel -> {
+						Message message = privateChannel.createMessage(embedCreateSpec)
+								.withComponents(createActionRow(match.getId(), game.isAllowDraw())).block();
+						UUID playerId = Player.generateId(guildId, user.getId().asLong());
+						match.getPlayerIdToMessageId().put(playerId, message.getId().asLong());
+						match.getPlayerIdToPrivateChannelId().put(playerId, privateChannel.getId().asLong());
+					}));
 		}
+		Mono.when(monos).block();
 	}
 
 	private static ActionRow createActionRow(UUID matchId, boolean allowDraw) {
