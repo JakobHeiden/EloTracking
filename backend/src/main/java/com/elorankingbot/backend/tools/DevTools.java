@@ -3,13 +3,10 @@ package com.elorankingbot.backend.tools;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.dao.MatchResultDao;
-import com.elorankingbot.backend.dao.PlayerDao;
-import com.elorankingbot.backend.dao.ServerDao;
-import com.elorankingbot.backend.dao.TimeSlotDao;
+import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
@@ -19,21 +16,23 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DevTools {
 
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
 	private final ApplicationPropertiesLoader props;
 	private final PlayerDao playerDao;
+	private final MatchDao matchDao;
 	private final MatchResultDao matchResultDao;
 	private final TimeSlotDao timeSlotDao;
 	private final ServerDao serverDao;
 
 	public DevTools(Services services,
-					PlayerDao playerDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
+					PlayerDao playerDao, MatchDao matchDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
 		this.service = services.service;
 		this.bot = services.bot;
 		this.client = services.client;
 		this.playerDao = playerDao;
+		this.matchDao = matchDao;
 		this.matchResultDao = matchResultDao;
 		this.props = services.props;
 		this.timeSlotDao = timeSlotDao;
@@ -77,8 +76,9 @@ public class DevTools {
 
 		log.info(String.format("Deleting all data on %s...", props.getSpringDataMongodbDatabase()));
 		//challengeDao.deleteAll();
-		//matchDao.deleteAll();
-		//playerDao.deleteAll();
+		matchDao.deleteAll();
+		matchResultDao.deleteAll();
+		playerDao.deleteAll();
 		timeSlotDao.deleteAll();
 		serverDao.deleteAll();
 	}

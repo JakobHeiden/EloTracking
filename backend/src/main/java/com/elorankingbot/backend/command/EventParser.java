@@ -7,8 +7,8 @@ import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
@@ -32,7 +32,7 @@ import java.util.function.Function;
 public class EventParser {
 
 	private final Services services;
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final Map<String, String> commandStringToClassName;
 
@@ -136,7 +136,9 @@ public class EventParser {
 					.getConstructor(ButtonInteractionEvent.class, Services.class)
 					.newInstance(event, services);
 		} catch (Exception e) {
-			bot.sendToOwner("exception occurred while instantiating command " + e.getMessage());
+			String errorMessage = "exception occurred while instantiating command " + commandClassName;
+			bot.sendToOwner(errorMessage);
+			System.out.println(errorMessage);
 			e.printStackTrace();
 			return null;
 		}

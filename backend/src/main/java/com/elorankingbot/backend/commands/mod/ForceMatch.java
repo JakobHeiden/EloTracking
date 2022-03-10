@@ -4,6 +4,7 @@ import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.FormatTools;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
@@ -124,7 +125,7 @@ public class ForceMatch extends SlashCommand {
 	private void informPlayers(double[] eloResults) {
 		String player1MessageContent = String.format(templatePlayer1,
 				event.getInteraction().getUser().getTag(), user2.getTag(),
-				service.formatRating(eloResults[0]), service.formatRating(eloResults[2]),
+				FormatTools.formatRating(eloResults[0]), FormatTools.formatRating(eloResults[2]),
 				reasonGiven);
 		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
 				.content(player1MessageContent).build();
@@ -132,7 +133,7 @@ public class ForceMatch extends SlashCommand {
 
 		String player2MessageContent = String.format(templatePlayer2,
 				event.getInteraction().getUser().getTag(), user1.getTag(),
-				service.formatRating(eloResults[1]), service.formatRating(eloResults[3]),
+				FormatTools.formatRating(eloResults[1]), FormatTools.formatRating(eloResults[3]),
 				reasonGiven);
 		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
 				.content(player2MessageContent).build();

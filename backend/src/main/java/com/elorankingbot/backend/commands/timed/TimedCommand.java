@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.commands.timed;
 
 import com.elorankingbot.backend.model.ChallengeModel;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class TimedCommand {
 
-	protected final EloRankingService service;
+	protected final DBService service;
 	protected final DiscordBotService bot;
 	protected final TimedTaskQueue queue;
 	protected final GatewayDiscordClient client;

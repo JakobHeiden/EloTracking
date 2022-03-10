@@ -2,7 +2,7 @@ package com.elorankingbot.backend.controller;
 
 import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.DBService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,10 +14,10 @@ import java.util.List;
 @RequestMapping("/api")
 public class Controller {
 
-    private final EloRankingService service;
+    private final DBService service;
 
-    public Controller(EloRankingService eloRankingService) {
-        this.service = eloRankingService;
+    public Controller(DBService DBService) {
+        this.service = DBService;
     }
 
     @GetMapping("rankings/{channelId}")

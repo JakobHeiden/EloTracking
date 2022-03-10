@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.dispute;
+package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.MessageUpdater;
@@ -13,7 +13,7 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 	public void execute() {
 		if (!isByModeratorOrAdmin()) return;
 
-		service.deleteChallenge(challenge);
+		dbservice.deleteChallenge(challenge);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled the challenge to be canceled. <@%s> <@%s>",

@@ -1,7 +1,8 @@
-package com.elorankingbot.backend.commands.dispute;
+package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.FormatTools;
 import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
@@ -18,8 +19,8 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 	public void execute() {
 		if (!isByModeratorOrAdmin()) return;
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
-		service.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
+		dbservice.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
+		dbservice.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
 		isChallengerWin = event.getCustomId().split(":")[2].equals("true");
 		long winnerId = isChallengerWin ? challenge.getChallengerUserId() : challenge.getAcceptorUserId();
 		long loserId = isChallengerWin ? challenge.getAcceptorUserId() : challenge.getChallengerUserId();
@@ -27,17 +28,17 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		String loserTag = isChallengerWin ? challenge.getAcceptorTag() : challenge.getChallengerTag();
 
 		MatchResult matchResult = null;//new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, false);
-		eloResults = service.updateRatingsAndSaveMatchAndPlayers(matchResult);
-		service.saveMatch(matchResult);
+		eloResults = dbservice.updateRatingsAndSaveMatchAndPlayers(matchResult);
+		dbservice.saveMatchResult(matchResult);
 
 		postToDisputeChannel(String.format(
 				"%s has ruled this match a win :arrow_up: for <@%s> and a loss :arrow_down: for <@%s>.",
 				moderatorName, winnerId, loserId));
-		bot.postToResultChannel(game, matchResult);
-		bot.updateLeaderboard(game);
+		bot.postToResultChannel(matchResult);
+		bot.refreshLeaderboard(null);
 		updateMessages();
 
-		service.deleteChallenge(challenge);
+		dbservice.deleteChallenge(challenge);
 
 		addMatchSummarizeToQueue(matchResult);
 		event.acknowledge().subscribe();
@@ -48,7 +49,7 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		winnerMessage = new MessageUpdater(winnerMessage)
 				.addLine(String.format("%s has ruled this match as a win :arrow_up: for you.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
-						service.formatRating(eloResults[0]), service.formatRating(eloResults[2])))
+						FormatTools.formatRating(eloResults[0]), FormatTools.formatRating(eloResults[2])))
 				.makeAllItalic()
 				.resend()
 				.withComponents(none)
@@ -57,7 +58,7 @@ public class RuleAsWin extends ButtonCommandRelatedToDispute {
 		loserMessage = new MessageUpdater(loserMessage)
 				.addLine(String.format("%s has ruled this match as a loss :arrow_down: for you.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
-						service.formatRating(eloResults[1]), service.formatRating(eloResults[3])))
+						FormatTools.formatRating(eloResults[1]), FormatTools.formatRating(eloResults[3])))
 				.makeAllItalic()
 				.resend()
 				.withComponents(none)

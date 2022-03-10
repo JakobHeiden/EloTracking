@@ -19,17 +19,17 @@ public class Buttons {
 
 	public static Button win(UUID matchId) {
 		return Button.primary("win:" + matchId.toString(),
-				Emojis.arrowUp, "Win");
+				Emojis.win, "Win");
 	}
 
 	public static Button lose(UUID matchId) {
 		return Button.primary("lose:" + matchId.toString(),
-				Emojis.arrowDown, "Lose");
+				Emojis.loss, "Lose");
 	}
 
 	public static Button draw(UUID matchId) {
 		return Button.primary("draw:" + matchId.toString(),
-				Emojis.leftRightArrow, "Draw");
+				Emojis.draw, "Draw");
 	}
 
 	public static Button cancel(UUID matchId) {
@@ -71,12 +71,12 @@ public class Buttons {
 	public static Button ruleAsWin(long challengeId, boolean isChallengerWin, String winnerName) {
 		return Button.primary(String.format("ruleaswin:%s:%s",
 						challengeId, isChallengerWin),
-				Emojis.arrowUp, "Rule the match a win for " + winnerName);
+				Emojis.win, "Rule the match a win for " + winnerName);
 	}
 
 	public static Button ruleAsDraw(long challengeId) {
 		return Button.primary("ruleasdraw:" + challengeId,
-				Emojis.leftRightArrow, "Rule the match a draw");
+				Emojis.draw, "Rule the match a draw");
 	}
 
 	public static Button ruleAsCancel(long challengeId) {

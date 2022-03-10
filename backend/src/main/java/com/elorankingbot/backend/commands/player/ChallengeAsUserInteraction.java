@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
@@ -11,7 +11,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 public class ChallengeAsUserInteraction {
 
 	private final UserInteractionEvent event;
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final TimedTaskQueue queue;
 

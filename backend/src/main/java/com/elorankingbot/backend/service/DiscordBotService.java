@@ -2,30 +2,37 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
-import com.google.common.base.Strings;
+import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +42,7 @@ public class DiscordBotService {
 
 	@Getter
 	private final GatewayDiscordClient client;
-	private final EloRankingService service;
+	private final DBService dbservice;
 	private final ApplicationService applicationService;
 	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
@@ -51,7 +58,7 @@ public class DiscordBotService {
 
 	public DiscordBotService(Services services) {
 		this.client = services.client;
-		this.service = services.service;
+		this.dbservice = services.service;
 		this.botId = client.getSelfId().asLong();
 		this.props = services.props;
 		applicationService = client.getRestClient().getApplicationService();
@@ -80,6 +87,10 @@ public class DiscordBotService {
 		return client.getUserById(Snowflake.of(userId)).flatMap(User::getPrivateChannel);
 	}
 
+	public Mono<Channel> getChannelById(long channelId) {
+		return client.getChannelById(Snowflake.of(channelId));
+	}
+
 	public Mono<Message> sendToUser(long userId, String text) {
 		return client.getUserById(Snowflake.of(userId)).block()
 				.getPrivateChannel().block()
@@ -100,100 +111,67 @@ public class DiscordBotService {
 		return client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId));
 	}
 
+	public Mono<Message> getPlayerMessage(Player player, Match match) {
+		return getMessageById(match.getMessageId(player.getId()), match.getPrivateChannelId(player.getId()));
+	}
+
 	public Mono<Guild> getGuildById(long guildId) {
 		return client.getGuildById(Snowflake.of(guildId));
 	}
 
-	public void postToResultChannel(Game game, MatchResult matchResult) {
-		/*
+	// Channels
+	public TextChannel createResultChannel(Server server) {
+		Guild guild = getGuildById(server.getGuildId()).block();
+		TextChannel resultChannel = guild.createTextChannel("Elo Rating match results")
+				.withPermissionOverwrites(PermissionOverwrite.forRole(
+						Snowflake.of(guild.getId().asLong()),
+						PermissionSet.none(),
+						PermissionSet.of(Permission.SEND_MESSAGES)))
+				.block();
+		server.setResultChannelId(resultChannel.getId().asLong());
+		return resultChannel;
+	}
+
+	public Message createLeaderboardChannelAndMessage(Server server) {
+		Guild guild = getGuildById(server.getGuildId()).block();
+		TextChannel leaderboardChannel = guild.createTextChannel("Elo Rankings")
+				.withPermissionOverwrites(PermissionOverwrite.forRole(
+						Snowflake.of(guild.getId().asLong()),
+						PermissionSet.none(),
+						PermissionSet.of(Permission.SEND_MESSAGES)))
+				.block();
+		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();
+		server.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
+		server.setLeaderboardChannelId(leaderboardChannel.getId().asLong());
+		return leaderboardMessage;
+	}
+
+	public void postToResultChannel(MatchResult matchResult) {
+		Server server = matchResult.getGame().getServer();
 		TextChannel resultChannel;
 		try {
-			resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
+			resultChannel = (TextChannel) client.getChannelById(Snowflake.of(server.getResultChannelId())).block();
 		} catch (ClientException e) {
-			resultChannel = Setup.createResultChannel(getGuildById(game.getGuildId()).block(), game);
-			game.setResultChannelId(resultChannel.getId().asLong());
-			service.saveGame(game);
+			resultChannel = createResultChannel(server);
+			dbservice.saveServer(server);
 		}
-		resultChannel.createMessage(String.format("%s (%s, +%s) %s %s (%s, -%s)",
-						match.getWinnerTag(),
-						formatRating(match.getWinnerNewRating()),
-						formatRating(match.getWinnerNewRating() - match.getWinnerOldRating()),
-						match.isDraw() ? "drew" : "defeated",
-						match.getLoserTag(),
-						formatRating(match.getLoserNewRating()),
-						formatRating(match.getLoserOldRating() - match.getLoserNewRating())))
-				.subscribe();
-
-		 */
+		resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).subscribe();
 	}
 
-	// TODO setting ob wins/losses angezeigt wird
-	public void updateLeaderboard(Game game) {
-		/*
+	public void refreshLeaderboard(Server server) {
 		Message leaderboardMessage;
 		try {
-			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+			leaderboardMessage = getMessageById(server.getLeaderboardMessageId(), server.getLeaderboardChannelId()).block();
 		} catch (ClientException e) {
-			Setup.createLeaderboardChannelAndMessage(getGuildById(game.getGuildId()).block(), game);
-			service.saveGame(game);
-			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+			leaderboardMessage = createLeaderboardChannelAndMessage(server);
+			dbservice.saveServer(server);
 		}
 
-		List<Player> playerList = service.getRankings(game.getGuildId());
-		int numTotalPlayers = playerList.size();
-		if (numTotalPlayers > game.getLeaderboardLength())
-			playerList = playerList.subList(0, game.getLeaderboardLength());
-
-		leaderboardMessage.edit().withContent("\n").withEmbeds(
-						generateLeaderboardEmbed(playerList, numTotalPlayers, game, 1, -1))
-				.subscribe();
-
-		 */
-	}
-
-	public EmbedCreateSpec generateLeaderboardEmbed(List<Player> playerList, int numTotalPlayers, Game game,
-													int rankOffset, int rankToHighlight) {
-		return null;
-		/*
-		String leaderboardString = "";
-		for (int i = 0; i < playerList.size(); i++) {
-			Player player = playerList.get(i);
-			String numDrawsString = game.isAllowDraw() ? entryOf(player.getDraws(), embedWinsSpaces) : "";
-			String leaderboardEntry = entryOf(i + rankOffset, embedRankSpaces)
-					+ entryOf(player.getRating(), embedRatingSpaces)
-					+ entryOf(player.getWins(), embedWinsSpaces)
-					+ entryOf(player.getLosses(), embedWinsSpaces)
-					+ numDrawsString
-					+ "  " + player.getTag() + "\n";
-			if (i == rankToHighlight) leaderboardEntry = "+" + leaderboardEntry.substring(1);
-			leaderboardString += leaderboardEntry;
+		List<EmbedCreateSpec> embeds = new ArrayList<>();
+		for (Game game : server.getGames().values()) {
+			embeds.add(EmbedBuilder.createRankingsEmbed(dbservice.getLeaderboard(game)));
 		}
-		if (leaderboardString.equals("")) leaderboardString = "no games played so far";
-		leaderboardString = "```diff\n" + leaderboardString + "```";
-
-		return EmbedCreateSpec.builder()
-				.title(game.getName() + " Rankings")
-				.addField(EmbedCreateFields.Field.of(
-						game.isAllowDraw() ? embedNameWithDraws : embedName,
-						leaderboardString,
-						true))
-				.footer(String.format("%s players total", numTotalPlayers), null)
-				.build();
-
-		 */
-	}
-
-	private String entryOf(String data, int totalSpaces) {
-		data = Strings.padEnd(data, (totalSpaces + data.length()) / 2, ' ');
-		return Strings.padStart(data, totalSpaces, ' ');
-	}
-
-	private String entryOf(int data, int totalSpaces) {
-		return entryOf(String.valueOf(data), totalSpaces);
-	}
-
-	private String entryOf(double data, int totalSpaces) {
-		return entryOf(EloRankingService.formatRating(data), totalSpaces);
+		leaderboardMessage.edit().withContent(Possible.of(Optional.empty())).withEmbedsOrNull(embeds).subscribe();
 	}
 
 	public Mono<Message> getChallengerMessage(ChallengeModel challenge) {// TODO schauen wo das noch uber client gemacht wird
