@@ -13,6 +13,7 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
@@ -21,6 +22,7 @@ import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.Map;
@@ -35,6 +37,8 @@ public class EventParser {
 	private final DBService service;
 	private final DiscordBotService bot;
 	private final Map<String, String> commandStringToClassName;
+	private final Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory;
+	private final Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory;
 
 	public EventParser(Services services, CommandClassScanner scanner,
 					   Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory,
@@ -43,27 +47,25 @@ public class EventParser {
 		this.services = services;
 		this.service = services.service;
 		this.bot = services.bot;
+		this.buttonCommandFactory = buttonCommandFactory;
+		this.slashCommandFactory = slashCommandFactory;
 		GatewayDiscordClient client = services.client;
 		ApplicationService applicationService = client.getRestClient().getApplicationService();
 		long botId = client.getSelfId().asLong();
 		this.commandStringToClassName = scanner.getCommandStringToClassName();
 
 		client.on(ChatInputInteractionEvent.class)
-				.map(slashCommandFactory::apply)
-				.doOnNext(bot::logCommand)
-				.doOnNext(SlashCommand::execute)
+				.doOnNext(this::createAndExecuteSlashCommand)
 				.doOnError(this::handleClientException)
 				.subscribe();
 
 		client.on(ButtonInteractionEvent.class)
-				.map(buttonCommandFactory::apply)
-				.doOnNext(bot::logCommand)
-				.doOnNext(ButtonCommand::execute)
+				.doOnNext(this::createAndExecuteButtonCommand)
 				.doOnError(this::handleClientException)
 				.subscribe();
 
 		client.on(UserInteractionEvent.class)
-				.map(userInteractionChallengeFactory::apply)
+				.map(userInteractionChallengeFactory)
 				.doOnNext(bot::logCommand)
 				.doOnNext(ChallengeAsUserInteraction::execute)
 				.doOnError(this::handleClientException)
@@ -104,6 +106,20 @@ public class EventParser {
 			throwable.printStackTrace();
 			bot.sendToOwner("Hooks::onErrorDropped: " + throwable.getMessage());
 		});
+	}
+
+	@Transactional
+	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
+		SlashCommand command = slashCommandFactory.apply(event);
+		bot.logCommand(command);
+		command.execute();
+	}
+
+	@Transactional
+	void createAndExecuteButtonCommand(ButtonInteractionEvent event) {
+		ButtonCommand command = buttonCommandFactory.apply(event);
+		bot.logCommand(command);
+		command.execute();
 	}
 
 	private void handleClientException(Throwable throwable) {
