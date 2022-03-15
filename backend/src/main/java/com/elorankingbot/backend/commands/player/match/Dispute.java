@@ -2,12 +2,14 @@ package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.TextChannelCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.component.ActionComponent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Category;
@@ -19,6 +21,7 @@ import discord4j.rest.util.PermissionSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Dispute extends ButtonCommandRelatedToMatch {
 
@@ -92,28 +95,19 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 						"this channel. Please state your view of the conflict so a moderator can resolve it. " +
 						"Note that the Buttons in this channel can only be used by <@&%s>.", server.getModRoleId()))
 				.withEmbeds(embedCreateSpec)
-				.withComponents(none)
+				.withComponents(createActionRow())
 				.subscribe();
 	}
 
 	private ActionRow createActionRow() {
-		match.getTeams().forEach(team -> {
-
-		});
-		return ActionRow.of(none);
-		/*
-		if (allowDraw) return ActionRow.of(
-
-				// TODO! Buttons, ActionRow anpassen
-				Buttons.ruleAsWin(challenge.getId(), true, challengerTag),
-				Buttons.ruleAsWin(challenge.getId(), false, acceptorTag),
-				Buttons.ruleAsDraw(challenge.getId()),
-				Buttons.ruleAsCancel(challenge.getId()));
-		else return ActionRow.of(
-				Buttons.ruleAsWin(challenge.getId(), true, challengerTag),
-				Buttons.ruleAsWin(challenge.getId(), false, acceptorTag),
-				Buttons.ruleAsCancel(challenge.getId()));
-
-		 */
+		int numTeams = match.getTeams().size();
+		UUID matchId = match.getId();
+		List<ActionComponent> buttons = new ArrayList<>(numTeams);
+		for (int i = 0; i < numTeams; i++) {
+			buttons.add(Buttons.ruleAsWin(matchId, i));
+		}
+		if (game.isAllowDraw())	buttons.add(Buttons.ruleAsDraw(matchId));
+		buttons.add(Buttons.ruleAsCancel(matchId));
+		return ActionRow.of(buttons);
 	}
 }
