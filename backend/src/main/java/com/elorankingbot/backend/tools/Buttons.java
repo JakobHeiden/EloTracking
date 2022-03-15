@@ -67,19 +67,18 @@ public class Buttons {
 	}
 
 	// Dispute
-	public static Button ruleAsWin(long challengeId, boolean isChallengerWin, String winnerName) {
-		return Button.primary(String.format("ruleaswin:%s:%s",
-						challengeId, isChallengerWin),
-				Emojis.win, "Rule the match a win for " + winnerName);
+	public static Button ruleAsWin(UUID matchId, int teamIndex) {
+		return Button.primary(String.format("ruleaswin:%s:%s", matchId, teamIndex),
+				Emojis.win, "Rule the match a win for team #" + (teamIndex + 1));
 	}
 
-	public static Button ruleAsDraw(long challengeId) {
-		return Button.primary("ruleasdraw:" + challengeId,
+	public static Button ruleAsDraw(UUID matchId) {
+		return Button.primary("ruleasdraw:" + matchId,
 				Emojis.draw, "Rule the match a draw");
 	}
 
-	public static Button ruleAsCancel(long challengeId) {
-		return Button.danger("ruleascancel:" + challengeId,
+	public static Button ruleAsCancel(UUID matchId) {
+		return Button.danger("ruleascancel:" + matchId,
 				Emojis.crossMark, "Rule the match as canceled");
 	}
 
