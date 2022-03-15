@@ -178,14 +178,12 @@ public class Join extends SlashCommand {
 	}
 
 	private void sendPlayerMessages() {
-		String embedTitle = String.format("Your match of %s %s is starting. " +// TODO queue-name weg wenn nur 1 queue
-						"I removed you from all other queues you joined on this server, if any. " + // TODO auflisten welche queues
-						"Please play the match and come back to report the result afterwards.",
-				match.getQueue().getGame().getName(),
-				match.getQueue().getName());
 		List<Mono<PrivateChannel>> monos = new ArrayList<>();
 		for (User user : allUsers) {
-			EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, activeUser.getTag());
+			EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(
+							EmbedBuilder.makeTitleForIncompleteMatch(match, false, false),
+							match,
+							activeUser.getTag());
 			monos.add(bot.getPrivateChannelByUserId(user.getId().asLong())
 					.doOnNext(privateChannel -> {
 						Message message = privateChannel.createMessage(embedCreateSpec)
@@ -209,4 +207,5 @@ public class Join extends SlashCommand {
 				Buttons.lose(matchId),
 				Buttons.cancel(matchId));
 	}
+
 }

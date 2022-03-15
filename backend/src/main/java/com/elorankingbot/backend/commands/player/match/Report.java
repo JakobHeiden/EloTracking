@@ -3,12 +3,13 @@ package com.elorankingbot.backend.commands.player.match;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.RatingCalculations;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.spec.EmbedCreateSpec;
 
-import java.util.List;
+import java.util.UUID;
 
 import static com.elorankingbot.backend.model.Match.ReportIntegrity.*;
 import static com.elorankingbot.backend.tools.FormatTools.formatRating;
@@ -23,7 +24,12 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
-		match.report(activePlayerId, reportStatus);
+		if (match.isDispute()) {
+			event.acknowledge().subscribe();
+			return;
+		}
+
+		match.reportAndSetConflictData(activePlayerId, reportStatus);
 		Match.ReportIntegrity reportIntegrity = match.getReportIntegrity();
 
 		if (reportIntegrity == INCOMPLETE) {
@@ -36,23 +42,24 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			dbservice.saveMatchResult(matchResult);
 			dbservice.deleteMatch(match);
 		}
-		if (reportIntegrity == CONFLICT) processConflictingReporting();
+		if (reportIntegrity == CONFLICT) {
+			processConflictingReporting();
+			dbservice.saveMatch(match);
+		}
 		event.acknowledge().subscribe();
 	}
 
 	private void processIncompleteReporting() {
+		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
+
 		for (Player player : match.getPlayers()) {
 			bot.getPlayerMessage(player, match)
 					.subscribe(message -> {
-						if (player.getUserId() == activeUserId) {
-							String activeEmbedTitle = "Not all players have reported yet.";
-							EmbedCreateSpec activeEmbedCreateSpec = EmbedBuilder.createMatchEmbed(activeEmbedTitle, match, activeUser.getTag());
-							getActiveMessage().block().edit().withEmbeds(activeEmbedCreateSpec).withComponents(none).block();
-						} else {
-							String embedTitle = message.getEmbeds().get(0).getTitle().get();
-							EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, activeUser.getTag());
-							message.edit().withEmbeds(embedCreateSpec).subscribe();
-						}
+						boolean hasPlayerReported = match.getReportStatus(player.getId()) != ReportStatus.NOT_YET_REPORTED;
+						System.out.println(hasPlayerReported);
+						String embedTitle = EmbedBuilder.makeTitleForIncompleteMatch(match, hasPlayerReported, false);
+						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, activeUser.getTag());
+						message.edit().withEmbeds(embedCreateSpec).subscribe();
 					});
 		}
 
@@ -94,36 +101,36 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 	}
 
 	private void processConflictingReporting() {
-		List<Player> conflictingReports = match.getConflictingReports();
-		/*
-		new MessageUpdater(parentMessage)
-				.makeAllNotBold()
-				.addLine("You reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, or file a dispute.")
-				.makeLastLineBold()
-				.update()
-				.withComponents(createActionRow(challenge.getId())).subscribe();
-		new MessageUpdater(targetMessage)
-				.addLine("Your opponent reported a win :arrow_up:. Your report and that of your opponent is in conflict.")
-				.addLine("You can call for a redo of the reporting, and/or call for a cancel, " +
-						"or file a dispute.")
-				.makeLastLineBold()
-				.resend()
-				.withComponents(createActionRow(challenge.getId()))
-				.subscribe(super::updateAndSaveChallenge);
-
-		 */
+		for (Player player : match.getPlayers()) {
+			bot.getPlayerMessage(player, match)
+					.subscribe(message -> {
+						boolean hasPlayerReported = match.getReportStatus(player.getId()) != ReportStatus.NOT_YET_REPORTED;
+						String embedTitle = EmbedBuilder.makeTitleForIncompleteMatch(match, hasPlayerReported, true);
+						ActionRow actionRow = createConflictActionRow(match.getId(), game.isAllowDraw(), hasPlayerReported);
+						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, player.getTag());
+						message.edit().withEmbeds(embedCreateSpec).withComponents(actionRow).subscribe();
+					});
+		}
 	}
 
-	static ActionRow createActionRow(long challengeId) {
-		return null;
-		/*
-		return ActionRow.of(
-				Buttons.redo(challengeId),
-				Buttons.cancelOnConflict(challengeId),
-				Buttons.redoOrCancelOnConflict(challengeId),
-				Buttons.dispute(challengeId));
-
-		 */
+	static ActionRow createConflictActionRow(UUID matchId, boolean allowDraw, boolean hasPlayerReported) {
+		if (hasPlayerReported) {
+			return ActionRow.of(
+					Buttons.redo(matchId),
+					Buttons.dispute(matchId));
+		} else {
+			if (allowDraw) {
+				return ActionRow.of(
+						Buttons.win(matchId),
+						Buttons.lose(matchId),
+						Buttons.draw(matchId),
+						Buttons.dispute(matchId));
+			} else {
+				return ActionRow.of(
+						Buttons.win(matchId),
+						Buttons.lose(matchId),
+						Buttons.dispute(matchId));
+			}
+		}
 	}
 }

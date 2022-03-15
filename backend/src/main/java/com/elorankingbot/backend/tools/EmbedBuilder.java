@@ -20,6 +20,7 @@ public class EmbedBuilder {
 		return createMatchEmbedOrCompletedMatchEmbed(title, match, null, tagToHighlight);
 	}
 
+	// TODO this really needs to be two separate methods that make use of common private methods
 	private static EmbedCreateSpec createMatchEmbedOrCompletedMatchEmbed(String title, Match match, MatchResult matchResult, String tagToHighlight) {
 		MatchFinderQueue queue = match.getQueue();
 		boolean isCompletedMatch = matchResult != null;
@@ -29,7 +30,7 @@ public class EmbedBuilder {
 			String embedText = "";
 			for (Player player : players) {
 				ReportStatus reportStatus = match.getReportStatus(player.getId());
-				String reportStatusIcon = reportStatus.getEmoji().asUnicodeEmoji().get().getRaw();
+				String reportStatusIcon = " " + reportStatus.getEmoji().asUnicodeEmoji().get().getRaw();
 				if (match.getConflictingReports().contains(player)) {
 					reportStatusIcon += Emojis.exclamation.asUnicodeEmoji().get().getRaw();
 				}
@@ -49,11 +50,12 @@ public class EmbedBuilder {
 		var embedBuilder = EmbedCreateSpec.builder()
 				.title(title);
 		for (int i = 0; i < queue.getNumTeams(); i++) {
-			embedBuilder.addField(EmbedCreateFields.Field.of(
-					"Team #" + (i + 1),
-					embedTexts.get(i).replace(tagToHighlight, "**" + tagToHighlight + "**"),// TODO rating auch bold
-					true));
+			String embedText = embedTexts.get(i);// TODO rating auch bold
+			if (tagToHighlight != null) embedText = embedText.replace(tagToHighlight, "**" + tagToHighlight + "**");
+			embedBuilder.addField(EmbedCreateFields.Field.of("Team #" + (i + 1), embedText, true));
 		}
+		if (isCompletedMatch && match.isOrWasConflict()) embedBuilder.footer(EmbedCreateFields.Footer.of(
+				"There was conflicting reporting but it has been resolved by players redoing their reports.", null));
 
 		return embedBuilder.build();
 	}
@@ -125,4 +127,23 @@ public class EmbedBuilder {
 		return entryOf(FormatTools.formatRating(data), totalSpaces);
 	}
 
+	public static String makeTitleForIncompleteMatch(Match match, boolean hasPlayerReported, boolean isConflict) {
+		if (isConflict) {
+			if (hasPlayerReported) {
+				return "There is conflicting reporting. You can redo your reporting, or file a dispute.";
+			} else {
+				return "There is conflicting reporting. You can file a dispute.";
+			}
+		} else {
+			if (hasPlayerReported) {
+				return "Not all players have reported yet.";
+			} else {
+				return String.format("Your match of %s %s is starting. " +// TODO queue-name weg wenn nur 1 queue
+								"I removed you from all other queues you joined on this server, if any. " + // TODO auflisten welche queues
+								"Please play the match and come back to report the result afterwards.",
+						match.getQueue().getGame().getName(),
+						match.getQueue().getName());
+			}
+		}
+	}
 }

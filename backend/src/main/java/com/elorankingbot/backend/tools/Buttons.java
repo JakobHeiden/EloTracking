@@ -39,7 +39,7 @@ public class Buttons {
 
 	public static Button redo(UUID matchId) {
 		return Button.primary("redo:" + matchId.toString(),
-				Emojis.redoArrow, "Call for a redo");
+				Emojis.redoArrow, "Redo your report");
 	}
 
 	public static Button cancelOnConflict(UUID matchId) {
@@ -63,8 +63,7 @@ public class Buttons {
 	}
 
 	public static Button dispute(UUID matchId) {
-		return Button.secondary("dispute:" + matchId.toString(),
-				Emojis.exclamation, "File a dispute");
+		return Button.secondary("dispute:" + matchId.toString(), "File a dispute");
 	}
 
 	// Dispute
