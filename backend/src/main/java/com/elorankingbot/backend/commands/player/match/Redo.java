@@ -2,11 +2,17 @@ package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.ReportStatus;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.Buttons;
+import com.elorankingbot.backend.tools.EmbedBuilder;
+import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
+import discord4j.core.spec.EmbedCreateSpec;
 
 public class Redo extends ButtonCommandRelatedToMatch {
 
@@ -15,23 +21,19 @@ public class Redo extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
-		/*
-		boolean bothCalledForRedo;
-		if (isChallengerCommand) {
-			challenge.setChallengerCalledForRedo(true);
-			bothCalledForRedo = challenge.isAcceptorCalledForRedo();
-		} else {
-			challenge.setAcceptorCalledForRedo(true);
-			bothCalledForRedo = challenge.isChallengerCalledForRedo();
-		}
-
-		if (!bothCalledForRedo) oneCalledForRedo();
-		if (bothCalledForRedo) bothCalledForRedo(parentMessage, targetMessage, challenge, game, dbservice);
+		Player activePlayer = match.getPlayer(activeUserId);
+		bot.getPlayerMessage(activePlayer, match)
+				.subscribe(message -> {
+					String embedTitle = "There is conflicting reporting. You can file a dispute.";
+					ActionRow actionRow = Report.createConflictActionRow(match.getId(), game.isAllowDraw(), false);
+					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, activePlayer.getTag());
+					message.edit().withEmbeds(embedCreateSpec).withComponents(actionRow).subscribe();
+				});
 		event.acknowledge().subscribe();
 	}
 
+	/* TODO! weg
 	private void oneCalledForRedo() {
-		/*
 		new MessageUpdater(parentMessage)
 				.makeAllNotBold()
 				.addLine("You called for a redo :leftwards_arrow_with_hook:. If your opponent does as well, " +
@@ -50,13 +52,10 @@ public class Redo extends ButtonCommandRelatedToMatch {
 						Buttons.agreeToRedo(challenge.getId()),
 						Buttons.dispute(challenge.getId())))
 				.subscribe(super::updateAndSaveChallenge);
-
-		 */
 	}
 
 	private void bothCalledForRedo(Message parentMessage, Message targetMessage, ChallengeModel challenge, Game game,
-								  DBService service) {
-		/*
+								   DBService service) {
 		challenge.redo();
 
 		new MessageUpdater(parentMessage)
@@ -73,21 +72,17 @@ public class Redo extends ButtonCommandRelatedToMatch {
 				.resend()
 				.withComponents(createActionRow(challenge.getId(), game.isAllowDraw()))
 				.subscribe(super::updateAndSaveChallenge);
-
-		 */
 	}
 
 	static ActionRow createActionRow(long channelId, boolean allowDraw) {
-		return null;
-		/*
 		if (allowDraw) return ActionRow.of(
 				Buttons.win(channelId),
 				Buttons.lose(channelId),
 				Buttons.draw(channelId));
 		else return ActionRow.of(
 				Buttons.win(channelId),
-				Buttons.lose(channelId));
 
-		 */
-	}
+			Buttons.lose(channelId));
+			}
+	 */
 }

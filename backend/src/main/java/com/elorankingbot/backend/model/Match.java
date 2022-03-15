@@ -1,8 +1,6 @@
 package com.elorankingbot.backend.model;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.annotation.Transient;
@@ -13,8 +11,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.elorankingbot.backend.model.ReportStatus.*;
+import static com.elorankingbot.backend.model.Match.ReportIntegrity.*;
 
-@Data
+@Getter
 @Document(collection = "match")
 public class Match {
 
@@ -29,25 +28,32 @@ public class Match {
 	@DBRef(lazy = true)
 	private Server server;
 	private String gameId, queueId;
+	@Setter
+	@Getter
+	private boolean isDispute;
+	@Getter
+	private boolean isOrWasConflict;
 	private List<List<Player>> teams;
 	private Map<UUID, ReportStatus> playerIdToReportStatus;
 	private Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
-	@Transient
-	private MatchFinderQueue queue;
-
-	@Transient
-	@Setter(AccessLevel.NONE)
 	private List<Player> conflictingReports;
-	@Transient
-	@Setter(AccessLevel.NONE)
 	private ReportIntegrity reportIntegrity;
+	@Transient
+	@Getter
+	private MatchFinderQueue queue;
+	@Transient
+	@Getter
+	private Game game;
 
+	// Match is constructed initially from queue, but persisted with server instead since queue has no collection
 	public Match(MatchFinderQueue queue, List<List<Player>> teams) {
 		this.id = UUID.randomUUID();
+		this.queue = queue;
 		this.server = queue.getGame().getServer();
 		this.gameId = queue.getGame().getName();
 		this.queueId = queue.getName();
-		this.queue = queue;
+		this.isDispute = false;
+		this.isOrWasConflict = false;
 		this.teams = teams;
 		this.playerIdToReportStatus = new HashMap<>(queue.getNumPlayers());
 		for (Player player : this.teams.stream().flatMap(Collection::stream).toList()) {
@@ -55,33 +61,39 @@ public class Match {
 		}
 		this.playerIdToMessageId = new HashMap<>(queue.getNumPlayers());
 		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayers());
-
 		this.conflictingReports = new ArrayList<>();
+		this.reportIntegrity = INCOMPLETE;
 	}
 
-	// there is no db collection for MatchFinderQueue, so queue must be extracted from server
 	@PersistenceConstructor
-	public Match(UUID id, Server server, String gameId, String queueId, List<List<Player>> teams, Map<UUID,
-			ReportStatus> playerIdToReportStatus, Map<UUID, Long> playerIdToMessageId,
-				 Map<UUID, Long> playerIdToPrivateChannelId) {
-		this.queue = server.getGame(gameId).getQueue(queueId);
+	public Match(UUID id, Server server, String gameId, String queueId, boolean isDispute, boolean isOrWasConflict,
+				 List<List<Player>> teams, Map<UUID, ReportStatus> playerIdToReportStatus, Map<UUID, Long> playerIdToMessageId,
+				 Map<UUID, Long> playerIdToPrivateChannelId, List<Player> conflictingReports, ReportIntegrity reportIntegrity) {
 		this.id = id;
 		this.server = server;
 		this.gameId = gameId;
 		this.queueId = queueId;
+		this.game = server.getGame(gameId);
+		this.queue = game.getQueue(queueId);
+		this.isDispute = isDispute;
+		this.isOrWasConflict = isOrWasConflict;
 		this.teams = teams;
 		this.playerIdToReportStatus = playerIdToReportStatus;
 		this.playerIdToMessageId = playerIdToMessageId;
 		this.playerIdToPrivateChannelId = playerIdToPrivateChannelId;
+		this.conflictingReports = conflictingReports;
+		this.reportIntegrity = reportIntegrity;
 	}
 
-	public void report(UUID playerId, ReportStatus reportStatus) {
+	public void reportAndSetConflictData(UUID playerId, ReportStatus reportStatus) {
 		playerIdToReportStatus.put(playerId, reportStatus);
 		setConflictingReports();
 		setReportIntegrity();
+		isOrWasConflict = isOrWasConflict || reportIntegrity == CONFLICT;
 	}
 
 	private void setConflictingReports() {
+		MatchFinderQueue queue = server.getGame(gameId).getQueue(queueId);
 		conflictingReports = new ArrayList<>();
 		List<ReportStatus> teamReports = new ArrayList<>(queue.getNumTeams());
 
@@ -170,7 +182,12 @@ public class Match {
 	}
 
 	public List<Player> getPlayers() {
-		return this.getTeams().stream().flatMap(groups -> groups.stream()).collect(Collectors.toList());
+		return this.getTeams().stream().flatMap(Collection::stream).collect(Collectors.toList());
+	}
+
+	public Player getPlayer(long userId) {
+		return this.getTeams().stream().flatMap(Collection::stream)
+				.filter(player -> player.getUserId() == userId).findAny().get();
 	}
 
 	public ReportStatus getReportStatus(UUID playerId) {

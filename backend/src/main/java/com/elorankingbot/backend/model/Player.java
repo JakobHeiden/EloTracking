@@ -23,11 +23,10 @@ public class Player  {
     private static final int PERMABANNED = -1;
     private static final int NOT_BANNED = -2;
 
-    // TODO! tag als id? modelle nochmal anschauen
     @Id
     private UUID id;
     private long userId;
-    private long guildId;// TODO vllt stattdessen DBRef auf Server
+    private long guildId;
     private String tag;
     private int unbanAtTimeSlot;
     private Map<String, PlayerGameStats> gameNameToPlayerGameStats;

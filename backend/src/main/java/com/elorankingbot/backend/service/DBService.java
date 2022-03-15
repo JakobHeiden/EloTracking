@@ -52,11 +52,14 @@ public class DBService {
 		//gameDao.deleteById(guildId);
 	}
 
+	/*
 	public void resetAllPlayerRatings(long guildId) {
 		List<Player> players = playerDao.findAllByGuildId(guildId);
 		//players.forEach(player -> player.setRating(1200));
 		playerDao.saveAll(players);
 	}
+
+	 */
 
 	// Server
 	public Optional<Server> findServerByGuildId(long guildId) {
@@ -217,6 +220,10 @@ public class DBService {
 		Player player = new Player(guildId, userId, tag);
 		playerDao.save(player);
 		return player;
+	}
+
+	public Player getPlayer(long guildId, long userId) {
+		return playerDao.findById(Player.generateId(guildId, userId)).get();
 	}
 
 	// Rankings
