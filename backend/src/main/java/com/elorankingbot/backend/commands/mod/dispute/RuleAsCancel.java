@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 public class RuleAsCancel extends ButtonCommandRelatedToDispute {

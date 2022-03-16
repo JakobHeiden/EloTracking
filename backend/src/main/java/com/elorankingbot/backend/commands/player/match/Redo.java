@@ -1,17 +1,10 @@
 package com.elorankingbot.backend.commands.player.match;
 
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.model.ReportStatus;
-import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.EmbedBuilder;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.entity.Message;
 import discord4j.core.spec.EmbedCreateSpec;
 
 public class Redo extends ButtonCommandRelatedToMatch {

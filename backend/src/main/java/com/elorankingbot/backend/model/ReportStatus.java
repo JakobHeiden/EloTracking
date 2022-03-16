@@ -8,9 +8,9 @@ import discord4j.core.object.reaction.ReactionEmoji;
 public enum ReportStatus {
 
 	NOT_YET_REPORTED(Emojis.notYetReported, -1, null, null),
-	WIN(Emojis.win, 1, "won", "Win"),
-	LOSE(Emojis.loss, 0, "lost", "Loss"),
-	DRAW(Emojis.draw, .5, "drew", "Draw"),
+	WIN(Emojis.win, 1, "won", "win"),// TODO das emoji ueber den value holen?
+	LOSE(Emojis.loss, 0, "lost", "loss"),// noun vllt auch ueber value?
+	DRAW(Emojis.draw, .5, "drew", "draw"),
 	CANCEL(Emojis.crossMark, -1, null, null);
 
 	private final ReactionEmoji emoji;
@@ -43,5 +43,9 @@ public enum ReportStatus {
 
 	public String asNoun() {
 		return asNoun;
+	}
+
+	public String asCapitalizedNoun() {
+		return asNoun.substring(0, 1).toUpperCase() + asNoun.substring(1);
 	}
 }

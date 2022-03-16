@@ -5,8 +5,6 @@ import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.channel.TextChannelCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionComponent;
