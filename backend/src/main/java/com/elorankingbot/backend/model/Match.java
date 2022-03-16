@@ -32,6 +32,7 @@ public class Match {
 	@Getter
 	private boolean isDispute;
 	@Getter
+	@Setter
 	private boolean isOrWasConflict;
 	private List<List<Player>> teams;
 	private Map<UUID, ReportStatus> playerIdToReportStatus;
@@ -175,6 +176,10 @@ public class Match {
 				reportIntegrity = ReportIntegrity.COMPLETE;
 			}
 		}
+	}
+
+	public int getNumTeams() {
+		return teams.size();
 	}
 
 	public int getNumPlayers() {// TODO vllt private?

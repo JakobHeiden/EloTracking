@@ -1,74 +1,69 @@
 package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.PlayerMatchResult;
+import com.elorankingbot.backend.service.RatingCalculations;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.FormatTools;
-import com.elorankingbot.backend.tools.MessageUpdater;
+import com.elorankingbot.backend.tools.EmbedBuilder;
+import com.elorankingbot.backend.tools.Emojis;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.entity.Message;
+import discord4j.core.spec.EmbedCreateSpec;
+
+import static com.elorankingbot.backend.model.ReportStatus.*;
+import static com.elorankingbot.backend.tools.FormatTools.formatRating;
 
 public class RuleAsWin extends ButtonCommandRelatedToDispute {
-
-	private double[] eloResults;
-	private boolean isChallengerWin;
 
 	public RuleAsWin(ButtonInteractionEvent event, Services services) {
 		super(event, services);
 	}
 
 	public void execute() {
-		if (!isByModeratorOrAdmin()) return;
+		if (!isByModeratorOrAdminDoReply()) return;
 
-		dbservice.addNewPlayerIfPlayerNotPresent(guildId, challenge.getChallengerUserId());
-		dbservice.addNewPlayerIfPlayerNotPresent(guildId, challenge.getAcceptorUserId());
-		isChallengerWin = event.getCustomId().split(":")[2].equals("true");
-		long winnerId = isChallengerWin ? challenge.getChallengerUserId() : challenge.getAcceptorUserId();
-		long loserId = isChallengerWin ? challenge.getAcceptorUserId() : challenge.getChallengerUserId();
-		String winnerTag = isChallengerWin ? challenge.getChallengerTag() : challenge.getAcceptorTag();
-		String loserTag = isChallengerWin ? challenge.getAcceptorTag() : challenge.getChallengerTag();
-
-		MatchResult matchResult = null;//new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, false);
-		eloResults = dbservice.updateRatingsAndSaveMatchAndPlayers(matchResult);
+		int winningTeamIndex = Integer.parseInt(event.getCustomId().split(":")[2]);
+		for (int i = 0; i < match.getNumTeams(); i++) {
+			for (Player player : match.getTeams().get(i)) {
+				match.reportAndSetConflictData(player.getId(), i == winningTeamIndex ? WIN : LOSE);
+			}
+		}
+		match.setOrWasConflict(false);// TODO dirty hack! EmbedBuilder neu machen!
+		MatchResult matchResult = RatingCalculations.generateMatchResult(match);
+		updatePlayerMessages(matchResult);
 		dbservice.saveMatchResult(matchResult);
-
-		postToDisputeChannel(String.format(
-				"%s has ruled this match a win :arrow_up: for <@%s> and a loss :arrow_down: for <@%s>.",
-				moderatorName, winnerId, loserId));
+		dbservice.deleteMatch(match);
+		postToDisputeChannelAndUpdateButtons(String.format(
+				"**%s has ruled this match a win %s for team #%s.**",// TODO! hier auch tags, oder nur tags
+				moderatorName, Emojis.win.asUnicodeEmoji().get().getRaw(), winningTeamIndex + 1));
 		bot.postToResultChannel(matchResult);
-		bot.refreshLeaderboard(null);
-		updateMessages();
+		bot.refreshLeaderboard(server);
 
-		dbservice.deleteChallenge(challenge);
 
-		addMatchSummarizeToQueue(matchResult);
+		// TODO! channels closen, sind die pings sinnvoll? was ist mit mentions?
+
+		//addMatchSummarizeToQueue(matchResult);
 		event.acknowledge().subscribe();
 	}
 
-	private void updateMessages() {
-		Message winnerMessage = isChallengerWin ? challengerMessage : acceptorMessage;
-		winnerMessage = new MessageUpdater(winnerMessage)
-				.addLine(String.format("%s has ruled this match as a win :arrow_up: for you.", moderatorName))
-				.addLine(String.format("Your rating went from %s to %s",
-						FormatTools.formatRating(eloResults[0]), FormatTools.formatRating(eloResults[2])))
-				.makeAllItalic()
-				.resend()
-				.withComponents(none)
-				.block();
-		Message loserMessage = isChallengerWin ? acceptorMessage : challengerMessage;
-		loserMessage = new MessageUpdater(loserMessage)
-				.addLine(String.format("%s has ruled this match as a loss :arrow_down: for you.", moderatorName))
-				.addLine(String.format("Your rating went from %s to %s",
-						FormatTools.formatRating(eloResults[1]), FormatTools.formatRating(eloResults[3])))
-				.makeAllItalic()
-				.resend()
-				.withComponents(none)
-				.block();
-		if (isChallengerWin) {
-			super.updateChallengerMessageIdAndSaveChallenge(winnerMessage);
-			super.updateAcceptorMessageIdAndSaveChallenge(loserMessage);
-		} else {
-			super.updateChallengerMessageIdAndSaveChallenge(loserMessage);
-			super.updateAcceptorMessageIdAndSaveChallenge(winnerMessage);
+	private void updatePlayerMessages(MatchResult matchResult) {
+		for (Player player : match.getPlayers()) {
+			bot.getPlayerMessage(player, match)
+					.subscribe(message -> {
+						PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(player.getId());
+						String embedTitle = String.format("%s has ruled the match your %s %s. Your new rating: %s (%s)",
+								moderatorName,
+								playerMatchResult.getResultStatus().asNoun(),
+								playerMatchResult.getResultStatus().getEmojiAsString(),
+								formatRating(playerMatchResult.getNewRating()),
+								playerMatchResult.getRatingChangeAsString());
+						EmbedCreateSpec embedCreateSpec = EmbedBuilder
+								.createCompletedMatchEmbed(embedTitle, match, matchResult, player.getTag());
+
+						message.delete().subscribe();
+						bot.getPrivateChannelByUserId(player.getUserId()).subscribe(channel ->
+								channel.createMessage(embedCreateSpec).subscribe());
+					});
 		}
 	}
 }

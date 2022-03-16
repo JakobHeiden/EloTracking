@@ -49,6 +49,7 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 	}
 
 	private void updateMessages() {
+		/*
 		new MessageUpdater(challengerMessage)
 				.addLine(String.format("%s has ruled this as a draw :left_right_arrow:.", moderatorName))
 				.addLine(String.format("Your rating went from %s to %s",
@@ -66,5 +67,7 @@ public class RuleAsDraw extends ButtonCommandRelatedToDispute {
 				.resend()
 				.withComponents(none)
 				.subscribe(super::updateAcceptorMessageIdAndSaveChallenge);
+
+		 */
 	}
 }

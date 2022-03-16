@@ -11,6 +11,7 @@ public class CloseChannelLater extends ButtonCommand {
 	}
 
 	public void execute() {
+		event.reply("This isn't implemented yet. Please delete the channel manually.").subscribe();
 		/*
 		Game game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))
