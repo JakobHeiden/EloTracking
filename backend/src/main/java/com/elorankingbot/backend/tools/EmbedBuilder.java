@@ -64,7 +64,7 @@ public class EmbedBuilder {
 		var embedBuilder = EmbedCreateSpec.builder();
 		for (TeamMatchResult teamMatchResult : matchResult.getTeamMatchResults()) {
 			String embedTitle = String.format("%s %s\n",
-					teamMatchResult.getResultStatus().asNoun(),
+					teamMatchResult.getResultStatus().asCapitalizedNoun(),
 					teamMatchResult.getResultStatus().getEmojiAsString());
 			String embedText = "";
 			for (PlayerMatchResult playerMatchResult : teamMatchResult.getPlayerMatchResults()) {
