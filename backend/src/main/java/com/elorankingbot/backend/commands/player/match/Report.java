@@ -38,12 +38,12 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		}
 		if (reportIntegrity == COMPLETE) {
 			MatchResult matchResult = RatingCalculations.generateMatchResult(match);
-			processCompleteReporting(matchResult);
+			processMatchResult(matchResult);
 			dbservice.saveMatchResult(matchResult);
 			dbservice.deleteMatch(match);
 		}
 		if (reportIntegrity == CONFLICT) {
-			processConflictingReporting();
+			processConflict();
 			dbservice.saveMatch(match);
 		}
 		event.acknowledge().subscribe();
@@ -69,7 +69,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		//		challenge.getId(), 0L, null);
 	}
 
-	private void processCompleteReporting(MatchResult matchResult) {
+	private void processMatchResult(MatchResult matchResult) {
 		for (Player player : match.getPlayers()) {
 			bot.getPlayerMessage(player, match)
 					.subscribe(message -> {
@@ -81,7 +81,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 								formatRating(playerMatchResult.getNewRating()),
 								playerMatchResult.getRatingChangeAsString());
 						EmbedCreateSpec embedCreateSpec = EmbedBuilder
-								.createCompletedMatchEmbed(embedTitle, match, matchResult, activeUser.getTag());
+								.createCompletedMatchEmbed(embedTitle, match, matchResult, player.getTag());
 
 						message.delete().subscribe();
 						bot.getPrivateChannelByUserId(player.getUserId()).subscribe(channel ->
@@ -100,7 +100,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		 */
 	}
 
-	private void processConflictingReporting() {
+	private void processConflict() {
 		for (Player player : match.getPlayers()) {
 			bot.getPlayerMessage(player, match)
 					.subscribe(message -> {

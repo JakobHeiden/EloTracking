@@ -11,11 +11,12 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 	}
 
 	public void execute() {
-		if (!isByModeratorOrAdmin()) return;
+		if (!isByModeratorOrAdminDoReply()) return;
+		/*
 
 		dbservice.deleteChallenge(challenge);
 
-		postToDisputeChannel(String.format(
+		postToDisputeChannelAndUpdateButtons(String.format(
 				"%s has ruled the challenge to be canceled. <@%s> <@%s>",
 				moderatorName, challenge.getChallengerUserId(), challenge.getAcceptorUserId()));
 		new MessageUpdater(challengerMessage)
@@ -36,5 +37,7 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 		//queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 		//		acceptorMessage.getId().asLong(), acceptorMessage.getChannelId().asLong(), null);
 		event.acknowledge().subscribe();
+
+		 */
 	}
 }
