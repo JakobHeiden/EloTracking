@@ -130,7 +130,7 @@ public class AddQueue extends SlashCommand {
 
 		bot.deleteCommand(server, Join.class.getSimpleName()).block();
 		bot.deployCommand(server, Join.getRequest(server)).block();
-		service.saveServer(server);
+		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. Command /join has been deployed or updated",
 				queue.getName(), game.getName())).subscribe();

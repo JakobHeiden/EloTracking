@@ -20,8 +20,8 @@ public class SetRole extends SlashCommand {
 
 	public SetRole(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
-		this.adminCommands = service.getAdminCommands();
-		this.modCommands = service.getModCommands();
+		this.adminCommands = dbService.getAdminCommands();
+		this.modCommands = dbService.getModCommands();
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -62,7 +62,7 @@ public class SetRole extends SlashCommand {
 			modCommands.forEach(commandName -> bot.setAdminAndModPermissionsToModCommand(server, commandName));
 			nameOfRole = modRole.getName();
 		}
-		service.saveServer(server);
+		dbService.saveServer(server);
 
 		event.reply(String.format("Linked %s permissions to %s. This may take a minute to update on the server.",
 				adminOrMod, nameOfRole)).subscribe();

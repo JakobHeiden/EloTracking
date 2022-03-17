@@ -40,7 +40,7 @@ public class TimedTaskQueue {
 	public TimedTaskQueue(Services services,
 						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
 		this.services = services;
-		this.service = services.service;
+		this.service = services.dbService;
 		this.bot = services.bot;
 		this.client = services.client;
 		this.timedTaskService = services.timedTaskService;

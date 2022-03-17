@@ -24,7 +24,7 @@ public abstract class TimedCommand {
 	protected static final List none = new ArrayList<>();
 
 	public TimedCommand(Services services, long relationId, int time) {
-		this.service = services.service;
+		this.service = services.dbService;
 		this.bot = services.bot;
 		this.queue = services.queue;
 		this.client = services.client;

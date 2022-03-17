@@ -17,7 +17,7 @@ public class ChallengeAsUserInteraction {
 
 	public ChallengeAsUserInteraction(UserInteractionEvent event, Services services) {
 		this.event = event;
-		this.service = services.service;
+		this.service = services.dbService;
 		this.bot = services.bot;
 		this.queue = services.queue;
 	}

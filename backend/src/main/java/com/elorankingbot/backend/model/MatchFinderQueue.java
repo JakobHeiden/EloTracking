@@ -7,7 +7,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Data
@@ -50,17 +49,8 @@ public class MatchFinderQueue {
 		groups.add(group);
 	}
 
-	public void setGroups(List<Group> groups) {
-		this.groups = groups;
-	}
-
 	public void removeGroupsContainingPlayer(Player player) {
-		for (Iterator<Group> iterator = groups.iterator(); iterator.hasNext(); ) {
-			Group group = iterator.next();
-			if (group.hasPlayer(player)) {
-				iterator.remove();
-			}
-		}
+		groups.removeIf(group -> group.hasPlayer(player));
 	}
 
 	public int getNumPlayers() {

@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -28,30 +27,23 @@ public class Match {
 	@Id
 	private UUID id;
 	@DBRef(lazy = true)
-	private Server server;
-	private String gameId, queueId;
+	private final Server server;
+	private final String gameId, queueId;
 	@Setter
 	@Getter
 	private boolean isDispute;
 	@Getter
 	@Setter
 	private boolean isOrWasConflict;
-	private List<List<Player>> teams;
-	private Map<UUID, ReportStatus> playerIdToReportStatus;
-	private Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
+	private final List<List<Player>> teams;
+	private final Map<UUID, ReportStatus> playerIdToReportStatus;
+	private final Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
 	private List<Player> conflictingReports;
 	private ReportIntegrity reportIntegrity;
-	@Transient
-	@Getter
-	private MatchFinderQueue queue;
-	@Transient
-	@Getter
-	private Game game;
 
 	// Match is constructed initially from queue, but persisted with server instead since queue has no collection
 	public Match(MatchFinderQueue queue, List<List<Player>> teams) {
 		this.id = UUID.randomUUID();
-		this.queue = queue;
 		this.server = queue.getGame().getServer();
 		this.gameId = queue.getGame().getName();
 		this.queueId = queue.getName();
@@ -76,8 +68,6 @@ public class Match {
 		this.server = server;
 		this.gameId = gameId;
 		this.queueId = queueId;
-		this.game = server.getGame(gameId);
-		this.queue = game.getQueue(queueId);
 		this.isDispute = isDispute;
 		this.isOrWasConflict = isOrWasConflict;
 		this.teams = teams;
@@ -207,5 +197,13 @@ public class Match {
 
 	public long getPrivateChannelId(UUID playerId) {
 		return playerIdToPrivateChannelId.get(playerId);
+	}
+
+	public Game getGame() {
+		return server.getGame(gameId);
+	}
+
+	public MatchFinderQueue getQueue() {
+		return server.getGame(gameId).getQueue(queueId);
 	}
 }

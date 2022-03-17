@@ -23,7 +23,7 @@ public class TimedTaskService {
 	protected final List none = new ArrayList<>();
 
 	public TimedTaskService(Services services) {
-		this.service = services.service;
+		this.service = services.dbService;
 		this.bot = services.bot;
 		this.queue = services.queue;
 		this.client = services.client;

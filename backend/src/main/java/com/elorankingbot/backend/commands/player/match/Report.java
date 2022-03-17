@@ -1,7 +1,7 @@
 package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.service.RatingCalculations;
+import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.Buttons;
 import com.elorankingbot.backend.tools.EmbedBuilder;
@@ -37,7 +37,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			dbservice.saveMatch(match);
 		}
 		if (reportIntegrity == COMPLETE) {
-			MatchResult matchResult = RatingCalculations.generateMatchResult(match);
+			MatchResult matchResult = MatchService.generateMatchResult(match);
 			processMatchResult(matchResult);
 			dbservice.saveMatchResult(matchResult);
 			dbservice.deleteMatch(match);

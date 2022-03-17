@@ -11,6 +11,8 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 
 	public void execute() {
 		if (!isByModeratorOrAdminDoReply()) return;
+
+		//TODO!
 		/*
 
 		dbservice.deleteChallenge(challenge);

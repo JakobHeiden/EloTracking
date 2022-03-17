@@ -72,8 +72,8 @@ public class Ban extends SlashCommand {
 			return;
 		}
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, playerUser.getId().asLong());
-		player = service.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
+		dbService.addNewPlayerIfPlayerNotPresent(guildId, playerUser.getId().asLong());
+		player = dbService.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
 		reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
 				: "";
@@ -108,7 +108,7 @@ public class Ban extends SlashCommand {
 				unban();
 				break;
 		}
-		service.savePlayer(player);
+		dbService.savePlayer(player);
 	}
 
 	private void permaban() {
@@ -166,11 +166,11 @@ public class Ban extends SlashCommand {
 	}
 
 	private void deleteExistingOpenChallenges() {
-		service.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId()).stream()
+		dbService.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId()).stream()
 				.forEach(challenge -> {
 					if (challenge.isAccepted()) return;
 
-					service.deleteChallenge(challenge);
+					dbService.deleteChallenge(challenge);
 
 					boolean isChallengerBanned = challenge.getChallengerUserId() == player.getUserId();
 					bot.getChallengerMessage(challenge).subscribe(message ->

@@ -22,7 +22,7 @@ public abstract class ButtonCommand {
 
 	public ButtonCommand(ButtonInteractionEvent event, Services services) {
 		this.event = event;
-		this.dbservice = services.service;
+		this.dbservice = services.dbService;
 		this.bot = services.bot;
 		this.timedTaskQueue = services.queue;
 		this.client = services.client;

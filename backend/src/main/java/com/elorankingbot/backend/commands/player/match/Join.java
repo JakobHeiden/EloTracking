@@ -4,21 +4,14 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.QueueService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
-import com.elorankingbot.backend.tools.EmbedBuilder;
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.PrivateChannel;
-import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.PREMADE;
@@ -31,8 +24,9 @@ public class Join extends SlashCommand {
 	private MatchFinderQueue queue;
 	private Game game;
 	private Match match;
-	private List<User> allyUsers;
+	private List<User> users;
 	private List<User> allUsers;
+	private List<Player> allPlayers;
 
 	public Join(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
@@ -91,121 +85,55 @@ public class Join extends SlashCommand {
 		// queue name is not in options
 		if (gameOptions.isEmpty() || gameOptions.get(0).getValue().isPresent()) {
 			queue = game.getQueues().values().stream().findAny().get();
-			allyUsers = gameOptions.stream()
-					.map(option -> option.getValue().get().asUser().block())
+			users = gameOptions.stream()
+					.map(option -> option.getValue().get().asUser().block())// TODO geht das ohne block?
 					.collect(Collectors.toList());
 			isSingularQueue = true;
 			// queue name present in options
 		} else {
 			queue = game.getQueues().get(gameOptions.get(0).getName());
-			allyUsers = gameOptions.get(0).getOptions().stream()
+			users = gameOptions.get(0).getOptions().stream()
 					.map(option -> option.getValue().get().asUser().block())
 					.collect(Collectors.toList());
 			isSingularQueue = false;
 		}
-		for (User user : allyUsers) {
+		for (User user : users) {
 			if (user.isBot()) {
 				event.reply("Bots cannot be added to the queue.").subscribe();
 				return;
 			}
 		}
+		users.add(activeUser);
 
-		allyUsers.add(event.getInteraction().getUser());
-
-		// TODO! accept-buttons
 		Group group = new Group(
-				allyUsers.stream()
-						.map(user -> service.getPlayerOrGenerateIfNotPresent(guildId, user.getId().asLong(), user.getTag()))
+				users.stream()
+						.map(user -> dbService.getPlayerOrGenerateIfNotPresent(guildId, user.getId().asLong(), user.getTag()))
 						.collect(Collectors.toList()),
 				game);
 		for (Player player : group.getPlayers()) {
 			if (queueService.isPlayerInQueue(player, queue)) {
 				event.reply(String.format("The player %s is already in this queue an cannot be added a second time.",
-								player.getTag()))
+								player.getTag()))// TODO unterscheiden nach active player
 						.withEphemeral(true).subscribe();
 				return;
 			}
 		}
-		queue.addGroup(group);
-		service.saveServer(server);
-		Optional<Match> maybeMatch = queueService.generateMatchIfPossible(queue);
 
+		queue.addGroup(group);
+		dbService.saveServer(server);
 		event.reply(String.format("Queue %s joined.",
 						isSingularQueue ? game.getName()
 								: game.getName() + " " + queue.getName()))
 				.withEphemeral(true).subscribe();
-		if (maybeMatch.isEmpty()) return;
-		else {
-			match = maybeMatch.get();
-			processMatch();
-		}
-	}
 
-	private void processMatch() {
-		for (Player player : match.getPlayers()) {
-			queueService.removePlayerFromAllQueues(server, player);
+		Optional<Match> maybeMatch = queueService.generateMatchIfPossible(queue);
+		if (maybeMatch.isPresent()) {
+			match = maybeMatch.get();
+			matchService.startMatch(match, users);
 		}
-		gatherAllUsers();
-		sendPlayerMessages();
-		service.saveMatch(match);
-		service.saveServer(server);
 		// buttons:
 		// accept
-		// win
-		// lose
-		// draw
 		// cancel
-		// dispute
-		// evtl kommentar bzgl self add entfernen...
 		// TODO!
-
 	}
-
-	private void gatherAllUsers() {
-		List<Player> allPlayers = match.getPlayers();
-		Set<Long> allyUserIds = allyUsers.stream().map(user -> user.getId().asLong()).collect(Collectors.toSet());
-		Set<Long> allUserIds = allPlayers.stream().map(player -> player.getUserId()).collect(Collectors.toSet());
-		allUsers = allyUsers;
-		List<Mono<User>> userMonos = new ArrayList<>(allUserIds.size() - allyUserIds.size());
-		for (long userId : allUserIds) {
-			if (!allyUserIds.contains(userId)) {
-				Mono<User> userMono = client.getUserById(Snowflake.of(userId));
-				userMonos.add(userMono);
-				userMono.subscribe(allUsers::add);
-			}
-		}
-		Mono.when(userMonos).block();
-	}
-
-	private void sendPlayerMessages() {
-		List<Mono<PrivateChannel>> monos = new ArrayList<>();
-		for (User user : allUsers) {
-			EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(
-							EmbedBuilder.makeTitleForIncompleteMatch(match, false, false),
-							match,
-							activeUser.getTag());
-			monos.add(bot.getPrivateChannelByUserId(user.getId().asLong())
-					.doOnNext(privateChannel -> {
-						Message message = privateChannel.createMessage(embedCreateSpec)
-								.withComponents(createActionRow(match.getId(), game.isAllowDraw())).block();
-						UUID playerId = Player.generateId(guildId, user.getId().asLong());
-						match.getPlayerIdToMessageId().put(playerId, message.getId().asLong());
-						match.getPlayerIdToPrivateChannelId().put(playerId, privateChannel.getId().asLong());
-					}));
-		}
-		Mono.when(monos).block();
-	}
-
-	private static ActionRow createActionRow(UUID matchId, boolean allowDraw) {
-		if (allowDraw) return ActionRow.of(
-				Buttons.win(matchId),
-				Buttons.lose(matchId),
-				Buttons.draw(matchId),
-				Buttons.cancel(matchId));
-		else return ActionRow.of(
-				Buttons.win(matchId),
-				Buttons.lose(matchId),
-				Buttons.cancel(matchId));
-	}
-
 }
