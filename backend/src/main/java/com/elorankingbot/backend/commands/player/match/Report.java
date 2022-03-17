@@ -42,6 +42,10 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			dbservice.saveMatchResult(matchResult);
 			dbservice.deleteMatch(match);
 		}
+		if (reportIntegrity == CANCEL) {
+			processCancel();
+			dbservice.deleteMatch(match);
+		}
 		if (reportIntegrity == CONFLICT) {
 			processConflict();
 			dbservice.saveMatch(match);
@@ -100,6 +104,17 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		 */
 	}
 
+	private void processCancel() {
+		for (Player player : match.getPlayers()) {
+			bot.getPlayerMessage(player, match)
+					.subscribe(message -> {
+						String title = "The match has been canceled.";
+						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match, player.getTag());
+						message.edit().withEmbeds(embedCreateSpec).withComponents(none).subscribe();
+					});
+		}
+	}
+
 	private void processConflict() {
 		for (Player player : match.getPlayers()) {
 			bot.getPlayerMessage(player, match)
@@ -113,6 +128,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		}
 	}
 
+	// TODO verallgemeinern?
 	static ActionRow createConflictActionRow(UUID matchId, boolean allowDraw, boolean hasPlayerReported) {
 		if (hasPlayerReported) {
 			return ActionRow.of(
@@ -124,11 +140,13 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 						Buttons.win(matchId),
 						Buttons.lose(matchId),
 						Buttons.draw(matchId),
+						Buttons.cancel(matchId),
 						Buttons.dispute(matchId));
 			} else {
 				return ActionRow.of(
 						Buttons.win(matchId),
 						Buttons.lose(matchId),
+						Buttons.cancel(matchId),
 						Buttons.dispute(matchId));
 			}
 		}

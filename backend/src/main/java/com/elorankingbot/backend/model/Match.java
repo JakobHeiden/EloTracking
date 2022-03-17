@@ -21,6 +21,7 @@ public class Match {
 	public enum ReportIntegrity {
 		INCOMPLETE,
 		COMPLETE,
+		CANCEL,
 		CONFLICT
 	}
 
@@ -164,6 +165,8 @@ public class Match {
 					.count();
 			if (numPlayersAlreadyReported < getNumPlayers()) {
 				reportIntegrity = ReportIntegrity.INCOMPLETE;
+			} else if (playerIdToReportStatus.values().stream().findAny().get() == CANCEL) {
+				reportIntegrity = ReportIntegrity.CANCEL;
 			} else {
 				reportIntegrity = ReportIntegrity.COMPLETE;
 			}
