@@ -48,6 +48,6 @@ public class RankingsEntry implements Comparable<RankingsEntry> {
 
 	@Override
 	public int compareTo(RankingsEntry other) {
-		return Double.compare(this.rating, other.rating);
+		return Double.compare(other.rating, this.rating);
 	}
 }

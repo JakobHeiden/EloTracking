@@ -97,7 +97,7 @@ public class Match {
 			for (Player player : team) {
 				boolean teamInternalConflict = false;
 				ReportStatus playerReported = playerIdToReportStatus.get(player.getId());
-				if (playerReported != null) {
+				if (playerReported != NOT_YET_REPORTED) {
 					if (teamReported == null) {
 						teamReported = playerReported;
 					} else {

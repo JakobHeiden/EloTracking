@@ -290,13 +290,14 @@ public class DBService {
 				1, Optional.empty(), numTotalPlayers);
 	}
 
+	// TODO das hier nach MatchService?
 	public boolean updateAndPersistRankingsAndPlayers(MatchResult matchResult) {
 		long guildId = matchResult.getGame().getServer().getGuildId();
 		String gameName = matchResult.getGame().getName();
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
 			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
 					.findByGuildIdAndGameNameAndPlayerTag(guildId, gameName, playerMatchResult.getPlayerTag());
-			if (maybeRankingsEntry.isPresent()) rankingsEntryDao.delete(maybeRankingsEntry.get());
+			maybeRankingsEntry.ifPresent(rankingsEntryDao::delete);
 			rankingsEntryDao.save(new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer()));
 		}
 

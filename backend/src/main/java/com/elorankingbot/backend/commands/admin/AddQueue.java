@@ -52,16 +52,16 @@ public class AddQueue extends SlashCommand {
 						.type(STRING.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("queuetype").description("Only if a team queue: " +
-								"is this a solo queue, or a premade team only queue?")//, or a mixed queue
+						.name("queuetype").description("Currently the bot only supports solo queue")//"Only if a team queue: " +
+								//"is this a solo queue, or a premade team only queue?")//, or a mixed queue
 						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("solo queue").value("solo").build())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("premade only").value("premade").build())
+						//.addChoice(ApplicationCommandOptionChoiceData.builder()
+						//		.name("premade only").value("premade").build())
 						//.addChoice(ApplicationCommandOptionChoiceData.builder()
 						//		.name("mixed queue").value("mixed").build())
-						.required(false).build())
+						.required(true).build())// false
 				//.addOption(ApplicationCommandOptionData.builder()
 				//		.name("maxpremade").description("Only if a mixed queue: what is the maximum premade team size?")
 				//		.type(INTEGER.getValue())
