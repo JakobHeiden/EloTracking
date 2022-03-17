@@ -44,7 +44,7 @@ public class EventParser {
 					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
 					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
 		this.services = services;
-		this.service = services.service;
+		this.service = services.dbService;
 		this.bot = services.bot;
 		this.buttonCommandFactory = buttonCommandFactory;
 		this.slashCommandFactory = slashCommandFactory;

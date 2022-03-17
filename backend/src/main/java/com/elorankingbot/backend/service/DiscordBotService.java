@@ -58,7 +58,7 @@ public class DiscordBotService {
 
 	public DiscordBotService(Services services) {
 		this.client = services.client;
-		this.dbservice = services.service;
+		this.dbservice = services.dbService;
 		this.botId = client.getSelfId().asLong();
 		this.props = services.props;
 		applicationService = client.getRestClient().getApplicationService();
@@ -101,6 +101,14 @@ public class DiscordBotService {
 		return client.getUserById(Snowflake.of(userId)).block()
 				.getPrivateChannel().block()
 				.createMessage(spec);
+	}
+
+	public Mono<User> getUser(Player player) {
+		return getUser(player.getUserId());
+	}
+
+	public Mono<User> getUser(long userId) {
+		return client.getUserById(Snowflake.of(userId));
 	}
 
 	public String getPlayerTag(long playerId) {

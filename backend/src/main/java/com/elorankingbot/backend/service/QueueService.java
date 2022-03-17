@@ -13,7 +13,7 @@ public class QueueService {
 	private final DBService service;
 
 	public QueueService(Services services) {
-		this.service = services.service;
+		this.service = services.dbService;
 	}
 
 	private class GroupRatingComparator implements Comparator<Group> {
@@ -78,9 +78,7 @@ public class QueueService {
 	}
 
 	public boolean isPlayerInQueue(Player player, MatchFinderQueue queue) {
-		return queue.getGroups().stream()
-				.filter(group -> group.hasPlayer(player))
-				.findAny().isPresent();
+		return queue.getGroups().stream().anyMatch(group -> group.hasPlayer(player));
 	}
 
 	public void removePlayerFromAllQueues(Server server, Player player) {

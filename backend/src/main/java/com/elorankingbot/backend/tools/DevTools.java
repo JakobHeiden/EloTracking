@@ -28,7 +28,7 @@ public class DevTools {
 
 	public DevTools(Services services,
 					PlayerDao playerDao, MatchDao matchDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
-		this.service = services.service;
+		this.service = services.dbService;
 		this.bot = services.bot;
 		this.client = services.client;
 		this.playerDao = playerDao;

@@ -2,6 +2,7 @@ package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.model.*;
 import com.google.common.base.Strings;
+import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 
@@ -145,5 +146,19 @@ public class EmbedBuilder {
 						match.getQueue().getName());
 			}
 		}
+	}
+
+	public static EmbedCreateSpec createQueueGroupMessageEmbed(MatchFinderQueue queue, List<User> users, String activeUserTag) {
+		String title = String.format("%s has nominated the following group to join the queue %s%s:",
+				activeUserTag, queue.getGame().getName(),
+				queue.getGame().hasSingularQueue() ? "" : " " + queue.getName());
+		return null; /*EmbedCreateSpec.builder()
+				.title(title)
+				.addFields(users.stream().map())
+				*/
+
+
+
+
 	}
 }

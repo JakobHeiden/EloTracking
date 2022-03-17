@@ -113,7 +113,7 @@ public class Info extends SlashCommand {
 	}
 
 	private EmbedCreateSpec generateMatchHistory(int numMatches) {
-		List<MatchResult> matchResultHistory = service.getMatchHistory(targetPlayer.getUserId(), guildId);
+		List<MatchResult> matchResultHistory = dbService.getMatchHistory(targetPlayer.getUserId(), guildId);
 		if (matchResultHistory.size() > numMatches) matchResultHistory = matchResultHistory.subList(0, numMatches);
 		String matchHistoryString = "";
 		for (MatchResult matchResult : matchResultHistory) {

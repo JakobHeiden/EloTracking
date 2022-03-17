@@ -42,6 +42,10 @@ public class Game {
         return queues.get(name);
     }
 
+    public boolean hasSingularQueue() {
+        return queues.size() == 1;
+    }
+
     public long getGuildId() {
         return server.getGuildId();
     }

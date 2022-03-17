@@ -3,7 +3,7 @@ package com.elorankingbot.backend.commands.mod.dispute;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.PlayerMatchResult;
-import com.elorankingbot.backend.service.RatingCalculations;
+import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -36,7 +36,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 			}
 		}
 		match.setOrWasConflict(false);// TODO dirty hack! EmbedBuilder neu machen!
-		MatchResult matchResult = RatingCalculations.generateMatchResult(match);
+		MatchResult matchResult = MatchService.generateMatchResult(match);
 		updatePlayerMessages(matchResult);
 		dbservice.saveMatchResult(matchResult);
 		dbservice.deleteMatch(match);

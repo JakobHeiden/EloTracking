@@ -49,7 +49,7 @@ public class CreateRanking extends SlashCommand {
 		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
 		Game game = new Game(server, nameOfGame, allowDraw);
 		server.addGame(game);
-		service.saveServer(server);
+		dbService.saveServer(server);
 
 		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
 		bot.setAdminPermissionToAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
