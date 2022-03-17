@@ -46,4 +46,15 @@ public class Server {
 	public Game getGame(String name) {
 		return games.get(name);
 	}
+
+	public boolean isPlayerEligibleForQueueInvite(Player player) {
+		// not in group
+		// not accepted other invite
+		// TODO
+		return false;
+	}
+
+	public void removePlayerFromAllQueuesAndFormingGroups(Player player) {
+		// TODO
+	}
 }

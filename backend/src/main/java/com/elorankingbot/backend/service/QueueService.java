@@ -77,7 +77,7 @@ public class QueueService {
 		return sumOfRatings / group.getPlayers().size();
 	}
 
-	public boolean isPlayerInQueue(Player player, MatchFinderQueue queue) {
+	public boolean isPlayerInQueue(Player player, MatchFinderQueue queue) {// TODO das gehoert hier nicht her, eher an server, oder queue?
 		return queue.getGroups().stream().anyMatch(group -> group.hasPlayer(player));
 	}
 

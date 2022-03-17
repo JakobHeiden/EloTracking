@@ -119,6 +119,8 @@ public class Join extends SlashCommand {
 			}
 		}
 
+		// TODO group queue
+
 		queue.addGroup(group);
 		dbService.saveServer(server);
 		event.reply(String.format("Queue %s joined.",
@@ -133,6 +135,8 @@ public class Join extends SlashCommand {
 		}
 		// buttons:
 		// accept
+		// decline
+		// -> leave
 		// cancel
 		// TODO!
 	}
