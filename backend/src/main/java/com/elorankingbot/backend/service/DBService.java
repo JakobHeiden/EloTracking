@@ -292,6 +292,13 @@ public class DBService {
 
 	// TODO das hier nach MatchService?
 	public boolean updateAndPersistRankingsAndPlayers(MatchResult matchResult) {
+		matchResult.getAllPlayerMatchResults().forEach(playerMatchResult -> {
+			PlayerGameStats gameStats = playerMatchResult.getPlayer().getGameStats(matchResult.getGame());
+			gameStats.setRating(playerMatchResult.getNewRating());
+			gameStats.addResultStatus(playerMatchResult.getResultStatus());
+			savePlayer(playerMatchResult.getPlayer());
+		});
+
 		long guildId = matchResult.getGame().getServer().getGuildId();
 		String gameName = matchResult.getGame().getName();
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
@@ -301,12 +308,6 @@ public class DBService {
 			rankingsEntryDao.save(new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer()));
 		}
 
-		matchResult.getAllPlayerMatchResults().forEach(playerMatchResult -> {
-			PlayerGameStats gameStats = playerMatchResult.getPlayer().getGameStats(matchResult.getGame());
-			gameStats.setRating(playerMatchResult.getNewRating());
-			gameStats.addResultStatus(playerMatchResult.getResultStatus());
-			savePlayer(playerMatchResult.getPlayer());
-		});
 		return true;// TODO! pagination etc
 	}
 
