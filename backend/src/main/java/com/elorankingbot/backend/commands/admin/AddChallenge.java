@@ -5,8 +5,7 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 
 @AdminCommand
 public class AddChallenge extends SlashCommand {
@@ -16,6 +15,7 @@ public class AddChallenge extends SlashCommand {
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {
+		/*
 		ImmutableApplicationCommandRequest.Builder requestBuilder = ApplicationCommandRequest.builder()
 				.name("addchallenge")
 				.description("Add a challenge option to a game")

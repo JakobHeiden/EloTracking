@@ -11,7 +11,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.PREMADE;
@@ -38,9 +37,9 @@ public class Join extends SlashCommand {
 				.name("join")
 				.description("Join a matchmaking queue")
 				.defaultPermission(true);
-		server.getGames().values().forEach(game -> {
-			if (game.getQueues().size() == 1) {
-				var queue = game.getQueues().values().stream().findAny().get();
+		server.getGames().forEach(game -> {
+			if (game.getQueueNameToQueue().size() == 1) {
+				var queue = game.getQueueNameToQueue().values().stream().findAny().get();
 				var queueOptionBuilder = ApplicationCommandOptionData.builder()
 						.name(game.getName()).description(queue.getDescription())
 						.type(SUB_COMMAND.getValue());
@@ -50,7 +49,7 @@ public class Join extends SlashCommand {
 				var gameOptionBuilder = ApplicationCommandOptionData.builder()
 						.name(game.getName()).description("game name")
 						.type(SUB_COMMAND_GROUP.getValue());
-				game.getQueues().values()
+				game.getQueueNameToQueue().values()
 						.forEach(queue -> {
 							var queueOptionBuilder = ApplicationCommandOptionData.builder()
 									.name(queue.getName()).description(queue.getDescription())
@@ -79,19 +78,19 @@ public class Join extends SlashCommand {
 	}
 
 	public void execute() {
-		game = server.getGames().get(event.getOptions().get(0).getName());
+		game = server.getGame(event.getOptions().get(0).getName());
 		boolean isSingularQueue;
 		var gameOptions = event.getOptions().get(0).getOptions();
 		// queue name is not in options
 		if (gameOptions.isEmpty() || gameOptions.get(0).getValue().isPresent()) {
-			queue = game.getQueues().values().stream().findAny().get();
+			queue = game.getQueueNameToQueue().values().stream().findAny().get();
 			users = gameOptions.stream()
 					.map(option -> option.getValue().get().asUser().block())// TODO geht das ohne block?
 					.collect(Collectors.toList());
 			isSingularQueue = true;
 			// queue name present in options
 		} else {
-			queue = game.getQueues().get(gameOptions.get(0).getName());
+			queue = game.getQueueNameToQueue().get(gameOptions.get(0).getName());
 			users = gameOptions.get(0).getOptions().stream()
 					.map(option -> option.getValue().get().asUser().block())
 					.collect(Collectors.toList());
@@ -128,11 +127,7 @@ public class Join extends SlashCommand {
 								: game.getName() + " " + queue.getName()))
 				.withEphemeral(true).subscribe();
 
-		Optional<Match> maybeMatch = queueService.generateMatchIfPossible(queue);
-		if (maybeMatch.isPresent()) {
-			match = maybeMatch.get();
-			matchService.startMatch(match, users);
-		}
+
 		// buttons:
 		// accept
 		// decline

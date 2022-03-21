@@ -12,6 +12,8 @@ import java.util.List;
 @UseToStringForLogging
 public class MatchFinderQueue {
 
+	private static int NO_LIMIT = -1;
+
 	public enum QueueType {
 		SOLO,
 		MIXED,
@@ -26,10 +28,9 @@ public class MatchFinderQueue {
 	private final Game game;
 	private final int numTeams;
 	private final int numPlayersPerTeam;
-	private int minRating;
-	private int maxRating;
 	private final QueueType queueType;
 	private final int maxPremadeSize;
+	private int maxRatingSpread;
 	private boolean isBuildMatchFromTopPlayer;
 
 	public MatchFinderQueue(Game game, String name, int numTeams, int numPlayersPerTeam,
@@ -40,6 +41,7 @@ public class MatchFinderQueue {
 		this.numPlayersPerTeam = numPlayersPerTeam;
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
+		this.maxRatingSpread = NO_LIMIT;
 		this.groups = new ArrayList<>();
 		this.formingGroups = new ArrayList<>();
 		this.isBuildMatchFromTopPlayer = true;

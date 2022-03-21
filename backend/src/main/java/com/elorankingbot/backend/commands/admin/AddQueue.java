@@ -28,7 +28,7 @@ public class AddQueue extends SlashCommand {
 				.name("ranking").description("Which ranking to add a queue to?")
 				.type(STRING.getValue())
 				.required(true);
-		server.getGames().keySet().forEach(nameOfGame -> gameOptionBuilder
+		server.getGameNameToGame().keySet().forEach(nameOfGame -> gameOptionBuilder
 				.addChoice(ApplicationCommandOptionChoiceData.builder()
 						.name(nameOfGame).value(nameOfGame).build()));
 
@@ -80,7 +80,7 @@ public class AddQueue extends SlashCommand {
 			event.reply("Cannot create a queue with less than 2 teams per match").subscribe();
 			return;
 		}
-		Game game = server.getGames().get(event.getOption("ranking").get().getValue().get().asString());
+		Game game = server.getGame(event.getOption("ranking").get().getValue().get().asString());
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
 		if (!isLegalDiscordName(nameOfQueue)) {
 			event.reply("Illegal queue name. Please use only letters, digits, dash, and underscore").subscribe();
@@ -90,7 +90,7 @@ public class AddQueue extends SlashCommand {
 			event.reply("Queue name cannot exceed 32 characters").subscribe();
 			return;
 		}
-		if (game.getQueues().containsKey(nameOfQueue)) {
+		if (game.getQueueNameToQueue().containsKey(nameOfQueue)) {
 			event.reply("A queue of that name already exists for that ranking. " +
 					"Queue names must be unique for each ranking").subscribe();
 			return;
