@@ -19,14 +19,8 @@ public class QueueService {
 		this.matchService = services.matchService;
 	}
 
-	private class GroupRatingComparator implements Comparator<Group> {
-
-		public int compare(Group a, Group b) {
-			return (int) Math.ceil(getAverageRating(a, a.getGame()) - getAverageRating(b, b.getGame()));
-		}
-	}
-
-	@Scheduled(fixedRate = 5000)
+	// TODO logging
+	@Scheduled(fixedRate = 3000)
 	public void generateAndStartMatches() {
 		dbService.findAllServers().stream()
 				.flatMap(server -> server.getGames().stream())
@@ -35,6 +29,8 @@ public class QueueService {
 					do {
 						Optional<Match> maybeMatch = generateMatchIfPossible(queue);
 						if (maybeMatch.isPresent()) {
+							for (Player player : maybeMatch.get().getPlayers())
+								removePlayerFromAllQueues(queue.getServer(), player);
 							matchService.startMatch(maybeMatch.get());
 							foundMatch = true;
 						} else {
@@ -50,13 +46,59 @@ public class QueueService {
 		return null;
 	}
 
-	private Optional<Match> generateMatchFromSoloQueue(MatchFinderQueue queue) {
+	public Optional<Match> generateMatchFromSoloQueue(MatchFinderQueue queue) {
+		List<Group> groupsSortedByRating = new LinkedList<>(queue.getGroups().stream().sorted().toList());
+		Date now = new Date();
+
+		int numPlayersNeeded = queue.getNumPlayersPerMatch();
+		if (groupsSortedByRating.size() < numPlayersNeeded) return Optional.empty();
+		for (int i = 0; i <= groupsSortedByRating.size() - numPlayersNeeded; i++) {// TODO abwechseln von unten und von oben matches suchen
+			List<Group> potentialMatch = groupsSortedByRating.subList(i, i + numPlayersNeeded);
+			if (queue.getMaxRatingSpread() == MatchFinderQueue.NO_LIMIT)
+				return Optional.of(buildMatch(potentialMatch, queue));
+			double potentialHighestRating = potentialMatch.stream()
+					.mapToDouble(group -> group.getAverageRating() - group.getRatingElasticity(now, queue))
+					.max().getAsDouble();
+			double potentialLowestRating = potentialMatch.stream()
+					.mapToDouble(group -> group.getAverageRating() + group.getRatingElasticity(now, queue))
+					.min().getAsDouble();
+			if (potentialHighestRating - potentialLowestRating <= queue.getMaxRatingSpread())
+				return Optional.of(buildMatch(potentialMatch, queue));
+		}
+		return Optional.empty();
+	}
+
+	private Match buildMatch(List<Group> groups, MatchFinderQueue queue) {
+		List<List<Player>> teams = new ArrayList<>();
+		for (int i = 0; i < queue.getNumTeams(); i++) {
+			teams.add(new ArrayList<>());
+		}
+		for (int i = 0; i < queue.getNumPlayersPerTeam(); i += 2) {
+			for (int j = 0; j < queue.getNumTeams(); j++) {
+				if (queue.getNumPlayersPerTeam() - i > 1) {
+					// take a player from top and bottom
+					teams.get(j).add(groups.get(0).getPlayers().get(0));
+					groups.remove(0);
+					teams.get(j).add(groups.get(groups.size() - 1).getPlayers().get(0));
+					groups.remove(groups.size() - 1);
+				} else {// TODO besser waere der player in der mitte statt random
+					// take a random player
+					int randomIndex = ThreadLocalRandom.current().nextInt(0, groups.size());
+					teams.get(j).add(groups.get(randomIndex).getPlayers().get(0));
+					groups.remove(randomIndex);
+				}
+			}
+		}
+		return new Match(queue, teams);
+	}
+
+	// TODO weg
+	private Optional<Match> alt_generateMatchFromSoloQueue(MatchFinderQueue queue) {
 		if (queue.getGroups().size() < queue.getNumTeams() * queue.getNumPlayersPerTeam()) return Optional.empty();
 
 		List<Group> groupsSortedByRating = new LinkedList<>(
 				queue.getGroups().stream()
-						.sorted(new GroupRatingComparator())
-						.toList());
+						.sorted().toList());
 
 		List<List<Player>> teams = new ArrayList<>();
 		for (int i = 0; i < queue.getNumTeams(); i++) {
@@ -89,13 +131,6 @@ public class QueueService {
 				.map(Group::getPlayers)
 				.collect(Collectors.toList());
 		return Optional.of(new Match(queue, allPlayers));
-	}
-
-	private double getAverageRating(Group group, Game game) {
-		double sumOfRatings = group.getPlayers().stream()
-				.map(player -> player.getGameStats(game).getRating())
-				.reduce(0D, Double::sum);
-		return sumOfRatings / group.getPlayers().size();
 	}
 
 	public boolean isPlayerInQueue(Player player, MatchFinderQueue queue) {// TODO das gehoert hier nicht her, eher an server, oder queue?

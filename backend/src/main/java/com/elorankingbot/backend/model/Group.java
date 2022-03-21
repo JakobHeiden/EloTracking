@@ -22,12 +22,21 @@ public class Group implements Comparable<Group> {
 
 	@Override
 	public int compareTo(Group other) {
-		boolean isSameSize = this.players.size() == other.players.size();
-		if (isSameSize) return this.timestamp.compareTo(other.timestamp);
-		else return this.players.size() - other.players.size();
+		return (int) Math.ceil(this.getAverageRating() - other.getAverageRating());
 	}
 
 	public boolean hasPlayer(Player player) {
 		return players.contains(player);
+	}
+
+	public double getAverageRating() {
+		double sumOfRatings = players.stream()
+				.map(player -> player.getGameStats(game).getRating())
+				.reduce(0D, Double::sum);
+		return sumOfRatings / players.size();
+	}
+
+	public double getRatingElasticity(Date now, MatchFinderQueue queue) {
+		return (now.getTime() - timestamp.getTime()) / 1000 * queue.getRatingElasticityPerSecond();
 	}
 }
