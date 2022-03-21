@@ -1,7 +1,7 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.player.match.Join;
+import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;

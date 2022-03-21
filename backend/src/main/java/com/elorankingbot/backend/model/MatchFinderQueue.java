@@ -12,7 +12,7 @@ import java.util.List;
 @UseToStringForLogging
 public class MatchFinderQueue {
 
-	private static int NO_LIMIT = -1;
+	public static int NO_LIMIT = -1;
 
 	public enum QueueType {
 		SOLO,
@@ -31,6 +31,7 @@ public class MatchFinderQueue {
 	private final QueueType queueType;
 	private final int maxPremadeSize;
 	private int maxRatingSpread;
+	private double ratingElasticityPerSecond;
 	private boolean isBuildMatchFromTopPlayer;
 
 	public MatchFinderQueue(Game game, String name, int numTeams, int numPlayersPerTeam,
@@ -42,6 +43,7 @@ public class MatchFinderQueue {
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
 		this.maxRatingSpread = NO_LIMIT;
+		this.ratingElasticityPerSecond = 100F / 60;
 		this.groups = new ArrayList<>();
 		this.formingGroups = new ArrayList<>();
 		this.isBuildMatchFromTopPlayer = true;
@@ -56,7 +58,7 @@ public class MatchFinderQueue {
 		// TODO!
 	}
 
-	public int getNumPlayers() {
+	public int getNumPlayersPerMatch() {
 		return numTeams * numPlayersPerTeam;
 	}
 
@@ -86,5 +88,9 @@ public class MatchFinderQueue {
 				};
 			}
 		}
+	}
+
+	public Server getServer() {
+		return getGame().getServer();
 	}
 }

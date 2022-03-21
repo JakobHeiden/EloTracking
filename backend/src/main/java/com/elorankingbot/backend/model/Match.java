@@ -51,12 +51,12 @@ public class Match {
 		this.isDispute = false;
 		this.isOrWasConflict = false;
 		this.teams = teams;
-		this.playerIdToReportStatus = new HashMap<>(queue.getNumPlayers());
+		this.playerIdToReportStatus = new HashMap<>(queue.getNumPlayersPerMatch());
 		for (Player player : this.teams.stream().flatMap(Collection::stream).toList()) {
 			this.playerIdToReportStatus.put(player.getId(), NOT_YET_REPORTED);
 		}
-		this.playerIdToMessageId = new HashMap<>(queue.getNumPlayers());
-		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayers());
+		this.playerIdToMessageId = new HashMap<>(queue.getNumPlayersPerMatch());
+		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayersPerMatch());
 		this.conflictingReports = new ArrayList<>();
 		this.reportIntegrity = INCOMPLETE;
 	}

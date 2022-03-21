@@ -64,9 +64,6 @@ public class MatchService {
 	}
 
 	public void startMatch(Match match) {//, List<User> usersAlreadyGathered) { TODO kann weg? ensprechend unten anpassen
-		for (Player player : match.getPlayers()) {
-			queueService.removePlayerFromAllQueues(match.getServer(), player);
-		}
 		List<User> users = gatherAllUsers(match, new ArrayList<>());
 		sendPlayerMessages(match, users);
 		dbService.saveMatch(match);
@@ -120,6 +117,6 @@ public class MatchService {
 	}
 
 	public static String formatRating(double rating) {
-		return String.format("%.1f", Float.valueOf(Math.round(rating * 10)) / 10);
+		return String.format("%.1f", (float) Math.round(rating * 10) / 10);
 	}
 }

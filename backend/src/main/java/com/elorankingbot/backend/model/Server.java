@@ -51,15 +51,4 @@ public class Server {
 	public Collection<Game> getGames() {
 		return gameNameToGame.values();
 	}
-
-	public boolean isPlayerEligibleForQueueInvite(Player player) {
-		// not in group
-		// not accepted other invite
-		// TODO im zusammenhang mit premade queue
-		return false;
-	}
-
-	public void removePlayerFromAllQueuesAndFormingGroups(Player player) {
-		// TODO im zusammenhang mit premade queue
-	}
 }
