@@ -176,7 +176,7 @@ public class DiscordBotService {
 		}
 
 		List<EmbedCreateSpec> embeds = new ArrayList<>();
-		for (Game game : server.getGames().values()) {
+		for (Game game : server.getGames()) {
 			embeds.add(EmbedBuilder.createRankingsEmbed(dbservice.getLeaderboard(game)));
 		}
 		leaderboardMessage.edit().withContent(Possible.of(Optional.empty())).withEmbedsOrNull(embeds).subscribe();

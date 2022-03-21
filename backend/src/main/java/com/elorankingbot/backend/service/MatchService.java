@@ -63,11 +63,11 @@ public class MatchService {
 		return matchResult;
 	}
 
-	public void startMatch(Match match, List<User> usersAlreadyGathered) {
+	public void startMatch(Match match) {//, List<User> usersAlreadyGathered) { TODO kann weg? ensprechend unten anpassen
 		for (Player player : match.getPlayers()) {
 			queueService.removePlayerFromAllQueues(match.getServer(), player);
 		}
-		List<User> users = gatherAllUsers(match, usersAlreadyGathered);
+		List<User> users = gatherAllUsers(match, new ArrayList<>());
 		sendPlayerMessages(match, users);
 		dbService.saveMatch(match);
 	}

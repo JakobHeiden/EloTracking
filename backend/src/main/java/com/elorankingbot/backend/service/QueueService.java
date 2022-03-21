@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -10,10 +11,12 @@ import java.util.stream.Collectors;
 @Service
 public class QueueService {
 
-	private final DBService service;
+	private final DBService dbService;
+	private final MatchService matchService;
 
 	public QueueService(Services services) {
-		this.service = services.dbService;
+		this.dbService = services.dbService;
+		this.matchService = services.matchService;
 	}
 
 	private class GroupRatingComparator implements Comparator<Group> {
@@ -21,6 +24,24 @@ public class QueueService {
 		public int compare(Group a, Group b) {
 			return (int) Math.ceil(getAverageRating(a, a.getGame()) - getAverageRating(b, b.getGame()));
 		}
+	}
+
+	@Scheduled(fixedRate = 5000)
+	public void generateAndStartMatches() {
+		dbService.findAllServers().stream()
+				.flatMap(server -> server.getGames().stream())
+				.flatMap(game -> game.getQueues().stream()).forEach(queue -> {
+					boolean foundMatch;
+					do {
+						Optional<Match> maybeMatch = generateMatchIfPossible(queue);
+						if (maybeMatch.isPresent()) {
+							matchService.startMatch(maybeMatch.get());
+							foundMatch = true;
+						} else {
+							foundMatch = false;
+						}
+					} while (foundMatch);
+				});
 	}
 
 	public Optional<Match> generateMatchIfPossible(MatchFinderQueue queue) {
@@ -82,9 +103,9 @@ public class QueueService {
 	}
 
 	public void removePlayerFromAllQueues(Server server, Player player) {
-		server.getGames().values().stream()
-				.flatMap(game -> game.getQueues().values().stream())
+		server.getGames().stream()
+				.flatMap(game -> game.getQueueNameToQueue().values().stream())
 				.forEach(queue -> queue.removeGroupsContainingPlayer(player));
-		service.saveServer(server);
+		dbService.saveServer(server);
 	}
 }

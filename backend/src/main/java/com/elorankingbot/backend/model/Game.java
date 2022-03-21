@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ public class Game {
 
     @Id
     private String name;
-    private Map<String, MatchFinderQueue> queues;
+    private Map<String, MatchFinderQueue> queueNameToQueue;
     @DBRef(lazy = true)
     private Server server;
     private int leaderboardLength;
@@ -26,7 +27,7 @@ public class Game {
     public Game(Server server, String name, boolean allowDraw) {
         this.name = name;
         this.server = server;
-        this.queues = new HashMap<>();
+        this.queueNameToQueue = new HashMap<>();
         this.leaderboardLength = 20;
         this.allowDraw = allowDraw;
         this.matchAutoResolveTime = 24 * 60;
@@ -35,15 +36,19 @@ public class Game {
     }
 
     public void addQueue(MatchFinderQueue queue) {
-        queues.put(queue.getName(), queue);
+        queueNameToQueue.put(queue.getName(), queue);
     }
 
     public MatchFinderQueue getQueue(String name) {
-        return queues.get(name);
+        return queueNameToQueue.get(name);
+    }
+
+    public Collection<MatchFinderQueue> getQueues() {
+        return queueNameToQueue.values();
     }
 
     public boolean hasSingularQueue() {
-        return queues.size() == 1;
+        return queueNameToQueue.size() == 1;
     }
 
     public long getGuildId() {

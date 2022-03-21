@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class Server {
 
 	@Id
 	private long guildId;
-	private Map<String, Game> games;
+	private Map<String, Game> gameNameToGame;
 	private long adminRoleId;
 	private long modRoleId;
 	private long disputeCategoryId;
@@ -30,31 +31,35 @@ public class Server {
 	public Server(long guildId) {
 		this.guildId = guildId;
 		this.isMarkedForDeletion = false;
-		this.games = new HashMap<>();
+		this.gameNameToGame = new HashMap<>();
 		this.adminRoleId = 0L;
 		this.modRoleId = 0L;
 	}
 
 	public void addGame(Game game) {
-		games.put(game.getName(), game);
+		gameNameToGame.put(game.getName(), game);
 	}
 
 	public void removeGame(Game game) {
-		games.remove(game.getName());
+		gameNameToGame.remove(game.getName());
 	}
 
 	public Game getGame(String name) {
-		return games.get(name);
+		return gameNameToGame.get(name);
+	}
+
+	public Collection<Game> getGames() {
+		return gameNameToGame.values();
 	}
 
 	public boolean isPlayerEligibleForQueueInvite(Player player) {
 		// not in group
 		// not accepted other invite
-		// TODO
+		// TODO im zusammenhang mit premade queue
 		return false;
 	}
 
 	public void removePlayerFromAllQueuesAndFormingGroups(Player player) {
-		// TODO
+		// TODO im zusammenhang mit premade queue
 	}
 }
