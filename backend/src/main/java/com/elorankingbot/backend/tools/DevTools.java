@@ -1,11 +1,14 @@
 package com.elorankingbot.backend.tools;
 
-import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.commands.admin.CreateRanking;
+import com.elorankingbot.backend.commands.admin.Edit;
+import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.dao.MatchDao;
-import com.elorankingbot.backend.dao.PlayerDao;
+import com.elorankingbot.backend.dao.*;
+import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,30 +17,54 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DevTools {
 
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
+	private final ApplicationPropertiesLoader props;
 	private final PlayerDao playerDao;
 	private final MatchDao matchDao;
+	private final MatchResultDao matchResultDao;
+	private final TimeSlotDao timeSlotDao;
+	private final ServerDao serverDao;
 
-	public DevTools(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client, PlayerDao playerDao, MatchDao matchDao) {
-		this.service = service;
-		this.bot = bot;
-		this.client = client;
+	public DevTools(Services services,
+					PlayerDao playerDao, MatchDao matchDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
+		this.service = services.dbService;
+		this.bot = services.bot;
+		this.client = services.client;
 		this.playerDao = playerDao;
 		this.matchDao = matchDao;
+		this.matchResultDao = matchResultDao;
+		this.props = services.props;
+		this.timeSlotDao = timeSlotDao;
+		this.serverDao = serverDao;
 
-		ApplicationPropertiesLoader props = service.getPropertiesLoader();
-		if (props.isDeleteDataOnStartup()) service.deleteAllData();
+		if (props.isDeleteDataOnStartup()) {
+			deleteAllData();
+			deployInitialCommands();
+		}
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 	}
 
 	private void updateGuildCommands() {
 		log.warn("updating guild commands...");
-		service.findAllGames().forEach(
-				game -> {
+
+		client.getGuilds().subscribe(guild -> {
+			bot.deleteAllGuildCommands(guild.getId().asLong()).blockLast();
+			Server server = new Server(guild.getId().asLong());
+			service.saveServer(server);
+			bot.deployCommand(server, SetRole.getRequest()).block();
+			long everyoneRoleId = server.getGuildId();
+			bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), everyoneRoleId);
+			bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
+		});
+		/*
+		service.findAllServers().forEach(
+				server -> {
 					try {
-						//bot.deployCommand(game.getGuildId(), Info.getRequest()).block();
+
+						bot.deployCommand(server, Edit.getRequest(server)).block();
+						bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
 						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
 						//bot.setDiscordCommandPermissions(game.getGuildId(), "ban", adminRole, modRole);
@@ -46,5 +73,33 @@ public class DevTools {
 					}
 				}
 		);
+
+		 */
+	}
+
+	private void deployInitialCommands() {
+		log.warn("Deploying initial guild commands...");
+		long entenwieseId = props.getEntenwieseId();
+		Server entenwieseServer = new Server(entenwieseId);
+		service.saveServer(entenwieseServer);
+
+		bot.deleteAllGuildCommands(entenwieseId).blockLast();
+		bot.deployCommand(entenwieseServer, SetRole.getRequest()).block();
+		bot.setCommandPermissionForRole(entenwieseServer, "setrole", entenwieseId);
+		bot.deployCommand(entenwieseServer, CreateRanking.getRequest()).subscribe();
+	}
+
+	private void deleteAllData() {
+		if (props.getSpringDataMongodbDatabase().equals("deploy")) {
+			throw new RuntimeException("deleteAllData is being called on deploy database");
+		}
+
+		log.warn(String.format("Deleting all data on %s...", props.getSpringDataMongodbDatabase()));
+		//challengeDao.deleteAll();
+		matchDao.deleteAll();
+		matchResultDao.deleteAll();
+		playerDao.deleteAll();
+		timeSlotDao.deleteAll();
+		serverDao.deleteAll();
 	}
 }

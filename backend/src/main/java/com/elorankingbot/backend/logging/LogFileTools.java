@@ -12,6 +12,7 @@ public class LogFileTools {
 	private static final String LOG_FILE_NAME = "log.txt";
 
 	public static void archiveOldLogFile() {
+		if (true) return;// TODO das hier kann wahrscheinlich weg
 		try {
 			if (!Files.exists(Path.of(LOG_ARCHIVE_FOLDER))) {
 				Files.createDirectory(Path.of(LOG_ARCHIVE_FOLDER));

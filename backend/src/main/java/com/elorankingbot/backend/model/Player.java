@@ -8,49 +8,36 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString
 @UseToStringForLogging
 @Document(collection = "player")
-public class Player implements Comparable<Player> {
+public class Player  {
+
+    private static final int PERMABANNED = -1;
+    private static final int NOT_BANNED = -2;
 
     @Id
     private UUID id;
     private long userId;
     private long guildId;
-    private String name;
-    private double rating;
-    private int wins;
-    private int draws;
-    private int losses;
+    private String tag;
     private int unbanAtTimeSlot;
+    private Map<String, PlayerGameStats> gameNameToPlayerGameStats;
 
-    public Player(long guildId, long userId, String name, double rating) {
+    public Player(long guildId, long userId, String tag) {
         this.id = generateId(guildId, userId);
         this.userId = userId;
         this.guildId = guildId;
-        this.name = name;
-        this.rating = rating;
-        this.wins = 0;
-        this.draws = 0;
-        this.losses = 0;
-        this.unbanAtTimeSlot = -2;// not banned
-    }
-
-    public void addWin() {
-        wins++;
-    }
-
-    public void addDraw() {
-        draws++;
-    }
-
-    public void addLoss() {
-        losses++;
+        this.tag = tag;
+        this.unbanAtTimeSlot = NOT_BANNED;
+        this.gameNameToPlayerGameStats = new HashMap<>();
     }
 
     public static UUID generateId(long guildId, long userId) {
@@ -58,15 +45,26 @@ public class Player implements Comparable<Player> {
     }
 
     public boolean isBanned() {
-        return unbanAtTimeSlot != -2;
+        return unbanAtTimeSlot != NOT_BANNED;
     }
 
     public boolean isPermaBanned() {
-        return unbanAtTimeSlot == -1;
+        return unbanAtTimeSlot == PERMABANNED;
+    }
+
+    public PlayerGameStats getGameStats(Game game) {
+        PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
+        if (playerGameStats == null) {
+            PlayerGameStats newPlayerGameStats = new PlayerGameStats(1200);
+            gameNameToPlayerGameStats.put(game.getName(), newPlayerGameStats);
+            playerGameStats = newPlayerGameStats;
+        }
+        return playerGameStats;
     }
 
     @Override
-    public int compareTo(Player otherPlayer) {
-        return Double.compare(this.rating, otherPlayer.rating);
+    public boolean equals(Object other) {
+        if (!(other instanceof Player)) return false;
+        return this.id.equals(((Player) other).id);
     }
 }

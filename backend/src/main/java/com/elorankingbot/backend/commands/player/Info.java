@@ -1,28 +1,18 @@
 package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.List;
-import java.util.Optional;
-
-import static com.elorankingbot.backend.service.EloRankingService.formatRating;
-import static java.lang.Integer.min;
 
 public class Info extends SlashCommand {
 
@@ -30,8 +20,8 @@ public class Info extends SlashCommand {
 	private boolean isSelfInfo;
 	private int numTotalPlayers, targetPlayerIndex, numHigherRanksToDisplay;
 
-	public Info(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Info(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -49,6 +39,7 @@ public class Info extends SlashCommand {
 	}
 
 	public void execute() {
+		/*
 		User targetUser;
 		User callingUser = event.getInteraction().getUser();
 		if (event.getOption("player").isEmpty()) {
@@ -86,10 +77,14 @@ public class Info extends SlashCommand {
 		event.reply().withContent("Information about player " + targetUser.getTag() + banString)
 				.withEmbeds(rankingsEmbed, matchHistoryEmbed)
 				.withEphemeral(isSelfInfo).subscribe();
+
+		 */
 	}
 
 	private List<Player> generatePlayerList() {
-		List<Player> playerList = service.getRankings(guildId);
+		return  null;
+		/*
+		List<Player> playerList = service.getLeaderboard(guildId);
 		numTotalPlayers = playerList.size();
 		targetPlayerIndex = playerList.indexOf(targetPlayer);
 		numHigherRanksToDisplay = min(10, targetPlayerIndex);
@@ -97,6 +92,8 @@ public class Info extends SlashCommand {
 		return playerList.subList(
 				targetPlayerIndex - numHigherRanksToDisplay,
 				targetPlayerIndex + numLowerRanksToDisplay + 1);
+
+		 */
 	}
 
 	private String generateBanString() {
@@ -106,7 +103,7 @@ public class Info extends SlashCommand {
 				banString = String.format("\n**%s banned permanently, or until unbanned.**",
 						isSelfInfo ? "You are" : "This player is");
 			} else {
-				int stillBannedMinutes = queue.getRemainingDuration(targetPlayer.getUnbanAtTimeSlot());
+				int stillBannedMinutes = timedTaskQueue.getRemainingDuration(targetPlayer.getUnbanAtTimeSlot());
 				banString = String.format("\n**%s still banned for %s.**",
 						isSelfInfo ? "You are" : "This player is",
 						DurationParser.minutesToString(stillBannedMinutes));
@@ -116,29 +113,33 @@ public class Info extends SlashCommand {
 	}
 
 	private EmbedCreateSpec generateMatchHistory(int numMatches) {
-		List<Match> matchHistory = service.getMatchHistory(targetPlayer.getUserId(), guildId);
-		if (matchHistory.size() > numMatches) matchHistory = matchHistory.subList(0, numMatches);
+		List<MatchResult> matchResultHistory = dbService.getMatchHistory(targetPlayer.getUserId(), guildId);
+		if (matchResultHistory.size() > numMatches) matchResultHistory = matchResultHistory.subList(0, numMatches);
 		String matchHistoryString = "";
-		for (Match match : matchHistory) {
-			matchHistoryString += generateMatchString(match, targetPlayer.getUserId());
+		for (MatchResult matchResult : matchResultHistory) {
+			matchHistoryString += generateMatchString(matchResult, targetPlayer.getUserId());
 		}
 		if (matchHistoryString.equals("")) matchHistoryString = "This player has not played any matches.";
 
 		return EmbedCreateSpec.builder()
-				.title(targetPlayer.getName() + " match history")
+				.title(targetPlayer.getTag() + " match history")
 				.addField(EmbedCreateFields.Field.of(
-						targetPlayer.getName() + " match history",
+						targetPlayer.getTag() + " match history",
 						matchHistoryString,
 						true))
 				.build();
 	}
 
-	private String generateMatchString(Match match, long playerId) {
+	private String generateMatchString(MatchResult matchResult, long playerId) {
+		return null;
+		/*
 		boolean isWin = match.getWinnerId() == playerId;
 		return String.format("%s vs %s: %s -> %s\n",
 				match.isDraw() ? ":left_right_arrow:" : isWin ? ":arrow_up:" : ":arrow_down:",
 				isWin ? match.getLoserTag() : match.getWinnerTag(),
 				formatRating(isWin ? match.getWinnerOldRating() : match.getLoserOldRating()),
 				formatRating(isWin ? match.getWinnerNewRating() : match.getLoserNewRating()));
+
+		 */
 	}
 }

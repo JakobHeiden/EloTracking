@@ -1,34 +1,16 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.challenge.Challenge;
-import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
-import com.elorankingbot.backend.commands.mod.Ban;
-import com.elorankingbot.backend.commands.mod.ForceMatch;
-import com.elorankingbot.backend.commands.mod.Rating;
-import com.elorankingbot.backend.commands.player.Info;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Category;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public class Setup extends SlashCommand {
 
@@ -37,9 +19,8 @@ public class Setup extends SlashCommand {
 	private Role modRole;
 	private String reply;
 
-	public Setup(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
-				 TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Setup(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -64,10 +45,11 @@ public class Setup extends SlashCommand {
 	}
 
 	public void execute() {
+		/*
 		reply = "Setup performed. Here is what I did:";
 		guild = event.getInteraction().getGuild().block();
-		game = new Game(guild.getId().asLong(),
-				event.getOption("nameofgame").get().getValue().get().asString());
+		game = new Game(event.getOption("nameofgame").get().getValue().get().asString(), guild.getId().asLong()
+		);
 		game.setAllowDraw(event.getOption("allowdraw").get().getValue().get().asBoolean());
 
 		updateCommands().block();
@@ -99,15 +81,19 @@ public class Setup extends SlashCommand {
 		service.saveGame(game);
 
 		reply += String.format("\n- I created a web page with full rankings: http://%s/%s",
-				service.getPropertiesLoader().getBaseUrl(), guildId);
+				services.applicationPropertiesLoader().getBaseUrl(), guildId);
 		reply += String.format("\nFollow my announcement channel: <#%s>",
-				service.getPropertiesLoader().getAnnouncementChannelId());
+				services.applicationPropertiesLoader().getAnnouncementChannelId());
 		event.reply(reply).doOnError(error -> System.out.println(error.getMessage())).subscribe();
 
 		bot.sendToOwner(String.format("Setup performed on guild %s:%s with %s members",
 				guild.getId().asLong(), guild.getName(), guild.getMemberCount()));
+				*/
+
+
 	}
 
+	/*
 	private void assignModAndAdminRole() {
 		boolean adminRolePresent = event.getOption("adminrole").isPresent();
 		boolean modRolePresent = event.getOption("moderatorrole").isPresent();
@@ -133,31 +119,11 @@ public class Setup extends SlashCommand {
 		game.setModRoleId(modRole.getId().asLong());
 	}
 
-	public static TextChannel createResultChannel(Guild guild, Game game) {
-		TextChannel resultChannel = guild.createTextChannel("Elo match results")
-				.withPermissionOverwrites(PermissionOverwrite.forRole(
-						Snowflake.of(guild.getId().asLong()),
-						PermissionSet.none(),
-						PermissionSet.of(Permission.SEND_MESSAGES)))
-				.block();
-		game.setResultChannelId(resultChannel.getId().asLong());
-		return resultChannel;
-	}
+	 */
 
-	public static TextChannel createLeaderboardChannelAndMessage(Guild guild, Game game) {
-		TextChannel leaderboardChannel = guild.createTextChannel("Elo Rankings")
-				.withPermissionOverwrites(PermissionOverwrite.forRole(
-						Snowflake.of(guild.getId().asLong()),
-						PermissionSet.none(),
-						PermissionSet.of(Permission.SEND_MESSAGES)))
-				.block();
-		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();
-		game.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
-		game.setLeaderboardChannelId(leaderboardChannel.getId().asLong());
-		return leaderboardChannel;
-	}
 
-	private void createDisputeCategory() {
+
+	private void createDisputeCategory() {// TODO
 		Category disputeCategory = guild.createCategory("elo disputes").withPermissionOverwrites(
 				PermissionOverwrite.forRole(guild.getId(), PermissionSet.none(),
 						PermissionSet.of(Permission.VIEW_CHANNEL)),
@@ -165,26 +131,27 @@ public class Setup extends SlashCommand {
 						PermissionSet.none()),
 				PermissionOverwrite.forRole(modRole.getId(), PermissionSet.of(Permission.VIEW_CHANNEL),
 						PermissionSet.none())).block();
-		game.setDisputeCategoryId(disputeCategory.getId().asLong());
+		server.setDisputeCategoryId(disputeCategory.getId().asLong());
 		reply += String.format("\n- I created a category %s where I will create dispute channels as needed. " +
 				"It is only visible to Elo Admins and Moderators.", disputeCategory.getMention());
 	}
 
+	/*
 	private Mono<Object> updateCommands() {
 		Mono<Void> deleteSetup = bot.deleteCommand(guildId, Setup.getRequest().name());
 		Mono<ApplicationCommandData> deployForcematch = bot.deployCommand(guildId, ForceMatch.getRequest(game.isAllowDraw()));
 		Mono<ApplicationCommandData> deployChallenge = bot.deployCommand(guildId, Challenge.getRequest());
 		Mono<ApplicationCommandData> deployUserInteractionChallenge = bot.deployCommand(guildId, ChallengeAsUserInteraction.getRequest());
 		Mono<ApplicationCommandData> deployReset = bot.deployCommand(guildId, Reset.getRequest());
-		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.Permission.getRequest());
+		Mono<ApplicationCommandData> deployPermission = bot.deployCommand(guildId, com.elorankingbot.backend.commands.admin.SetRole.getRequest());
 		Mono<ApplicationCommandData> deploySet = bot.deployCommand(guildId, Set.getRequest());
 		Mono<ApplicationCommandData> deployRating = bot.deployCommand(guildId, Rating.getRequest());
-		Mono<ApplicationCommandData> deployBan =bot.deployCommand(guildId, Ban.getRequest());
-		Mono<ApplicationCommandData> deployInfo =bot.deployCommand(guildId, Info.getRequest());
+		Mono<ApplicationCommandData> deployBan = bot.deployCommand(guildId, Ban.getRequest());
+		Mono<ApplicationCommandData> deployInfo = bot.deployCommand(guildId, Info.getRequest());
 		reply += "\n- I updated my commands on this server. This may take a minute to update.";
 		return Mono.zip(List.of(
-				deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
-				deployReset, deployPermission, deploySet, deployRating, deployBan, deployInfo),
+						deleteSetup, deployForcematch, deployChallenge, deployUserInteractionChallenge,
+						deployReset, deployPermission, deploySet, deployRating, deployBan, deployInfo),
 				object -> null);
 	}
 
@@ -197,4 +164,6 @@ public class Setup extends SlashCommand {
 		service.getModCommands().forEach(commandName ->
 				bot.setDiscordCommandPermissions(guildId, commandName, adminRole, modRole));
 	}
+
+	 */
 }

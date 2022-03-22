@@ -3,13 +3,10 @@ package com.elorankingbot.backend.commands.mod;
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
@@ -29,8 +26,8 @@ public class Ban extends SlashCommand {
 	private String reasonGiven;
 	private int duration;
 
-	public Ban(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Ban(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -75,8 +72,8 @@ public class Ban extends SlashCommand {
 			return;
 		}
 
-		service.addNewPlayerIfPlayerNotPresent(guildId, playerUser.getId().asLong());
-		player = service.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
+		dbService.addNewPlayerIfPlayerNotPresent(guildId, playerUser.getId().asLong());
+		player = dbService.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
 		reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
 				: "";
@@ -111,7 +108,7 @@ public class Ban extends SlashCommand {
 				unban();
 				break;
 		}
-		service.savePlayer(player);
+		dbService.savePlayer(player);
 	}
 
 	private void permaban() {
@@ -151,9 +148,9 @@ public class Ban extends SlashCommand {
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		}
 
-		player.setUnbanAtTimeSlot((queue.getCurrentIndex() + duration) % queue.getNumberOfTimeSlots());
+		player.setUnbanAtTimeSlot((timedTaskQueue.getCurrentIndex() + duration) % timedTaskQueue.getNumberOfTimeSlots());
 
-		queue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
+		timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
 				guildId, player.getUserId(), null);
 	}
 
@@ -169,13 +166,13 @@ public class Ban extends SlashCommand {
 	}
 
 	private void deleteExistingOpenChallenges() {
-		service.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId()).stream()
+		dbService.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId()).stream()
 				.forEach(challenge -> {
 					if (challenge.isAccepted()) return;
 
-					service.deleteChallenge(challenge);
+					dbService.deleteChallenge(challenge);
 
-					boolean isChallengerBanned = challenge.getChallengerId() == player.getUserId();
+					boolean isChallengerBanned = challenge.getChallengerUserId() == player.getUserId();
 					bot.getChallengerMessage(challenge).subscribe(message ->
 							new MessageUpdater(message)
 									.makeAllNotBold()
@@ -185,7 +182,8 @@ public class Ban extends SlashCommand {
 									.makeAllItalic()
 									.resend()
 									.withComponents(none)
-									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+									.subscribe(msg -> timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+											0,//game.getMessageCleanupTime(),
 											msg.getId().asLong(), challenge.getChallengerChannelId(), null)));
 					bot.getAcceptorMessage(challenge).subscribe(message ->
 							new MessageUpdater(message)
@@ -196,7 +194,8 @@ public class Ban extends SlashCommand {
 									.makeAllItalic()
 									.resend()
 									.withComponents(none)
-									.subscribe(msg -> queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
+									.subscribe(msg -> timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
+											0,//game.getMessageCleanupTime(),
 											msg.getId().asLong(), challenge.getAcceptorChannelId(), null)));
 				});
 	}

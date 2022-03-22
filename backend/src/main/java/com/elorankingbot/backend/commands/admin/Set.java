@@ -2,11 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.mod.ForceMatch;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -23,8 +19,8 @@ public class Set extends SlashCommand {
 	private static final List<String> integerVariables = List.of(
 			"openchallengedecay", "acceptedchallengedecay", "matchautoresolve", "messagecleanup", "leaderboardlength");
 
-	public Set(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Set(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -70,6 +66,7 @@ public class Set extends SlashCommand {
 		if (integerVariables.contains(variable)) valueAsInt = Integer.parseInt(value);
 		if (variable.equals("allowdraw"))
 			valueAsBoolean = value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t");
+		/*
 		switch (variable) {
 			case "name":
 				game.setName(value);
@@ -103,5 +100,7 @@ public class Set extends SlashCommand {
 				break;
 		}
 		service.saveGame(game);
+
+		 */
 	}
 }

@@ -5,8 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -30,14 +31,13 @@ public class ChallengeModel {
         CONFLICT
     }
 
-    @Id
-    private long id;
-    private long guildId;
-    private long challengerId;
+    private UUID id;
+    private UUID gameId;
+    private long challengerUserId;
     private long challengerMessageId;
     private long challengerChannelId;
     private String challengerTag;
-    private long acceptorId;
+    private long acceptorUserId;
     private long acceptorMessageId;
     private long acceptorChannelId;
     private String acceptorTag;
@@ -52,15 +52,14 @@ public class ChallengeModel {
     private boolean isDispute = false;
 
     public ChallengeModel(long guildId,
-                          long challengerId, long challengerMessageId, long challengerChannelId, String challengerTag,
-                          long acceptorId, long acceptorMessageId, long acceptorChannelId, String acceptorTag) {
-        this.id = challengerMessageId;
-        this.guildId = guildId;
-        this.challengerId = challengerId;
+                          long challengerUserId, long challengerMessageId, long challengerChannelId, String challengerTag,
+                          long acceptorUserId, long acceptorMessageId, long acceptorChannelId, String acceptorTag) {
+        this.id = UUID.randomUUID();
+        this.challengerUserId = challengerUserId;
         this.challengerMessageId = challengerMessageId;
         this.challengerChannelId = challengerChannelId;
         this.challengerTag = challengerTag;
-        this.acceptorId = acceptorId;
+        this.acceptorUserId = acceptorUserId;
         this.acceptorMessageId = acceptorMessageId;
         this.acceptorChannelId = acceptorChannelId;
         this.acceptorTag = acceptorTag;

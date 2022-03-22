@@ -1,9 +1,9 @@
 package com.elorankingbot.backend.command;
 
-import com.elorankingbot.backend.service.EloRankingService;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,13 +13,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class CommandClassScanner {
-	/*
-	Commands mit public static boolean isModCommand() versehen
-	Permission baut sich seine listen anhand der map und isModCommand selber
 
-	das ding mit der q nochmal anschauen und evtl umbauen
-	 */
 	@Getter
 	private final Map<String, String> commandStringToClassName;
 	@Getter
@@ -33,11 +29,18 @@ public class CommandClassScanner {
 				// for some reason GitHub needs this
 				.filter(classInfo -> !classInfo.getPackageName().contains("target.classes"))
 				// for some reason Heroku needs this
-				.filter(classInfo -> !classInfo.getPackageName().contains("BOOT-INF.classes"))
-				.map(classInfo -> classInfo.load())
+				.map(classInfo -> {
+					try {
+						return Class.forName(classInfo.getName().replace("BOOT-INF.classes.", ""));
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+						return null;
+					}
+				})
 				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
 				// apparently some reflected class by Spring is getting caught up in this...
 				.filter(clazz -> !clazz.getSimpleName().equals(""))
+				.peek(classInfo -> log.trace("scanning command class " + classInfo.getSimpleName()))
 				.collect(Collectors.toSet());
 
 		this.adminCommands = classes.stream()

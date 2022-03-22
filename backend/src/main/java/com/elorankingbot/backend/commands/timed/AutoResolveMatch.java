@@ -2,13 +2,8 @@ package com.elorankingbot.backend.commands.timed;
 
 import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.object.entity.Message;
 
 public class AutoResolveMatch extends TimedCommand {
@@ -16,9 +11,8 @@ public class AutoResolveMatch extends TimedCommand {
 	private Message reportPresentMessage;
 	private Message reportAbsentMessage;
 
-	public AutoResolveMatch(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client,
-							TimedTaskQueue queue, long challengeId, int time) {
-		super(service, bot, queue, client, challengeId, time);
+	public AutoResolveMatch(Services services, long challengeId, int time) {
+		super(services, challengeId, time);;
 	}
 
 	public void execute() {
@@ -29,8 +23,8 @@ public class AutoResolveMatch extends TimedCommand {
 		ChallengeModel.ReportStatus report = hasChallengerReported ?
 				challenge.getChallengerReported()
 				: challenge.getAcceptorReported();
-		long challengerId = challenge.getChallengerId();
-		long acceptorId = challenge.getAcceptorId();
+		long challengerId = challenge.getChallengerUserId();
+		long acceptorId = challenge.getAcceptorUserId();
 		String challengerTag = challenge.getChallengerTag();
 		String acceptorTag = challenge.getAcceptorTag();
 		long winnerId = 0L;
@@ -65,9 +59,10 @@ public class AutoResolveMatch extends TimedCommand {
 				return;
 		}
 
+		/*
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
-		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerId());
-		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorId());
+		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerUserId());
+		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorUserId());
 		Match match = new Match(challenge.getGuildId(), winnerId, loserId, winnerTag, loserTag, isDraw);
 		service.updateRatingsAndSaveMatchAndPlayers(match);
 		service.deleteChallenge(challenge);
@@ -79,10 +74,13 @@ public class AutoResolveMatch extends TimedCommand {
 				reportPresentMessage.getId().asLong(), reportPresentMessage.getChannelId().asLong(), match);
 		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
 				reportAbsentMessage.getId().asLong(), reportAbsentMessage.getChannelId().asLong(), match);
+
+		 */
 	}
 
-	private void postToInvolvedChannels(ChallengeModel challenge, Match match, Game game,
+	private void postToInvolvedChannels(ChallengeModel challenge, MatchResult matchResult, Game game,
 										boolean hasChallengerReported, boolean isDraw, boolean isWin) {
+		/*
 		Message reportPresentMessage = hasChallengerReported ?
 				bot.getChallengerMessage(challenge).block()
 				: bot.getAcceptorMessage(challenge).block();
@@ -122,9 +120,12 @@ public class AutoResolveMatch extends TimedCommand {
 				.makeAllItalic()
 				.resend()
 				.withComponents(none).subscribe();
+
+		 */
 	}
 
 	private void autoResolveMatchAsCancel(ChallengeModel challenge, boolean isReportedByChallenger) {
+		/*
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		service.deleteChallenge(challenge);
 
@@ -153,5 +154,7 @@ public class AutoResolveMatch extends TimedCommand {
 				reportPresentMessage.getId().asLong(), reportPresentMessage.getChannelId().asLong(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, game.getMessageCleanupTime(),
 				reportAbsentMessage.getId().asLong(), reportAbsentMessage.getChannelId().asLong(), null);
+
+		 */
 	}
 }

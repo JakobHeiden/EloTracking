@@ -1,15 +1,12 @@
 package com.elorankingbot.backend.timedtask;
 
-import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
+import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.rest.http.client.ClientException;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,37 +15,37 @@ import java.util.List;
 @Service
 public class TimedTaskService {
 
-	private final EloRankingService service;
+	private final DBService service;
 	private final DiscordBotService bot;
 	private final TimedTaskQueue queue;
 	private final GatewayDiscordClient client;
 
 	protected final List none = new ArrayList<>();
 
-	public TimedTaskService(EloRankingService service, @Lazy DiscordBotService bot,
-							@Lazy TimedTaskQueue queue, GatewayDiscordClient client) {
-		this.service = service;
-		this.bot = bot;
-		this.queue = queue;
-		this.client = client;
+	public TimedTaskService(Services services) {
+		this.service = services.dbService;
+		this.bot = services.bot;
+		this.queue = services.queue;
+		this.client = services.client;
 	}
 
 	public void markGamesForDeletion() {
 		List<Long> allGuildIds = client.getGuilds()
 				.map(guild -> guild.getId().asLong())
 				.collectList().block();
-		service.findAllGames().stream()
-				.filter(game -> !allGuildIds.contains(game.getGuildId()))
-				.forEach(game -> game.setMarkedForDeletion(true));
+		//service.findAllGames().stream()
+		//		.filter(game -> !allGuildIds.contains(game.getGuildId()))
+		//		.forEach(game -> game.setMarkedForDeletion(true));
 	}
 
 	public void deleteGamesMarkedForDeletion() {
-		service.findAllGames().stream()
-				.filter(game -> game.isMarkedForDeletion())
-				.forEach(game -> service.deleteGame(game.getGuildId()));
+		//service.findAllGames().stream()
+		//		.filter(game -> game.isMarkedForDeletion())
+		//		.forEach(game -> service.deleteGame(game.getGuildId()));
 	}
 
 	public void summarizeMatch(long messageId, long channelId, Object value) {
+		/*
 		Match match = (Match) value;
 		Message message = client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
 		boolean isWinnerMessage = ((PrivateChannel) message.getChannel().block())
@@ -61,6 +58,8 @@ public class TimedTaskService {
 						isWinnerMessage ? service.formatRating(match.getWinnerOldRating()) : service.formatRating(match.getLoserOldRating()),
 						isWinnerMessage ? service.formatRating(match.getWinnerNewRating()) : service.formatRating(match.getLoserNewRating())))
 				.subscribe();
+
+		 */
 	}
 
 	public void deleteMessage(long messageId, long channelId) {
