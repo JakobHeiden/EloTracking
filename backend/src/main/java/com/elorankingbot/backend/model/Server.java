@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -48,7 +48,11 @@ public class Server {
 		return gameNameToGame.get(name);
 	}
 
-	public Collection<Game> getGames() {
-		return gameNameToGame.values();
+	public List<Game> getGames() {
+		return gameNameToGame.values().stream().toList();
+	}
+
+	public List<MatchFinderQueue> getQueues() {
+		return getGames().stream().flatMap(game -> game.getQueues().stream()).toList();
 	}
 }

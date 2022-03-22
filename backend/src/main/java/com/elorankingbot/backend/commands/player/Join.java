@@ -24,7 +24,7 @@ public class Join extends SlashCommand {
 	private Game game;
 	private Match match;
 	private List<User> users;
-	private List<User> allUsers;
+	private List<User> allUsers;// TODO aufraeumen
 	private List<Player> allPlayers;
 
 	public Join(ChatInputInteractionEvent event, Services services) {
@@ -38,8 +38,8 @@ public class Join extends SlashCommand {
 				.description("Join a matchmaking queue")
 				.defaultPermission(true);
 		server.getGames().forEach(game -> {
-			if (game.getQueueNameToQueue().size() == 1) {
-				var queue = game.getQueueNameToQueue().values().stream().findAny().get();
+			if (game.getQueues().size() == 1) {
+				var queue = game.getQueues().stream().findAny().get();
 				var queueOptionBuilder = ApplicationCommandOptionData.builder()
 						.name(game.getName()).description(queue.getDescription())
 						.type(SUB_COMMAND.getValue());
@@ -49,14 +49,13 @@ public class Join extends SlashCommand {
 				var gameOptionBuilder = ApplicationCommandOptionData.builder()
 						.name(game.getName()).description("game name")
 						.type(SUB_COMMAND_GROUP.getValue());
-				game.getQueueNameToQueue().values()
-						.forEach(queue -> {
-							var queueOptionBuilder = ApplicationCommandOptionData.builder()
-									.name(queue.getName()).description(queue.getDescription())
-									.type(SUB_COMMAND.getValue());
-							addUserOptions(queue, queueOptionBuilder);
-							gameOptionBuilder.addOption(queueOptionBuilder.build());
-						});
+				game.getQueues().forEach(queue -> {
+					var queueOptionBuilder = ApplicationCommandOptionData.builder()
+							.name(queue.getName()).description(queue.getDescription())
+							.type(SUB_COMMAND.getValue());
+					addUserOptions(queue, queueOptionBuilder);
+					gameOptionBuilder.addOption(queueOptionBuilder.build());
+				});
 				requestBuilder.addOption(gameOptionBuilder.build());
 			}
 		});

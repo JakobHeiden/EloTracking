@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.commands.admin.CreateRanking;
+import com.elorankingbot.backend.commands.admin.Edit;
 import com.elorankingbot.backend.commands.admin.SetRole;
-import com.elorankingbot.backend.commands.player.match.Leave;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -51,7 +51,8 @@ public class DevTools {
 		service.findAllServers().forEach(
 				server -> {
 					try {
-						bot.deployCommand(server, Leave.getRequest()).block();
+						bot.deployCommand(server, Edit.getRequest(server)).block();
+						bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
 						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
 						//bot.setDiscordCommandPermissions(game.getGuildId(), "ban", adminRole, modRole);

@@ -77,7 +77,8 @@ public class EventParser {
 						Server server = new Server(event.getGuild().getId().asLong());
 						service.saveServer(server);
 						bot.deployCommand(server, SetRole.getRequest()).block();
-						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), server.getGuildId());
+						long everyoneRoleId = server.getGuildId();
+						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), everyoneRoleId);
 						bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
 
 					}
