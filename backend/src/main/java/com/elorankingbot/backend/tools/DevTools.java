@@ -48,9 +48,21 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating guild commands...");
+
+		client.getGuilds().subscribe(guild -> {
+			bot.deleteAllGuildCommands(guild.getId().asLong()).blockLast();
+			Server server = new Server(guild.getId().asLong());
+			service.saveServer(server);
+			bot.deployCommand(server, SetRole.getRequest()).block();
+			long everyoneRoleId = server.getGuildId();
+			bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), everyoneRoleId);
+			bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
+		});
+		/*
 		service.findAllServers().forEach(
 				server -> {
 					try {
+
 						bot.deployCommand(server, Edit.getRequest(server)).block();
 						bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
@@ -61,6 +73,8 @@ public class DevTools {
 					}
 				}
 		);
+
+		 */
 	}
 
 	private void deployInitialCommands() {

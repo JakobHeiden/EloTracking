@@ -37,6 +37,6 @@ public class Group implements Comparable<Group> {
 	}
 
 	public double getRatingElasticity(Date now, MatchFinderQueue queue) {
-		return (now.getTime() - timestamp.getTime()) / 1000 * queue.getRatingElasticityPerSecond();
+		return (double) (now.getTime() - timestamp.getTime()) / (60 * 1000) * queue.getRatingElasticity();
 	}
 }
