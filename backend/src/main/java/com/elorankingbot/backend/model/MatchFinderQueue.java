@@ -31,7 +31,7 @@ public class MatchFinderQueue {
 	private final QueueType queueType;
 	private final int maxPremadeSize;
 	private int maxRatingSpread;
-	private double ratingElasticityPerSecond;
+	private int ratingElasticity;
 	private boolean isBuildMatchFromTopPlayer;
 
 	public MatchFinderQueue(Game game, String name, int numTeams, int numPlayersPerTeam,
@@ -43,7 +43,7 @@ public class MatchFinderQueue {
 		this.queueType = queueType;
 		this.maxPremadeSize = maxPremadeSize;
 		this.maxRatingSpread = NO_LIMIT;
-		this.ratingElasticityPerSecond = 100F / 60;
+		this.ratingElasticity = 100;
 		this.groups = new ArrayList<>();
 		this.formingGroups = new ArrayList<>();
 		this.isBuildMatchFromTopPlayer = true;

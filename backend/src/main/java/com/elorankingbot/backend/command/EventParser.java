@@ -80,7 +80,6 @@ public class EventParser {
 						long everyoneRoleId = server.getGuildId();
 						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), everyoneRoleId);
 						bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
-
 					}
 				});
 

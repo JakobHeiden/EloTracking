@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.player.Join;
+import com.elorankingbot.backend.commands.player.match.Leave;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
@@ -128,8 +129,9 @@ public class AddQueue extends SlashCommand {
 		// TODO log
 		// TODO inputs nach quatsch filtern
 
-		bot.deleteCommand(server, Join.class.getSimpleName()).block();
+		bot.deleteCommand(server, Join.class.getSimpleName()).block();// TODO muss ich hier ueberhaupt loeschen?
 		bot.deployCommand(server, Join.getRequest(server)).block();
+		bot.deployCommand(server, Leave.getRequest()).subscribe();
 		bot.deleteCommand(server, Edit.class.getSimpleName()).block();
 		bot.deployCommand(server, Edit.getRequest(server)).block();// TODO blocks buendeln
 		bot.setAdminPermissionToAdminCommand(server, Edit.class.getSimpleName());
