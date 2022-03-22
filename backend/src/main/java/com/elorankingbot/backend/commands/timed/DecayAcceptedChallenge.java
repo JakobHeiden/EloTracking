@@ -1,23 +1,15 @@
 package com.elorankingbot.backend.commands.timed;
 
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import com.elorankingbot.backend.tools.MessageUpdater;
-import discord4j.core.GatewayDiscordClient;
-
-import java.util.Optional;
+import com.elorankingbot.backend.service.Services;
 
 public class DecayAcceptedChallenge extends TimedCommand {
 
-	public DecayAcceptedChallenge(EloRankingService service, DiscordBotService bot, GatewayDiscordClient client,
-								  TimedTaskQueue queue, long challengeId, int time) {
-		super(service, bot, queue, client, challengeId, time);
+	public DecayAcceptedChallenge(Services services, long challengeId, int time) {
+		super(services, challengeId, time);;
 	}
 
 	public void execute() {
+		/*
 		if (challenge == null) return;
 		if (challenge.hasAReport()) return;
 
@@ -43,5 +35,7 @@ public class DecayAcceptedChallenge extends TimedCommand {
 				challenge.getChallengerMessageId(), challenge.getChallengerChannelId(), null);
 		queue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE, timer,
 				challenge.getAcceptorMessageId(), challenge.getAcceptorChannelId(), null);
+
+		 */
 	}
 }

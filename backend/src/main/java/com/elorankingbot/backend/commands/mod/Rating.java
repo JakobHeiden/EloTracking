@@ -2,26 +2,18 @@ package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
-import discord4j.core.object.entity.User;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import static com.elorankingbot.backend.service.EloRankingService.formatRating;
-
 @ModCommand
 public class Rating extends SlashCommand {
 
-	public Rating(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot, TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public Rating(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -55,6 +47,7 @@ public class Rating extends SlashCommand {
 	}
 
 	public void execute() {
+		/*
 		User playerUser = event.getOption("player").get().getValue().get().asUser().block();
 		if (playerUser.isBot()) {
 			event.reply("Bots don't have ratings.").subscribe();
@@ -68,9 +61,9 @@ public class Rating extends SlashCommand {
 		Player player = service.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
 		double oldRating = player.getRating();
 		double newRating = isSetNewRating ? rating : oldRating + rating;
-		player.setRating(newRating);
+		//player.setRating(newRating);
 		service.savePlayer(player);
-		bot.updateLeaderboard(game);
+		//bot.updateLeaderboard(game);
 
 		String reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
@@ -82,5 +75,7 @@ public class Rating extends SlashCommand {
 				event.getInteraction().getUser().getTag(), formatRating(newRating), formatRating(oldRating), reasonGiven);
 		MessageCreateSpec playerMessageSpec = MessageCreateSpec.builder().content(playerMessageContent).build();
 		playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(playerMessageSpec).subscribe());
+
+		 */
 	}
 }

@@ -1,14 +1,10 @@
 package com.elorankingbot.backend.commands.mod;
 
-import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.model.Match;
-import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.EloRankingService;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
-import discord4j.core.GatewayDiscordClient;
+import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.tools.FormatTools;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
@@ -17,22 +13,19 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import java.util.Optional;
-
 @ModCommand
 public class ForceMatch extends SlashCommand {
 
 	private User user1;
 	private User user2;
 	private String reasonGiven;
-	private Match match;
+	private MatchResult matchResult;
 	private boolean isDraw;
 	private String templatePlayer1;
 	private String templatePlayer2;
 
-	public ForceMatch(ChatInputInteractionEvent event, EloRankingService service, DiscordBotService bot,
-					  TimedTaskQueue queue, GatewayDiscordClient client) {
-		super(event, service, bot, queue, client);
+	public ForceMatch(ChatInputInteractionEvent event, Services services) {
+		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest(boolean allowDraw) {
@@ -99,6 +92,7 @@ public class ForceMatch extends SlashCommand {
 	}
 
 	private void forceResolveMatch() {
+		/*
 		service.addNewPlayerIfPlayerNotPresent(guildId, user1.getId().asLong());
 		service.addNewPlayerIfPlayerNotPresent(guildId, user2.getId().asLong());
 
@@ -110,9 +104,9 @@ public class ForceMatch extends SlashCommand {
 			user2 = tempUser1;
 		}
 
-		match = new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
-		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(match);
-		service.saveMatch(match);
+		matchResult = null;// new Match(guildId, user1.getId().asLong(), user2.getId().asLong(), user1.getTag(), user2.getTag(), isDraw);
+		double[] eloResults = service.updateRatingsAndSaveMatchAndPlayers(matchResult);
+		service.saveMatch(matchResult);
 		templatePlayer1 = isDraw ?
 				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
 				: "*%s has forced a win :arrow_up: over %s. Your rating went from %s to %s.%s*";
@@ -120,16 +114,18 @@ public class ForceMatch extends SlashCommand {
 				"*%s has forced a draw :left_right_arrow: with %s. Your rating went from %s to %s.%s*"
 				: "*%s has forced a loss :arrow_down: to %s. Your rating went from %s to %s.%s*";
 		informPlayers(eloResults);
-		bot.postToResultChannel(game, match);
-		bot.updateLeaderboard(game);
+		//bot.postToResultChannel(game, match);
+		//bot.updateLeaderboard(game);
 		String template = isDraw ? "Forced a draw :left_right_arrow: between %s and %s.%s" : "Forced a win :arrow_up: for %s over %s.%s";
 		event.reply(String.format(template, user1.getTag(), user2.getTag(), reasonGiven)).subscribe();
+
+		 */
 	}
 
 	private void informPlayers(double[] eloResults) {
 		String player1MessageContent = String.format(templatePlayer1,
 				event.getInteraction().getUser().getTag(), user2.getTag(),
-				service.formatRating(eloResults[0]), service.formatRating(eloResults[2]),
+				FormatTools.formatRating(eloResults[0]), FormatTools.formatRating(eloResults[2]),
 				reasonGiven);
 		MessageCreateSpec player1MessageSpec = MessageCreateSpec.builder()
 				.content(player1MessageContent).build();
@@ -137,7 +133,7 @@ public class ForceMatch extends SlashCommand {
 
 		String player2MessageContent = String.format(templatePlayer2,
 				event.getInteraction().getUser().getTag(), user1.getTag(),
-				service.formatRating(eloResults[1]), service.formatRating(eloResults[3]),
+				FormatTools.formatRating(eloResults[1]), FormatTools.formatRating(eloResults[3]),
 				reasonGiven);
 		MessageCreateSpec player2MessageSpec = MessageCreateSpec.builder()
 				.content(player2MessageContent).build();
@@ -145,6 +141,7 @@ public class ForceMatch extends SlashCommand {
 	}
 
 	private void undoMatch() {
+		/*
 		Optional<Match> maybeMostRecentMatch = service.findMostRecentMatch(guildId, user1.getId().asLong(), user2.getId().asLong());
 		if (maybeMostRecentMatch.isEmpty()) {
 			event.reply("These players have no recorded matches.").subscribe();
@@ -165,9 +162,13 @@ public class ForceMatch extends SlashCommand {
 		bot.updateLeaderboard(game);
 		event.reply(String.format("Reverted the last recorded match between %s and %s.",
 				user1.getTag(), user2.getTag())).subscribe();
+
+		 */
 	}
 
 	private double[] updateRatingsForUndo() {
+		return null;
+		/*
 		Player winner = service.findPlayerByGuildIdAndUserId(guildId, match.getWinnerId()).get();
 		double winnerOldRating = winner.getRating();
 		double winnerNewRating = winnerOldRating - (match.getWinnerNewRating() - match.getWinnerOldRating());
@@ -190,5 +191,7 @@ public class ForceMatch extends SlashCommand {
 		service.savePlayer(loser);
 
 		return new double[]{winnerOldRating, loserOldRating, winnerNewRating, loserNewRating};
+
+		 */
 	}
 }

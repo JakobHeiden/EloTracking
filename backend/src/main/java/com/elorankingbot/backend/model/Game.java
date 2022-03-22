@@ -1,43 +1,62 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.logging.UseToStringForLogging;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
-@Data
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 @NoArgsConstructor
-@ToString
-@UseToStringForLogging
-@Document(collection = "game")
+@Data
 public class Game {
 
     @Id
-    private long guildId;
-    private long adminRoleId;
-    private long modRoleId;
-    private long resultChannelId;
-    private long disputeCategoryId;
-    private long leaderboardChannelId;// TODO kann weg?
-    private long leaderboardMessageId;
     private String name;
-    private boolean allowDraw = false;
-    private int openChallengeDecayTime;
-    private int acceptedChallengeDecayTime;
+    private Map<String, MatchFinderQueue> queueNameToQueue;
+    @DBRef(lazy = true)
+    private Server server;
+    private int leaderboardLength;
+    private boolean allowDraw;
     private int matchAutoResolveTime;
     private int messageCleanupTime;
-    private int leaderboardLength;
-    private boolean isMarkedForDeletion = false;
+    private int noReportsModalityDecayTime;
 
-    public Game(long guildId, String name) {
-        this.guildId = guildId;
+    public Game(Server server, String name, boolean allowDraw) {
         this.name = name;
-        this.openChallengeDecayTime = 2 * 60;
-        this.acceptedChallengeDecayTime = 7 * 24 * 60;
+        this.server = server;
+        this.queueNameToQueue = new HashMap<>();
+        this.leaderboardLength = 20;
+        this.allowDraw = allowDraw;
         this.matchAutoResolveTime = 24 * 60;
         this.messageCleanupTime = 12 * 60;
-        this.leaderboardLength = 20;
+        this.noReportsModalityDecayTime = 7 * 24 * 60;
+    }
+
+    public void addQueue(MatchFinderQueue queue) {
+        queueNameToQueue.put(queue.getName(), queue);
+    }
+
+    public MatchFinderQueue getQueue(String name) {
+        return queueNameToQueue.get(name);
+    }
+
+    public Collection<MatchFinderQueue> getQueues() {
+        return queueNameToQueue.values();
+    }
+
+    public boolean hasSingularQueue() {
+        return queueNameToQueue.size() == 1;
+    }
+
+    public long getGuildId() {
+        return server.getGuildId();
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

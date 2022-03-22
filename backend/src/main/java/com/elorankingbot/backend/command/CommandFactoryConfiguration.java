@@ -2,10 +2,10 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.challenge.ChallengeAsUserInteraction;
-import com.elorankingbot.backend.tools.ButtonInteractionEventWrapper;
-import com.elorankingbot.backend.tools.ChatInputInteractionEventWrapper;
-import com.elorankingbot.backend.tools.UserInteractionEventWrapper;
+import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,35 +25,35 @@ public class CommandFactoryConfiguration {
 	}
 
 	@Bean
-	public Function<ChatInputInteractionEventWrapper, SlashCommand> slashCommandFactory() {
-		return eventWrapper -> createSlashCommand(eventWrapper);
+	public Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory() {
+		return event -> createSlashCommand(event);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public SlashCommand createSlashCommand(ChatInputInteractionEventWrapper eventWrapper) {
-		return eventParser.createSlashCommand(eventWrapper);
+	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
+		return eventParser.createSlashCommand(event);
 	}
 
 	@Bean
-	public Function<ButtonInteractionEventWrapper, ButtonCommand> buttonCommandFactory() {
-		return eventWrapper -> createButtonCommand(eventWrapper);
-	}
-
-	@Bean
-	@Scope("prototype")
-	public ButtonCommand createButtonCommand(ButtonInteractionEventWrapper eventWrapper) {
-		return eventParser.createButtonCommand(eventWrapper);
-	}
-
-	@Bean
-	public Function<UserInteractionEventWrapper, ChallengeAsUserInteraction> userInteractionChallengeFactory() {
-		return eventWrapper -> createUserInteractionChallenge(eventWrapper);
+	public Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory() {
+		return event -> createButtonCommand(event);
 	}
 
 	@Bean
 	@Scope("prototype")
-	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEventWrapper eventWrapper) {
-		return eventParser.createUserInteractionChallenge(eventWrapper);
+	public ButtonCommand createButtonCommand(ButtonInteractionEvent event) {
+		return eventParser.createButtonCommand(event);
+	}
+
+	@Bean
+	public Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory() {
+		return event -> createUserInteractionChallenge(event);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEvent event) {
+		return eventParser.createUserInteractionChallenge(event);
 	}
 }

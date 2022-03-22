@@ -1,60 +1,212 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.logging.UseToStringForLogging;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
-@UseToStringForLogging
+import static com.elorankingbot.backend.model.Match.ReportIntegrity.CONFLICT;
+import static com.elorankingbot.backend.model.Match.ReportIntegrity.INCOMPLETE;
+import static com.elorankingbot.backend.model.ReportStatus.*;
+
+@Getter
 @Document(collection = "match")
-@CompoundIndex(def = "{'guildId': 1, 'winnerId': 1, 'date': -1}")
-@CompoundIndex(def = "{'guildId': 1, 'loserId': 1, 'date': -1}")
-public class Match implements Comparable<Match> {
+public class Match {
 
-    @Id
-    private UUID id;
-    private Date date;
-    private long guildId;
-    private long winnerId;
-    private String winnerTag;
-    private double winnerOldRating;
-    private double winnerNewRating;
-    private long loserId;
-    private String loserTag;
-    private double loserOldRating;
-    private double loserNewRating;
-    private boolean isDraw;
+	public enum ReportIntegrity {
+		INCOMPLETE,
+		COMPLETE,
+		CANCEL,
+		CONFLICT
+	}
 
-    public Match(long guildId, long winnerId, long loserId, String winnerTag, String loserTag, boolean isDraw) {
-        this.guildId = guildId;
-        this.winnerId = winnerId;
-        this.loserId = loserId;
-        this.winnerTag = winnerTag;
-        this.loserTag = loserTag;
-        this.isDraw = isDraw;
-        this.id = UUID.randomUUID();
-        this.date = new Date();
-    }
+	@Id
+	private UUID id;
+	@DBRef(lazy = true)
+	private final Server server;
+	private final String gameId, queueId;
+	@Setter
+	@Getter
+	private boolean isDispute;
+	@Getter
+	@Setter
+	private boolean isOrWasConflict;
+	private final List<List<Player>> teams;
+	private final Map<UUID, ReportStatus> playerIdToReportStatus;
+	private final Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
+	private List<Player> conflictingReports;
+	private ReportIntegrity reportIntegrity;
 
-    public String getWinnerTag(GatewayDiscordClient client) {// TODO umziehen nach bot, oder mit persistieren?
-        return client.getUserById(Snowflake.of(winnerId)).block().getTag();
-    }
+	// Match is constructed initially from queue, but persisted with server instead since queue has no collection
+	public Match(MatchFinderQueue queue, List<List<Player>> teams) {
+		this.id = UUID.randomUUID();
+		this.server = queue.getGame().getServer();
+		this.gameId = queue.getGame().getName();
+		this.queueId = queue.getName();
+		this.isDispute = false;
+		this.isOrWasConflict = false;
+		this.teams = teams;
+		this.playerIdToReportStatus = new HashMap<>(queue.getNumPlayersPerMatch());
+		for (Player player : this.teams.stream().flatMap(Collection::stream).toList()) {
+			this.playerIdToReportStatus.put(player.getId(), NOT_YET_REPORTED);
+		}
+		this.playerIdToMessageId = new HashMap<>(queue.getNumPlayersPerMatch());
+		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayersPerMatch());
+		this.conflictingReports = new ArrayList<>();
+		this.reportIntegrity = INCOMPLETE;
+	}
 
-    @Override
-    public int compareTo(Match other) {
-        return date.compareTo(other.date);
-    }
+	@PersistenceConstructor
+	public Match(UUID id, Server server, String gameId, String queueId, boolean isDispute, boolean isOrWasConflict,
+				 List<List<Player>> teams, Map<UUID, ReportStatus> playerIdToReportStatus, Map<UUID, Long> playerIdToMessageId,
+				 Map<UUID, Long> playerIdToPrivateChannelId, List<Player> conflictingReports, ReportIntegrity reportIntegrity) {
+		this.id = id;
+		this.server = server;
+		this.gameId = gameId;
+		this.queueId = queueId;
+		this.isDispute = isDispute;
+		this.isOrWasConflict = isOrWasConflict;
+		this.teams = teams;
+		this.playerIdToReportStatus = playerIdToReportStatus;
+		this.playerIdToMessageId = playerIdToMessageId;
+		this.playerIdToPrivateChannelId = playerIdToPrivateChannelId;
+		this.conflictingReports = conflictingReports;
+		this.reportIntegrity = reportIntegrity;
+	}
+
+	public void reportAndSetConflictData(UUID playerId, ReportStatus reportStatus) {
+		playerIdToReportStatus.put(playerId, reportStatus);
+		setConflictingReports();
+		setReportIntegrity();
+		isOrWasConflict = isOrWasConflict || reportIntegrity == CONFLICT;
+	}
+
+	private void setConflictingReports() {
+		MatchFinderQueue queue = server.getGame(gameId).getQueue(queueId);
+		conflictingReports = new ArrayList<>();
+		List<ReportStatus> teamReports = new ArrayList<>(queue.getNumTeams());
+
+		// check for team internal conflicts
+		List<Player> teamInternalConflicts = new ArrayList<>(queue.getNumPlayersPerTeam());
+		for (List<Player> team : teams) {
+			ReportStatus teamReported = null;
+			for (Player player : team) {
+				boolean teamInternalConflict = false;
+				ReportStatus playerReported = playerIdToReportStatus.get(player.getId());
+				if (playerReported != NOT_YET_REPORTED) {
+					if (teamReported == null) {
+						teamReported = playerReported;
+					} else {
+						if (playerReported != teamReported) {
+							teamInternalConflict = true;
+						}
+					}
+				}
+				if (teamInternalConflict) {
+					teamInternalConflicts.addAll(team);
+				}
+			}
+			teamReports.add(teamReported);
+		}
+		if (teamInternalConflicts.size() > 0) {
+			conflictingReports = teamInternalConflicts;
+			return;
+		}
+
+		// check for conflicts involving draws and non-draws
+		List<Player> playersReportedDraw = new ArrayList<>(getNumPlayers());
+		List<Player> playersReportedCancel = new ArrayList<>(getNumPlayers());
+		List<Player> playersReportedWinOrLoss = new ArrayList<>(getNumPlayers());
+		for (Player player : getPlayers()) {
+			ReportStatus reportStatus = playerIdToReportStatus.get(player.getId());
+			if (reportStatus == DRAW) playersReportedDraw.add(player);
+			if (reportStatus == CANCEL) playersReportedCancel.add(player);
+			if (reportStatus == WIN || reportStatus == LOSE) playersReportedWinOrLoss.add(player);
+		}
+		if ((playersReportedDraw.size() > 0 && playersReportedCancel.size() > 0)
+				|| (playersReportedDraw.size() > 0 && playersReportedWinOrLoss.size() > 0)
+				|| (playersReportedCancel.size() > 0 && playersReportedWinOrLoss.size() > 0)) {
+			// Only mark reports coming from a minority of players
+			if (playersReportedDraw.size() <= getNumPlayers() / 2) {
+				conflictingReports.addAll(playersReportedDraw);
+			}
+			if (playersReportedCancel.size() <= getNumPlayers() / 2) {
+				conflictingReports.addAll(playersReportedCancel);
+			}
+			if (playersReportedWinOrLoss.size() <= getNumPlayers() / 2) {
+				conflictingReports.addAll(playersReportedWinOrLoss);
+			}
+			return;
+		}
+
+		// check for conflicts with more than one team reporting win
+		int numberOfTeamsReportingWin = 0;
+		for (ReportStatus reportStatus : teamReports) {
+			if (reportStatus == WIN) numberOfTeamsReportingWin++;
+		}
+		if (numberOfTeamsReportingWin > 1) {
+			conflictingReports = getPlayers().stream()
+					.filter(player -> playerIdToReportStatus.get(player.getId()) == WIN)
+					.collect(Collectors.toList());
+		}
+	}
+
+	private void setReportIntegrity() {
+		if (conflictingReports.size() > 0) {
+			reportIntegrity = ReportIntegrity.CONFLICT;
+		} else {
+			long numPlayersAlreadyReported = playerIdToReportStatus.values().stream()
+					.filter(reportStatus -> !reportStatus.equals(NOT_YET_REPORTED))
+					.count();
+			if (numPlayersAlreadyReported < getNumPlayers()) {
+				reportIntegrity = ReportIntegrity.INCOMPLETE;
+			} else if (playerIdToReportStatus.values().stream().findAny().get() == CANCEL) {
+				reportIntegrity = ReportIntegrity.CANCEL;
+			} else {
+				reportIntegrity = ReportIntegrity.COMPLETE;
+			}
+		}
+	}
+
+	public int getNumTeams() {
+		return teams.size();
+	}
+
+	public int getNumPlayers() {// TODO vllt private?
+		return getPlayers().size();
+	}
+
+	public List<Player> getPlayers() {
+		return this.getTeams().stream().flatMap(Collection::stream).collect(Collectors.toList());
+	}
+
+	public Player getPlayer(long userId) {
+		return this.getTeams().stream().flatMap(Collection::stream)
+				.filter(player -> player.getUserId() == userId).findAny().get();
+	}
+
+	public ReportStatus getReportStatus(UUID playerId) {
+		return playerIdToReportStatus.get(playerId);
+	}
+
+	public long getMessageId(UUID playerId) {
+		return playerIdToMessageId.get(playerId);
+	}
+
+	public long getPrivateChannelId(UUID playerId) {
+		return playerIdToPrivateChannelId.get(playerId);
+	}
+
+	public Game getGame() {
+		return server.getGame(gameId);
+	}
+
+	public MatchFinderQueue getQueue() {
+		return server.getGame(gameId).getQueue(queueId);
+	}
 }

@@ -11,3 +11,5 @@ heapdump*
 *~
 *.swp
 *.gz
+
+/out/
