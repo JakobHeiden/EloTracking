@@ -193,6 +193,8 @@ public class DiscordBotService {
 	}
 
 	// Commands
+	// TODO direkt schauen ob in dbService.adminCommands und entsprechend permissions setzen?
+	// schauen wie es ist mit CommandParser, on(GuildCreateEvent.class)
 	public Mono<ApplicationCommandData> deployCommand(Server server, ApplicationCommandRequest request) {
 		return applicationService.createGuildApplicationCommand(botId, server.getGuildId(), request)
 				.doOnNext(commandData -> log.debug(String.format("deployed command %s:%s to %s",
