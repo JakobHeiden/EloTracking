@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.player;
+package com.elorankingbot.backend.command_legacy;
 
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DBService;

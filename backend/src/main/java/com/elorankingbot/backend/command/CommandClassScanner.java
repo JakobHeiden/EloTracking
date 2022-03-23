@@ -19,7 +19,7 @@ public class CommandClassScanner {
 	@Getter
 	private final Map<String, String> commandStringToClassName;
 	@Getter
-	private final Set<String> adminCommands, modCommands;
+	private final Set<String> adminCommands, modCommands, playerCommands;
 
 	public CommandClassScanner() throws IOException {
 		Set<Class> classes = ClassPath.from(ClassLoader.getSystemClassLoader())
@@ -58,6 +58,17 @@ public class CommandClassScanner {
 				.filter(clazz -> {
 					try {
 						return Class.forName(clazz.getName()).isAnnotationPresent(ModCommand.class);
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+						return false;
+					}
+				})
+				.map(clazz -> clazz.getSimpleName())
+				.collect(Collectors.toSet());
+		this.playerCommands = classes.stream()
+				.filter(clazz -> {
+					try {
+						return Class.forName(clazz.getName()).isAnnotationPresent(PlayerCommand.class);
 					} catch (ClassNotFoundException e) {
 						e.printStackTrace();
 						return false;

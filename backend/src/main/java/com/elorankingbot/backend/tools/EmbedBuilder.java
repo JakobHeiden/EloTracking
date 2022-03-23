@@ -157,9 +157,12 @@ public class EmbedBuilder {
 				.title(title)
 				.addFields(users.stream().map())
 				*/
+		// TODO
+	}
 
-
-
-
+	public static EmbedCreateSpec createHelpEmbed(String title, String content) {
+		return EmbedCreateSpec.builder()
+				.addField(EmbedCreateFields.Field.of(title, content, true))
+				.build();
 	}
 }

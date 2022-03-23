@@ -1,10 +1,10 @@
 package com.elorankingbot.backend.command;
 
+import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
-import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;

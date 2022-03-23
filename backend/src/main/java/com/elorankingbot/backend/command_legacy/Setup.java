@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.admin;
+package com.elorankingbot.backend.command_legacy;
 
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;

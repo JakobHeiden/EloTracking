@@ -26,7 +26,7 @@ public class DBService {
 	private final MatchDao matchDao;
 	private final RankingsEntryDao rankingsEntryDao;
 	@Getter
-	private final Set<String> modCommands, adminCommands;
+	private final Set<String> modCommands, adminCommands;// TODO weg
 
 	@Autowired
 	public DBService(Services services, CommandClassScanner scanner,

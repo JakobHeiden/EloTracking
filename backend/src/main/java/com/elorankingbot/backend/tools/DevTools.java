@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.tools;
 
+import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
@@ -17,9 +18,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DevTools {
 
-	private final DBService service;
+	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
+	private final CommandClassScanner commandClassScanner;
 	private final ApplicationPropertiesLoader props;
 	private final PlayerDao playerDao;
 	private final MatchDao matchDao;
@@ -29,9 +31,10 @@ public class DevTools {
 
 	public DevTools(Services services,
 					PlayerDao playerDao, MatchDao matchDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
-		this.service = services.dbService;
+		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.client = services.client;
+		this.commandClassScanner = services.commandClassScanner;
 		this.playerDao = playerDao;
 		this.matchDao = matchDao;
 		this.matchResultDao = matchResultDao;
@@ -48,11 +51,11 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating guild commands...");
-		service.findAllServers().forEach(
+		dbService.findAllServers().forEach(
 				server -> {
 					try {
 
-						bot.deployCommand(server, Help.getRequest()).block();
+						bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
 						//bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
 						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();
@@ -68,7 +71,7 @@ public class DevTools {
 		log.warn("Deploying initial guild commands...");
 		long entenwieseId = props.getEntenwieseId();
 		Server entenwieseServer = new Server(entenwieseId);
-		service.saveServer(entenwieseServer);
+		dbService.saveServer(entenwieseServer);
 
 		bot.deleteAllGuildCommands(entenwieseId).blockLast();
 		bot.deployCommand(entenwieseServer, SetRole.getRequest()).block();

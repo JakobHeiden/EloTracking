@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.player;
 
+import com.elorankingbot.backend.command.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.QueueService;
@@ -17,6 +18,7 @@ import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.PREMADE
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.SOLO;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
+@PlayerCommand
 public class Join extends SlashCommand {
 
 	private final QueueService queueService;
