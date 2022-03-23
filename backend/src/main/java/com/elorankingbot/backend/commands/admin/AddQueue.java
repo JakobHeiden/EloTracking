@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
@@ -18,6 +19,7 @@ import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscord
 import static discord4j.core.object.command.ApplicationCommandOption.Type.INTEGER;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
+@AdminCommand
 public class AddQueue extends SlashCommand {
 
 	public AddQueue(ChatInputInteractionEvent event, Services services) {

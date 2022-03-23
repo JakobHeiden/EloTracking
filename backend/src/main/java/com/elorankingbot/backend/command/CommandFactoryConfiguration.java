@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.command;
 
+import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.player.ChallengeAsUserInteraction;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;

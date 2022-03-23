@@ -1,5 +1,6 @@
-package com.elorankingbot.backend.commands.player.match;
+package com.elorankingbot.backend.command_legacy;
 
+import com.elorankingbot.backend.commands.player.match.ButtonCommandRelatedToMatch;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
