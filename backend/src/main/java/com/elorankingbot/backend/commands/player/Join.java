@@ -41,17 +41,17 @@ public class Join extends SlashCommand {
 			if (game.getQueues().size() == 1) {
 				var queue = game.getQueues().stream().findAny().get();
 				var queueOptionBuilder = ApplicationCommandOptionData.builder()
-						.name(game.getName()).description(queue.getDescription())
+						.name(game.getName().toLowerCase()).description(queue.getDescription())
 						.type(SUB_COMMAND.getValue());
 				addUserOptions(queue, queueOptionBuilder);
 				requestBuilder.addOption(queueOptionBuilder.build());
 			} else {
 				var gameOptionBuilder = ApplicationCommandOptionData.builder()
-						.name(game.getName()).description("game name")
+						.name(game.getName().toLowerCase()).description("game name")
 						.type(SUB_COMMAND_GROUP.getValue());
 				game.getQueues().forEach(queue -> {
 					var queueOptionBuilder = ApplicationCommandOptionData.builder()
-							.name(queue.getName()).description(queue.getDescription())
+							.name(queue.getName().toLowerCase()).description(queue.getDescription())
 							.type(SUB_COMMAND.getValue());
 					addUserOptions(queue, queueOptionBuilder);
 					gameOptionBuilder.addOption(queueOptionBuilder.build());
@@ -82,7 +82,7 @@ public class Join extends SlashCommand {
 		var gameOptions = event.getOptions().get(0).getOptions();
 		// queue name is not in options
 		if (gameOptions.isEmpty() || gameOptions.get(0).getValue().isPresent()) {
-			queue = game.getQueueNameToQueue().values().stream().findAny().get();
+			queue = game.getQueues().stream().findAny().get();
 			users = gameOptions.stream()
 					.map(option -> option.getValue().get().asUser().block())// TODO geht das ohne block?
 					.collect(Collectors.toList());

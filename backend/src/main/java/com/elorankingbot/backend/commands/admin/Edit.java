@@ -43,11 +43,11 @@ public class Edit extends SlashCommand {
 
 		List<ApplicationCommandOptionData> subCommandGroupsAndSubCommands = server.getGames().stream().map(game ->
 				(ApplicationCommandOptionData) ApplicationCommandOptionData.builder()
-						.name(game.getName()).description(game.getName())
+						.name(game.getName().toLowerCase()).description(game.getName())
 						.type(SUB_COMMAND_GROUP.getValue())
 						.addAllOptions(game.getQueues().stream().map(queue ->
 								(ApplicationCommandOptionData) ApplicationCommandOptionData.builder()
-										.name(queue.getName())
+										.name(queue.getName().toLowerCase())
 										.description(String.format("Edit the queue %s %s",game.getName(), queue.getName()))
 										.type(SUB_COMMAND.getValue())
 										.addAllOptions(optionsForVariables)
@@ -72,6 +72,7 @@ public class Edit extends SlashCommand {
 			return;
 		}
 
+		botReplies.add(String.format("Editing %s %s...", game.getName(), queue.getName()));
 		optionsForVariables.forEach(option -> {
 			switch (option.getName()) {
 				case "maxratingspread" -> {

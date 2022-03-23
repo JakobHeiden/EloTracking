@@ -37,15 +37,15 @@ public class Server {
 	}
 
 	public void addGame(Game game) {
-		gameNameToGame.put(game.getName(), game);
+		gameNameToGame.put(game.getName().toLowerCase(), game);
 	}
 
 	public void removeGame(Game game) {
-		gameNameToGame.remove(game.getName());
+		gameNameToGame.remove(game.getName().toLowerCase());
 	}
 
 	public Game getGame(String name) {
-		return gameNameToGame.get(name);
+		return gameNameToGame.get(name.toLowerCase());
 	}
 
 	public List<Game> getGames() {

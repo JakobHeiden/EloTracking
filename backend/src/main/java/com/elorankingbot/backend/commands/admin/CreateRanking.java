@@ -47,7 +47,7 @@ public class CreateRanking extends SlashCommand {
 			return;
 		}
 		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
-		Game game = new Game(server, nameOfGame, allowDraw);
+		Game game = new Game(server, nameOfGame, allowDraw);// TODO duplikate verhindern
 		server.addGame(game);
 		dbService.saveServer(server);
 
