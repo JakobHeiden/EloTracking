@@ -62,7 +62,8 @@ public class EmbedBuilder {
 	}
 
 	public static EmbedCreateSpec createMatchResultEmbed(MatchResult matchResult) {
-		var embedBuilder = EmbedCreateSpec.builder();
+		var embedBuilder = EmbedCreateSpec.builder()
+				.title(matchResult.getGame().getName());
 		for (TeamMatchResult teamMatchResult : matchResult.getTeamMatchResults()) {
 			String embedTitle = String.format("%s %s\n",
 					teamMatchResult.getResultStatus().asCapitalizedNoun(),

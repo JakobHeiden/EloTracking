@@ -54,7 +54,7 @@ public class AddQueue extends SlashCommand {
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("queuetype").description("Currently the bot only supports solo queue")//"Only if a team queue: " +
-								//"is this a solo queue, or a premade team only queue?")//, or a mixed queue
+						//"is this a solo queue, or a premade team only queue?")//, or a mixed queue
 						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("solo queue").value("solo").build())
@@ -129,12 +129,10 @@ public class AddQueue extends SlashCommand {
 		// TODO log
 		// TODO inputs nach quatsch filtern
 
-		bot.deleteCommand(server, Join.class.getSimpleName()).block();// TODO muss ich hier ueberhaupt loeschen?
-		bot.deployCommand(server, Join.getRequest(server)).block();
+		bot.deployCommand(server, Join.getRequest(server)).subscribe();
 		bot.deployCommand(server, Leave.getRequest()).subscribe();
-		bot.deleteCommand(server, Edit.class.getSimpleName()).block();
-		bot.deployCommand(server, Edit.getRequest(server)).block();// TODO blocks buendeln
-		bot.setAdminPermissionToAdminCommand(server, Edit.class.getSimpleName());
+		bot.deployCommand(server, Edit.getRequest(server)).subscribe(commandData ->
+				bot.setAdminPermissionToAdminCommand(server, Edit.class.getSimpleName()));
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. Command /join has been deployed or updated",

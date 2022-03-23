@@ -36,11 +36,11 @@ public class Game {
     }
 
     public void addQueue(MatchFinderQueue queue) {
-        queueNameToQueue.put(queue.getName(), queue);
+        queueNameToQueue.put(queue.getName().toLowerCase(), queue);
     }
 
     public MatchFinderQueue getQueue(String name) {
-        return queueNameToQueue.get(name);
+        return queueNameToQueue.get(name.toLowerCase());
     }
 
     public Collection<MatchFinderQueue> getQueues() {
