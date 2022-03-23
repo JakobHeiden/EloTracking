@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.player.match;
+package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;

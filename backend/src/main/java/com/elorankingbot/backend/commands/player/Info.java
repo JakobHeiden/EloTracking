@@ -6,13 +6,14 @@ import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 import java.util.List;
+
+import static discord4j.core.object.command.ApplicationCommandOption.Type.USER;
 
 public class Info extends SlashCommand {
 
@@ -32,7 +33,7 @@ public class Info extends SlashCommand {
 						.name("player")
 						.description("The player to get information about. Only available to moderators. " +
 								"Leave empty to get info on self")
-						.type(ApplicationCommandOption.Type.USER.getValue())
+						.type(USER.getValue())
 						.required(false)
 						.build())
 				.build();
