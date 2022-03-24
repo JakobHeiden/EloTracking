@@ -72,6 +72,19 @@ public class AddQueue extends SlashCommand {
 				.build();
 	}
 
+	public static String getShortDescription() {
+		return "Add a queue to a ranking.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"`Required:` `playersperteam` The number of players on a team for the queue.\n" +
+				"`Required:` `numberofteams` The number of teams in a match.\n" +
+				"`Required:` `nameofqueue` The name of the new queue.\n" +
+				"`Required:` `queuetype` Currently there is only solo queue.\n" +
+				"For more information on queues, see `/help:` `Concept: Rankings and Queues`.";
+	}
+
 	public void execute() {
 		int playersPerTeam = (int) event.getOption("playersperteam").get().getValue().get().asLong();
 		if (playersPerTeam < 1) {
@@ -93,7 +106,7 @@ public class AddQueue extends SlashCommand {
 			event.reply("Queue name cannot exceed 32 characters").subscribe();
 			return;
 		}
-		if (game.getQueueNameToQueue().containsKey(nameOfQueue)) {
+		if (game.getQueueNameToQueue().containsKey(nameOfQueue.toLowerCase())) {
 			event.reply("A queue of that name already exists for that ranking. " +
 					"Queue names must be unique for each ranking").subscribe();
 			return;

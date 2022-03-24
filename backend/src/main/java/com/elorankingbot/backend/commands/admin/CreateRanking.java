@@ -40,6 +40,18 @@ public class CreateRanking extends SlashCommand {
 				.build();
 	}
 
+
+	public static String getShortDescription() {
+		return "Create a new ranking on the server.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"`Required:` `nameofranking` The name of the new ranking.\n" +
+				"`Required:` `allowdraw` Wether or not to allow draw as a result in matches for this ranking.\n" +
+				"For more information on rankings, see `/help:` `Concept: Rankings and Queues`.";
+	}
+
 	public void execute() {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!isLegalDiscordName(nameOfGame)) {

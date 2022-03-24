@@ -62,6 +62,17 @@ public class Edit extends SlashCommand {
 				.build();
 	}
 
+	public static String getShortDescription() {
+		return "Edit settings for a queue.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"`Optional:` `maxratingspread` See `/help:` `Concept: Matchmaking, Rating Spread, Rating Elasticity`\n" +
+				"`Optional:` `ratingelasticity` See `/help:` `Concept: Matchmaking, Rating Spread, Rating Elasticity`\n" +
+				"Select one or more options to edit them.";
+	}
+
 	public void execute() {
 		List<String> botReplies = new ArrayList<>();
 		Game game = server.getGame(event.getOptions().get(0).getName());

@@ -34,6 +34,19 @@ public class Join extends SlashCommand {
 		this.queueService = services.queueService;
 	}
 
+	public static String getShortDescription() {
+		return "Join a queue.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"This command will not be present unless the server is configured to have at least one ranking and one " +
+				"queue. There will be one `/join` command for each queue.\n" +
+				"You can join as many queues as you like; Once one match starts, you will automatically be removed from " +
+				"all queues.\n" +
+				"For more information on queues, see `/help`:`Concept: Rankings and Queues`.";
+	}
+
 	public static ApplicationCommandRequest getRequest(Server server) {
 		var requestBuilder = ApplicationCommandRequest.builder()
 				.name("join")
