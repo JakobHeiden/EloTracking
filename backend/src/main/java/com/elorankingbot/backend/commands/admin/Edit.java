@@ -8,7 +8,6 @@ import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
-import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -16,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.NO_LIMIT;
-import static discord4j.core.object.command.ApplicationCommandOption.Type.SUB_COMMAND;
-import static discord4j.core.object.command.ApplicationCommandOption.Type.SUB_COMMAND_GROUP;
+import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 @AdminCommand
 public class Edit extends SlashCommand {
@@ -31,13 +29,13 @@ public class Edit extends SlashCommand {
 				ApplicationCommandOptionData.builder()
 						.name("maxratingspread")
 						.description("The maximum rating difference in a match. Enter 0 for no maximum")
-						.type(ApplicationCommandOption.Type.INTEGER.getValue())
+						.type(INTEGER.getValue())
 						.required(false)
 						.build(),
 				ApplicationCommandOptionData.builder()
 						.name("ratingelasticity")
 						.description("Accept larger rating difference after waiting, measured in rating points per minute")
-						.type(ApplicationCommandOption.Type.INTEGER.getValue())
+						.type(INTEGER.getValue())
 						.required(false)
 						.build());
 

@@ -36,6 +36,7 @@ public class Help extends SlashCommand {
 								.name("Command List")
 								.value("Command List")
 								.build())
+						// TODO! slash commands
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("Concept: Rankings and Queues")
 								.value("Concept: Rankings and Queues")
