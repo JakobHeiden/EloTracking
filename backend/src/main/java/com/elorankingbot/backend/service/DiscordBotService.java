@@ -219,6 +219,7 @@ public class DiscordBotService {
 						botId, guildId, Long.parseLong(commandData.id())));
 	}
 
+	// Permissions
 	public void setCommandPermissionForRole(Server server, String commandName, long roleId) {
 		client.getRoleById(Snowflake.of(server.getGuildId()), Snowflake.of(roleId))
 				.subscribe(role -> {
@@ -247,6 +248,14 @@ public class DiscordBotService {
 		if (server.getAdminRoleId() != 0L) {
 			setCommandPermissionForRole(server, commandName, server.getAdminRoleId());
 		}
+	}
+
+	public void setOwnerPermissionToCommand(Server server, String commandName) {
+		var request = ApplicationCommandPermissionsRequest.builder()
+				.addPermission(ApplicationCommandPermissionsData.builder()
+						.id(props.getOwnerId()).type(2).permission(true).build()).build();
+		getCommandIdByName(server.getGuildId(), commandName).subscribe(commandId ->	applicationService
+				.modifyApplicationCommandPermissions(botId, server.getGuildId(), commandId, request).subscribe());
 	}
 
 	private Mono<Long> getCommandIdByName(long guildid, String commandName) {
