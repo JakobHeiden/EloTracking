@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ public class CommandClassScanner {
 	@Getter
 	private final Map<String, String> commandStringToClassName;
 	@Getter
-	private final Set<String> adminCommands, modCommands, playerCommands;
+	private final Set<String> adminCommandClassNames, modCommandClassNames, playerCommandClassNames;
 
 	public CommandClassScanner() throws IOException {
 		Set<Class> classes = ClassPath.from(ClassLoader.getSystemClassLoader())
@@ -43,7 +44,7 @@ public class CommandClassScanner {
 				.peek(classInfo -> log.trace("scanning command class " + classInfo.getSimpleName()))
 				.collect(Collectors.toSet());
 
-		this.adminCommands = classes.stream()
+		this.adminCommandClassNames = classes.stream()
 				.filter(clazz -> {
 					try {
 						return Class.forName(clazz.getName()).isAnnotationPresent(AdminCommand.class);
@@ -54,7 +55,7 @@ public class CommandClassScanner {
 				})
 				.map(clazz -> clazz.getSimpleName())
 				.collect(Collectors.toSet());
-		this.modCommands = classes.stream()
+		this.modCommandClassNames = classes.stream()
 				.filter(clazz -> {
 					try {
 						return Class.forName(clazz.getName()).isAnnotationPresent(ModCommand.class);
@@ -65,7 +66,7 @@ public class CommandClassScanner {
 				})
 				.map(clazz -> clazz.getSimpleName())
 				.collect(Collectors.toSet());
-		this.playerCommands = classes.stream()
+		this.playerCommandClassNames = classes.stream()
 				.filter(clazz -> {
 					try {
 						return Class.forName(clazz.getName()).isAnnotationPresent(PlayerCommand.class);
@@ -80,5 +81,13 @@ public class CommandClassScanner {
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
 		classes.forEach(clazz -> mapBuilder.put(clazz.getSimpleName().toLowerCase(), clazz.getName()));
 		this.commandStringToClassName = mapBuilder.build();
+	}
+
+	public Set<String> getAllCommandClassNames() {// TODO macht das hier alles sinn? class name vs command string etc
+		Set<String> allCommandClassnames = new HashSet<>();
+		allCommandClassnames.addAll(playerCommandClassNames);
+		allCommandClassnames.addAll(modCommandClassNames);
+		allCommandClassnames.addAll(adminCommandClassNames);
+		return allCommandClassnames;
 	}
 }

@@ -5,7 +5,6 @@ import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
-import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -33,7 +32,7 @@ import java.util.function.Function;
 public class EventParser {
 
 	private final Services services;
-	private final DBService service;
+	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final Map<String, String> commandStringToClassName;
 	private final Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory;
@@ -44,7 +43,7 @@ public class EventParser {
 					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
 					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory) {
 		this.services = services;
-		this.service = services.dbService;
+		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.buttonCommandFactory = buttonCommandFactory;
 		this.slashCommandFactory = slashCommandFactory;
@@ -72,10 +71,10 @@ public class EventParser {
 
 		client.on(GuildCreateEvent.class)
 				.subscribe(event -> {
-					Optional<Server> maybeServer = service.findServerByGuildId(event.getGuild().getId().asLong());
+					Optional<Server> maybeServer = dbService.findServerByGuildId(event.getGuild().getId().asLong());
 					if (maybeServer.isEmpty()) {
 						Server server = new Server(event.getGuild().getId().asLong());
-						service.saveServer(server);
+						dbService.saveServer(server);
 						bot.deployCommand(server, SetRole.getRequest()).block();
 						long everyoneRoleId = server.getGuildId();
 						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), everyoneRoleId);
@@ -85,18 +84,11 @@ public class EventParser {
 
 		client.on(RoleDeleteEvent.class)
 				.subscribe(event -> {
-					Optional<Game> maybeGame = service.findGameByGuildId(event.getGuildId().asLong());
-					if (maybeGame.isEmpty()) return;
-
-					/*
-					if (event.getRoleId().asLong() == maybeGame.get().getAdminRoleId()) {
-						bot.setDiscordCommandPermissions(
-								event.getGuildId().asLong(),
-								"permission",
-								event.getGuild().block().getEveryoneRole().block());
+					Server server = dbService.findServerByGuildId(event.getGuildId().asLong()).get();
+					if (server.getAdminRoleId() == event.getRoleId().asLong()) {
+						long everyoneRoleId = server.getGuildId();
+						bot.setCommandPermissionForRole(server, SetRole.class.getSimpleName().toLowerCase(), everyoneRoleId);
 					}
-
-					 */
 				});
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));

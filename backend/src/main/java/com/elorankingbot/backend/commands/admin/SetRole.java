@@ -27,7 +27,7 @@ public class SetRole extends SlashCommand {
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
 				.name("setrole")
-				.description("Link elo permissions to a role")
+				.description(getShortDescription())
 				.defaultPermission(false)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("adminormod").description("Link admin or moderator permissions to a role?")
@@ -43,6 +43,21 @@ public class SetRole extends SlashCommand {
 						.type(ApplicationCommandOption.Type.ROLE.getValue())
 						.required(true).build())
 				.build();
+	}
+
+	public static String getShortDescription() {
+		return "Link elo permissions to a role.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"`Required:` `adminormod` Wether to set the admin role, or the moderator role.\n" +
+				"`Required:` `role` The role to link permissions to.\n" +
+				"Moderator commands are commands related to the day-to-day operation of the bot and include things like " +
+				"dispute resolution, bans, and player rating manipulation.\n" +
+				"Admin commands are those that alter the settings of the bot. Admin permissions include moderator permissions. " +
+				"Deleting the admin role will make /setrole available to @everyone, so you cannot lock yourself out of " +
+				"admin permissions.";
 	}
 
 	public void execute() {

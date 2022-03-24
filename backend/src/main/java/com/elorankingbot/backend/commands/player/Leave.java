@@ -22,6 +22,15 @@ public class Leave extends SlashCommand {
 				.build();
 	}
 
+	public static String getShortDescription() {
+		return "Leave all queues you are currently in.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+		"For more information on queues, see `/help`:`Concept: Rankings and Queues`.";
+	}
+
 	public void execute() {
 		Player player = dbService.getPlayerOrGenerateIfNotPresent(guildId, activeUserId, activeUser.getTag());
 		queueService.removePlayerFromAllQueues(server, player);

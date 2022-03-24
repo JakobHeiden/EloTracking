@@ -8,9 +8,11 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import lombok.extern.slf4j.Slf4j;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
+@Slf4j
 @PlayerCommand
 public class Help extends SlashCommand {
 
@@ -42,11 +44,7 @@ public class Help extends SlashCommand {
 								.name("Concept: Matchmaking, Rating Spread, Rating Elasticity")
 								.value("Concept: Matchmaking, Rating Spread, Rating Elasticity")
 								.build())
-						.addAllChoices(commandClassScanner.getPlayerCommands().stream()
-								.map(Help::createChoice).toList())
-						.addAllChoices(commandClassScanner.getModCommands().stream()
-								.map(Help::createChoice).toList())
-						.addAllChoices(commandClassScanner.getAdminCommands().stream()
+						.addAllChoices(commandClassScanner.getAllCommandClassNames().stream()
 								.map(Help::createChoice).toList())
 						.build())
 				.addOption(ApplicationCommandOptionData.builder()
@@ -67,11 +65,11 @@ public class Help extends SlashCommand {
 	}
 
 	public static String getShortDescription() {
-		return "Get a list of all commands, or get detailed information about a topic or command";
+		return "Get a list of all commands, or get detailed information about a topic or command.";
 	}
 
 	public static String getLongDescription() {
-		return getShortDescription() + ".\n" +
+		return getShortDescription() + "\n" +
 				"`Required:` `topic` Which command or topic you want to get help on.\n" +
 				"`Optional:` `displaypublic` Wether you want to display the help information just for yourself, or publicly " +
 				"in the channel you're in. By default it is shown only you.";
@@ -82,25 +80,35 @@ public class Help extends SlashCommand {
 		boolean isEphemeralReply = event.getOptions().size() == 1
 				|| event.getOptions().get(1).getValue().get().asString().equals("is-ephemeral");
 
-		String embedTitle = "";
-		String embedText = "";
-		// TODO mit CommandClassScanner integrieren
+		String embedTitle;
+		StringBuilder embedText = new StringBuilder();
 		switch (topic) {
 			case "Command List" -> {
 				embedTitle = topic;
-				embedText = "hier liste";
+				String shortDescription = null;
+				for (String commandClassName : commandClassScanner.getAllCommandClassNames()) {
+					try {
+						shortDescription = (String) Class.forName(commandClassScanner.getCommandStringToClassName()
+										.get(commandClassName.toLowerCase()))
+								.getMethod("getShortDescription").invoke(null);
+					} catch (ReflectiveOperationException e) {
+						bot.sendToOwner("Reflection error in Help");
+						e.printStackTrace();
+					}
+					embedText.append(String.format("`/%s` %s\n", commandClassName.toLowerCase(), shortDescription));
+				}
 			}
 			case "Concept: Rankings and Queues" -> {
 				embedTitle = topic;
-				embedText = "One server can have several rankings. Each ranking can have several queues.\n" +
+				embedText = new StringBuilder("One server can have several rankings. Each ranking can have several queues.\n" +
 						"A ranking can be a game, or it you can have several rankings for the same game.\n" +
 						"For example: You could have a ranking \"Starcraft-versus\" with one queue \"1v1\", and a ranking " +
 						"\"Starcraft-team\" with two queues \"2v2\" and \"3v3\". That way, 2v2 and 3v3 would " +
-						"share a rating and a leaderboard, while 1v1 would be separate.";
+						"share a rating and a leaderboard, while 1v1 would be separate.");
 			}
 			case "Concept: Matchmaking, Rating Spread, Rating Elasticity" -> {
 				embedTitle = topic;
-				embedText = "Queues have a setting called `maxratingspread`. This defines the maximum rating distance " +
+				embedText = new StringBuilder("Queues have a setting called `maxratingspread`. This defines the maximum rating distance " +
 						"between the strongest player and the weakest player in a match.\n" +
 						"There is also another setting called `ratingelasticity`, given in ratings points per minute, " +
 						"which defines how fast (if at all) the matchmaker will consider matches that violate " +
@@ -108,33 +116,28 @@ public class Help extends SlashCommand {
 						"Use `\\edit` to change these settings. \n" +
 						"The default for `matchratingspread` is NO_LIMIT, which turns the feature off.\n" +
 						"The default for `ratingelasticity` is 100 points per minute.\n" +
-						"`ratingelasticity` is applied in fractions, not only each full minute.\n";
+						"`ratingelasticity` is applied in fractions, not only each full minute.\n");
 			}
 			default -> {
 				embedTitle = "Help on " + topic;
-				String className =  commandClassScanner.getCommandStringToClassName().get(topic.substring(1));
+				String commandClassName = commandClassScanner.getCommandStringToClassName().get(topic.substring(1));
 				try {
-					embedText = (String) Class.forName(className).getMethod("getLongDescription").invoke(null);
+					embedText = new StringBuilder((String) Class.forName(commandClassName)
+							.getMethod("getLongDescription").invoke(null));
 				} catch (ReflectiveOperationException e) {
 					bot.sendToOwner("Reflection error in Help");
 					e.printStackTrace();
 				}
 			}
-			case "/setrole" -> {
-				embedTitle = "Help on " + topic;
-				//embedText = SetRole.getLongDescription();
-			}
 		}
 
-		event.reply().withEmbeds(EmbedBuilder.createHelpEmbed(embedTitle, embedText))
+		event.reply().withEmbeds(EmbedBuilder.createHelpEmbed(embedTitle, embedText.toString()))
 				.withEphemeral(isEphemeralReply).subscribe();
 	}
 
-	// TODO! choices automatisieren? CommandClassScanner liste abfragen
-	// dann oben das switch automatisieren?
 	private static ApplicationCommandOptionChoiceData createChoice(String commandClassName) {
 		String discordCommandName = "/" + commandClassName.toLowerCase();
-		return (ApplicationCommandOptionChoiceData) ApplicationCommandOptionChoiceData.builder()
+		return ApplicationCommandOptionChoiceData.builder()
 				.name(discordCommandName)
 				.value(discordCommandName)
 				.build();

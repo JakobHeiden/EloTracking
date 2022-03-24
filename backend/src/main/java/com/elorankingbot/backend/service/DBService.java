@@ -38,8 +38,8 @@ public class DBService {
 		this.matchResultDao = matchResultDao;
 		this.playerDao = playerDao;
 		this.timeSlotDao = timeSlotDao;
-		this.adminCommands = scanner.getAdminCommands();
-		this.modCommands = scanner.getModCommands();
+		this.adminCommands = scanner.getAdminCommandClassNames();
+		this.modCommands = scanner.getModCommandClassNames();
 		this.matchDao = matchDao;
 		this.rankingsEntryDao = rankingsEntryDao;
 	}
