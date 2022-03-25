@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.command_legacy;
+package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
@@ -33,9 +33,9 @@ public class Ban extends SlashCommand {
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
 				.name("ban")
-				.description("Ban a player for a duration, or permanently, or unban a player")
+				.description(getShortDescription())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("mode").description("Ban a player for a duration, or permanently, or unban a player?")
+						.name("mode").description("Ban for a duration, or permanently, or unban?")
 						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("ban for a duration").value("duration").build())
@@ -46,7 +46,7 @@ public class Ban extends SlashCommand {
 						.required(true)
 						.build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("player").description("Ban or unban this player")
+						.name("player").description("Choose a player")
 						.type(ApplicationCommandOption.Type.USER.getValue())
 						.required(true)
 						.build())
@@ -65,6 +65,22 @@ public class Ban extends SlashCommand {
 				.build();
 	}
 
+	public static String getShortDescription() {
+		return "Ban a player for a duration, or permanently, or unban a player";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"`Required:` `mode` Wether to ban the player for a duration, or permanently, or to lift an existing ban " +
+				"on a player.\n" +
+				"`Required:` `player` Which player to ban or unban.\n" +
+				"`Optional:` `duration` For how long to ban the player. This option is technically optional, but the " +
+				"command will not work if `mode` = `duration` and this option is not set. " +
+				"Durations are in minutes by default, but can be entered in hours, days, or weeks, by adding the " +
+				"letters h, d, or w to the duration.\n" +
+				"`Optional:` `reason` Give a reason for the ban. This will be included in the ban message sent to the player.\n";
+	}
+
 	public void execute() {
 		playerUser = event.getOption("player").get().getValue().get().asUser().block();
 		if (playerUser.isBot()) {
@@ -72,18 +88,19 @@ public class Ban extends SlashCommand {
 			return;
 		}
 
-		dbService.addNewPlayerIfPlayerNotPresent(guildId, playerUser.getId().asLong());
+		dbService.getPlayerOrGenerateIfNotPresent(guildId, playerUser.getId().asLong(), playerUser.getTag());
 		player = dbService.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
 		reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())
 				: "";
 
-		switch (event.getOption("mode").get().getValue().get().asString()) {
-			case "permaban":
+		String mode = event.getOption("mode").get().getValue().get().asString();
+		switch (mode) {
+			case "permaban" -> {
 				permaban();
-				deleteExistingOpenChallenges();
-				break;
-			case "duration":
+				queueService.removePlayerFromAllQueues(server, player);
+			}
+			case "duration" -> {
 				if (event.getOption("duration").isEmpty()) {
 					event.reply("Please enter a duration.").subscribe();
 					return;
@@ -95,18 +112,16 @@ public class Ban extends SlashCommand {
 					return;
 				}
 				duration = maybeDuration.get();
-
 				durationBan();
-				deleteExistingOpenChallenges();
-				break;
-			case "unban":
+				queueService.removePlayerFromAllQueues(server, player);
+			}
+			case "unban" -> {
 				if (!player.isBanned()) {
 					event.reply("That player is not banned currently.").subscribe();
 					return;
 				}
-
 				unban();
-				break;
+			}
 		}
 		dbService.savePlayer(player);
 	}
@@ -136,14 +151,12 @@ public class Ban extends SlashCommand {
 			playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
 					String.format("%s has updated your ban to end after %s, from now.%s",
 							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven)).subscribe());
-
 			event.reply(String.format("%s's ban has been updated to end after %s, from now.%s",
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		} else {
 			playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
 					String.format("%s has banned you for %s.%s",
 							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven)).subscribe());
-
 			event.reply(String.format("%s is banned for %s.%s",
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		}
@@ -158,15 +171,15 @@ public class Ban extends SlashCommand {
 		playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
 				String.format("%s has lifted your ban.%s",
 						event.getInteraction().getUser().getTag(), reasonGiven)).subscribe());
-
 		event.reply(String.format("%s has been unbanned.%s",
 				playerUser.getTag(), reasonGiven)).subscribe();
 
 		player.setUnbanAtTimeSlot(-2);
 	}
 
+	/*
 	private void deleteExistingOpenChallenges() {
-		dbService.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId()).stream()
+		dbService.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId())
 				.forEach(challenge -> {
 					if (challenge.isAccepted()) return;
 
@@ -199,4 +212,6 @@ public class Ban extends SlashCommand {
 											msg.getId().asLong(), challenge.getAcceptorChannelId(), null)));
 				});
 	}
+
+	 */
 }

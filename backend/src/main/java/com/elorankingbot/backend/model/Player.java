@@ -14,7 +14,6 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 @UseToStringForLogging
 @Document(collection = "player")

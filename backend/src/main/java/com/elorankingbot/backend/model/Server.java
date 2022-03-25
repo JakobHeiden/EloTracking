@@ -24,7 +24,7 @@ public class Server {
 	private long leaderboardChannelId;
 	private long resultChannelId;
 	private boolean isMarkedForDeletion;
-	private boolean hasSetupRoles;
+	private boolean hasSetupRoles;// TODO kann weg?
 	private boolean hasSetupGame;
 	private boolean hasSetupMatchFinderModality;// TODO! in /help einflechten
 

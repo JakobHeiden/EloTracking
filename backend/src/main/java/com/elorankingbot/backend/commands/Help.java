@@ -36,7 +36,6 @@ public class Help extends SlashCommand {
 								.name("Command List")
 								.value("Command List")
 								.build())
-						// TODO! slash commands
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("Concept: Rankings and Queues")
 								.value("Concept: Rankings and Queues")
@@ -82,11 +81,13 @@ public class Help extends SlashCommand {
 				|| event.getOptions().get(1).getValue().get().asString().equals("is-ephemeral");
 
 		String embedTitle;
-		StringBuilder embedText = new StringBuilder();
+		String embedText = "";
 		switch (topic) {
 			case "Command List" -> {
 				embedTitle = topic;
 				String shortDescription = null;
+				embedText = "Not all commands will be present on the server at all times. For example, all moderator " +
+						"commands will be absent until the moderator role is set with `/setrole`.\n";
 				for (String commandClassName : commandClassScanner.getAllCommandClassNames()) {
 					try {
 						shortDescription = (String) Class.forName(commandClassScanner.getCommandStringToClassName()
@@ -96,20 +97,20 @@ public class Help extends SlashCommand {
 						bot.sendToOwner("Reflection error in Help");
 						e.printStackTrace();
 					}
-					embedText.append(String.format("`/%s` %s\n", commandClassName.toLowerCase(), shortDescription));
+					embedText += String.format("`/%s` %s\n", commandClassName.toLowerCase(), shortDescription);
 				}
 			}
 			case "Concept: Rankings and Queues" -> {
 				embedTitle = topic;
-				embedText = new StringBuilder("One server can have several rankings. Each ranking can have several queues.\n" +
+				embedText = "One server can have several rankings. Each ranking can have several queues.\n" +
 						"A ranking can be a game, or it you can have several rankings for the same game.\n" +
 						"For example: You could have a ranking \"Starcraft-versus\" with one queue \"1v1\", and a ranking " +
 						"\"Starcraft-team\" with two queues \"2v2\" and \"3v3\". That way, 2v2 and 3v3 would " +
-						"share a rating and a leaderboard, while 1v1 would be separate.");
+						"share a rating and a leaderboard, while 1v1 would be separate.";
 			}
 			case "Concept: Matchmaking, Rating Spread, Rating Elasticity" -> {
 				embedTitle = topic;
-				embedText = new StringBuilder("Queues have a setting called `maxratingspread`. This defines the maximum rating distance " +
+				embedText = "Queues have a setting called `maxratingspread`. This defines the maximum rating distance " +
 						"between the strongest player and the weakest player in a match.\n" +
 						"There is also another setting called `ratingelasticity`, given in ratings points per minute, " +
 						"which defines how fast (if at all) the matchmaker will consider matches that violate " +
@@ -117,14 +118,14 @@ public class Help extends SlashCommand {
 						"Use `\\edit` to change these settings. \n" +
 						"The default for `matchratingspread` is NO_LIMIT, which turns the feature off.\n" +
 						"The default for `ratingelasticity` is 100 points per minute.\n" +
-						"`ratingelasticity` is applied in fractions, not only each full minute.\n");
+						"`ratingelasticity` is applied in fractions, not only each full minute.\n";
 			}
 			default -> {
 				embedTitle = "Help on " + topic;
 				String commandClassName = commandClassScanner.getCommandStringToClassName().get(topic.substring(1));
 				try {
-					embedText = new StringBuilder((String) Class.forName(commandClassName)
-							.getMethod("getLongDescription").invoke(null));
+					embedText = (String) Class.forName(commandClassName)
+							.getMethod("getLongDescription").invoke(null);
 				} catch (ReflectiveOperationException e) {
 					bot.sendToOwner("Reflection error in Help");
 					e.printStackTrace();

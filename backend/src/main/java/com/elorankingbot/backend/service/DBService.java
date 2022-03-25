@@ -201,12 +201,12 @@ public class DBService {
 		return playerDao.findById(Player.generateId(guildId, userId));
 	}
 
+	//legacy
 	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {// TODO! schauen wo man den namen schon hat
 		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
 		//	playerDao.insert(new Player(guildId, userId, bot.getPlayerTag(userId), initialRating));
 		}
 	}
-
 	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId, String name) {
 		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
 		//	playerDao.insert(new Player(guildId, userId, name, initialRating));

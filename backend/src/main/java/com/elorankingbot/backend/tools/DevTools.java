@@ -1,8 +1,10 @@
 package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
+import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.commands.owner.GuildInfo;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
@@ -51,13 +53,15 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating guild commands...");
-		bot.deployCommand(dbService.findServerByGuildId(929504858585845810L).get(), GuildInfo.getRequest()).block();
-		bot.setOwnerPermissionToCommand(dbService.findServerByGuildId(929504858585845810L).get(), "guildinfo");
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-
-
+						if (server.getModRoleId() == 0L) {
+							bot.deleteCommand(server, "ban").subscribe();
+							//bot.deployCommand(server, Ban.getRequest()).block();
+							//bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
+							//bot.setAdminAndModPermissionsToModCommand(server, Ban.class.getSimpleName().toLowerCase());
+						}
 						//bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
 						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();

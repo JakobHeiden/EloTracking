@@ -62,7 +62,7 @@ public class SetRole extends SlashCommand {
 
 	public void execute() {
 		String adminOrMod = event.getOption("adminormod").get().getValue().get().asString();
-		String nameOfRole;
+		String nameOfRole = null;
 		if (adminOrMod.equals("admin")) {
 			adminRole = event.getOption("role").get().getValue().get().asRole()
 					.block();
@@ -70,7 +70,8 @@ public class SetRole extends SlashCommand {
 			adminCommands.forEach(commandName -> bot.setAdminPermissionToAdminCommand(server, commandName));
 			modCommands.forEach(commandName -> bot.setAdminAndModPermissionsToModCommand(server, commandName));
 			nameOfRole = adminRole.getName();
-		} else {
+		}
+		if (adminOrMod.equals("moderator")) {
 			modRole = event.getOption("role").get().getValue().get().asRole()
 					.block();
 			server.setModRoleId(modRole.getId().asLong());
