@@ -34,19 +34,6 @@ public class Join extends SlashCommand {
 		this.queueService = services.queueService;
 	}
 
-	public static String getShortDescription() {
-		return "Join a queue.";
-	}
-
-	public static String getLongDescription() {
-		return getShortDescription() + "\n" +
-				"This command will not be present unless the server is configured to have at least one ranking and one " +
-				"queue. There will be one `/join` command for each queue.\n" +
-				"You can join as many queues as you like; Once one match starts, you will automatically be removed from " +
-				"all queues.\n" +
-				"For more information on queues, see `/help`:`Concept: Rankings and Queues`.";
-	}
-
 	public static ApplicationCommandRequest getRequest(Server server) {
 		var requestBuilder = ApplicationCommandRequest.builder()
 				.name("join")
@@ -91,6 +78,19 @@ public class Join extends SlashCommand {
 		}
 	}
 
+	public static String getShortDescription() {
+		return "Join a queue.";
+	}
+
+	public static String getLongDescription() {
+		return getShortDescription() + "\n" +
+				"This command will not be present unless the server is configured to have at least one ranking and one " +
+				"queue. There will be one `/join` command for each queue.\n" +
+				"You can join as many queues as you like; Once one match starts, you will automatically be removed from " +
+				"all queues.\n" +
+				"For more information on queues, see `/help`:`Concept: Rankings and Queues`.";
+	}
+
 	public void execute() {
 		game = server.getGame(event.getOptions().get(0).getName());
 		boolean isSingularQueue;
@@ -112,7 +112,7 @@ public class Join extends SlashCommand {
 		}
 		for (User user : users) {
 			if (user.isBot()) {
-				event.reply("Bots cannot be added to the queue.").subscribe();
+				event.reply("Bots cannot be added to the queue.").withEphemeral(true).subscribe();
 				return;
 			}
 		}
@@ -124,10 +124,15 @@ public class Join extends SlashCommand {
 						.collect(Collectors.toList()),
 				game);
 		for (Player player : group.getPlayers()) {
-			if (queueService.isPlayerInQueue(player, queue)) {
+			if (queueService.isPlayerInQueue(player, queue)) {// TODO alle auflisten
 				event.reply(String.format("The player %s is already in this queue an cannot be added a second time.",
 								player.getTag()))// TODO unterscheiden nach active player
 						.withEphemeral(true).subscribe();
+				return;
+			}
+			if (player.isBanned()) {// TODO alle player auflisten
+				event.reply(String.format("The player %s is currently banned and cannot join a queue.", player.getTag()))
+						.withEphemeral(true).subscribe();// TODO unterscheiden nach active player
 				return;
 			}
 		}
@@ -140,13 +145,5 @@ public class Join extends SlashCommand {
 						isSingularQueue ? game.getName()
 								: game.getName() + " " + queue.getName()))
 				.withEphemeral(true).subscribe();
-
-
-		// buttons:
-		// accept
-		// decline
-		// -> leave
-		// cancel
-		// TODO!
 	}
 }

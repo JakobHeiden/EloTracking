@@ -74,27 +74,13 @@ public class TimedTaskQueue {
 		int duration = task.duration();
 		log.debug(String.format("executing %s %s after %s", task.type().name(), id, duration));
 		switch (task.type()) {
-			case OPEN_CHALLENGE_DECAY:
-				new DecayOpenChallenge(services, id, duration).execute();
-				break;
-			case ACCEPTED_CHALLENGE_DECAY:
-				new DecayAcceptedChallenge(services, id, duration).execute();
-				break;
-			case MATCH_AUTO_RESOLVE:
-				new AutoResolveMatch(services, id, duration).execute();
-				break;
-			case MATCH_SUMMARIZE:
-				timedTaskService.summarizeMatch(id, otherId, task.value());
-				break;
-			case MESSAGE_DELETE:
-				timedTaskService.deleteMessage(id, otherId);
-				break;
-			case CHANNEL_DELETE:
-				timedTaskService.deleteChannel(id);
-				break;
-			case PLAYER_UNBAN:
-				timedTaskService.unbanPlayer(id, otherId, duration);
-				break;
+			case OPEN_CHALLENGE_DECAY -> new DecayOpenChallenge(services, id, duration).execute();
+			case ACCEPTED_CHALLENGE_DECAY -> new DecayAcceptedChallenge(services, id, duration).execute();
+			case MATCH_AUTO_RESOLVE -> new AutoResolveMatch(services, id, duration).execute();
+			case MATCH_SUMMARIZE -> timedTaskService.summarizeMatch(id, otherId, task.value());
+			case MESSAGE_DELETE -> timedTaskService.deleteMessage(id, otherId);
+			case CHANNEL_DELETE -> timedTaskService.deleteChannel(id);
+			case PLAYER_UNBAN -> timedTaskService.unbanPlayer(id, otherId, duration);
 		}
 	}
 
