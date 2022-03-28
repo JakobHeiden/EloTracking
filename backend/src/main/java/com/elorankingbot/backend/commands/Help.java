@@ -115,7 +115,7 @@ public class Help extends SlashCommand {
 						"There is also another setting called `ratingelasticity`, given in ratings points per minute, " +
 						"which defines how fast (if at all) the matchmaker will consider matches that violate " +
 						"`maxratingspread`.\n" +
-						"Use `\\edit` to change these settings. \n" +
+						"Use `/edit` to change these settings. \n" +
 						"The default for `matchratingspread` is NO_LIMIT, which turns the feature off.\n" +
 						"The default for `ratingelasticity` is 100 points per minute.\n" +
 						"`ratingelasticity` is applied in fractions, not only each full minute.\n";

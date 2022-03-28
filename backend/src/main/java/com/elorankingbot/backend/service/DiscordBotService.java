@@ -235,7 +235,8 @@ public class DiscordBotService {
 				});
 	}
 
-	public void setAdminAndModPermissionsToModCommand(Server server, String commandName) {
+	public void setPermissionsForModCommand(Server server, String commandName) {
+		// both admin and mod permissions need to be set
 		if (server.getAdminRoleId() != 0L) {
 			setCommandPermissionForRole(server, commandName, server.getAdminRoleId());
 		}
@@ -244,7 +245,8 @@ public class DiscordBotService {
 		}
 	}
 
-	public void setAdminPermissionToAdminCommand(Server server, String commandName) {
+	public void setPermissionsForAdminCommand(Server server, String commandName) {
+		// only admin permissions need to be set
 		if (server.getAdminRoleId() != 0L) {
 			setCommandPermissionForRole(server, commandName, server.getAdminRoleId());
 		}

@@ -6,7 +6,6 @@ import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import com.elorankingbot.backend.timedtask.TimedTask;
-import com.elorankingbot.backend.tools.MessageUpdater;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;

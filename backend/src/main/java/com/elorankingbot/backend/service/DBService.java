@@ -52,14 +52,19 @@ public class DBService {
 		//gameDao.deleteById(guildId);
 	}
 
-	/*
-	public void resetAllPlayerRatings(long guildId) {
-		List<Player> players = playerDao.findAllByGuildId(guildId);
-		//players.forEach(player -> player.setRating(1200));
+	public void resetAllPlayerRatings(Game game) {
+		List<Player> players = playerDao.findAllByGuildId(game.getGuildId());
+		players.forEach(player -> {
+			PlayerGameStats gameStats = player.getGameStats(game);
+			gameStats.setRating(initialRating);
+			gameStats.setWins(0);
+			gameStats.setLosses(0);
+			gameStats.setDraws(0);
+		});
 		playerDao.saveAll(players);
-	}
 
-	 */
+		rankingsEntryDao.deleteAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
+	}
 
 	// Server
 	public Optional<Server> findServerByGuildId(long guildId) {
@@ -193,7 +198,7 @@ public class DBService {
 
 	// Player
 	public void savePlayer(Player player) {
-		log.debug("saving player " + player.getUserId());
+		log.debug("saving player " + player.getTag());
 		playerDao.save(player);
 	}
 
@@ -315,6 +320,4 @@ public class DBService {
 	public Optional<Game> findGameByGuildId(long asLong) {
 		return null;
 	}
-
-
 }
