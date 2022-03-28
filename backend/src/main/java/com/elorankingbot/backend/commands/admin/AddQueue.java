@@ -147,7 +147,7 @@ public class AddQueue extends SlashCommand {
 		bot.deployCommand(server, Join.getRequest(server)).subscribe();
 		bot.deployCommand(server, Leave.getRequest()).subscribe();
 		bot.deployCommand(server, Edit.getRequest(server)).subscribe(commandData ->
-				bot.setAdminPermissionToAdminCommand(server, Edit.class.getSimpleName()));
+				bot.setPermissionsForAdminCommand(server, Edit.class.getSimpleName()));
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. Command /join has been deployed or updated",

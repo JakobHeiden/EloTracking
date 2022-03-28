@@ -64,7 +64,7 @@ public class CreateRanking extends SlashCommand {
 		dbService.saveServer(server);
 
 		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
-		bot.setAdminPermissionToAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
+		bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
 
 		event.reply(String.format("Ranking %s has been created. However, there is no way yet for players to find a match. " +
 				"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the ranking.",

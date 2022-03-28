@@ -60,7 +60,6 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			bot.getPlayerMessage(player, match)
 					.subscribe(message -> {
 						boolean hasPlayerReported = match.getReportStatus(player.getId()) != ReportStatus.NOT_YET_REPORTED;
-						System.out.println(hasPlayerReported);
 						String embedTitle = EmbedBuilder.makeTitleForIncompleteMatch(match, hasPlayerReported, false);
 						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, player.getTag());
 						message.edit().withEmbeds(embedCreateSpec).subscribe();

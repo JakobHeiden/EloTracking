@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.model;
 
 import com.elorankingbot.backend.logging.UseToStringForLogging;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
