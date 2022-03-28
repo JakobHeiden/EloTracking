@@ -47,8 +47,8 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 				isRuleAsWin ? WIN.getEmojiAsString() : DRAW.getEmojiAsString(),
 				isRuleAsWin ? " for team #" + (winningTeamIndex + 1) : ""));
 		bot.postToResultChannel(matchResult);
-		bot.refreshLeaderboard(server);
-
+		boolean hasLeaderboardChanged = dbservice.updateAndPersistRankingsAndPlayers(matchResult);
+		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
 
 		// TODO! channels closen, sind die pings sinnvoll? was ist mit mentions?
 
