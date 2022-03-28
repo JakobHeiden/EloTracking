@@ -85,6 +85,7 @@ public class EmbedBuilder {
 	private static int embedWinsSpaces = 5;// TODO abhaengig von den daten
 	private static String embedName = "`   Rank  Rating   Wins Losses  Name`";
 	private static String embedNameWithDraws = "`   Rank  Rating    Wins Losses Draws Name`";
+	private static String descriptionSpacerLine = "-----------------------------------------------";
 
 	public static EmbedCreateSpec createRankingsEmbed(RankingsExcerpt rankingsExcerpt) {
 		List<RankingsEntry> rankingsEntries = rankingsExcerpt.rankingsEntries();
@@ -108,6 +109,7 @@ public class EmbedBuilder {
 
 		return EmbedCreateSpec.builder()
 				.title(game.getName() + " Rankings")
+				.description(descriptionSpacerLine)
 				.addField(EmbedCreateFields.Field.of(
 						game.isAllowDraw() ? embedNameWithDraws : embedName,
 						leaderboardString,
