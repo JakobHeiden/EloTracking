@@ -118,7 +118,7 @@ public class Match {
 			return;
 		}
 
-		// check for conflicts involving draws and non-draws
+		// check for conflicts involving draws and non-draws present at the same time; same for cancel
 		List<Player> playersReportedDraw = new ArrayList<>(getNumPlayers());
 		List<Player> playersReportedCancel = new ArrayList<>(getNumPlayers());
 		List<Player> playersReportedWinOrLoss = new ArrayList<>(getNumPlayers());
@@ -153,6 +153,10 @@ public class Match {
 			conflictingReports = getPlayers().stream()
 					.filter(player -> playerIdToReportStatus.get(player.getId()) == WIN)
 					.collect(Collectors.toList());
+		}
+		// ...or no team reporting win
+		if (numberOfTeamsReportingWin == 0) {
+			conflictingReports = getPlayers();
 		}
 	}
 
