@@ -6,12 +6,16 @@ import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.elorankingbot.backend.tools.FormatTools.formatRating;
 
 public class EmbedBuilder {
+
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
 
 	public static EmbedCreateSpec createCompletedMatchEmbed(String title, Match match, MatchResult matchResult, String tagToHighlight) {
 		return createMatchEmbedOrCompletedMatchEmbed(title, match, matchResult, tagToHighlight);
@@ -31,7 +35,7 @@ public class EmbedBuilder {
 			String embedText = "";
 			for (Player player : players) {
 				ReportStatus reportStatus = match.getReportStatus(player.getId());
-				String reportStatusIcon = " " + reportStatus.getEmoji().asUnicodeEmoji().get().getRaw();
+				String reportStatusIcon = " " + reportStatus.emoji.asUnicodeEmoji().get().getRaw();
 				if (match.getConflictingReports().contains(player)) {
 					reportStatusIcon += Emojis.exclamation.asUnicodeEmoji().get().getRaw();
 				}
@@ -65,19 +69,61 @@ public class EmbedBuilder {
 		var embedBuilder = EmbedCreateSpec.builder()
 				.title(matchResult.getGame().getName());
 		for (TeamMatchResult teamMatchResult : matchResult.getTeamMatchResults()) {
-			String embedTitle = String.format("%s %s\n",
+			String fieldTitle = String.format("%s %s\n",
 					teamMatchResult.getResultStatus().asCapitalizedNoun(),
-					teamMatchResult.getResultStatus().getEmojiAsString());
-			String embedText = "";
+					teamMatchResult.getResultStatus().asEmojiAsString());
+			String fieldText = "";
 			for (PlayerMatchResult playerMatchResult : teamMatchResult.getPlayerMatchResults()) {
-				embedText += String.format("%s (%s, %s)\n",
+				fieldText += String.format("%s (%s, %s)\n",
 						playerMatchResult.getPlayerTag(),
 						formatRating(playerMatchResult.getNewRating()),
 						playerMatchResult.getRatingChangeAsString());
 			}
-			embedBuilder.addField(EmbedCreateFields.Field.of(embedTitle, embedText, true));
+			embedBuilder.addField(EmbedCreateFields.Field.of(fieldTitle, fieldText, true));
 		}
 		return embedBuilder.build();
+	}
+
+	public static EmbedCreateSpec createMatchHistoryEmbed(Player player, List<Optional<MatchResult>> matchResults) {
+		String embedText = String.join("\n",
+				matchResults.stream().map(maybeMatchResult -> {
+					if (maybeMatchResult.isEmpty()) return "Match not found";
+					MatchResult matchResult = maybeMatchResult.get();
+
+					List<Player> ownTeam = matchResult.getTeamMatchResults().stream()
+							.filter(teamMatchResult -> teamMatchResult.getPlayers().contains(player))
+							.findAny().get().getPlayers();
+					List<List<Player>> otherTeams = matchResult.getTeamMatchResults().stream()
+							.map(TeamMatchResult::getPlayers)
+							.filter(players -> !players.contains(player)).toList();
+					return String.format("%s %s %s %s on %s",
+							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
+							createTeamString(ownTeam),
+							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,
+							createSeveralTeamsString(otherTeams),
+							dateFormat.format(matchResult.getDate()));
+				}).toList());
+		Optional<MatchResult> maybeAnyMatchResult = matchResults.stream().filter(Optional::isPresent).map(Optional::get).findAny();
+		if (maybeAnyMatchResult.isEmpty()) {
+			return EmbedCreateSpec.builder()
+					.title("Match history not found")
+					.description("Match history not found")
+					.build();
+		}
+		return EmbedCreateSpec.builder()
+				.title(String.format("Match history for %s: %s", player.getTag(), maybeAnyMatchResult.get().getGame().getName()))
+				.description(embedText)
+				.build();
+	}
+
+	private static String createTeamString(List<Player> team) {
+		return String.join(", ", team.stream().map(player -> player.getTag()).toList());
+	}
+
+	private static String createSeveralTeamsString(List<List<Player>> teams) {
+		if (teams.size() == 1) return createTeamString(teams.get(0));
+
+		return String.join(", ", teams.stream().map(team -> String.format("(%s)", createTeamString(team))).toList());
 	}
 
 	private static int embedRankSpaces = 6;
@@ -88,8 +134,20 @@ public class EmbedBuilder {
 	private static String descriptionSpacerLine = "-----------------------------------------------";
 
 	public static EmbedCreateSpec createRankingsEmbed(RankingsExcerpt rankingsExcerpt) {
-		List<RankingsEntry> rankingsEntries = rankingsExcerpt.rankingsEntries();
 		Game game = rankingsExcerpt.game();
+		String title = rankingsExcerpt.tagToHighlight().isEmpty() ? game.getName() + " leaderboard"
+				: String.format("Rankings for %s: %s", rankingsExcerpt.tagToHighlight().get(),
+				rankingsExcerpt.game().getName());
+
+		if (rankingsExcerpt.rankingsEntries().isEmpty()) {
+			return EmbedCreateSpec.builder()
+					.title(title)
+					.description("Not present in rankings.")
+					.footer(String.format("%s players total", rankingsExcerpt.numTotalPlayers()), null)
+					.build();
+		}
+
+		List<RankingsEntry> rankingsEntries = rankingsExcerpt.rankingsEntries();
 		String leaderboardString = "";
 		for (int i = 0; i < rankingsEntries.size(); i++) {
 			RankingsEntry rankingsEntry = rankingsEntries.get(i);
@@ -108,7 +166,7 @@ public class EmbedBuilder {
 		leaderboardString = "```diff\n" + leaderboardString + "```";
 
 		return EmbedCreateSpec.builder()
-				.title(game.getName() + " Rankings")
+				.title(title)
 				.description(descriptionSpacerLine)
 				.addField(EmbedCreateFields.Field.of(
 						game.isAllowDraw() ? embedNameWithDraws : embedName,

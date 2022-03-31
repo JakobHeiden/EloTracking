@@ -7,42 +7,28 @@ import discord4j.core.object.reaction.ReactionEmoji;
 // TODO evtl doch ResultStatus wieder einfuehren?
 public enum ReportStatus {
 
-	NOT_YET_REPORTED(Emojis.notYetReported, -1, null, null),
-	WIN(Emojis.win, 1, "won", "win"),// TODO das emoji ueber den value holen?
-	LOSE(Emojis.loss, 0, "lost", "loss"),// noun vllt auch ueber value?
-	DRAW(Emojis.draw, .5, "drew", "draw"),
-	CANCEL(Emojis.crossMark, -1, null, null);
+	NOT_YET_REPORTED(Emojis.notYetReported, -1, null, null, null),
+	WIN(Emojis.win, 1, "won", "defeated", "win"),// TODO das emoji ueber den value holen?
+	LOSE(Emojis.loss, 0, "lost", "lost to", "loss"),// noun vllt auch ueber value?
+	DRAW(Emojis.draw, .5, "drew", "drew", "draw"),
+	CANCEL(Emojis.crossMark, -1, null, null, null);
 
-	private final ReactionEmoji emoji;
-	private final double value;
-	private final String asVerb;
-	private final String asNoun;
+	public final ReactionEmoji emoji;
+	public final double value;
+	public final String asVerb;
+	public final String asRelationalVerb;
+	public final String asNoun;
 
-	ReportStatus(ReactionEmoji emoji, double value, String asVerb, String asNoun) {
+	ReportStatus(ReactionEmoji emoji, double value, String asVerb, String asRelationalVerb, String asNoun) {
 		this.emoji = emoji;
 		this.value = value;
 		this.asVerb = asVerb;
+		this.asRelationalVerb = asRelationalVerb;
 		this.asNoun = asNoun;
 	}
 
-	public ReactionEmoji getEmoji() {
-		return this.emoji;
-	}
-
-	public String getEmojiAsString() {
-		return getEmoji().asUnicodeEmoji().get().getRaw();
-	}
-
-	public double getValue() {
-		return value;
-	}
-
-	public String asVerb() {
-		return asVerb;
-	}
-
-	public String asNoun() {
-		return asNoun;
+	public String asEmojiAsString() {
+		return emoji.asUnicodeEmoji().get().getRaw();
 	}
 
 	public String asCapitalizedNoun() {

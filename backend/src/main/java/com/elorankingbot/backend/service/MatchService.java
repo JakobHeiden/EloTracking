@@ -31,38 +31,6 @@ public class MatchService {
 		this.queueService = services.queueService;
 	}
 
-	public static MatchResult generateMatchResult(Match match) {
-		MatchResult matchResult = new MatchResult(match);
-		Game game = match.getQueue().getGame();
-		for (List<Player> team : match.getTeams()) {
-			List<Player> otherPlayers = match.getPlayers();
-			team.forEach(otherPlayers::remove);
-			double averageTeamRating = team.stream()
-					.mapToDouble(pl -> pl.getGameStats(game).getRating())
-					.average().getAsDouble();
-			double averageOtherRating = otherPlayers.stream()
-					.mapToDouble(pl -> pl.getGameStats(game).getRating())
-					.average().getAsDouble();
-			double numOtherTeams = match.getQueue().getNumTeams() - 1;
-			double expectedResult = 1 / (numOtherTeams * (1 + Math.pow(10, (averageOtherRating - averageTeamRating) / 400)));
-
-			TeamMatchResult teamResult = new TeamMatchResult();
-			for (Player player : team) {
-				double actualResult = match.getReportStatus(player.getId()).getValue();
-				double oldRating = player.getGameStats(game).getRating();
-				double newRating = oldRating + k * (actualResult - expectedResult);
-				PlayerMatchResult playerMatchResult = new PlayerMatchResult(matchResult,
-						player, player.getTag(),
-						ReportStatus.valueOf(match.getReportStatus(player.getId()).name()),
-						oldRating, newRating);
-				teamResult.add(playerMatchResult);
-			}
-
-			matchResult.addTeamMatchResult(teamResult);
-		}
-		return matchResult;
-	}
-
 	public void startMatch(Match match) {//, List<User> usersAlreadyGathered) { TODO kann weg? ensprechend unten anpassen
 		List<User> users = gatherAllUsers(match, new ArrayList<>());
 		sendPlayerMessages(match, users);
@@ -84,6 +52,38 @@ public class MatchService {
 		}
 		Mono.when(userMonos).block();
 		return allUsers;
+	}
+
+	public static MatchResult generateMatchResult(Match match) {
+		MatchResult matchResult = new MatchResult(match);
+		Game game = match.getQueue().getGame();
+		for (List<Player> team : match.getTeams()) {
+			List<Player> otherPlayers = match.getPlayers();
+			team.forEach(otherPlayers::remove);
+			double averageTeamRating = team.stream()
+					.mapToDouble(pl -> pl.getGameStats(game).getRating())
+					.average().getAsDouble();
+			double averageOtherRating = otherPlayers.stream()
+					.mapToDouble(pl -> pl.getGameStats(game).getRating())
+					.average().getAsDouble();
+			double numOtherTeams = match.getQueue().getNumTeams() - 1;
+			double expectedResult = 1 / (numOtherTeams * (1 + Math.pow(10, (averageOtherRating - averageTeamRating) / 400)));
+
+			TeamMatchResult teamResult = new TeamMatchResult();
+			for (Player player : team) {
+				double actualResult = match.getReportStatus(player.getId()).value;
+				double oldRating = player.getGameStats(game).getRating();
+				double newRating = oldRating + k * (actualResult - expectedResult);
+				PlayerMatchResult playerMatchResult = new PlayerMatchResult(matchResult,
+						player, player.getTag(),
+						ReportStatus.valueOf(match.getReportStatus(player.getId()).name()),
+						oldRating, newRating);
+				teamResult.add(playerMatchResult);
+			}
+
+			matchResult.addTeamMatchResult(teamResult);
+		}
+		return matchResult;
 	}
 
 	private void sendPlayerMessages(Match match, List<User> users) {
