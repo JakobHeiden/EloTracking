@@ -25,8 +25,8 @@ public class PlayerMatchResult {
 		return FormatTools.formatRatingChange(newRating - oldRating);
 	}
 
-	@Override
+	@Override // for logging
 	public String toString() {
-		return String.format("%s:%s->%s", playerTag, resultStatus.asNoun(), formatRating(newRating));
+		return String.format("%s:%s->%s", playerTag, resultStatus.asNoun, formatRating(newRating));
 	}
 }

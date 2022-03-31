@@ -12,7 +12,6 @@ import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.entity.channel.TopLevelGuildChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Permission;

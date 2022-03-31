@@ -2,7 +2,6 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.dao.*;
-import com.elorankingbot.backend.dto.PlayerInRankingsDto;
 import com.elorankingbot.backend.model.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -44,14 +43,6 @@ public class DBService {
 		this.rankingsEntryDao = rankingsEntryDao;
 	}
 
-
-	public void deleteAllDataForGame(long guildId) {
-		//matchDao.deleteAllByGuildId(guildId);
-		//challengeDao.deleteAllByGuildId(guildId);
-		//playerDao.deleteAllByGuildId(guildId);
-		//gameDao.deleteById(guildId);
-	}
-
 	public void resetAllPlayerRatings(Game game) {
 		List<Player> players = playerDao.findAllByGuildId(game.getGuildId());
 		players.forEach(player -> {
@@ -62,7 +53,6 @@ public class DBService {
 			gameStats.setDraws(0);
 		});
 		playerDao.saveAll(players);
-
 		rankingsEntryDao.deleteAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
 	}
 
@@ -100,28 +90,9 @@ public class DBService {
 		matchResultDao.save(matchResult);
 	}
 
-
-	// Game
-	// TODO das hier sollte obsolet sein, games sind teil von server
-	/*
-	public Optional<Game> findGameByGuildId(long guildId) {// TODO kein optional zurueckgeben, fehler hier behandeln
-		return gameDao.findById(guildId);
+	public Optional<MatchResult> findMatchResult(UUID id) {
+		return matchResultDao.findById(id);
 	}
-
-	public void saveGame(Game game) {
-		log.debug("saving game " + game.getName());
-		gameDao.save(game);
-	}
-
-	public List<Game> findAllGames() {
-		return gameDao.findAll();
-	}
-
-	public void deleteGame(long guildId) {
-		gameDao.deleteById(guildId);
-	}
-
-	 */
 
 	// Challenge
 	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
@@ -157,13 +128,6 @@ public class DBService {
 
 	// Match legacy
 
-
-	public void deleteMatchResult(MatchResult matchResult) {
-		//log.debug(String.format("deleting match %s %s %s",
-		//		match.getWinnerId(), match.isDraw() ? "drew" : "defeated", match.getLoserId()));
-		matchResultDao.delete(matchResult);
-	}
-
 	public Optional<MatchResult> findMostRecentMatchResult(long guildId, long player1Id, long player2Id) {
 		return null;
 		/*
@@ -185,17 +149,6 @@ public class DBService {
 		 */
 	}
 
-	public List<MatchResult> getMatchHistory(long playerId, long guildId) {
-		return null;
-		/*
-		List<Match> matches = matchDao.findAllByGuildIdAndWinnerId(guildId, playerId);
-		matches.addAll(matchDao.findAllByGuildIdAndLoserId(guildId, playerId));
-		Collections.sort(matches);
-		return matches;
-
-		 */
-	}
-
 	// Player
 	public void savePlayer(Player player) {
 		log.debug("saving player " + player.getTag());
@@ -204,18 +157,6 @@ public class DBService {
 
 	public Optional<Player> findPlayerByGuildIdAndUserId(long guildId, long userId) {
 		return playerDao.findById(Player.generateId(guildId, userId));
-	}
-
-	//legacy
-	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId) {// TODO! schauen wo man den namen schon hat
-		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
-		//	playerDao.insert(new Player(guildId, userId, bot.getPlayerTag(userId), initialRating));
-		}
-	}
-	public void addNewPlayerIfPlayerNotPresent(long guildId, long userId, String name) {
-		if (!playerDao.existsById(Player.generateId(guildId, userId))) {
-		//	playerDao.insert(new Player(guildId, userId, name, initialRating));
-		}
 	}
 
 	public Player getPlayerOrGenerateIfNotPresent(long guildId, long userId, String tag) {
@@ -227,65 +168,7 @@ public class DBService {
 		return player;
 	}
 
-	public Player getPlayer(long guildId, long userId) {
-		return playerDao.findById(Player.generateId(guildId, userId)).get();
-	}
-
 	// Rankings
-	public double[] updateRatingsAndSaveMatchAndPlayers(MatchResult matchResult) {// TODO evtl match zurueckgeben
-		/*
-		Player winner = playerDao.findById(Player.generateId(match.getGuildId(), match.getWinnerId())).get();
-		Player loser = playerDao.findById(Player.generateId(match.getGuildId(), match.getLoserId())).get();
-
-		double[] ratings = calculateElo(winner.getRating(), loser.getRating(),
-				match.isDraw() ? 0.5 : 1, k);
-
-		match.setWinnerOldRating(winner.getRating());
-		match.setWinnerNewRating(ratings[2]);
-		winner.setRating(ratings[2]);
-		match.setLoserOldRating(loser.getRating());
-		match.setLoserNewRating(ratings[3]);
-		loser.setRating(ratings[3]);
-		if (match.isDraw()) {
-			winner.addDraw();
-			loser.addDraw();
-		} else {
-			winner.addWin();
-			loser.addLoss();
-		}
-
-		savePlayer(winner);
-		savePlayer(loser);
-		saveMatch(match);
-
-		return ratings;
-
-		 */
-		return null;
-	}
-
-	private static double[] calculateElo(double rating1, double rating2, double player1Result, double k) {
-		double player2Result = 1 - player1Result;
-		double expectedResult1 = 1 / (1 + Math.pow(10, (rating2 - rating1) / 400));
-		double expectedResult2 = 1 / (1 + Math.pow(10, (rating1 - rating2) / 400));
-		double newRating1 = rating1 + k * (player1Result - expectedResult1);
-		double newRating2 = rating2 + k * (player2Result - expectedResult2);
-		return new double[]{rating1, rating2, newRating1, newRating2};
-	}
-
-	public List<PlayerInRankingsDto> getRankingsAsDto(long guildId) {
-		/*
-		List<Player> allPlayers = playerDao.findAllByGuildId(guildId);
-		List<PlayerInRankingsDto> allPlayersAsDto = allPlayers.stream()
-				.map(player -> new PlayerInRankingsDto(bot.getPlayerTag(player.getUserId()), player.getRating()))
-				.collect(Collectors.toList());
-		Collections.sort(allPlayersAsDto);
-		return allPlayersAsDto;
-
-		 */
-		return null;
-	}
-
 	public RankingsExcerpt getLeaderboard(Game game) {
 		// TODO nur ausschnitte abrufen, wahrscheinlich mit PagingAndSortingRepository?
 		List<RankingsEntry> allEntries = rankingsEntryDao.getAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
@@ -295,15 +178,32 @@ public class DBService {
 				1, Optional.empty(), numTotalPlayers);
 	}
 
-	// TODO das hier nach MatchService?
-	public boolean updateAndPersistRankingsAndPlayers(MatchResult matchResult) {
-		matchResult.getAllPlayerMatchResults().forEach(playerMatchResult -> {
-			PlayerGameStats gameStats = playerMatchResult.getPlayer().getGameStats(matchResult.getGame());
-			gameStats.setRating(playerMatchResult.getNewRating());
-			gameStats.addResultStatus(playerMatchResult.getResultStatus());
-			savePlayer(playerMatchResult.getPlayer());
-		});
+	public RankingsExcerpt getRankingsExcerptForPlayer(Game game, Player player) {
+		// TODO wie oben
+		List<RankingsEntry> allEntries = rankingsEntryDao.getAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
+		int numTotalPlayers = allEntries.size();
+		Collections.sort(allEntries);
+		Optional<Integer> maybePlayerRankingsEntryIndex = allEntries.stream()
+				.filter(rankingsEntry -> rankingsEntry.getPlayerTag().equals(player.getTag()))
+				.map(allEntries::indexOf).findAny();
 
+		List<RankingsEntry> entries;
+		int lowestIndex;
+		if (maybePlayerRankingsEntryIndex.isPresent()) {
+			int centerIndex = maybePlayerRankingsEntryIndex.get();
+			int excerptLength = 20;// TODO
+			lowestIndex = Math.max(0, centerIndex - excerptLength / 2);// TODO immer 20 zeigen, auch am rand
+			int highestIndex = Math.min(allEntries.size(), centerIndex + excerptLength / 2);
+			entries = allEntries.subList(lowestIndex, highestIndex);
+		} else {
+			entries = new ArrayList<>();
+			lowestIndex = -2;
+		}
+
+		return new RankingsExcerpt(game, entries, lowestIndex + 1, Optional.of(player.getTag()), numTotalPlayers);
+	}
+
+	public boolean persistRankings(MatchResult matchResult) {
 		long guildId = matchResult.getGame().getServer().getGuildId();
 		String gameName = matchResult.getGame().getName();
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
@@ -312,7 +212,6 @@ public class DBService {
 			maybeRankingsEntry.ifPresent(rankingsEntryDao::delete);
 			rankingsEntryDao.save(new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer()));
 		}
-
 		return true;// TODO! pagination etc
 	}
 

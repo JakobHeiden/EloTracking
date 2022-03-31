@@ -43,11 +43,11 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 		postToDisputeChannelAndUpdateButtons(String.format(
 				"**%s has ruled this match a %s %s%s.**",// TODO! hier auch tags, oder nur tags
 				moderatorName,
-				isRuleAsWin ? WIN.asNoun() : DRAW.asNoun(),
-				isRuleAsWin ? WIN.getEmojiAsString() : DRAW.getEmojiAsString(),
+				isRuleAsWin ? WIN.asNoun : DRAW.asNoun,
+				isRuleAsWin ? WIN.asEmojiAsString() : DRAW.asEmojiAsString(),
 				isRuleAsWin ? " for team #" + (winningTeamIndex + 1) : ""));
 		bot.postToResultChannel(matchResult);
-		boolean hasLeaderboardChanged = dbservice.updateAndPersistRankingsAndPlayers(matchResult);
+		boolean hasLeaderboardChanged = dbservice.persistRankings(matchResult);
 		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
 
 		// TODO! channels closen, sind die pings sinnvoll? was ist mit mentions?
@@ -63,8 +63,8 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 						PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(player.getId());
 						String embedTitle = String.format("%s has ruled the match %s %s. Your new rating: %s (%s)",
 								moderatorName,
-								isRuleAsWin ? "your " + playerMatchResult.getResultStatus().asNoun() : "a draw",
-								playerMatchResult.getResultStatus().getEmojiAsString(),
+								isRuleAsWin ? "your " + playerMatchResult.getResultStatus().asNoun : "a draw",
+								playerMatchResult.getResultStatus().asEmojiAsString(),
 								formatRating(playerMatchResult.getNewRating()),
 								playerMatchResult.getRatingChangeAsString());
 						EmbedCreateSpec embedCreateSpec = EmbedBuilder

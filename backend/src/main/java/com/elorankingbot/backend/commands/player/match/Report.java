@@ -79,8 +79,8 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 						PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(player.getId());
 						String embedTitle = String.format("%s %s %s the match. Your new rating: %s (%s)",
 								queue.getNumPlayersPerTeam() == 1 ? "You" : "Your team",
-								playerMatchResult.getResultStatus().asVerb(),
-								playerMatchResult.getResultStatus().getEmojiAsString(),
+								playerMatchResult.getResultStatus().asVerb,
+								playerMatchResult.getResultStatus().asEmojiAsString(),
 								formatRating(playerMatchResult.getNewRating()),
 								playerMatchResult.getRatingChangeAsString());
 						EmbedCreateSpec embedCreateSpec = EmbedBuilder
@@ -93,7 +93,11 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		}
 
 		bot.postToResultChannel(matchResult);
-		boolean hasLeaderboardChanged = dbservice.updateAndPersistRankingsAndPlayers(matchResult);
+		matchResult.getPlayers().forEach(player -> {
+			player.addMatchResult(matchResult);
+			dbservice.savePlayer(player);
+		});
+		boolean hasLeaderboardChanged = dbservice.persistRankings(matchResult);
 		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
 
 		/*queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern

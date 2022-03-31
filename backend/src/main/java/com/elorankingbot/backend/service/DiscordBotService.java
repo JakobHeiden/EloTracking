@@ -182,16 +182,6 @@ public class DiscordBotService {
 		leaderboardMessage.edit().withContent(Possible.of(Optional.empty())).withEmbedsOrNull(embeds).subscribe();
 	}
 
-	public Mono<Message> getChallengerMessage(ChallengeModel challenge) {// TODO schauen wo das noch uber client gemacht wird
-		return client.getMessageById(Snowflake.of(challenge.getChallengerChannelId()),
-				Snowflake.of(challenge.getChallengerMessageId()));
-	}
-
-	public Mono<Message> getAcceptorMessage(ChallengeModel challenge) {
-		return client.getMessageById(Snowflake.of(challenge.getAcceptorChannelId()),
-				Snowflake.of(challenge.getAcceptorMessageId()));
-	}
-
 	// Commands
 	// TODO direkt schauen ob in dbService.adminCommands und entsprechend permissions setzen?
 	// schauen wie es ist mit CommandParser, on(GuildCreateEvent.class)

@@ -3,8 +3,8 @@ package com.elorankingbot.backend.tools;
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
-import com.elorankingbot.backend.commands.admin.Reset;
 import com.elorankingbot.backend.commands.admin.SetRole;
+import com.elorankingbot.backend.commands.player.PlayerInfo;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -55,10 +55,8 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						if (server.getAdminRoleId() != 0L) {
-							bot.deployCommand(server, Reset.getRequest(server)).block();
-							bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
-						}
+						bot.deployCommand(server, PlayerInfo.getRequest()).block();
+						//bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
 						bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
 						//bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();

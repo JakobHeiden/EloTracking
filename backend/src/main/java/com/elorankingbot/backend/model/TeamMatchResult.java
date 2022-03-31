@@ -20,8 +20,8 @@ public class TeamMatchResult implements Comparable<TeamMatchResult> {
 
 	@Override
 	public int compareTo(TeamMatchResult other) {
-		Double thisValue = this.playerMatchResults.get(0).getResultStatus().getValue();
-		Double otherValue = other.playerMatchResults.get(0).getResultStatus().getValue();
+		Double thisValue = this.playerMatchResults.get(0).getResultStatus().value;
+		Double otherValue = other.playerMatchResults.get(0).getResultStatus().value;
 		return thisValue.compareTo(otherValue);
 	}
 

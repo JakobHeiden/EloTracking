@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -58,6 +59,23 @@ public class Player  {
             playerGameStats = newPlayerGameStats;
         }
         return playerGameStats;
+    }
+
+    public void addMatchResult(MatchResult matchResult) {
+        PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(id);
+        PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(matchResult.getGame().getName());
+
+        playerGameStats.setRating(playerMatchResult.getNewRating());
+
+        playerGameStats.getMatchHistory().add(matchResult.getId());
+
+        List<PlayerMatchResult> recentMatches = playerGameStats.getRecentMatches();
+        recentMatches.add(matchResult.getPlayerMatchResult(id));
+        if (recentMatches.size() > 10) {// TODO
+            recentMatches.remove(0);
+        }
+
+        playerGameStats.addResultStatus(matchResult.getResultStatus(this));
     }
 
     @Override
