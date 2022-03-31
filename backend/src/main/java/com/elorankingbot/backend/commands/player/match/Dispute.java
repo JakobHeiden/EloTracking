@@ -31,7 +31,7 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 
 	public void execute() {
 		match.setDispute(true);
-		dbservice.saveMatch(match);
+		dbService.saveMatch(match);
 
 		createDisputeChannel();
 		updateMatchMessages();
@@ -69,7 +69,7 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 				PermissionOverwrite.forRole(Snowflake.of(server.getModRoleId()), PermissionSet.of(Permission.VIEW_CHANNEL),
 						PermissionSet.none())).block();
 		server.setDisputeCategoryId(disputeCategory.getId().asLong());
-		dbservice.saveServer(server);// TODO! ?
+		dbService.saveServer(server);// TODO! ?
 		return disputeCategory;
 	}
 

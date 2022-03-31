@@ -21,7 +21,7 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 	protected ButtonCommandRelatedToDispute(ButtonInteractionEvent event, Services services) {
 		super(event, services);
 		UUID matchId = UUID.fromString(event.getCustomId().split(":")[1]);
-		this.match = dbservice.getMatch(matchId);
+		this.match = dbService.getMatch(matchId);
 		this.server = match.getServer();
 		this.moderatorName = event.getInteraction().getUser().getTag();
 		/*

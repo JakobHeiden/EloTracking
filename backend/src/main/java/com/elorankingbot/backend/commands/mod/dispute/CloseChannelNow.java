@@ -1,7 +1,9 @@
 package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 public class CloseChannelNow extends ButtonCommand {
@@ -11,18 +13,14 @@ public class CloseChannelNow extends ButtonCommand {
 	}
 
 	public void execute() {
-		event.reply("This isn't implemented yet. Please delete the channel manually.").subscribe();
-		/*
-		Game game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
-		if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getAdminRoleId()))
-				&& !event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(game.getModRoleId()))) {
+		Server server = dbService.findServerByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
+		if (!event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getAdminRoleId()))
+				&& !event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getModRoleId()))) {
 			event.reply("Only a Moderator can use this.").withEphemeral(true).subscribe();
 			return;
 		}
 
-		event.getInteraction().getChannel().block().delete().subscribe();
 		event.acknowledge().subscribe();
-
-		 */
+		event.getInteraction().getChannel().block().delete().subscribe();
 	}
 }

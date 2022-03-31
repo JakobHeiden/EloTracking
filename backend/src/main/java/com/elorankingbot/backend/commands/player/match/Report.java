@@ -34,21 +34,21 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 
 		if (reportIntegrity == INCOMPLETE) {
 			processIncompleteReporting();
-			dbservice.saveMatch(match);
+			dbService.saveMatch(match);
 		}
 		if (reportIntegrity == COMPLETE) {
 			MatchResult matchResult = MatchService.generateMatchResult(match);
 			processMatchResult(matchResult);
-			dbservice.saveMatchResult(matchResult);
-			dbservice.deleteMatch(match);
+			dbService.saveMatchResult(matchResult);
+			dbService.deleteMatch(match);
 		}
 		if (reportIntegrity == CANCEL) {
 			processCancel();
-			dbservice.deleteMatch(match);
+			dbService.deleteMatch(match);
 		}
 		if (reportIntegrity == CONFLICT) {
 			processConflict();
-			dbservice.saveMatch(match);
+			dbService.saveMatch(match);
 		}
 		event.acknowledge().subscribe();
 	}
@@ -95,9 +95,9 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		bot.postToResultChannel(matchResult);
 		matchResult.getPlayers().forEach(player -> {
 			player.addMatchResult(matchResult);
-			dbservice.savePlayer(player);
+			dbService.savePlayer(player);
 		});
-		boolean hasLeaderboardChanged = dbservice.persistRankings(matchResult);
+		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
 		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
 
 		/*queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern

@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class ButtonCommand {
 
 	protected final ButtonInteractionEvent event;
-	protected final DBService dbservice;
+	protected final DBService dbService;
 	protected final DiscordBotService bot;
 	protected final TimedTaskQueue timedTaskQueue;
 	protected final GatewayDiscordClient client;
@@ -22,7 +22,7 @@ public abstract class ButtonCommand {
 
 	public ButtonCommand(ButtonInteractionEvent event, Services services) {
 		this.event = event;
-		this.dbservice = services.dbService;
+		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.timedTaskQueue = services.queue;
 		this.client = services.client;

@@ -15,7 +15,7 @@ public class RuleAsCancel extends ButtonCommandRelatedToDispute {
 	public void execute() {
 		if (!isByModeratorOrAdminDoReply()) return;
 
-		dbservice.deleteMatch(match);
+		dbService.deleteMatch(match);
 
 		postToDisputeChannelAndUpdateButtons(String.format("%s has ruled the match to be canceled.", moderatorName));
 
