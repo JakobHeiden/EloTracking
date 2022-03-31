@@ -45,9 +45,9 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 				Snowflake.of(player.getUserId()),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
 				PermissionSet.none())));
-		Category disputeCategory = (Category) bot.getChannelById(server.getDisputeCategoryId()).block();
-		permissionOverwrites.addAll(disputeCategory.getPermissionOverwrites());
 		try {
+			Category disputeCategory = (Category) bot.getChannelById(server.getDisputeCategoryId()).block();
+			permissionOverwrites.addAll(disputeCategory.getPermissionOverwrites());
 			disputeChannel = client.getGuildById(Snowflake.of(game.getGuildId())).block()
 					.createTextChannel("Open Dispute")
 					.withParentId(Snowflake.of(server.getDisputeCategoryId()))
@@ -89,7 +89,7 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 
 
 	private void createDisputeMessage() {
-		String embedTitle = String.format("%s filed a dispute",	activeUser.getTag());
+		String embedTitle = String.format("%s filed a dispute", activeUser.getTag());
 		EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, null);
 		disputeChannel.createMessage(String.format("Welcome everyone. Only Moderators and affected players can view " +
 						"this channel. Please state your view of the conflict so a moderator can resolve it. " +
@@ -106,7 +106,7 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 		for (int i = 0; i < numTeams; i++) {
 			buttons.add(Buttons.ruleAsWin(matchId, i));
 		}
-		if (game.isAllowDraw())	buttons.add(Buttons.ruleAsDraw(matchId));
+		if (game.isAllowDraw()) buttons.add(Buttons.ruleAsDraw(matchId));
 		buttons.add(Buttons.ruleAsCancel(matchId));
 		return ActionRow.of(buttons);
 	}
