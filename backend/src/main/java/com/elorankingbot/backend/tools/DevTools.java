@@ -55,9 +55,12 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						bot.deployCommand(server, PlayerInfo.getRequest()).block();
-						//bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
-						bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
+						if (server.getAdminRoleId() != 0L) {
+							bot.deployCommand(server, PlayerInfo.getRequest()).block();
+							//bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
+							bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
+						}
+
 						//bot.setAdminPermissionToAdminCommand(server, "edit");
 						//Role adminRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getAdminRoleId())).block();
 						//Role modRole = client.getRoleById(Snowflake.of(game.getGuildId()), Snowflake.of(game.getModRoleId())).block();

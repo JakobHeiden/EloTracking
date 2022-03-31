@@ -23,7 +23,7 @@ public abstract class ButtonCommandRelatedToMatch extends ButtonCommand {
 
 	protected ButtonCommandRelatedToMatch(ButtonInteractionEvent event, Services services) {
 		super(event, services);
-		this.match = dbservice.getMatch(UUID.fromString(event.getCustomId().split(":")[1]));
+		this.match = dbService.getMatch(UUID.fromString(event.getCustomId().split(":")[1]));
 		this.queue = match.getQueue();
 		this.game = queue.getGame();
 		this.server = game.getServer();

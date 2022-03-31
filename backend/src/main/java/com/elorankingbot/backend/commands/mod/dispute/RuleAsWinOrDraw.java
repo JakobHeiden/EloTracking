@@ -38,8 +38,8 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 		match.setOrWasConflict(false);// TODO dirty hack! EmbedBuilder neu machen!
 		MatchResult matchResult = MatchService.generateMatchResult(match);
 		updatePlayerMessages(matchResult);
-		dbservice.saveMatchResult(matchResult);
-		dbservice.deleteMatch(match);
+		dbService.saveMatchResult(matchResult);
+		dbService.deleteMatch(match);
 		postToDisputeChannelAndUpdateButtons(String.format(
 				"**%s has ruled this match a %s %s%s.**",// TODO! hier auch tags, oder nur tags
 				moderatorName,
@@ -47,7 +47,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 				isRuleAsWin ? WIN.asEmojiAsString() : DRAW.asEmojiAsString(),
 				isRuleAsWin ? " for team #" + (winningTeamIndex + 1) : ""));
 		bot.postToResultChannel(matchResult);
-		boolean hasLeaderboardChanged = dbservice.persistRankings(matchResult);
+		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
 		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
 
 		// TODO! channels closen, sind die pings sinnvoll? was ist mit mentions?
