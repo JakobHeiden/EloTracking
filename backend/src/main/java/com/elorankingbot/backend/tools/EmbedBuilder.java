@@ -60,7 +60,7 @@ public class EmbedBuilder {
 			embedBuilder.addField(EmbedCreateFields.Field.of("Team #" + (i + 1), embedText, true));
 		}
 		if (isCompletedMatch && match.isOrWasConflict()) embedBuilder.footer(EmbedCreateFields.Footer.of(
-				"There was conflicting reporting but it has been resolved by players redoing their reports.", null));
+				"There was conflicting reporting, but it has been resolved by players redoing their reports.", null));
 
 		return embedBuilder.build();
 	}
@@ -142,7 +142,7 @@ public class EmbedBuilder {
 		if (rankingsExcerpt.rankingsEntries().isEmpty()) {
 			return EmbedCreateSpec.builder()
 					.title(title)
-					.description("Not present in rankings.")
+					.description(rankingsExcerpt.tagToHighlight().isPresent() ? "Not present in rankings." : "Rankings are empty.")
 					.footer(String.format("%s players total", rankingsExcerpt.numTotalPlayers()), null)
 					.build();
 		}

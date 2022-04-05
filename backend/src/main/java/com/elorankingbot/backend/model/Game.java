@@ -18,6 +18,9 @@ public class Game {
     private Map<String, MatchFinderQueue> queueNameToQueue;
     @DBRef(lazy = true)
     private Server server;
+    private long resultChannelId;
+    private long leaderboardMessageId;
+    private long leaderboardChannelId;
     private int leaderboardLength;
     private boolean allowDraw;
     private int matchAutoResolveTime;
@@ -26,8 +29,9 @@ public class Game {
 
     public Game(Server server, String name, boolean allowDraw) {
         this.name = name;
-        this.server = server;
         this.queueNameToQueue = new HashMap<>();
+        this.server = server;
+        this.resultChannelId = 0L;
         this.leaderboardLength = 20;
         this.allowDraw = allowDraw;
         this.matchAutoResolveTime = 24 * 60;

@@ -9,7 +9,6 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionComponent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -54,23 +53,10 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 					.withPermissionOverwrites(permissionOverwrites)
 					.block();
 		} catch (ClientException e) {
-			createDisputeCategory();
+			bot.createDisputeCategory(server);
+			dbService.saveServer(server);
 			createDisputeChannel();
 		}
-	}
-
-	private Category createDisputeCategory() {
-		Guild guild = bot.getGuildById(guildId).block();
-		Category disputeCategory = guild.createCategory("elo disputes").withPermissionOverwrites(
-				PermissionOverwrite.forRole(guild.getId(), PermissionSet.none(),
-						PermissionSet.of(Permission.VIEW_CHANNEL)),
-				PermissionOverwrite.forRole(Snowflake.of(server.getAdminRoleId()), PermissionSet.of(Permission.VIEW_CHANNEL),
-						PermissionSet.none()),
-				PermissionOverwrite.forRole(Snowflake.of(server.getModRoleId()), PermissionSet.of(Permission.VIEW_CHANNEL),
-						PermissionSet.none())).block();
-		server.setDisputeCategoryId(disputeCategory.getId().asLong());
-		dbService.saveServer(server);// TODO! ?
-		return disputeCategory;
 	}
 
 	private void updateMatchMessages() {

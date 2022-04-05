@@ -66,7 +66,7 @@ public class Reset extends SlashCommand {
 		}
 
 		dbService.resetAllPlayerRatings(game);
-		bot.refreshLeaderboard(server);
+		bot.refreshLeaderboard(game).subscribe();
 		event.reply(String.format("Resetting all player ratings, wins%s for %s.",
 				game.isAllowDraw() ? ", losses and draws" : " and losses",
 				game.getName())).subscribe();

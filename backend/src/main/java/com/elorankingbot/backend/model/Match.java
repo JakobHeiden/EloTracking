@@ -86,7 +86,7 @@ public class Match {
 		isOrWasConflict = isOrWasConflict || reportIntegrity == CONFLICT;
 	}
 
-	private void setConflictingReports() {
+	private void setConflictingReports() {// TODO refaktorn?
 		MatchFinderQueue queue = server.getGame(gameId).getQueue(queueId);
 		conflictingReports = new ArrayList<>();
 		List<ReportStatus> teamReports = new ArrayList<>(queue.getNumTeams());
@@ -143,6 +143,7 @@ public class Match {
 			}
 			return;
 		}
+		if (!playersReportedDraw.isEmpty() || !playersReportedCancel.isEmpty()) return;
 
 		// check for conflicts with more than one team reporting win
 		int numberOfTeamsReportingWin = 0;
@@ -212,5 +213,9 @@ public class Match {
 
 	public MatchFinderQueue getQueue() {
 		return server.getGame(gameId).getQueue(queueId);
+	}
+
+	public void setIsOrWasConflict(boolean isOrWasConflict) {
+		this.isOrWasConflict = isOrWasConflict;
 	}
 }
