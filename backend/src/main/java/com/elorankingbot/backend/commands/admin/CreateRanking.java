@@ -6,9 +6,11 @@ import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.rest.http.client.ClientException;
 
 import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
@@ -58,16 +60,42 @@ public class CreateRanking extends SlashCommand {
 			event.reply("Illegal name. Please use only letters, digits, dash, and underscore").subscribe();
 			return;
 		}
+
 		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
+		boolean doCreateDisputeCategory = server.getDisputeCategoryId() == 0L;// TODO stimmt nicht so ganz
 		Game game = new Game(server, nameOfGame, allowDraw);// TODO duplikate verhindern
 		server.addGame(game);
+		Channel resultChannel;
+		try {
+			resultChannel = bot.createResultChannel(game);
+			bot.refreshLeaderboard(game).subscribe();
+			bot.createDisputeCategory(server);
+		} catch (ClientException e) {
+			String failedRequest = "Unknown error.\\nPlease contact the developer, Ente#3460";
+			if (e.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")) {
+				if (e.getRequest().getBody().toString().startsWith("ChannelCreateRequest")) {
+					failedRequest = "Error: cannot create channel due to missing permission: Manage Channels";
+				}
+				if (e.getRequest().getBody().toString().startsWith("MessageCreateRequest")) {
+					failedRequest = "Error: cannot create message due to missing permission: Send Messages";
+				}// TODO richtig machen, generisch machen
+			}
+			event.reply(failedRequest).subscribe();
+			return;
+		}
 		dbService.saveServer(server);
 
 		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
-		bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());
+		bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());// TODO braucht man hier permissions eigtl?
 
-		event.reply(String.format("Ranking %s has been created. However, there is no way yet for players to find a match. " +
-				"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the ranking.",
-				nameOfGame)).subscribe();
+		event.reply(String.format("Ranking %s has been created. I also created %s where I will post all match results%s" +
+						"<#%s> where I put the leaderboard%s.\n" +
+						"However, there is no way yet for players to find a match. " +
+						"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the ranking.",
+				nameOfGame,
+				resultChannel.getMention(),
+				doCreateDisputeCategory ? ", " : " and ",
+				game.getLeaderboardChannelId(),
+				doCreateDisputeCategory ? ", and a channel category for disputes" : "")).subscribe();
 	}
 }

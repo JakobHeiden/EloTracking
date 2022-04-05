@@ -38,9 +38,23 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		}
 		if (reportIntegrity == COMPLETE) {
 			MatchResult matchResult = MatchService.generateMatchResult(match);
-			processMatchResult(matchResult);
+			sendResultsToPlayers(matchResult);
+			bot.postToResultChannel(matchResult);
+			matchResult.getPlayers().forEach(player -> {
+				player.addMatchResult(matchResult);
+				dbService.savePlayer(player);
+			});
+			boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
+			if (hasLeaderboardChanged) bot.refreshLeaderboard(game).subscribe();
+
 			dbService.saveMatchResult(matchResult);
 			dbService.deleteMatch(match);
+
+		/*queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern
+				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
+		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
+				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
+		 */
 		}
 		if (reportIntegrity == CANCEL) {
 			processCancel();
@@ -72,7 +86,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		//		challenge.getId(), 0L, null);
 	}
 
-	private void processMatchResult(MatchResult matchResult) {
+	private void sendResultsToPlayers(MatchResult matchResult) {
 		for (Player player : match.getPlayers()) {
 			bot.getPlayerMessage(player, match)
 					.subscribe(message -> {
@@ -91,20 +105,6 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 								channel.createMessage(embedCreateSpec).subscribe());
 					});
 		}
-
-		bot.postToResultChannel(matchResult);
-		matchResult.getPlayers().forEach(player -> {
-			player.addMatchResult(matchResult);
-			dbService.savePlayer(player);
-		});
-		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
-		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
-
-		/*queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern
-				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
-		 */
 	}
 
 	private void processCancel() {

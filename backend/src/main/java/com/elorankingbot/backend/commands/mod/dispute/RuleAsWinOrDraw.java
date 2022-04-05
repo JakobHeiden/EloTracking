@@ -35,10 +35,10 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 				match.reportAndSetConflictData(player.getId(), DRAW);
 			}
 		}
-		match.setOrWasConflict(false);// TODO dirty hack! EmbedBuilder neu machen!
+		match.setIsOrWasConflict(false);// TODO dirty hack! EmbedBuilder neu machen!
 		MatchResult matchResult = MatchService.generateMatchResult(match);
 		updatePlayerMessages(matchResult);
-		dbService.saveMatchResult(matchResult);
+		dbService.saveMatchResult(matchResult);// TODO das hier ist alles sehr ähnlich mit Report, vllt refaktorn?
 		dbService.deleteMatch(match);
 		postToDisputeChannelAndUpdateButtons(String.format(
 				"**%s has ruled this match a %s %s%s.**",// TODO! hier auch tags, oder nur tags
@@ -47,8 +47,12 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 				isRuleAsWin ? WIN.asEmojiAsString() : DRAW.asEmojiAsString(),
 				isRuleAsWin ? " for team #" + (winningTeamIndex + 1) : ""));
 		bot.postToResultChannel(matchResult);
+		matchResult.getPlayers().forEach(player -> {
+			player.addMatchResult(matchResult);
+			dbService.savePlayer(player);
+		});
 		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
-		if (hasLeaderboardChanged) bot.refreshLeaderboard(server);
+		if (hasLeaderboardChanged) bot.refreshLeaderboard(matchResult.getGame()).subscribe();
 
 		// TODO! channels closen, sind die pings sinnvoll? was ist mit mentions?
 

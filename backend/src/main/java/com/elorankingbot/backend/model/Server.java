@@ -20,9 +20,6 @@ public class Server {
 	private long adminRoleId;
 	private long modRoleId;
 	private long disputeCategoryId;
-	private long leaderboardMessageId;
-	private long leaderboardChannelId;
-	private long resultChannelId;
 	private boolean isMarkedForDeletion;
 	private boolean hasSetupRoles;// TODO kann weg?
 	private boolean hasSetupGame;
