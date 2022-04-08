@@ -15,7 +15,7 @@ import static com.elorankingbot.backend.tools.FormatTools.formatRating;
 
 public class EmbedBuilder {
 
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy hh:mm");
 
 	public static EmbedCreateSpec createCompletedMatchEmbed(String title, Match match, MatchResult matchResult, String tagToHighlight) {
 		return createMatchEmbedOrCompletedMatchEmbed(title, match, matchResult, tagToHighlight);
@@ -92,16 +92,16 @@ public class EmbedBuilder {
 
 					List<Player> ownTeam = matchResult.getTeamMatchResults().stream()
 							.filter(teamMatchResult -> teamMatchResult.getPlayers().contains(player))
-							.findAny().get().getPlayers();
+							.findAny().get().getPlayers().stream().filter(pl -> !pl.equals(player)).toList();
 					List<List<Player>> otherTeams = matchResult.getTeamMatchResults().stream()
 							.map(TeamMatchResult::getPlayers)
 							.filter(players -> !players.contains(player)).toList();
-					return String.format("%s %s %s %s on %s",
+					return String.format("`%s` %s %s %s %s",
+							dateFormat.format(matchResult.getDate()),
 							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
-							createTeamString(ownTeam),
+							createOwnTeamString(ownTeam),
 							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,
-							createSeveralTeamsString(otherTeams),
-							dateFormat.format(matchResult.getDate()));
+							createSeveralTeamsString(otherTeams));
 				}).toList());
 		Optional<MatchResult> maybeAnyMatchResult = matchResults.stream().filter(Optional::isPresent).map(Optional::get).findAny();
 		if (maybeAnyMatchResult.isEmpty()) {
@@ -116,14 +116,19 @@ public class EmbedBuilder {
 				.build();
 	}
 
-	private static String createTeamString(List<Player> team) {
-		return String.join(", ", team.stream().map(player -> player.getTag()).toList());
+	private static String createOwnTeamString(List<Player> team) {
+		if (team.isEmpty()) return "";
+		return "with " + String.join(", ", team.stream().map(Player::getTag).toList()) + ",";
+	}
+
+	private static String createOtherTeamString(List<Player> team) {
+		return String.join(", ", team.stream().map(Player::getTag).toList());
 	}
 
 	private static String createSeveralTeamsString(List<List<Player>> teams) {
-		if (teams.size() == 1) return createTeamString(teams.get(0));
+		if (teams.size() == 1) return createOtherTeamString(teams.get(0));
 
-		return String.join(", ", teams.stream().map(team -> String.format("(%s)", createTeamString(team))).toList());
+		return String.join(", ", teams.stream().map(team -> String.format("(%s)", createOtherTeamString(team))).toList());
 	}
 
 	private static int embedRankSpaces = 6;
