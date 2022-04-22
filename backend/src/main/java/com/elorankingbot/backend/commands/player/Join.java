@@ -141,9 +141,8 @@ public class Join extends SlashCommand {
 
 		queue.addGroup(group);
 		dbService.saveServer(server);
-		event.reply(String.format("Queue %s joined.",
-						isSingularQueue ? game.getName()
-								: game.getName() + " " + queue.getName()))
+		event.reply(String.format("Queue %s joined. Once the match starts, " +
+						"I will create a channel for the match, and ping all participants.", queue.getFullName()))
 				.withEphemeral(true).subscribe();
 	}
 }

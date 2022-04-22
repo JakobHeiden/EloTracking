@@ -1,8 +1,9 @@
-package com.elorankingbot.backend.commands.player.match;
+package com.elorankingbot.backend.command_legacy;
 
+import com.elorankingbot.backend.commands.player.match.ButtonCommandRelatedToMatch;
 import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -18,8 +19,8 @@ public class Redo extends ButtonCommandRelatedToMatch {
 		bot.getPlayerMessage(activePlayer, match)
 				.subscribe(message -> {
 					String embedTitle = "There is conflicting reporting. You can file a dispute.";
-					ActionRow actionRow = Report.createConflictActionRow(match.getId(), game.isAllowDraw(), false);
-					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, activePlayer.getTag());
+					ActionRow actionRow = null;//Report.createConflictActionRow(match.getId(), game.isAllowDraw(), false);
+					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbedOld(embedTitle, match, activePlayer.getTag());
 					message.edit().withEmbeds(embedCreateSpec).withComponents(actionRow).subscribe();
 				});
 		event.acknowledge().subscribe();

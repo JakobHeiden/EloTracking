@@ -17,13 +17,9 @@ public class Server {
 	@Id
 	private long guildId;
 	private Map<String, Game> gameNameToGame;
-	private long adminRoleId;
-	private long modRoleId;
-	private long disputeCategoryId;
+	private long adminRoleId, modRoleId;
+	private long disputeCategoryId, matchCategoryId, archiveCategoryId;
 	private boolean isMarkedForDeletion;
-	private boolean hasSetupRoles;// TODO kann weg?
-	private boolean hasSetupGame;
-	private boolean hasSetupMatchFinderModality;// TODO! in /help einflechten
 
 	public Server(long guildId) {
 		this.guildId = guildId;

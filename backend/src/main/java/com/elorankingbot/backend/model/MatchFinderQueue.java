@@ -62,6 +62,14 @@ public class MatchFinderQueue {
 		return numTeams * numPlayersPerTeam;
 	}
 
+	public String getFullName() {
+		if (game.getQueues().size() == 1) {
+			return game.getName();
+		} else {
+			return game.getName() + " " + name;
+		}
+	}
+
 	public String getDescription() {
 		if (numTeams == 2) {
 			if (numPlayersPerTeam == 1) return "Join this 1v1 queue";

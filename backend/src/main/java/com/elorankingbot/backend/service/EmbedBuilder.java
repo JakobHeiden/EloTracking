@@ -1,6 +1,8 @@
-package com.elorankingbot.backend.tools;
+package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.tools.Emojis;
+import com.elorankingbot.backend.tools.FormatTools;
 import com.google.common.base.Strings;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateFields;
@@ -17,11 +19,64 @@ public class EmbedBuilder {
 
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy hh:mm");
 
-	public static EmbedCreateSpec createCompletedMatchEmbed(String title, Match match, MatchResult matchResult, String tagToHighlight) {
+	// TODO in solo matches keine teams anzeigen
+	public static EmbedCreateSpec createMatchEmbed(String title, Match match) {
+		MatchFinderQueue queue = match.getQueue();
+		List<String> embedTexts = new ArrayList<>();
+		for (List<Player> players : match.getTeams()) {
+			StringBuilder embedText = new StringBuilder();
+			for (Player player : players) {
+				ReportStatus reportStatus = match.getReportStatus(player.getId());
+				String reportStatusIcon = " " + reportStatus.emoji.asUnicodeEmoji().get().getRaw();
+				if (match.getConflictingReports().contains(player)) {
+					reportStatusIcon += Emojis.exclamation.asUnicodeEmoji().get().getRaw();
+				}
+				embedText.append(String.format("%s (%s)%s\n",
+						player.getTag(),
+						formatRating(player.getGameStats(queue.getGame()).getRating()),
+						reportStatusIcon));
+			}
+			embedTexts.add(embedText.toString());
+		}
+
+		var embedBuilder = EmbedCreateSpec.builder()
+				.title(title);
+		for (int i = 0; i < queue.getNumTeams(); i++) {
+			embedBuilder.addField(EmbedCreateFields.Field.of("Team #" + (i + 1), embedTexts.get(i), true));
+		}
+		return embedBuilder.build();
+	}
+
+	public static EmbedCreateSpec createCompletedMatchEmbed(String title, MatchResult matchResult) {
+		List<String> embedTexts = new ArrayList<>();
+		for (TeamMatchResult teamMatchResult : matchResult.getTeamMatchResults()) {
+			String embedText = "";
+			for (PlayerMatchResult playerMatchResult : teamMatchResult.getPlayerMatchResults()) {
+				Player player = playerMatchResult.getPlayer();
+				ReportStatus resultStatus = playerMatchResult.getResultStatus();
+				String resultStatusIcon = " " + resultStatus.emoji.asUnicodeEmoji().get().getRaw();
+				embedText += String.format("%s (%s%s)%s\n",
+						player.getTag(),
+						formatRating(playerMatchResult.getNewRating()),
+						", " + playerMatchResult.getRatingChangeAsString(),
+						resultStatusIcon);
+			}
+			embedTexts.add(embedText);
+		}
+
+		var embedBuilder = EmbedCreateSpec.builder()
+				.title(title);
+		for (int i = 0; i < matchResult.getTeamMatchResults().size(); i++) {
+			embedBuilder.addField(EmbedCreateFields.Field.of("Team #" + (i + 1), embedTexts.get(i), true));
+		}
+		return embedBuilder.build();
+	}
+
+	public static EmbedCreateSpec createCompletedMatchEmbedOld(String title, Match match, MatchResult matchResult, String tagToHighlight) {
 		return createMatchEmbedOrCompletedMatchEmbed(title, match, matchResult, tagToHighlight);
 	}
 
-	public static EmbedCreateSpec createMatchEmbed(String title, Match match, String tagToHighlight) {
+	public static EmbedCreateSpec createMatchEmbedOld(String title, Match match, String tagToHighlight) {
 		return createMatchEmbedOrCompletedMatchEmbed(title, match, null, tagToHighlight);
 	}
 
@@ -192,26 +247,6 @@ public class EmbedBuilder {
 
 	private static String entryOf(double data, int totalSpaces) {
 		return entryOf(FormatTools.formatRating(data), totalSpaces);
-	}
-
-	public static String makeTitleForIncompleteMatch(Match match, boolean hasPlayerReported, boolean isConflict) {
-		if (isConflict) {
-			if (hasPlayerReported) {
-				return "There is conflicting reporting. You can redo your reporting, or file a dispute.";
-			} else {
-				return "There is conflicting reporting. You can file a dispute.";
-			}
-		} else {
-			if (hasPlayerReported) {
-				return "Not all players have reported yet.";
-			} else {
-				return String.format("Your match of %s %s is starting. " +// TODO queue-name weg wenn nur 1 queue
-								"I removed you from all other queues you joined on this server, if any. " + // TODO auflisten welche queues
-								"Please play the match and come back to report the result afterwards.",
-						match.getQueue().getGame().getName(),
-						match.getQueue().getName());
-			}
-		}
 	}
 
 	public static EmbedCreateSpec createQueueGroupMessageEmbed(MatchFinderQueue queue, List<User> users, String activeUserTag) {

@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands;
 
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
+import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.core.GatewayDiscordClient;
@@ -17,15 +18,17 @@ public abstract class ButtonCommand {
 	protected final DiscordBotService bot;
 	protected final TimedTaskQueue timedTaskQueue;
 	protected final GatewayDiscordClient client;
+	protected final MatchService matchService;
 
 	protected static final List none = new ArrayList<>();
 
-	public ButtonCommand(ButtonInteractionEvent event, Services services) {
+	protected ButtonCommand(ButtonInteractionEvent event, Services services) {
 		this.event = event;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
-		this.timedTaskQueue = services.queue;
+		this.timedTaskQueue = services.timedTaskQueue;
 		this.client = services.client;
+		this.matchService = services.matchService;
 	}
 
 	public abstract void execute();

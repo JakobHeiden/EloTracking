@@ -2,7 +2,7 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.tools.EmbedBuilder;
+import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.PermissionOverwrite;
@@ -15,6 +15,8 @@ import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditMono;
+import discord4j.core.spec.TextChannelCreateMono;
+import discord4j.core.spec.TextChannelEditMono;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
@@ -31,9 +33,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
 @Slf4j
 @Component
@@ -41,7 +47,8 @@ public class DiscordBotService {
 
 	@Getter
 	private final GatewayDiscordClient client;
-	private final DBService dbservice;
+	private final DBService dbService;
+	private final TimedTaskQueue timedTaskQueue;
 	private final ApplicationService applicationService;
 	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
@@ -57,10 +64,11 @@ public class DiscordBotService {
 
 	public DiscordBotService(Services services) {
 		this.client = services.client;
-		this.dbservice = services.dbService;
+		this.dbService = services.dbService;
+		this.timedTaskQueue = services.timedTaskQueue;
 		this.botId = client.getSelfId().asLong();
 		this.props = services.props;
-		applicationService = client.getRestClient().getApplicationService();
+		this.applicationService = client.getRestClient().getApplicationService();
 	}
 
 	@PostConstruct
@@ -106,12 +114,16 @@ public class DiscordBotService {
 		return client.getUserById(Snowflake.of(userId));
 	}
 
-	public Mono<Message> getMessageById(long messageId, long channelId) {
+	public Mono<Message> getMessage(long messageId, long channelId) {
 		return client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId));
 	}
 
+	public Mono<Message> getMatchMessage(Match match) {
+		return getMessage(match.getMessageId(), match.getChannelId());
+	}
+
 	public Mono<Message> getPlayerMessage(Player player, Match match) {
-		return getMessageById(match.getMessageId(player.getId()), match.getPrivateChannelId(player.getId()));
+		return getMessage(match.getMessageId(player.getId()), match.getPrivateChannelId(player.getId()));
 	}
 
 	public Mono<Guild> getGuildById(long guildId) {
@@ -121,40 +133,38 @@ public class DiscordBotService {
 	// Channels
 	public void postToResultChannel(MatchResult matchResult) {
 		Game game = matchResult.getGame();
-		TextChannel resultChannel;
-		try {
-			resultChannel = (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
-		} catch (ClientException e) {
-			resultChannel = createResultChannel(game);
-			dbservice.saveServer(game.getServer());
-		}
+		TextChannel resultChannel = getOrCreateResultChannel(game);
 		resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).subscribe();
 	}
 
-	public TextChannel createResultChannel(Game game) {// TODO evtl umbauen in getOrCreateResultChannel, ebenso mit leaderboardMessage
-		Guild guild = getGuildById(game.getGuildId()).block();
-		TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
-				.withPermissionOverwrites(PermissionOverwrite.forRole(
-						Snowflake.of(guild.getId().asLong()),
-						PermissionSet.none(),
-						PermissionSet.of(Permission.SEND_MESSAGES)))
-				.block();
-		game.setResultChannelId(resultChannel.getId().asLong());
-		return resultChannel;
+	public TextChannel getOrCreateResultChannel(Game game) {
+		try {
+			return (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
+		} catch (ClientException e) {
+			Guild guild = getGuildById(game.getGuildId()).block();
+			TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
+					.withPermissionOverwrites(PermissionOverwrite.forRole(
+							Snowflake.of(guild.getId().asLong()),
+							PermissionSet.none(),
+							PermissionSet.of(Permission.SEND_MESSAGES)))
+					.block();
+			game.setResultChannelId(resultChannel.getId().asLong());
+			dbService.saveServer(game.getServer());
+			return resultChannel;
+		}
 	}
 
 	public MessageEditMono refreshLeaderboard(Game game) {
 		Message leaderboardMessage;
 		try {
-			leaderboardMessage = getMessageById(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+			leaderboardMessage = getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
 		} catch (ClientException e) {
 			leaderboardMessage = createLeaderboardChannelAndMessage(game);
-			dbservice.saveServer(game.getServer());// TODO muss das?
+			dbService.saveServer(game.getServer());// TODO muss das?
 		}
-
 		return leaderboardMessage.edit()
 				.withContent(Possible.of(Optional.empty()))
-				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbservice.getLeaderboard(game)));
+				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)));
 	}
 
 	private Message createLeaderboardChannelAndMessage(Game game) {
@@ -171,17 +181,107 @@ public class DiscordBotService {
 		return leaderboardMessage;
 	}
 
-	public Category createDisputeCategory(Server server) {
-		Guild guild = getGuildById(server.getGuildId()).block();
-		Category disputeCategory = guild.createCategory("elo disputes").withPermissionOverwrites(
-				PermissionOverwrite.forRole(guild.getId(), PermissionSet.none(),
-						PermissionSet.of(Permission.VIEW_CHANNEL)),
-				PermissionOverwrite.forRole(Snowflake.of(server.getAdminRoleId()), PermissionSet.of(Permission.VIEW_CHANNEL),
-						PermissionSet.none()),
-				PermissionOverwrite.forRole(Snowflake.of(server.getModRoleId()), PermissionSet.of(Permission.VIEW_CHANNEL),
-						PermissionSet.none())).block();
-		server.setDisputeCategoryId(disputeCategory.getId().asLong());
-		return disputeCategory;
+	public Category getOrCreateMatchCategory(Server server) {
+		try {
+			return (Category) getChannelById(server.getMatchCategoryId()).block();
+		} catch (ClientException e) {
+			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+				throw e;
+			}
+			Guild guild = getGuildById(server.getGuildId()).block();
+			Category matchCategory = guild.createCategory("elo matches")
+					.withPermissionOverwrites(denyEveryoneView(server)).block();
+			server.setMatchCategoryId(matchCategory.getId().asLong());
+			dbService.saveServer(server);
+			return matchCategory;
+		}
+	}
+
+	public Category getOrCreateDisputeCategory(Server server) {// TODO evtl Optional<Guild> mit als parameter, um den request zu sparen?
+		try {
+			return (Category) getChannelById(server.getDisputeCategoryId()).block();
+		} catch (ClientException e) {
+			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+				throw e;
+			}
+			Guild guild = getGuildById(server.getGuildId()).block();
+			Category disputeCategory = guild.createCategory("elo disputes").withPermissionOverwrites(
+					denyEveryoneView(server),
+					allowAdminView(server),
+					allowModView(server)).block();
+			server.setDisputeCategoryId(disputeCategory.getId().asLong());
+			dbService.saveServer(server);
+			return disputeCategory;
+		}
+	}
+
+	public Category getOrCreateArchiveCategory(Server server) {
+		try {
+			return (Category) getChannelById(server.getArchiveCategoryId()).block();
+		} catch (ClientException e) {
+			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+				throw e;
+			}
+			Guild guild = getGuildById(server.getGuildId()).block();
+			Category archiveCategory = guild.createCategory("elo archive").withPermissionOverwrites(
+					denyEveryoneView(server),
+					allowAdminView(server),
+					allowModView(server)).block();
+			server.setArchiveCategoryId(archiveCategory.getId().asLong());
+			dbService.saveServer(server);
+			return archiveCategory;
+		}
+	}
+
+	public void moveToArchive(Server server, Channel channel) {
+		setParentCategory(channel, server.getArchiveCategoryId())
+				.onErrorResume(error -> {// TODO error filtern
+					Category newArchiveCategory = getOrCreateArchiveCategory(server);
+					server.setArchiveCategoryId(newArchiveCategory.getId().asLong());
+					return setParentCategory(channel, newArchiveCategory.getId().asLong());
+				}).subscribe();
+		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, channel.getId().asLong(), 0L, null);
+		((TextChannel) channel).createMessage("**I have moved this channel to the archive. " +
+				"I will delete this channel in 24h.**").subscribe();
+	}
+
+	public TextChannelCreateMono createDisputeChannel(Match match) {
+		Server server = match.getServer();
+		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>(match.getNumPlayers());
+		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
+		Category disputeCategory = getOrCreateDisputeCategory(server);
+		permissionOverwrites.addAll(disputeCategory.getPermissionOverwrites());
+		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
+				.createTextChannel(createMatchChannelName(match.getTeams()))
+				.withParentId(Snowflake.of(server.getDisputeCategoryId()))
+				.withPermissionOverwrites(permissionOverwrites);
+	}
+
+	public TextChannelCreateMono createMatchChannel(Match match) {
+		Server server = match.getServer();
+		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>();
+		permissionOverwrites.add(denyEveryoneView(server));
+		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
+		String channelName = createMatchChannelName(match.getTeams());
+		getOrCreateMatchCategory(server);
+		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
+				.createTextChannel(channelName)
+				.withParentId(Snowflake.of(server.getMatchCategoryId()))
+				.withPermissionOverwrites(permissionOverwrites);
+	}
+
+	private String createMatchChannelName(List<List<Player>> teams) {
+		String tentativeString = String.join("-vs-", teams.stream()
+				.map(team -> String.join("-", team.stream().map(Player::getTag).toList())).toList());
+		if (tentativeString.length() <= 100) {
+			return tentativeString;
+		} else {
+			return tentativeString.substring(0, 100);
+		}
+	}
+
+	public TextChannelEditMono setParentCategory(Channel channel, long categoryId) {
+		return ((TextChannel) channel).edit().withParentId(Possible.of(Optional.of(Snowflake.of(categoryId))));
 	}
 
 	// Commands
@@ -252,6 +352,31 @@ public class DiscordBotService {
 				.modifyApplicationCommandPermissions(botId, server.getGuildId(), commandId, request).subscribe());
 	}
 
+	public static PermissionOverwrite allowAdminView(Server server) {
+		return PermissionOverwrite.forRole(Snowflake.of(server.getAdminRoleId()),
+				PermissionSet.of(Permission.VIEW_CHANNEL),
+				PermissionSet.none());
+	}
+
+	public static PermissionOverwrite allowModView(Server server) {
+		return PermissionOverwrite.forRole(Snowflake.of(server.getModRoleId()),
+				PermissionSet.of(Permission.VIEW_CHANNEL),
+				PermissionSet.none());
+	}
+
+	public static PermissionOverwrite denyEveryoneView(Server server) {
+		return PermissionOverwrite.forRole(Snowflake.of(server.getGuildId()),
+				PermissionSet.none(),
+				PermissionSet.of(Permission.VIEW_CHANNEL));
+	}
+
+	public static PermissionOverwrite allowPlayerView(Player player) {
+		return PermissionOverwrite.forMember(Snowflake.of(player.getUserId()),
+				PermissionSet.of(Permission.VIEW_CHANNEL),
+				PermissionSet.none());
+	}
+
+	// misc
 	private Mono<Long> getCommandIdByName(long guildid, String commandName) {
 		return applicationService.getGuildApplicationCommands(botId, guildid)
 				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName.toLowerCase()))

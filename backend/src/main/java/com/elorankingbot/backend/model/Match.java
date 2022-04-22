@@ -2,6 +2,7 @@ package com.elorankingbot.backend.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -15,6 +16,7 @@ import static com.elorankingbot.backend.model.Match.ReportIntegrity.INCOMPLETE;
 import static com.elorankingbot.backend.model.ReportStatus.*;
 
 @Getter
+@Slf4j
 @Document(collection = "match")
 public class Match {
 
@@ -31,13 +33,13 @@ public class Match {
 	private final Server server;
 	private final String gameId, queueId;
 	@Setter
-	@Getter
 	private boolean isDispute;
-	@Getter
 	@Setter
 	private boolean isOrWasConflict;
 	private final List<List<Player>> teams;
 	private final Map<UUID, ReportStatus> playerIdToReportStatus;
+	@Setter// TODO vllt doch @Data ?
+	private long messageId, channelId;
 	private final Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
 	private List<Player> conflictingReports;
 	private ReportIntegrity reportIntegrity;
@@ -63,7 +65,7 @@ public class Match {
 
 	@PersistenceConstructor
 	public Match(UUID id, Server server, String gameId, String queueId, boolean isDispute, boolean isOrWasConflict,
-				 List<List<Player>> teams, Map<UUID, ReportStatus> playerIdToReportStatus, Map<UUID, Long> playerIdToMessageId,
+				 List<List<Player>> teams, Map<UUID, ReportStatus> playerIdToReportStatus, long messageId, Map<UUID, Long> playerIdToMessageId,
 				 Map<UUID, Long> playerIdToPrivateChannelId, List<Player> conflictingReports, ReportIntegrity reportIntegrity) {
 		this.id = id;
 		this.server = server;
@@ -73,6 +75,7 @@ public class Match {
 		this.isOrWasConflict = isOrWasConflict;
 		this.teams = teams;
 		this.playerIdToReportStatus = playerIdToReportStatus;
+		this.messageId = messageId;
 		this.playerIdToMessageId = playerIdToMessageId;
 		this.playerIdToPrivateChannelId = playerIdToPrivateChannelId;
 		this.conflictingReports = conflictingReports;
@@ -86,7 +89,7 @@ public class Match {
 		isOrWasConflict = isOrWasConflict || reportIntegrity == CONFLICT;
 	}
 
-	private void setConflictingReports() {// TODO refaktorn?
+	private void setConflictingReports() {// TODO refaktorn. TRACE kann dann ueber die function calls automatisch laufen
 		MatchFinderQueue queue = server.getGame(gameId).getQueue(queueId);
 		conflictingReports = new ArrayList<>();
 		List<ReportStatus> teamReports = new ArrayList<>(queue.getNumTeams());
@@ -115,6 +118,7 @@ public class Match {
 		}
 		if (teamInternalConflicts.size() > 0) {
 			conflictingReports = teamInternalConflicts;
+			log.trace("teamInternalConflicts = " + String.join(",", teamInternalConflicts.stream().map(Player::getTag).toList()));
 			return;
 		}
 
@@ -141,6 +145,8 @@ public class Match {
 			if (playersReportedWinOrLoss.size() <= getNumPlayers() / 2) {
 				conflictingReports.addAll(playersReportedWinOrLoss);
 			}
+			log.trace("conflict involving draws or cancels = " + String.join(",",
+					conflictingReports.stream().map(Player::getTag).toList()));
 			return;
 		}
 		if (!playersReportedDraw.isEmpty() || !playersReportedCancel.isEmpty()) return;
@@ -155,10 +161,13 @@ public class Match {
 					.filter(player -> playerIdToReportStatus.get(player.getId()) == WIN)
 					.collect(Collectors.toList());
 		}
-		// ...or no team reporting win
-		if (numberOfTeamsReportingWin == 0) {
+		// check for all reports in but no team reporting win
+		boolean allReportsIn = playerIdToReportStatus.values().stream().noneMatch(reportStatus -> reportStatus == NOT_YET_REPORTED);
+		if (allReportsIn && numberOfTeamsReportingWin == 0) {
 			conflictingReports = getPlayers();
 		}
+		log.trace(conflictingReports.isEmpty() ? "conflictingReports isEmpty"
+				: "conflictingReports = " + String.join(",", conflictingReports.stream().map(Player::getTag).toList()));
 	}
 
 	private void setReportIntegrity() {
@@ -199,6 +208,10 @@ public class Match {
 		return playerIdToReportStatus.get(playerId);
 	}
 
+	public boolean hasReports() {
+		return playerIdToReportStatus.values().stream().anyMatch(reportStatus -> reportStatus != NOT_YET_REPORTED);
+	}
+
 	public long getMessageId(UUID playerId) {
 		return playerIdToMessageId.get(playerId);
 	}
@@ -217,5 +230,10 @@ public class Match {
 
 	public void setIsOrWasConflict(boolean isOrWasConflict) {
 		this.isOrWasConflict = isOrWasConflict;
+	}
+
+	public String getAllMentions() {
+		return String.join(" ", getPlayers().stream()
+				.map(player -> String.format("<@%s>", player.getUserId())).toList());
 	}
 }

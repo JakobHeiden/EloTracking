@@ -1,16 +1,15 @@
 package com.elorankingbot.backend.tools;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
-import com.elorankingbot.backend.commands.player.PlayerInfo;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -55,10 +54,11 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
+						deleteAllChannels(server, "vs");
 						if (server.getAdminRoleId() != 0L) {
-							bot.deployCommand(server, PlayerInfo.getRequest()).block();
+							//bot.deployCommand(server, PlayerInfo.getRequest()).block();
 							//bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
-							bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
+							//bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
 						}
 
 						//bot.setAdminPermissionToAdminCommand(server, "edit");
@@ -96,5 +96,12 @@ public class DevTools {
 		playerDao.deleteAll();
 		timeSlotDao.deleteAll();
 		serverDao.deleteAll();
+	}
+
+	private void deleteAllChannels(Server server, String name) {
+		client.getGuildById(Snowflake.of(server.getGuildId())).block().getChannels()
+				.doOnNext(System.out::println)
+				.filter(channel -> channel.getName().contains(name))
+				.subscribe(channel -> channel.delete().subscribe());
 	}
 }

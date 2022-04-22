@@ -33,7 +33,7 @@ public abstract class SlashCommand {
 		this.matchService = services.matchService;
 		this.queueService = services.queueService;
 		this.client = services.client;
-		this.timedTaskQueue = services.queue;
+		this.timedTaskQueue = services.timedTaskQueue;
 
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
 		this.server = dbService.findServerByGuildId(guildId).get();

@@ -26,7 +26,7 @@ public abstract class TimedCommand {
 	public TimedCommand(Services services, long relationId, int time) {
 		this.service = services.dbService;
 		this.bot = services.bot;
-		this.queue = services.queue;
+		this.queue = services.timedTaskQueue;
 		this.client = services.client;
 
 		this.relationId = relationId;

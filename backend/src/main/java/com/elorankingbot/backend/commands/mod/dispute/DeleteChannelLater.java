@@ -7,9 +7,9 @@ import com.elorankingbot.backend.timedtask.TimedTask;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class CloseChannelLater extends ButtonCommand {
+public class DeleteChannelLater extends ButtonCommand {
 
-	public CloseChannelLater(ButtonInteractionEvent event, Services services) {
+	public DeleteChannelLater(ButtonInteractionEvent event, Services services) {
 		super(event, services);
 	}
 
@@ -25,7 +25,7 @@ public class CloseChannelLater extends ButtonCommand {
 		event.getInteraction().getMessage().get().edit()
 				.withComponents(none).subscribe();
 		event.getInteraction().getChannel()
-				.subscribe(channel -> channel.createMessage("I will delete this channel in 24 hours.").subscribe());
+				.subscribe(channel -> bot.moveToArchive(server, channel));
 
 		timedTaskQueue.addTimedTask(
 				TimedTask.TimedTaskType.CHANNEL_DELETE, 24 * 60,

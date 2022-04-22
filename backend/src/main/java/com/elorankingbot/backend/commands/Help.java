@@ -2,8 +2,8 @@ package com.elorankingbot.backend.commands;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.PlayerCommand;
+import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;

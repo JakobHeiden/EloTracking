@@ -1,18 +1,18 @@
 package com.elorankingbot.backend.commands.player.match;
 
-import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.model.ReportStatus;
+import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.tools.Buttons;
-import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.spec.EmbedCreateSpec;
 
 import java.util.UUID;
 
-import static com.elorankingbot.backend.model.Match.ReportIntegrity.*;
-import static com.elorankingbot.backend.tools.FormatTools.formatRating;
+import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
 public abstract class Report extends ButtonCommandRelatedToMatch {
 
@@ -24,134 +24,70 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
-		if (match.isDispute()) {
+		if (!activeUserIsInvolvedInMatch() || match.isDispute()) {
 			event.acknowledge().subscribe();
 			return;
 		}
 
 		match.reportAndSetConflictData(activePlayerId, reportStatus);
 		Match.ReportIntegrity reportIntegrity = match.getReportIntegrity();
-
-		if (reportIntegrity == INCOMPLETE) {
-			processIncompleteReporting();
-			dbService.saveMatch(match);
-		}
-		if (reportIntegrity == COMPLETE) {
-			MatchResult matchResult = MatchService.generateMatchResult(match);
-			sendResultsToPlayers(matchResult);
-			bot.postToResultChannel(matchResult);
-			matchResult.getPlayers().forEach(player -> {
-				player.addMatchResult(matchResult);
-				dbService.savePlayer(player);
-			});
-			boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
-			if (hasLeaderboardChanged) bot.refreshLeaderboard(game).subscribe();
-
-			dbService.saveMatchResult(matchResult);
-			dbService.deleteMatch(match);
-
-		/*queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),// TODO verallgemeinern
-				parentMessage.getId().asLong(), parentMessage.getChannelId().asLong(), match);
-		queue.addTimedTask(TimedTask.TimedTaskType.MATCH_SUMMARIZE, game.getMessageCleanupTime(),
-				targetMessage.getId().asLong(), targetMessage.getChannelId().asLong(), match);
-		 */
-		}
-		if (reportIntegrity == CANCEL) {
-			processCancel();
-			dbService.deleteMatch(match);
-		}
-		if (reportIntegrity == CONFLICT) {
-			processConflict();
-			dbService.saveMatch(match);
+		switch (reportIntegrity) {
+			case INCOMPLETE -> {
+				processIncompleteReporting();
+				dbService.saveMatch(match);
+			}
+			case CONFLICT -> {
+				processConflictingReporting();
+				dbService.saveMatch(match);
+			}
+			case CANCEL -> {
+				matchService.processCancel(match);
+			}
+			case COMPLETE -> {
+				MatchResult matchResult = MatchService.generateMatchResult(match);
+				matchService.processMatchResult(matchResult, match);
+				timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, match.getChannelId(), 0L, null);
+			}
 		}
 		event.acknowledge().subscribe();
 	}
 
 	private void processIncompleteReporting() {
-		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
-
-		for (Player player : match.getPlayers()) {
-			bot.getPlayerMessage(player, match)
-					.subscribe(message -> {
-						boolean hasPlayerReported = match.getReportStatus(player.getId()) != ReportStatus.NOT_YET_REPORTED;
-						String embedTitle = EmbedBuilder.makeTitleForIncompleteMatch(match, hasPlayerReported, false);
-						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, player.getTag());
-						message.edit().withEmbeds(embedCreateSpec).subscribe();
-					});
-		}
-
+		String title = "Not all players have reported yet. " +
+				"Please report the result of the match, if you haven't already.";
+		bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
+				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match))
+				.withComponents(MatchService.createActionRow(match)).subscribe());
 
 		// TODO!  ...autoresolve bei 1? fehlendem vote, ansonsten dispute
 		//timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
 		//		challenge.getId(), 0L, null);
 	}
 
-	private void sendResultsToPlayers(MatchResult matchResult) {
-		for (Player player : match.getPlayers()) {
-			bot.getPlayerMessage(player, match)
-					.subscribe(message -> {
-						PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(player.getId());
-						String embedTitle = String.format("%s %s %s the match. Your new rating: %s (%s)",
-								queue.getNumPlayersPerTeam() == 1 ? "You" : "Your team",
-								playerMatchResult.getResultStatus().asVerb,
-								playerMatchResult.getResultStatus().asEmojiAsString(),
-								formatRating(playerMatchResult.getNewRating()),
-								playerMatchResult.getRatingChangeAsString());
-						EmbedCreateSpec embedCreateSpec = EmbedBuilder
-								.createCompletedMatchEmbed(embedTitle, match, matchResult, player.getTag());
-
-						message.delete().subscribe();
-						bot.getPrivateChannelByUserId(player.getUserId()).subscribe(channel ->
-								channel.createMessage(embedCreateSpec).subscribe());
-					});
-		}
+	private void processConflictingReporting() {
+		String title = "There are conflicts. Please try to sort out the issue with the other players. " +
+				"If you cannot find a solution, you can file a dispute.";
+		bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
+				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match))
+				.withComponents(createConflictActionRow(match)).subscribe());
 	}
 
-	private void processCancel() {
-		for (Player player : match.getPlayers()) {
-			bot.getPlayerMessage(player, match)
-					.subscribe(message -> {
-						String title = "The match has been canceled.";
-						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match, player.getTag());
-						message.edit().withEmbeds(embedCreateSpec).withComponents(none).subscribe();
-					});
-		}
-	}
-
-	private void processConflict() {
-		for (Player player : match.getPlayers()) {
-			bot.getPlayerMessage(player, match)
-					.subscribe(message -> {
-						boolean hasPlayerReported = match.getReportStatus(player.getId()) != ReportStatus.NOT_YET_REPORTED;
-						String embedTitle = EmbedBuilder.makeTitleForIncompleteMatch(match, hasPlayerReported, true);
-						ActionRow actionRow = createConflictActionRow(match.getId(), game.isAllowDraw(), hasPlayerReported);
-						EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match, player.getTag());
-						message.edit().withEmbeds(embedCreateSpec).withComponents(actionRow).subscribe();
-					});
-		}
-	}
-
-	// TODO verallgemeinern?
-	static ActionRow createConflictActionRow(UUID matchId, boolean allowDraw, boolean hasPlayerReported) {
-		if (hasPlayerReported) {
+	static ActionRow createConflictActionRow(Match match) {
+		boolean allowDraw = match.getGame().isAllowDraw();
+		UUID matchId = match.getId();
+		if (allowDraw) {
 			return ActionRow.of(
-					Buttons.redo(matchId),
+					Buttons.win(matchId),
+					Buttons.lose(matchId),
+					Buttons.draw(matchId),
+					Buttons.cancel(matchId),
 					Buttons.dispute(matchId));
 		} else {
-			if (allowDraw) {
-				return ActionRow.of(
-						Buttons.win(matchId),
-						Buttons.lose(matchId),
-						Buttons.draw(matchId),
-						Buttons.cancel(matchId),
-						Buttons.dispute(matchId));
-			} else {
-				return ActionRow.of(
-						Buttons.win(matchId),
-						Buttons.lose(matchId),
-						Buttons.cancel(matchId),
-						Buttons.dispute(matchId));
-			}
+			return ActionRow.of(
+					Buttons.win(matchId),
+					Buttons.lose(matchId),
+					Buttons.cancel(matchId),
+					Buttons.dispute(matchId));
 		}
 	}
 }

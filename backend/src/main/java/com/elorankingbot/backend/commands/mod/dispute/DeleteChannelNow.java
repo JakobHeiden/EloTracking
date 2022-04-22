@@ -6,9 +6,9 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-public class CloseChannelNow extends ButtonCommand {
+public class DeleteChannelNow extends ButtonCommand {
 
-	public CloseChannelNow(ButtonInteractionEvent event, Services services) {
+	public DeleteChannelNow(ButtonInteractionEvent event, Services services) {
 		super(event, services);
 	}
 
