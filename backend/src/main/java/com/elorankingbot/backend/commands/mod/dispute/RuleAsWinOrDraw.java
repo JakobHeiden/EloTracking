@@ -2,15 +2,12 @@ package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.model.PlayerMatchResult;
 import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.spec.EmbedCreateSpec;
 
 import static com.elorankingbot.backend.model.ReportStatus.*;
-import static com.elorankingbot.backend.tools.FormatTools.formatRating;
+import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
 public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 
@@ -35,49 +32,17 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 				match.reportAndSetConflictData(player.getId(), DRAW);
 			}
 		}
-		match.setIsOrWasConflict(false);// TODO dirty hack! EmbedBuilder neu machen!
 		MatchResult matchResult = MatchService.generateMatchResult(match);
-		updatePlayerMessages(matchResult);
-		dbService.saveMatchResult(matchResult);// TODO das hier ist alles sehr ähnlich mit Report, vllt refaktorn?
-		dbService.deleteMatch(match);
-		postToDisputeChannelAndUpdateButtons(String.format(
-				"**%s has ruled this match a %s %s%s.**",// TODO! hier auch tags, oder nur tags
-				moderatorName,
-				isRuleAsWin ? WIN.asNoun : DRAW.asNoun,
-				isRuleAsWin ? WIN.asEmojiAsString() : DRAW.asEmojiAsString(),
-				isRuleAsWin ? " for team #" + (winningTeamIndex + 1) : ""));
-		bot.postToResultChannel(matchResult);
-		matchResult.getPlayers().forEach(player -> {
-			player.addMatchResult(matchResult);
-			dbService.savePlayer(player);
-		});
-		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
-		if (hasLeaderboardChanged) bot.refreshLeaderboard(matchResult.getGame()).subscribe();
+		matchService.processMatchResult(matchResult, match);
+		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, match.getChannelId(), 0L, null);
 
-		// TODO! channels closen, sind die pings sinnvoll? was ist mit mentions?
-
-		//addMatchSummarizeToQueue(matchResult);
-		event.acknowledge().subscribe();
-	}
-
-	private void updatePlayerMessages(MatchResult matchResult) {
-		for (Player player : match.getPlayers()) {
-			bot.getPlayerMessage(player, match)
-					.subscribe(message -> {
-						PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(player.getId());
-						String embedTitle = String.format("%s has ruled the match %s %s. Your new rating: %s (%s)",
-								moderatorName,
-								isRuleAsWin ? "your " + playerMatchResult.getResultStatus().asNoun : "a draw",
-								playerMatchResult.getResultStatus().asEmojiAsString(),
-								formatRating(playerMatchResult.getNewRating()),
-								playerMatchResult.getRatingChangeAsString());
-						EmbedCreateSpec embedCreateSpec = EmbedBuilder
-								.createCompletedMatchEmbed(embedTitle, match, matchResult, player.getTag());
-
-						message.delete().subscribe();
-						bot.getPrivateChannelByUserId(player.getUserId()).subscribe(channel ->
-								channel.createMessage(embedCreateSpec).subscribe());
-					});
+		if (isRuleAsWin) {
+			postToDisputeChannelAndUpdateButtons(String.format("**%s has ruled this match a %s %s for team #%s.**",
+					moderatorTag, WIN.asNoun, WIN.asEmojiAsString(), winningTeamIndex + 1));
+		} else {
+			postToDisputeChannelAndUpdateButtons(String.format("**%s has ruled this match a %s %s.**",
+					moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString()));
 		}
+		event.acknowledge().subscribe();
 	}
 }

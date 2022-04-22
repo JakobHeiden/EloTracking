@@ -2,20 +2,14 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.tools.Buttons;
-import com.elorankingbot.backend.tools.EmbedBuilder;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
@@ -31,27 +25,10 @@ public class MatchService {
 		this.queueService = services.queueService;
 	}
 
-	public void startMatch(Match match) {//, List<User> usersAlreadyGathered) { TODO kann weg? ensprechend unten anpassen
-		List<User> users = gatherAllUsers(match, new ArrayList<>());
-		sendPlayerMessages(match, users);
+	public void startMatch(Match match) {
+		TextChannel channel = bot.createMatchChannel(match).block();
+		sendMatchMessage(channel, match);
 		dbService.saveMatch(match);
-	}
-
-	private List<User> gatherAllUsers(Match match, List<User> usersAlreadyGathered) {
-		List<Player> players = match.getPlayers();
-		List<User> allUsers = new ArrayList<>(usersAlreadyGathered);
-		Set<Long> userIdsAlreadyGathered = usersAlreadyGathered.stream().map(user -> user.getId().asLong()).collect(Collectors.toSet());
-		Set<Long> allUserIds = players.stream().map(Player::getUserId).collect(Collectors.toSet());
-		List<Mono<User>> userMonos = new ArrayList<>(allUserIds.size() - userIdsAlreadyGathered.size());
-		for (long userId : allUserIds) {
-			if (!userIdsAlreadyGathered.contains(userId)) {
-				Mono<User> userMono = bot.getUser(userId);
-				userMonos.add(userMono);
-				userMono.subscribe(allUsers::add);
-			}
-		}
-		Mono.when(userMonos).block();
-		return allUsers;
 	}
 
 	public static MatchResult generateMatchResult(Match match) {
@@ -86,25 +63,62 @@ public class MatchService {
 		return matchResult;
 	}
 
-	private void sendPlayerMessages(Match match, List<User> users) {
-		List<Mono<PrivateChannel>> channelMonos = new ArrayList<>(users.size());
-		for (User user : users) {
-			EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(
-					EmbedBuilder.makeTitleForIncompleteMatch(match, false, false),
-					match, user.getTag());
-			channelMonos.add(bot.getPrivateChannelByUserId(user.getId().asLong())
-					.doOnNext(privateChannel -> {
-						Message message = privateChannel.createMessage(embedCreateSpec)
-								.withComponents(createActionRow(match.getId(), match.getGame().isAllowDraw())).block();
-						UUID playerId = Player.generateId(match.getGame().getGuildId(), user.getId().asLong());
-						match.getPlayerIdToMessageId().put(playerId, message.getId().asLong());
-						match.getPlayerIdToPrivateChannelId().put(playerId, privateChannel.getId().asLong());
-					}));
-		}
-		Mono.when(channelMonos).block();
+	private void sendMatchMessage(TextChannel channel, Match match) {
+		String title = String.format("Your match of %s is starting. " +
+						"I removed you from all other queues you joined on this server, if any. " +
+						"Please play the match and come back to report the result afterwards.",
+				match.getQueue().getFullName());
+		EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match);
+		Message message = channel.createMessage(match.getAllMentions())
+				.withEmbeds(embedCreateSpec)
+				.withComponents(createActionRow(match)).block();
+		message.pin().subscribe();
+		match.setMessageId(message.getId().asLong());
+		match.setChannelId(message.getChannelId().asLong());
 	}
 
-	private static ActionRow createActionRow(UUID matchId, boolean allowDraw) {
+	public void processMatchResult(MatchResult matchResult, Match match) {
+		TextChannel channel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
+		Game game = match.getGame();
+		String embedTitle = "The match has been resolved. Below are your new ratings and the rating changes. " +
+				"This channel has been moved to the archives and will automatically be deleted in 24h.";
+		bot.getMessage(match.getMessageId(), match.getChannelId())
+				.subscribe(message -> {
+					channel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
+							.withContent(match.getAllMentions())
+							.subscribe(msg -> msg.pin().subscribe());
+					message.delete().subscribe();
+				});
+		bot.moveToArchive(game.getServer(), channel);
+		bot.postToResultChannel(matchResult);
+		matchResult.getPlayers().forEach(player -> {
+			player.addMatchResult(matchResult);
+			dbService.savePlayer(player);
+		});
+		dbService.saveMatchResult(matchResult);
+		dbService.deleteMatch(match);
+		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
+		if (hasLeaderboardChanged) bot.refreshLeaderboard(game).subscribe();
+	}
+
+	public void processCancel(Match match) {
+		bot.getMatchMessage(match)
+				.subscribe(message -> {
+					String title = "The match has been canceled.";
+					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match);
+					message.getChannel().subscribe(channel -> channel
+							.createMessage(embedCreateSpec)
+							.withContent(match.getAllMentions())
+							.subscribe(msg -> msg.pin().subscribe()));
+					message.delete().subscribe();
+				});
+		bot.getChannelById(match.getChannelId()).subscribe(channel -> bot.moveToArchive(match.getServer(), channel));
+		dbService.deleteMatch(match);
+	}
+
+	public static ActionRow createActionRow(Match match) {
+		boolean allowDraw = match.getGame().isAllowDraw();
+		UUID matchId = match.getId();
 		if (allowDraw) return ActionRow.of(
 				Buttons.win(matchId),
 				Buttons.lose(matchId),

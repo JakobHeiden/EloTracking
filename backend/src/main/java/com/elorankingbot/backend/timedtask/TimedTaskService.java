@@ -25,7 +25,7 @@ public class TimedTaskService {
 	public TimedTaskService(Services services) {
 		this.service = services.dbService;
 		this.bot = services.bot;
-		this.queue = services.queue;
+		this.queue = services.timedTaskQueue;
 		this.client = services.client;
 	}
 

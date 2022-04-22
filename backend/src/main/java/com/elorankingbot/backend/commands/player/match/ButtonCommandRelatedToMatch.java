@@ -33,8 +33,13 @@ public abstract class ButtonCommandRelatedToMatch extends ButtonCommand {
 		this.activePlayerId = Player.generateId(guildId, activeUserId);
 	}
 
+	protected boolean activeUserIsInvolvedInMatch() {
+		return match.getPlayers().stream()
+				.anyMatch(player -> player.getUserId() == activeUserId);
+	}
+
 	protected Mono<Message> getActiveMessage() {
-		return bot.getMessageById(match.getMessageId(activePlayerId), match.getPrivateChannelId(activePlayerId));
+		return bot.getMessage(match.getMessageId(activePlayerId), match.getPrivateChannelId(activePlayerId));
 	}
 
 	protected void updateAndSaveChallenge(Message message) {// TODO vllt in interface, default method refaktorn

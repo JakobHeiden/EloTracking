@@ -19,7 +19,7 @@ public class ChallengeAsUserInteraction {
 		this.event = event;
 		this.service = services.dbService;
 		this.bot = services.bot;
-		this.queue = services.queue;
+		this.queue = services.timedTaskQueue;
 	}
 
 	public static ApplicationCommandRequest getRequest() {

@@ -82,13 +82,18 @@ public class Buttons {
 				Emojis.crossMark, "Rule the match as canceled");
 	}
 
-	public static Button closeChannelNow() {
-		return Button.secondary("closechannelnow",
-				Emojis.crossMark, "Close this channel now");
+	public static Button deleteChannelNow() {
+		return Button.secondary("deletechannelnow",
+				Emojis.crossMark, "Delete this channel now");
 	}
 
-	public static Button closeChannelLater() {
-		return Button.secondary("closechannellater",
-				Emojis.hourglass, "Close this channel in 24h");// TODO vllt konfbar machen
+	public static Button archiveAndDeleteChannelLater() {
+		return Button.secondary("deletechannellater",
+				Emojis.hourglass, "Archive this channel and delete it in 24h");// TODO vllt konfbar machen
+	}
+
+	public static Button archiveChannel() {
+		return Button.secondary("archivechannel",
+				Emojis.archive, "Archive this channel");
 	}
 }

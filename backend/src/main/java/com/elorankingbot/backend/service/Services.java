@@ -16,7 +16,7 @@ public class Services {
 	public final DiscordBotService bot;
 	public final MatchService matchService;
 	public final GatewayDiscordClient client;
-	public final TimedTaskQueue queue;
+	public final TimedTaskQueue timedTaskQueue;
 	public final TimedTaskService timedTaskService;
 	public final QueueService queueService;
 	public final CommandClassScanner commandClassScanner;
@@ -24,14 +24,14 @@ public class Services {
 	public Services(ApplicationPropertiesLoader props,
 					@Lazy DBService dbService, @Lazy DiscordBotService bot, @Lazy MatchService matchService,
 					@Lazy GatewayDiscordClient client,
-					@Lazy TimedTaskQueue queue, @Lazy TimedTaskService timedTaskService, @Lazy QueueService queueService,
+					@Lazy TimedTaskQueue timedTaskQueue, @Lazy TimedTaskService timedTaskService, @Lazy QueueService queueService,
 					@Lazy CommandClassScanner commandClassScanner) {
 		this.props = props;
 		this.dbService = dbService;
 		this.bot = bot;
 		this.matchService = matchService;
 		this.client = client;
-		this.queue = queue;
+		this.timedTaskQueue = timedTaskQueue;
 		this.timedTaskService = timedTaskService;
 		this.queueService = queueService;
 		this.commandClassScanner = commandClassScanner;
