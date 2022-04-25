@@ -15,6 +15,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
+import static com.elorankingbot.backend.service.DiscordBotService.illegalNameMessage;
 import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.INTEGER;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
@@ -99,7 +100,7 @@ public class AddQueue extends SlashCommand {
 		Game game = server.getGame(event.getOption("ranking").get().getValue().get().asString());
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
 		if (!isLegalDiscordName(nameOfQueue)) {
-			event.reply("Illegal queue name. Please use only letters, digits, dash, and underscore").subscribe();
+			event.reply(illegalNameMessage()).subscribe();
 			return;
 		}
 		if (nameOfQueue.length() > 32) {
