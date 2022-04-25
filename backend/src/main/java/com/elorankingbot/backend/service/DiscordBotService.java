@@ -385,9 +385,14 @@ public class DiscordBotService {
 	}
 
 	public static boolean isLegalDiscordName(String string) {
-		Pattern p = Pattern.compile("[\\w-]{1,32}");
+		if (!string.toLowerCase().equals(string)) return false;
+		Pattern p = Pattern.compile("^[-_\\p{L}\\p{N}\\p{sc=Deva}\\p{sc=Thai}]{1,32}$");
 		Matcher m = p.matcher(string);
 		if (m.find()) return true;
 		else return false;
+	}
+
+	public static String illegalNameMessage() {
+		return "Illegal name. Please use only lowercase letters, digits, dash, and underscore.";
 	}
 }

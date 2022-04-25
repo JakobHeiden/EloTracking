@@ -3,6 +3,7 @@ package com.elorankingbot.backend.commands.admin;
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -56,7 +57,7 @@ public class CreateRanking extends SlashCommand {
 	public void execute() {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!isLegalDiscordName(nameOfGame)) {
-			event.reply("Illegal name. Please use only letters, digits, dash, and underscore").subscribe();
+			event.reply(DiscordBotService.illegalNameMessage()).subscribe();
 			return;
 		}
 
@@ -85,8 +86,10 @@ public class CreateRanking extends SlashCommand {
 		}
 		dbService.saveServer(server);
 
-		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
-		bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase());// TODO braucht man hier permissions eigtl?
+		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
+				bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
+		//bot.deployCommand(server, CreateRank.getRequest(server)).subscribe(commandData ->
+		//		bot.setPermissionsForAdminCommand(server, CreateRank.class.getSimpleName().toLowerCase()));
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +
