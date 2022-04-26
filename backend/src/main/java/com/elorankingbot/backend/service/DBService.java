@@ -46,7 +46,7 @@ public class DBService {
 	public void resetAllPlayerRatings(Game game) {
 		List<Player> players = playerDao.findAllByGuildId(game.getGuildId());
 		players.forEach(player -> {
-			PlayerGameStats gameStats = player.getGameStats(game);
+			PlayerGameStats gameStats = player.getOrCreateGameStats(game);
 			gameStats.setRating(initialRating);
 			gameStats.setWins(0);
 			gameStats.setLosses(0);
@@ -166,6 +166,10 @@ public class DBService {
 		Player player = new Player(guildId, userId, tag);
 		playerDao.save(player);
 		return player;
+	}
+
+	public List<Player> findAllPlayersForServer(Server server) {
+		return playerDao.findAllByGuildId(server.getGuildId());
 	}
 
 	// Rankings

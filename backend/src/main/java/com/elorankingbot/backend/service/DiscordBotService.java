@@ -3,10 +3,12 @@ package com.elorankingbot.backend.service;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.google.common.collect.Iterables;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Category;
@@ -33,11 +35,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
@@ -394,5 +395,37 @@ public class DiscordBotService {
 
 	public static String illegalNameMessage() {
 		return "Illegal name. Please use only lowercase letters, digits, dash, and underscore.";
+	}
+
+	public void updatePlayerRank(Game game, Player player) {
+		List<Integer> applicableRequiredRatings = new ArrayList<>(game.getRequiredRatingToRankId().keySet().stream()
+				.filter(requiredRating -> player.findGameStats(game).isPresent()
+						&& player.findGameStats(game).get().getRating() > requiredRating)
+				.toList());
+		if (applicableRequiredRatings.size() == 0) return;
+
+		Collections.sort(applicableRequiredRatings);
+		int relevantRequiredRating = Iterables.getLast(applicableRequiredRatings);
+		Snowflake rankSnowflake = Snowflake.of(game.getRequiredRatingToRankId().get(relevantRequiredRating));
+
+		Member member = client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block();
+		Set<Snowflake> currentRankSnowflakes = member.getRoleIds().stream()
+				.filter(snowflake -> game.getRequiredRatingToRankId().containsValue(snowflake.asLong()))
+				.collect(Collectors.toSet());
+		if (!currentRankSnowflakes.contains(rankSnowflake)) {
+			member.addRole(rankSnowflake).subscribe();
+		}
+		currentRankSnowflakes.stream().filter(roleSnowflake -> !roleSnowflake.equals(rankSnowflake))
+				.forEach(roleIdSnowflake -> member.removeRole(roleIdSnowflake).subscribe());
+	}
+
+	public void removeAllRanks(Game game) {
+		Collection<Long> allRankIds = game.getRequiredRatingToRankId().values();
+		for (Player player : dbService.findAllPlayersForServer(game.getServer())) {
+			client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId()))
+					.subscribe(member -> member.getRoleIds().stream()
+							.filter(snowflake -> allRankIds.contains(snowflake.asLong()))
+							.forEach(snowflake -> member.removeRole(snowflake).subscribe()));
+		}
 	}
 }

@@ -88,8 +88,12 @@ public class CreateRanking extends SlashCommand {
 
 		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
 				bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
-		//bot.deployCommand(server, CreateRank.getRequest(server)).subscribe(commandData ->
-		//		bot.setPermissionsForAdminCommand(server, CreateRank.class.getSimpleName().toLowerCase()));
+		bot.deployCommand(server, AddRank.getRequest(server)).subscribe(commandData ->
+				bot.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase()));
+		bot.deployCommand(server, DeleteRanks.getRequest(server)).subscribe(commandData ->
+				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
+		bot.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
+				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +

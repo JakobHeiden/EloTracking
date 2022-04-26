@@ -41,7 +41,6 @@ public class CommandClassScanner {
 				.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
 				// apparently some reflected class by Spring is getting caught up in this...
 				.filter(clazz -> !clazz.getSimpleName().equals(""))
-				.peek(classInfo -> log.trace("scanning command class " + classInfo.getSimpleName()))
 				.collect(Collectors.toSet());
 
 		this.adminCommandClassNames = classes.stream()
@@ -53,8 +52,9 @@ public class CommandClassScanner {
 						return false;
 					}
 				})
-				.map(clazz -> clazz.getSimpleName())
+				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
+		adminCommandClassNames.forEach(className -> log.trace("admin command " + className));
 		this.modCommandClassNames = classes.stream()
 				.filter(clazz -> {
 					try {
@@ -64,8 +64,9 @@ public class CommandClassScanner {
 						return false;
 					}
 				})
-				.map(clazz -> clazz.getSimpleName())
+				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
+		modCommandClassNames.forEach(className -> log.trace("mod command " + className));
 		this.playerCommandClassNames = classes.stream()
 				.filter(clazz -> {
 					try {
@@ -75,8 +76,9 @@ public class CommandClassScanner {
 						return false;
 					}
 				})
-				.map(clazz -> clazz.getSimpleName())
+				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
+		playerCommandClassNames.forEach(className -> log.trace("player command " + className));
 
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
 		classes.forEach(clazz -> mapBuilder.put(clazz.getSimpleName().toLowerCase(), clazz.getName()));
