@@ -26,6 +26,7 @@ public class Game {
     private int matchAutoResolveTime;
     private int messageCleanupTime;
     private int noReportsModalityDecayTime;
+    private Map<Integer, Long> requiredRatingToRankId;
 
     public Game(Server server, String name, boolean allowDraw) {
         this.name = name;
@@ -37,6 +38,7 @@ public class Game {
         this.matchAutoResolveTime = 24 * 60;
         this.messageCleanupTime = 12 * 60;
         this.noReportsModalityDecayTime = 7 * 24 * 60;
+        this.requiredRatingToRankId = new HashMap<>();
     }
 
     public void addQueue(MatchFinderQueue queue) {

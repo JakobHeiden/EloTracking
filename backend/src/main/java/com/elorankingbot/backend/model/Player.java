@@ -7,10 +7,7 @@ import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -51,7 +48,7 @@ public class Player  {
         return unbanAtTimeSlot == PERMABANNED;
     }
 
-    public PlayerGameStats getGameStats(Game game) {
+    public PlayerGameStats getOrCreateGameStats(Game game) {// TODO! durch alle uses gehen, nach bedarf durch findGameStats ersetzen
         PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
         if (playerGameStats == null) {
             PlayerGameStats newPlayerGameStats = new PlayerGameStats(1200);
@@ -59,6 +56,12 @@ public class Player  {
             playerGameStats = newPlayerGameStats;
         }
         return playerGameStats;
+    }
+
+    public Optional<PlayerGameStats> findGameStats(Game game) {
+        PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
+        if (playerGameStats == null) return Optional.empty();
+        else return Optional.of(playerGameStats);
     }
 
     public void addMatchResult(MatchResult matchResult) {

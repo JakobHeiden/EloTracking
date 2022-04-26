@@ -38,10 +38,10 @@ public class MatchService {
 			List<Player> otherPlayers = match.getPlayers();
 			team.forEach(otherPlayers::remove);
 			double averageTeamRating = team.stream()
-					.mapToDouble(pl -> pl.getGameStats(game).getRating())
+					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
 			double averageOtherRating = otherPlayers.stream()
-					.mapToDouble(pl -> pl.getGameStats(game).getRating())
+					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
 			double numOtherTeams = match.getQueue().getNumTeams() - 1;
 			double expectedResult = 1 / (numOtherTeams * (1 + Math.pow(10, (averageOtherRating - averageTeamRating) / 400)));
@@ -49,7 +49,7 @@ public class MatchService {
 			TeamMatchResult teamResult = new TeamMatchResult();
 			for (Player player : team) {
 				double actualResult = match.getReportStatus(player.getId()).value;
-				double oldRating = player.getGameStats(game).getRating();
+				double oldRating = player.getOrCreateGameStats(game).getRating();
 				double newRating = oldRating + k * (actualResult - expectedResult);
 				PlayerMatchResult playerMatchResult = new PlayerMatchResult(matchResult,
 						player, player.getTag(),
@@ -99,6 +99,9 @@ public class MatchService {
 		dbService.deleteMatch(match);
 		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
 		if (hasLeaderboardChanged) bot.refreshLeaderboard(game).subscribe();
+		for (Player player : match.getPlayers()) {
+			bot.updatePlayerRank(game, player);
+		}
 	}
 
 	public void processCancel(Match match) {

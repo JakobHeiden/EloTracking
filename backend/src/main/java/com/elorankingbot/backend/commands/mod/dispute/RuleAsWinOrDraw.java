@@ -35,6 +35,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 		MatchResult matchResult = MatchService.generateMatchResult(match);
 		matchService.processMatchResult(matchResult, match);
 		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, match.getChannelId(), 0L, null);
+		// TODO sollte archiviert werden stattdessen
 
 		if (isRuleAsWin) {
 			postToDisputeChannelAndUpdateButtons(String.format("**%s has ruled this match a %s %s for team #%s.**",

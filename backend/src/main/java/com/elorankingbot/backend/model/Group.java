@@ -31,7 +31,7 @@ public class Group implements Comparable<Group> {
 
 	public double getAverageRating() {
 		double sumOfRatings = players.stream()
-				.map(player -> player.getGameStats(game).getRating())
+				.map(player -> player.getOrCreateGameStats(game).getRating())
 				.reduce(0D, Double::sum);
 		return sumOfRatings / players.size();
 	}

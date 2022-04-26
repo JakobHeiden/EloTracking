@@ -33,7 +33,7 @@ public class EmbedBuilder {
 				}
 				embedText.append(String.format("%s (%s)%s\n",
 						player.getTag(),
-						formatRating(player.getGameStats(queue.getGame()).getRating()),
+						formatRating(player.getOrCreateGameStats(queue.getGame()).getRating()),
 						reportStatusIcon));
 			}
 			embedTexts.add(embedText.toString());
@@ -98,7 +98,7 @@ public class EmbedBuilder {
 						player.getTag(),
 						isCompletedMatch ?
 								formatRating(matchResult.getPlayerMatchResult(player.getId()).getNewRating())
-								: formatRating(player.getGameStats(queue.getGame()).getRating()),
+								: formatRating(player.getOrCreateGameStats(queue.getGame()).getRating()),
 						isCompletedMatch ?
 								", " + matchResult.getPlayerMatchResult(player.getId()).getRatingChangeAsString()
 								: "",
