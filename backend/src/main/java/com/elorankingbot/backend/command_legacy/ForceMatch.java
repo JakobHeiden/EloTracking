@@ -2,9 +2,9 @@ package com.elorankingbot.backend.command_legacy;
 
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.components.FormatTools;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.FormatTools;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;

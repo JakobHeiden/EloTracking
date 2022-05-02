@@ -1,7 +1,7 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.tools.Buttons;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;

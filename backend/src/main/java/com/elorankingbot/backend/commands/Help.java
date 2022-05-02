@@ -2,87 +2,73 @@ package com.elorankingbot.backend.commands;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.PlayerCommand;
-import com.elorankingbot.backend.service.EmbedBuilder;
+import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
-import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.SelectMenu;
+import discord4j.core.spec.EmbedCreateFields;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
 
-import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @PlayerCommand
 public class Help extends SlashCommand {
 
+	private final Services services;
 	private final CommandClassScanner commandClassScanner;
+	public static final String customId = "help";
 
 	public Help(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
+		this.services = services;
 		this.commandClassScanner = services.commandClassScanner;
 	}
 
-	public static ApplicationCommandRequest getRequest(CommandClassScanner commandClassScanner) {
+	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
 				.name("help")
 				.description(getShortDescription())
 				.defaultPermission(true)
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("topic").description("Choose a topic or command")
-						.type(STRING.getValue())
-						.required(true)
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("Command List")
-								.value("Command List")
-								.build())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("Concept: Rankings and Queues")
-								.value("Concept: Rankings and Queues")
-								.build())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("Concept: Matchmaking, Rating Spread, Rating Elasticity")
-								.value("Concept: Matchmaking, Rating Spread, Rating Elasticity")
-								.build())
-						.addAllChoices(commandClassScanner.getAllCommandClassNames().stream()
-								.map(Help::createChoice).toList())
-						.build())
-				.addOption(ApplicationCommandOptionData.builder()
-						.name("displaypublic")
-						.description("Display help information for you alone, or for everyone to see")
-						.required(false)
-						.type(STRING.getValue())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("display in public")
-								.value("is-public")
-								.build())
-						.addChoice(ApplicationCommandOptionChoiceData.builder()
-								.name("display only for me (default)")
-								.value("is-ephemeral")
-								.build())
-						.build())
 				.build();
 	}
 
 	public static String getShortDescription() {
-		return "Get a list of all commands, or get detailed information about a topic or command.";
+		return "Get help on how to use the bot.";
 	}
 
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
-				"`Required:` `topic` Which command or topic you want to get help on.\n" +
-				"`Optional:` `displaypublic` Wether you want to display the help information just for yourself, or publicly " +
-				"in the channel you're in. By default it is shown only you.";
+				"The command will display some general help, and a menu to to display help on selected topics, and every bot command.";
 	}
 
 	public void execute() {
-		String topic = event.getOptions().get(0).getValue().get().asString();
-		boolean isEphemeralReply = event.getOptions().size() == 1
-				|| event.getOptions().get(1).getValue().get().asString().equals("is-ephemeral");
+		String topic = "General Help";
+		event.reply().withEmbeds(createHelpEmbed(services, topic))
+				.withComponents(createActionRow())
+				.block();
+	}
 
+	public static void executeSelectMenuSelection(Services services, SelectMenuInteractionEvent event) {
+		event.getMessage().get().edit().withEmbeds(createHelpEmbed(services, event.getValues().get(0))).subscribe();
+		event.deferEdit().subscribe();
+	}
+
+	private static EmbedCreateSpec createHelpEmbed(Services services, String topic) {
+		DiscordBotService bot = services.bot;
+		CommandClassScanner commandClassScanner = services.commandClassScanner;
 		String embedTitle;
 		String embedText = "";
 		switch (topic) {
+			case "General Help" -> {
+				embedTitle = topic;
+				embedText = "*work in progress*";//TODO!
+			}
 			case "Command List" -> {
 				embedTitle = topic;
 				String shortDescription = null;
@@ -121,8 +107,8 @@ public class Help extends SlashCommand {
 						"`ratingelasticity` is applied in fractions, not only each full minute.\n";
 			}
 			default -> {
-				embedTitle = "Help on " + topic;
-				String commandClassName = commandClassScanner.getCommandStringToClassName().get(topic.substring(1));
+				embedTitle = "Help on /" + topic;
+				String commandClassName = commandClassScanner.getCommandStringToClassName().get(topic.toLowerCase());
 				try {
 					embedText = (String) Class.forName(commandClassName)
 							.getMethod("getLongDescription").invoke(null);
@@ -133,15 +119,19 @@ public class Help extends SlashCommand {
 			}
 		}
 
-		event.reply().withEmbeds(EmbedBuilder.createHelpEmbed(embedTitle, embedText.toString()))
-				.withEphemeral(isEphemeralReply).subscribe();
+		return EmbedCreateSpec.builder()
+				.addField(EmbedCreateFields.Field.of(embedTitle, embedText, true))
+				.build();
 	}
 
-	private static ApplicationCommandOptionChoiceData createChoice(String commandClassName) {
-		String discordCommandName = "/" + commandClassName.toLowerCase();
-		return ApplicationCommandOptionChoiceData.builder()
-				.name(discordCommandName)
-				.value(discordCommandName)
-				.build();
+	private ActionRow createActionRow() {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
+				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		menuOptions.add(0, SelectMenu.Option.of("Concept: Matchmaking, Rating Spread, Rating Elasticity",
+				"Concept: Matchmaking, Rating Spread, Rating Elasticity"));
+		menuOptions.add(0, SelectMenu.Option.of("Concept: Rankings and Queues", "Concept: Rankings and Queues"));
+		menuOptions.add(0, SelectMenu.Option.of("Command List", "Command List"));
+		menuOptions.add(0, SelectMenu.Option.of("General Help", "General Help"));
+		return ActionRow.of(SelectMenu.of(customId, menuOptions));
 	}
 }

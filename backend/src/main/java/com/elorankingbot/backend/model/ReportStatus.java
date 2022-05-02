@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.tools.Emojis;
+import com.elorankingbot.backend.components.Emojis;
 import discord4j.core.object.reaction.ReactionEmoji;
 
 // referred to as "ResultStatus" if the match is already done

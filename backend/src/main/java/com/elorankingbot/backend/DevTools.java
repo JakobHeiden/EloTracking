@@ -1,8 +1,9 @@
-package com.elorankingbot.backend.tools;
+package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.Help;
-import com.elorankingbot.backend.commands.admin.*;
+import com.elorankingbot.backend.commands.admin.CreateRanking;
+import com.elorankingbot.backend.commands.admin.SetRole;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -13,8 +14,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
 
 @Component
 @Slf4j
@@ -56,16 +55,15 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						server.getGames().forEach(game -> game.setRequiredRatingToRankId(new HashMap<>()));
-						dbService.saveServer(server);
+						//server.getGames().forEach(game -> game.setRequiredRatingToRankId(new HashMap<>()));
+						//dbService.saveServer(server);
 						//deleteAllChannels(server, "vs");
-						bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
-						bot.deployCommand(server, AddRank.getRequest(server)).block();
-						bot.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase());
-						bot.deployCommand(server, DeleteRanks.getRequest(server)).block();
-						bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase());
-						bot.deployCommand(server, Reset.getRequest(server)).block();
-						bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
+						bot.deployCommand(server, Help.getRequest()).block();
+						//bot.deployCommand(server, AddRank.getRequest(server)).block();
+						//bot.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase());
+						//bot.deployCommand(server, DeleteRanks.getRequest(server)).block();
+						//bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase());
+						//bot.setPermissionsForAdminCommand(server, Reset.class.getSimpleName().toLowerCase());
 						//bot.deployCommand(server, Help.getRequest(commandClassScanner)).block();
 
 						//bot.setAdminPermissionToAdminCommand(server, "edit");
