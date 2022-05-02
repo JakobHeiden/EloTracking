@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.tools;
+package com.elorankingbot.backend.components;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 

@@ -66,8 +66,8 @@ public class AddRank extends SlashCommand {
 				"`Required:` `role` The role to make into a rank.\n" +
 				"`Required:` `rating` The minimum rating to attain the new rank.\n" +
 				"If a player qualifies for more than one rank, only the highest rank will apply.\n" +
-				"Note that using the same roles as ranks in different rankings will lead to undefined behavior and is " +
-				"recommended against.";
+				"Note that using the same roles as ranks in different rankings will lead to unspecified behavior and is " +
+				"recommended against.";// TODO programmatisch ausschliessen. ausserdem ausschliessen dass die gleiche role in 1 ranking mehrmals verwendent wird
 	}
 
 	public void execute() {

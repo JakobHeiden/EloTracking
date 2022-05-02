@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.components.Emojis;
+import com.elorankingbot.backend.components.FormatTools;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.tools.Emojis;
-import com.elorankingbot.backend.tools.FormatTools;
 import com.google.common.base.Strings;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateFields;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.elorankingbot.backend.tools.FormatTools.formatRating;
+import static com.elorankingbot.backend.components.FormatTools.formatRating;
 
 public class EmbedBuilder {
 
@@ -260,9 +260,4 @@ public class EmbedBuilder {
 		// TODO
 	}
 
-	public static EmbedCreateSpec createHelpEmbed(String title, String content) {
-		return EmbedCreateSpec.builder()
-				.addField(EmbedCreateFields.Field.of(title, content, true))
-				.build();
-	}
 }

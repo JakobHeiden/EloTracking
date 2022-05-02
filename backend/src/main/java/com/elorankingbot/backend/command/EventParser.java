@@ -2,6 +2,7 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetRole;
@@ -14,10 +15,10 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.rest.http.client.ClientException;
-import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +49,6 @@ public class EventParser {
 		this.buttonCommandFactory = buttonCommandFactory;
 		this.slashCommandFactory = slashCommandFactory;
 		GatewayDiscordClient client = services.client;
-		ApplicationService applicationService = client.getRestClient().getApplicationService();
-		long botId = client.getSelfId().asLong();
 		this.commandStringToClassName = scanner.getCommandStringToClassName();
 
 		client.on(ChatInputInteractionEvent.class)
@@ -61,6 +60,10 @@ public class EventParser {
 				.doOnNext(this::createAndExecuteButtonCommand)
 				.doOnError(this::handleClientException)
 				.subscribe();
+
+		client.on(SelectMenuInteractionEvent.class)
+				.filter(event -> event.getCustomId().equals(Help.customId))
+				.subscribe(event -> Help.executeSelectMenuSelection(services, event));
 
 		client.on(UserInteractionEvent.class)
 				.map(userInteractionChallengeFactory)

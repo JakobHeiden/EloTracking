@@ -1,10 +1,10 @@
 package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;

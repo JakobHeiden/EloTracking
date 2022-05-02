@@ -1,8 +1,8 @@
 package com.elorankingbot.backend.commands.player.match;
 
+import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.tools.Buttons;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionComponent;
