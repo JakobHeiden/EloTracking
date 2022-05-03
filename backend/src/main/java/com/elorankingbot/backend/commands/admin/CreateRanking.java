@@ -98,7 +98,7 @@ public class CreateRanking extends SlashCommand {
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +
 						"However, there is no way yet for players to find a match. " +
-						"Use /addqueue or /addchallenge to either add a queue or a challenge modality to the ranking.",
+						"Use `/addqueue` to either add a queue the ranking.",
 				nameOfGame,
 				game.getResultChannelId(),
 				doCreateCategories ? ", " : " and ",

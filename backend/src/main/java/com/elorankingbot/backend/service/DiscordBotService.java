@@ -312,8 +312,11 @@ public class DiscordBotService {
 						botId, guildId, Long.parseLong(commandData.id())));
 	}
 
-	// Permissions
+	// Command Permissions
 	public void setCommandPermissionForRole(Server server, String commandName, long roleId) {
+		// discord api changes invalidated this code, and Discord4J does not currently support the workaround.
+		// currently, command permissions are checked on our side in SlashCommand
+		/*
 		client.getRoleById(Snowflake.of(server.getGuildId()), Snowflake.of(roleId))
 				.subscribe(role -> {
 					long commandId = getCommandIdByName(server.getGuildId(), commandName).defaultIfEmpty(0L).block();
@@ -326,6 +329,7 @@ public class DiscordBotService {
 					applicationService
 							.modifyApplicationCommandPermissions(botId, server.getGuildId(), commandId, request).block();
 				});
+		 */
 	}
 
 	public void setPermissionsForModCommand(Server server, String commandName) {
@@ -353,6 +357,7 @@ public class DiscordBotService {
 				.modifyApplicationCommandPermissions(botId, server.getGuildId(), commandId, request).subscribe());
 	}
 
+	// other Permissions
 	public static PermissionOverwrite allowAdminView(Server server) {
 		return PermissionOverwrite.forRole(Snowflake.of(server.getAdminRoleId()),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
@@ -389,8 +394,7 @@ public class DiscordBotService {
 		if (!string.toLowerCase().equals(string)) return false;
 		Pattern p = Pattern.compile("^[-_\\p{L}\\p{N}\\p{sc=Deva}\\p{sc=Thai}]{1,32}$");
 		Matcher m = p.matcher(string);
-		if (m.find()) return true;
-		else return false;
+		return m.find();
 	}
 
 	public static String illegalNameMessage() {
