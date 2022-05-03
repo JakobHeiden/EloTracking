@@ -70,7 +70,7 @@ public class Ban extends SlashCommand {
 
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
-				"`Required:` `mode` Wether to ban the player for a duration, or permanently, or to lift an existing ban " +
+				"`Required:` `mode` Whether to ban the player for a duration, or permanently, or to lift an existing ban " +
 				"on a player.\n" +
 				"`Required:` `player` Which player to ban or unban.\n" +
 				"`Optional:` `duration` For how long to ban the player. This option is technically optional, but the " +

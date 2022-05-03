@@ -19,4 +19,4 @@ jobs:
         with:
           java-version: 17
       - name: Build with Maven
-        run: mvn -B -Dspring-boot.run.profiles=dev package --file backend/pom.xml
+        run: mvn -B -Dspring-boot.run.profiles=test package --file backend/pom.xml

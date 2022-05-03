@@ -50,7 +50,7 @@ public class CreateRanking extends SlashCommand {
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
 				"`Required:` `nameofranking` The name of the new ranking.\n" +
-				"`Required:` `allowdraw` Wether or not to allow draw as a result in matches for this ranking.\n" +
+				"`Required:` `allowdraw` Whether or not to allow draw as a result in matches for this ranking.\n" +
 				"For more information on rankings, see `/help:` `Concept: Rankings and Queues`.";
 	}
 

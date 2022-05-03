@@ -51,7 +51,7 @@ public class SetPermissions extends SlashCommand {
 
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
-				"`Required:` `adminormod` Wether to set the admin role, or the moderator role.\n" +
+				"`Required:` `adminormod` Whether to set the admin role, or the moderator role.\n" +
 				"`Required:` `role` The role to link permissions to.\n" +
 				"Moderator commands are commands related to the day-to-day operation of the bot and include things like " +
 				"dispute resolution, bans, and player rating manipulation.\n" +
