@@ -254,7 +254,7 @@ public class DiscordBotService {
 		permissionOverwrites.addAll(disputeCategory.getPermissionOverwrites());
 		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
 				.createTextChannel(createMatchChannelName(match.getTeams()))
-				.withParentId(Snowflake.of(server.getDisputeCategoryId()))
+				.withParentId(disputeCategory.getId())
 				.withPermissionOverwrites(permissionOverwrites);
 	}
 
@@ -264,10 +264,10 @@ public class DiscordBotService {
 		permissionOverwrites.add(denyEveryoneView(server));
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
 		String channelName = createMatchChannelName(match.getTeams());
-		getOrCreateMatchCategory(server);
+		Category matchCategory = getOrCreateMatchCategory(server);
 		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
 				.createTextChannel(channelName)
-				.withParentId(Snowflake.of(server.getMatchCategoryId()))
+				.withParentId(matchCategory.getId())
 				.withPermissionOverwrites(permissionOverwrites);
 	}
 
