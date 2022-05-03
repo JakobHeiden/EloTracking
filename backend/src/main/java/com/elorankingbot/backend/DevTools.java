@@ -1,9 +1,8 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
-import com.elorankingbot.backend.commands.admin.SetRole;
+import com.elorankingbot.backend.commands.admin.SetPermissions;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -55,10 +54,12 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
+						bot.deleteCommand(server, "setrole").subscribe();
+						bot.deployCommand(server, SetPermissions.getRequest()).subscribe();
 						//server.getGames().forEach(game -> game.setRequiredRatingToRankId(new HashMap<>()));
 						//dbService.saveServer(server);
 						//deleteAllChannels(server, "vs");
-						bot.deployCommand(server, Help.getRequest()).block();
+						//bot.deployCommand(server, Help.getRequest()).block();
 						//bot.deployCommand(server, AddRank.getRequest(server)).block();
 						//bot.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase());
 						//bot.deployCommand(server, DeleteRanks.getRequest(server)).block();
@@ -84,7 +85,7 @@ public class DevTools {
 		dbService.saveServer(entenwieseServer);
 
 		bot.deleteAllGuildCommands(entenwieseId).blockLast();
-		bot.deployCommand(entenwieseServer, SetRole.getRequest()).block();
+		bot.deployCommand(entenwieseServer, SetPermissions.getRequest()).block();
 		bot.setCommandPermissionForRole(entenwieseServer, "setrole", entenwieseId);
 		bot.deployCommand(entenwieseServer, CreateRanking.getRequest()).subscribe();
 	}

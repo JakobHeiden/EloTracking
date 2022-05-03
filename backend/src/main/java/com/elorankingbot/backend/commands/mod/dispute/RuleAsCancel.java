@@ -10,7 +10,7 @@ public class RuleAsCancel extends RuleAsWinOrDraw {
 	}
 
 	public void execute() {
-		if (!isByModeratorOrAdminDoReply()) return;
+		if (!isByAdminOrModeratorDoReply()) return;
 
 		matchService.processCancel(match);
 		postToDisputeChannelAndUpdateButtons(String.format("%s has ruled the match to be canceled.", moderatorTag));

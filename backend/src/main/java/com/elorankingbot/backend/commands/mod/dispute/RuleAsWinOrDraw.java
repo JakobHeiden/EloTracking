@@ -19,7 +19,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 	}
 
 	public void execute() {
-		if (!isByModeratorOrAdminDoReply()) return;
+		if (!isByAdminOrModeratorDoReply()) return;
 
 		if (isRuleAsWin) {
 			for (int i = 0; i < match.getNumTeams(); i++) {

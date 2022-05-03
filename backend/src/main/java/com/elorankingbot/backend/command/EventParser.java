@@ -4,8 +4,7 @@ import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.Help;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.admin.CreateRanking;
-import com.elorankingbot.backend.commands.admin.SetRole;
+import com.elorankingbot.backend.commands.admin.SetPermissions;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -78,10 +77,13 @@ public class EventParser {
 					if (maybeServer.isEmpty()) {
 						Server server = new Server(event.getGuild().getId().asLong());
 						dbService.saveServer(server);
-						bot.deployCommand(server, SetRole.getRequest()).block();
+						bot.deployCommand(server, SetPermissions.getRequest()).block();
 						long everyoneRoleId = server.getGuildId();
-						bot.setCommandPermissionForRole(server, SetRole.getRequest().name(), everyoneRoleId);
-						bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
+
+						bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
+
+
+						bot.deployCommand(server, Help.getRequest()).subscribe();
 					}
 				});
 
@@ -90,7 +92,7 @@ public class EventParser {
 					Server server = dbService.findServerByGuildId(event.getGuildId().asLong()).get();
 					if (server.getAdminRoleId() == event.getRoleId().asLong()) {
 						long everyoneRoleId = server.getGuildId();
-						bot.setCommandPermissionForRole(server, SetRole.class.getSimpleName().toLowerCase(), everyoneRoleId);
+						bot.setCommandPermissionForRole(server, SetPermissions.class.getSimpleName().toLowerCase(), everyoneRoleId);
 					}
 				});
 
@@ -106,7 +108,7 @@ public class EventParser {
 	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
 		SlashCommand command = slashCommandFactory.apply(event);
 		bot.logCommand(command);
-		command.execute();
+		command.doExecute();
 	}
 
 	@Transactional

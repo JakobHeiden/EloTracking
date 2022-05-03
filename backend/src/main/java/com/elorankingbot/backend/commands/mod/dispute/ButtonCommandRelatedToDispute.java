@@ -25,12 +25,12 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 		this.moderatorTag = event.getInteraction().getUser().getTag();
 	}
 
-	protected boolean isByModeratorOrAdminDoReply() {// TODO das geht auch anders und schoener? vllt mit ButtonCommand::doExecute
+	protected boolean isByAdminOrModeratorDoReply() {// TODO das geht auch anders und schoener? vllt mit ButtonCommand::doExecute
 		// wahrscheinlich anpassen zusammen mit error handling
-		boolean result = event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getAdminRoleId()))
+		boolean isByAdminOrModerator = event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getAdminRoleId()))
 				|| event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getModRoleId()));
-		if (!result) event.reply("Only a Moderator can use this.").withEphemeral(true).subscribe();
-		return result;
+		if (!isByAdminOrModerator) event.reply("Only a Moderator can use this.").withEphemeral(true).subscribe();
+		return isByAdminOrModerator;
 	}
 
 	protected void postToDisputeChannelAndUpdateButtons(String text) {

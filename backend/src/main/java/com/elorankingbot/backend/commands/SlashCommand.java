@@ -1,8 +1,12 @@
 package com.elorankingbot.backend.commands;
 
+import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.ModCommand;
+import com.elorankingbot.backend.commands.admin.SetPermissions;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
@@ -39,6 +43,40 @@ public abstract class SlashCommand {
 		this.server = dbService.findServerByGuildId(guildId).get();
 		this.activeUser = event.getInteraction().getUser();
 		this.activeUserId = activeUser.getId().asLong();
+	}
+
+	public void doExecute() {
+		if (this.getClass() == SetPermissions.class && server.getAdminRoleId() == 0L) {
+			execute();
+			return;
+		}
+
+		List<Long> memberRoleIds = event.getInteraction().getMember().get().getRoleIds()
+				.stream().map(Snowflake::asLong).toList();
+		if (this.getClass().isAnnotationPresent(AdminCommand.class)) {
+			if (server.getAdminRoleId() == 0L) {
+				event.reply("This command requires Admin permissions. The Admin role is not currently set. " +
+						"Please use /setpermissions.").subscribe();
+				return;
+			}
+			if (!memberRoleIds.contains(server.getAdminRoleId())) {
+				event.reply(String.format("This command requires the <@&%s> role.", server.getAdminRoleId())).subscribe();
+				return;
+			}
+		}
+		if (this.getClass().isAnnotationPresent(ModCommand.class)) {
+			if (server.getModRoleId() == 0L) {
+				event.reply("This command requires Moderator permissions. The Moderator role is not currently set. " +
+						"Please use /setpermissions.").subscribe();
+				return;
+			}
+			if (!memberRoleIds.contains(server.getModRoleId())) {
+				event.reply(String.format("This command requires the <@&%s> role.", server.getModRoleId())).subscribe();
+				return;
+			}
+		}
+
+		execute();
 	}
 
 	public abstract void execute();
