@@ -79,5 +79,5 @@ public abstract class SlashCommand {
 		execute();
 	}
 
-	public abstract void execute();
+	protected abstract void execute();
 }

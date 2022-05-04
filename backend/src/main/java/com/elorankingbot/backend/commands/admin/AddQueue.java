@@ -86,7 +86,7 @@ public class AddQueue extends SlashCommand {
 				"For more information on queues, see `/help:` `Concept: Rankings and Queues`.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		int playersPerTeam = (int) event.getOption("playersperteam").get().getValue().get().asLong();
 		if (playersPerTeam < 1) {
 			event.reply("Cannot create a queue with less than 1 player per team").subscribe();

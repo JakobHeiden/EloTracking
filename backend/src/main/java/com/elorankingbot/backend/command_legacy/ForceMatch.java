@@ -61,7 +61,7 @@ public class ForceMatch extends SlashCommand {
 				.build();
 	}
 
-	public void execute() {
+	protected void execute() {
 		user1 = event.getOption("player1").get().getValue().get().asUser().block();
 		user2 = event.getOption("player2").get().getValue().get().asUser().block();
 		if (user1.isBot() || user2.isBot()) {

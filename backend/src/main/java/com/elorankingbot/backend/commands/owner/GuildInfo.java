@@ -29,7 +29,7 @@ public class GuildInfo extends SlashCommand {
 				.build();
 	}
 
-	public void execute() {
+	protected void execute() {
 		try {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuildById(guildId).block();

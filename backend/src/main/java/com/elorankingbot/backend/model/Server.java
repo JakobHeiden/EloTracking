@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +19,15 @@ public class Server {
 	private long guildId;
 	private Map<String, Game> gameNameToGame;
 	private long adminRoleId, modRoleId;
-	private long disputeCategoryId, matchCategoryId, archiveCategoryId;
+	private List<Long> archiveCategoryIds;
+	private long disputeCategoryId, matchCategoryId;
 	private boolean isMarkedForDeletion;
 
 	public Server(long guildId) {
 		this.guildId = guildId;
 		this.isMarkedForDeletion = false;
 		this.gameNameToGame = new HashMap<>();
+		this.archiveCategoryIds = new ArrayList<>();
 		this.adminRoleId = 0L;
 		this.modRoleId = 0L;
 	}

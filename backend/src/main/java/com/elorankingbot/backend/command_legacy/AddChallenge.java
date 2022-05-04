@@ -76,7 +76,7 @@ public class AddChallenge extends SlashCommand {
 		return  null;
 	}
 
-	public void execute() {
+	protected void execute() {
 
 
 

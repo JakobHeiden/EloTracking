@@ -217,33 +217,51 @@ public class DiscordBotService {
 	}
 
 	public Category getOrCreateArchiveCategory(Server server) {
-		try {
-			return (Category) getChannelById(server.getArchiveCategoryId()).block();
-		} catch (ClientException e) {
-			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
-				throw e;
+		List<Long> categoryIds = server.getArchiveCategoryIds();
+		Category archiveCategory;
+		int index = 0;
+		while (true) {
+			if (index >= categoryIds.size()) {
+				Guild guild = getGuildById(server.getGuildId()).block();
+				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : index + 1))
+						.withPermissionOverwrites(
+								denyEveryoneView(server),
+								allowAdminView(server),
+								allowModView(server)).block();
+				categoryIds.add(archiveCategory.getId().asLong());
+				dbService.saveServer(server);
+				break;
 			}
-			Guild guild = getGuildById(server.getGuildId()).block();
-			Category archiveCategory = guild.createCategory("elo archive").withPermissionOverwrites(
-					denyEveryoneView(server),
-					allowAdminView(server),
-					allowModView(server)).block();
-			server.setArchiveCategoryId(archiveCategory.getId().asLong());
-			dbService.saveServer(server);
-			return archiveCategory;
+			try {
+				archiveCategory = (Category) getChannelById(categoryIds.get(index)).block();
+			} catch (ClientException e) {
+				if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+					throw e;
+				}
+				Guild guild = getGuildById(server.getGuildId()).block();
+				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : index + 1))
+						.withPermissionOverwrites(
+								denyEveryoneView(server),
+								allowAdminView(server),
+								allowModView(server)).block();
+				categoryIds.set(index, archiveCategory.getId().asLong());
+				dbService.saveServer(server);
+				break;
+			}
+			if (archiveCategory.getChannels().count().block() < 48) {
+				break;
+			}
+			index++;
 		}
+		return archiveCategory;
 	}
 
 	public void moveToArchive(Server server, Channel channel) {
-		setParentCategory(channel, server.getArchiveCategoryId())
-				.onErrorResume(error -> {// TODO error filtern
-					Category newArchiveCategory = getOrCreateArchiveCategory(server);
-					server.setArchiveCategoryId(newArchiveCategory.getId().asLong());
-					return setParentCategory(channel, newArchiveCategory.getId().asLong());
-				}).subscribe();
-		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, channel.getId().asLong(), 0L, null);
+		Category archiveCategory = getOrCreateArchiveCategory(server);
+		setParentCategory(channel, archiveCategory.getId().asLong()).subscribe();
+		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 1 * 60, channel.getId().asLong(), 0L, null);
 		((TextChannel) channel).createMessage("**I have moved this channel to the archive. " +
-				"I will delete this channel in 24h.**").subscribe();
+				"I will delete this channel in one hour.**").subscribe();
 	}
 
 	public TextChannelCreateMono createDisputeChannel(Match match) {

@@ -55,7 +55,7 @@ public class DeleteRanks extends SlashCommand {
 				"This will not delete the roles formerly associated with the ranks.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		Game game = null;
 		if (server.getGames().size() > 1) {
 			game = server.getGame(event.getOption("ranking").get().getValue().get().asString());

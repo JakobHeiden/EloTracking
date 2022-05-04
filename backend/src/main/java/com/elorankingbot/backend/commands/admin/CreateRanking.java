@@ -24,7 +24,7 @@ public class CreateRanking extends SlashCommand {
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name("createranking")
+				.name(CreateRanking.class.getSimpleName().toLowerCase())
 				.description("Create a ranking")
 				.defaultPermission(false)
 				.addOption(ApplicationCommandOptionData.builder()
@@ -54,7 +54,7 @@ public class CreateRanking extends SlashCommand {
 				"For more information on rankings, see `/help:` `Concept: Rankings and Queues`.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!isLegalDiscordName(nameOfGame)) {
 			event.reply(DiscordBotService.illegalNameMessage()).subscribe();

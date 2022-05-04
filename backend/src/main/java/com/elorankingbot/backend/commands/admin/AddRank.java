@@ -70,7 +70,7 @@ public class AddRank extends SlashCommand {
 				"recommended against.";// TODO programmatisch ausschliessen. ausserdem ausschliessen dass die gleiche role in 1 ranking mehrmals verwendent wird
 	}
 
-	public void execute() {
+	protected void execute() {
 		int rating;
 		try {
 			rating = Math.toIntExact(event.getOption("rating").get().getValue().get().asLong());
