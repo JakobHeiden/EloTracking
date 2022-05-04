@@ -47,7 +47,7 @@ public class Set extends SlashCommand {
 				.build();
 	}
 
-	public void execute() {
+	protected void execute() {
 		String variable = event.getOption("variable").get().getValue().get().asString();
 		String value = event.getOption("value").get().getValue().get().asString();
 		if (integerVariables.contains(variable) && !value.matches("[0-9]+")) {

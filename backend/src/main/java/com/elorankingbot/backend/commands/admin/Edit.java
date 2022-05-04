@@ -71,7 +71,7 @@ public class Edit extends SlashCommand {
 				"Select one or more options to edit them.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		List<String> botReplies = new ArrayList<>();
 		Game game = server.getGame(event.getOptions().get(0).getName());
 		MatchFinderQueue queue = game.getQueue(event.getOptions().get(0).getOptions().get(0).getName());

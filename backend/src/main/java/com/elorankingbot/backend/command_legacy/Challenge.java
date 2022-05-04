@@ -32,7 +32,7 @@ public class Challenge extends SlashCommand {
 				.build();
 	}
 
-	public void execute() {
+	protected void execute() {
 		User acceptorUser = event.getOption("player").get().getValue().get().asUser().block();
 		if (acceptorUser.isBot()) {
 			event.reply("You cannot challenge a bot.").withEphemeral(true).subscribe();

@@ -56,7 +56,7 @@ public class Reset extends SlashCommand {
 				"Resets all player ratings, wins, losses, and possibly draws for a ranking. Match history is not affected.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		Game game = server.getGame(event.getOption("ranking").get().getValue().get().asString().toLowerCase());
 		String entered = event.getOption("areyousure").get().getValue().get().asString();
 		if (!entered.equals(game.getName())) {

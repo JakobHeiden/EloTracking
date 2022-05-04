@@ -31,7 +31,7 @@ public class Leave extends SlashCommand {
 		"For more information on queues, see `/help`:`Concept: Rankings and Queues`.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		Player player = dbService.getPlayerOrGenerateIfNotPresent(guildId, activeUserId, activeUser.getTag());
 		queueService.removePlayerFromAllQueues(server, player);
 		event.reply("I removed you from all queues you were in, if any.").withEphemeral(true).subscribe();

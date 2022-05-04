@@ -80,7 +80,7 @@ public class Ban extends SlashCommand {
 				"`Optional:` `reason` Give a reason for the ban. This will be included in the ban message sent to the player.\n";
 	}
 
-	public void execute() {
+	protected void execute() {
 		playerUser = event.getOption("player").get().getValue().get().asUser().block();
 		if (playerUser.isBot()) {
 			event.reply("Bots cannot be banned.").subscribe();

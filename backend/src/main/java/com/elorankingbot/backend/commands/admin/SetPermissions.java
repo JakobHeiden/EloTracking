@@ -60,7 +60,7 @@ public class SetPermissions extends SlashCommand {
 				"admin permissions.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		String adminOrMod = event.getOption("adminormod").get().getValue().get().asString();
 		String nameOfRole = null;
 		if (adminOrMod.equals("admin")) {

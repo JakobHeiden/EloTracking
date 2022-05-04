@@ -91,7 +91,7 @@ public class Join extends SlashCommand {
 				"For more information on queues, see `/help`:`Concept: Rankings and Queues`.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		game = server.getGame(event.getOptions().get(0).getName());
 		boolean isSingularQueue;
 		var gameOptions = event.getOptions().get(0).getOptions();

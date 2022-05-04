@@ -46,7 +46,7 @@ public class Rating extends SlashCommand {
 				.build();
 	}
 
-	public void execute() {
+	protected void execute() {
 		/*
 		User playerUser = event.getOption("player").get().getValue().get().asUser().block();
 		if (playerUser.isBot()) {

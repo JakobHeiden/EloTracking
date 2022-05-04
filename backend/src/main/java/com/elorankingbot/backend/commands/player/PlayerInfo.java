@@ -54,7 +54,7 @@ public class PlayerInfo extends SlashCommand {
 				"about yourself, visible to only yourself. Otherwise you will get openly visible information.";
 	}
 
-	public void execute() {
+	protected void execute() {
 		User targetUser;
 		if (event.getOption("player").isEmpty()) {
 			targetUser = event.getInteraction().getUser();

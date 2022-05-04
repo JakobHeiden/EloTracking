@@ -44,7 +44,7 @@ public class Setup extends SlashCommand {
 				.build();
 	}
 
-	public void execute() {
+	protected void execute() {
 		/*
 		reply = "Setup performed. Here is what I did:";
 		guild = event.getInteraction().getGuild().block();

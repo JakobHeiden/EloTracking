@@ -54,8 +54,10 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						bot.deleteCommand(server, "setrole").subscribe();
-						bot.deployCommand(server, SetPermissions.getRequest()).subscribe();
+						dbService.saveServer(server);
+
+						//bot.deleteCommand(server, "setrole").subscribe();
+						//bot.deployCommand(server, SetPermissions.getRequest()).subscribe();
 						//server.getGames().forEach(game -> game.setRequiredRatingToRankId(new HashMap<>()));
 						//dbService.saveServer(server);
 						//deleteAllChannels(server, "vs");
