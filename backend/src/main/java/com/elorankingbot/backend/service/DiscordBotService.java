@@ -236,6 +236,7 @@ public class DiscordBotService {
 				archiveCategory = (Category) getChannelById(categoryIds.get(index)).block();
 			} catch (ClientException e) {
 				if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+					// TODO warum bekomme ich manchmal Unknown Channel und macnhmal ChannelParentInvalid?
 					throw e;
 				}
 				Guild guild = getGuildById(server.getGuildId()).block();
@@ -248,7 +249,7 @@ public class DiscordBotService {
 				dbService.saveServer(server);
 				break;
 			}
-			if (archiveCategory.getChannels().count().block() < 48) {
+			if (archiveCategory.getChannels().count().block() < 2) {
 				break;
 			}
 			index++;

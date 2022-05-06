@@ -54,7 +54,7 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						dbService.saveServer(server);
+						//dbService.saveServer(server);
 
 						//bot.deleteCommand(server, "setrole").subscribe();
 						//bot.deployCommand(server, SetPermissions.getRequest()).subscribe();

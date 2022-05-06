@@ -17,10 +17,3 @@ deploy devtools
 deploy
 execute
 update: join, deleteq, editq, createranks, deleteranks
-
-
-x model anpassen
-x moveToArchive anpassen
-x createRanking anpassen
-x gucken wo getOrCreate aufgerufen wird
-db migrieren

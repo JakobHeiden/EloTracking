@@ -104,5 +104,7 @@ public class CreateRanking extends SlashCommand {
 				doCreateCategories ? ", " : " and ",
 				game.getLeaderboardChannelId(),
 				doCreateCategories ? ", and channel categories for disputes and an archive" : "")).subscribe();
+		bot.sendToOwner(String.format("Created ranking %s on %s : %s",
+				nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));
 	}
 }
