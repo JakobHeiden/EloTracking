@@ -46,7 +46,6 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			case COMPLETE -> {
 				MatchResult matchResult = MatchService.generateMatchResult(match);
 				matchService.processMatchResult(matchResult, match);
-				timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, match.getChannelId(), 0L, null);
 			}
 		}
 		event.acknowledge().subscribe();
