@@ -52,24 +52,17 @@ public class EventParser {
 
 		client.on(ChatInputInteractionEvent.class)
 				.doOnNext(this::createAndExecuteSlashCommand)
-				.doOnError(this::handleClientException)
+				.onErrorContinue(this::handleException)
 				.subscribe();
 
 		client.on(ButtonInteractionEvent.class)
 				.doOnNext(this::createAndExecuteButtonCommand)
-				.doOnError(this::handleClientException)
+				.onErrorContinue(this::handleException)
 				.subscribe();
 
 		client.on(SelectMenuInteractionEvent.class)
 				.filter(event -> event.getCustomId().equals(Help.customId))
 				.subscribe(event -> Help.executeSelectMenuSelection(services, event));
-
-		client.on(UserInteractionEvent.class)
-				.map(userInteractionChallengeFactory)
-				.doOnNext(bot::logCommand)
-				.doOnNext(ChallengeAsUserInteraction::execute)
-				.doOnError(this::handleClientException)
-				.subscribe();
 
 		client.on(GuildCreateEvent.class)
 				.subscribe(event -> {
@@ -78,11 +71,8 @@ public class EventParser {
 						Server server = new Server(event.getGuild().getId().asLong());
 						dbService.saveServer(server);
 						bot.deployCommand(server, SetPermissions.getRequest()).block();
-						long everyoneRoleId = server.getGuildId();
-
-						bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
-
-
+						//long everyoneRoleId = server.getGuildId();
+						//bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
 						bot.deployCommand(server, Help.getRequest()).subscribe();
 					}
 				});
@@ -118,12 +108,14 @@ public class EventParser {
 		command.execute();
 	}
 
-	private void handleClientException(Throwable throwable) {
+	private void handleException(Throwable throwable, Object event) {
 		if (throwable instanceof ClientException) {
 			log.error(((ClientException) throwable).getRequest().toString());
 		}
-		bot.sendToOwner(String.format("Error in EventParser: %s\n" +
-				"Occured during %s", throwable.toString(), bot.getLatestCommandLog()));
+		String errorMessage = String.format("Error in EventParser: %s\n" +
+				"Occured during %s", throwable.toString(), bot.getLatestCommandLog());
+		log.error(errorMessage);
+		bot.sendToOwner(errorMessage);
 	}
 
 	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
