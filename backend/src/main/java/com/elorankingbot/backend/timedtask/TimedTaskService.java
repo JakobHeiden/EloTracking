@@ -1,21 +1,25 @@
 package com.elorankingbot.backend.timedtask;
 
+import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.ReportStatus;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.rest.http.client.ClientException;
+import discord4j.core.object.entity.channel.TextChannel;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TimedTaskService {
 
-	private final DBService service;
+	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final TimedTaskQueue queue;
 	private final GatewayDiscordClient client;
@@ -23,7 +27,7 @@ public class TimedTaskService {
 	protected final List none = new ArrayList<>();
 
 	public TimedTaskService(Services services) {
-		this.service = services.dbService;
+		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.queue = services.timedTaskQueue;
 		this.client = services.client;
@@ -68,22 +72,36 @@ public class TimedTaskService {
 	}
 
 	public void deleteChannel(long channelId) {
-		try {
-			client.getChannelById(Snowflake.of(channelId)).block().delete().subscribe();
-		} catch (ClientException ignored) {
-		}
+		client.getChannelById(Snowflake.of(channelId)).block()
+				.delete().onErrorContinue((ignored, o) -> {}).subscribe();
 	}
 
 	public void unbanPlayer(long guildId, long userId, int duration) {
-		Player player = service.findPlayerByGuildIdAndUserId(guildId, userId).get();
+		Player player = dbService.findPlayerByGuildIdAndUserId(guildId, userId).get();
 		if (!player.isBanned()) return;
 		if (player.getUnbanAtTimeSlot() != queue.getCurrentIndex()) return;
 
 		player.setUnbanAtTimeSlot(-2);
-		service.savePlayer(player);
+		dbService.savePlayer(player);
 
 		bot.getPrivateChannelByUserId(userId).subscribe(privateChannel -> privateChannel
 				.createMessage(String.format("Your ban has run out after %s. You are no longer banned.",
 						DurationParser.minutesToString(duration))).subscribe());
+	}
+
+	public void warnMissingReports(UUID matchId) {
+		Optional<Match> maybeMatch = dbService.findMatch(matchId);
+		if (maybeMatch.isEmpty()) return;
+
+		Match match = maybeMatch.get();
+		StringBuilder mentions = new StringBuilder();
+		for (Player player : match.getPlayers()) {
+			if (match.getReportStatus(player.getId()).equals(ReportStatus.NOT_YET_REPORTED)) {
+				mentions.append(String.format("<@%s>", player.getUserId()));
+			}
+		}
+		TextChannel channel = (TextChannel) bot.getChannelById(match.getChannelId()).block();
+		channel.createMessage(mentions + " there are 10 minutes left to make your report. After that, I will autoresolve " +
+				"the match if possible, or otherwise open a dispute.").subscribe();// TODO
 	}
 }

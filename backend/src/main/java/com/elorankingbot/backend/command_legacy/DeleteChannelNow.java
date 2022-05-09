@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.mod.dispute;
+package com.elorankingbot.backend.command_legacy;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.Server;

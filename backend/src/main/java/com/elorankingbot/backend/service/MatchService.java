@@ -77,11 +77,10 @@ public class MatchService {
 		match.setChannelId(message.getChannelId().asLong());
 	}
 
-	public void processMatchResult(MatchResult matchResult, Match match) {
+	public void processMatchResult(MatchResult matchResult, Match match, String embedTitle) {
 		TextChannel channel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Game game = match.getGame();
-		String embedTitle = "The match has been resolved. Below are your new ratings and the rating changes. " +
-				"This channel has been moved to the archives and will automatically be deleted in one hour.";
+
 		bot.getMessage(match.getMessageId(), match.getChannelId())
 				.subscribe(message -> {
 					channel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))

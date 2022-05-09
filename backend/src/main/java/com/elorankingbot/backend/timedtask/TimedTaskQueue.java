@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -35,7 +36,7 @@ public class TimedTaskQueue {
 	private final TimedTaskService timedTaskService;
 	private final TimeSlotDao timeSlotDao;
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
-	private boolean doRunQueue;
+	private boolean doRunQueue, enforceWaitingPeriods;
 
 	public TimedTaskQueue(Services services,
 						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
@@ -48,6 +49,7 @@ public class TimedTaskQueue {
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
 		this.numberOfTimeSlots = services.props.getNumberOfTimeSlots();
 		this.doRunQueue = services.props.isDoRunQueue();
+		this.enforceWaitingPeriods = services.props.isEnforceWaitingPeriods();
 
 		if (!timedTaskQueueCurrentIndexDao.existsById(1)) {
 			currentIndex = 0;
@@ -56,15 +58,16 @@ public class TimedTaskQueue {
 		}
 	}
 
-	public void addTimedTask(TimedTask.TimedTaskType type, int delay, long relationId, long otherId, Object value) {
+	public void addTimedTask(TimedTask.TimedTaskType type, int duration, long relationId, long otherId, Object value) {
 		if (!doRunQueue) return;
+		if (!enforceWaitingPeriods) duration = 1;
 
-		int targetTimeSlotIndex = (currentIndex + delay) % numberOfTimeSlots;
+		int targetTimeSlotIndex = (currentIndex + duration) % numberOfTimeSlots;
 		log.debug(String.format("adding timed task for %s of type %s with timer %s to slot %s",
-				relationId, type.name(), delay, targetTimeSlotIndex));
+				relationId, type.name(), duration, targetTimeSlotIndex));
 		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(targetTimeSlotIndex);
 		Set<TimedTask> timedTasks = maybeTimeSlot.isPresent() ? maybeTimeSlot.get().getTimedTasks() : new HashSet<>();
-		timedTasks.add(new TimedTask(type, delay, relationId, otherId, value));
+		timedTasks.add(new TimedTask(type, duration, relationId, otherId, value));
 		timeSlotDao.save(new TimeSlot(targetTimeSlotIndex, timedTasks));
 	}
 
@@ -76,7 +79,8 @@ public class TimedTaskQueue {
 		switch (task.type()) {
 			case OPEN_CHALLENGE_DECAY -> new DecayOpenChallenge(services, id, duration).execute();
 			case ACCEPTED_CHALLENGE_DECAY -> new DecayAcceptedChallenge(services, id, duration).execute();
-			case MATCH_AUTO_RESOLVE -> new AutoResolveMatch(services, id, duration).execute();
+			case MATCH_WARN_MISSING_REPORTS -> timedTaskService.warnMissingReports((UUID) task.value());
+			case MATCH_AUTO_RESOLVE -> new AutoResolveMatch(services, (UUID) task.value(), duration).execute();
 			case MATCH_SUMMARIZE -> timedTaskService.summarizeMatch(id, otherId, task.value());
 			case MESSAGE_DELETE -> timedTaskService.deleteMessage(id, otherId);
 			case CHANNEL_DELETE -> timedTaskService.deleteChannel(id);

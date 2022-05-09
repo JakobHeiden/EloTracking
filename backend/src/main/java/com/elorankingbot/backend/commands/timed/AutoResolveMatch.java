@@ -1,23 +1,123 @@
 package com.elorankingbot.backend.commands.timed;
 
-import com.elorankingbot.backend.model.ChallengeModel;
-import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.MatchResult;
-import com.elorankingbot.backend.service.Services;
-import discord4j.core.object.entity.Message;
+import com.elorankingbot.backend.commands.player.match.Dispute;
+import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.service.*;
+import com.elorankingbot.backend.timedtask.DurationParser;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
 
-public class AutoResolveMatch extends TimedCommand {
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-	private Message reportPresentMessage;
-	private Message reportAbsentMessage;
+import static com.elorankingbot.backend.model.ReportStatus.*;
 
-	public AutoResolveMatch(Services services, long challengeId, int time) {
-		super(services, challengeId, time);;
+public class AutoResolveMatch {
+
+	private final DBService dbService;
+	private final DiscordBotService bot;
+	private final MatchService matchService;
+	private final int duration;
+	private final UUID matchId;
+	private Match match;
+	private TextChannel matchChannel, disputeChannel;
+
+	public AutoResolveMatch(Services services, UUID matchId, int duration) {
+		this.dbService = services.dbService;
+		this.bot = services.bot;
+		this.matchService = services.matchService;
+		this.duration = duration;
+		this.matchId = matchId;
 	}
 
 	public void execute() {
-		if (challenge == null) return;
-		if (challenge.isDispute()) return;
+		Optional<Match> maybeMatch = dbService.findMatch(matchId);
+		if (maybeMatch.isEmpty()) return;
+		match = maybeMatch.get();
+		if (match.isDispute()) return;
+
+		if (match.getReportIntegrity().equals(Match.ReportIntegrity.CONFLICT)) {
+			processDispute();
+			return;
+		}
+
+		// if ReportIntegrity != CONFLICT, the possible states of the reporting are greatly reduced
+		if (match.getPlayerIdToReportStatus().containsValue(DRAW)) {
+			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), DRAW));
+		}
+		if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
+			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), CANCEL));
+		}
+		if (match.getPlayerIdToReportStatus().containsValue(WIN)) {
+			match.getTeams().forEach(team -> {
+				boolean thisTeamReportedWin = team.stream()
+						.anyMatch(player -> match.getReportStatus(player.getId()).equals(WIN));
+				if (thisTeamReportedWin) {
+					team.forEach(player -> match.reportAndSetConflictData(player.getId(), WIN));
+				} else {
+					team.forEach(player -> match.reportAndSetConflictData(player.getId(), LOSE));
+				}
+			});
+		} else {
+			List<List<Player>> teamsReportedLose = match.getTeams().stream()
+					.filter(team -> team.stream().noneMatch(player -> match.getReportStatus(player.getId()).equals(LOSE)))
+					.toList();
+			if (teamsReportedLose.size() == match.getTeams().size() - 1) {
+				teamsReportedLose.forEach(team ->
+						team.forEach(player -> match.reportAndSetConflictData(player.getId(), LOSE)));
+				match.getPlayers().stream()
+						.filter(player -> match.getReportStatus(player.getId()).equals(NOT_YET_REPORTED))
+						.forEach(player -> match.reportAndSetConflictData(player.getId(), WIN));
+			} else {
+				processDispute();
+				return;
+			}
+		}
+		MatchResult matchResult = MatchService.generateMatchResult(match);
+		String autoresolveMessage = "As 60 minutes have passed since the first report, I have auto-resolved the match.";// TODO
+		matchService.processMatchResult(matchResult, match, autoresolveMessage);
+	}
+
+	private void processDispute() {
+		match.setDispute(true);
+		dbService.saveMatch(match);
+		matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();
+		Dispute.makeMatchChannelVisibleToMods(matchChannel, match).subscribe();
+		disputeChannel = bot.createDisputeChannel(match).block();
+		sendDisputeLinkMessage();
+		createDisputeMessage();
+	}
+
+	private void sendDisputeLinkMessage() {
+		EmbedCreateSpec embed = EmbedCreateSpec.builder()
+				.title(String.format("%s have passed since the first report, and this match is due for auto-resolution. " +
+								"However, as there are conflicts in the reporting, I opened a dispute. " +
+								"For resolution please follow the link:",
+						DurationParser.minutesToString(duration)))
+				.description(disputeChannel.getMention()).build();
+		matchChannel.createMessage(embed).subscribe(message -> message.pin().subscribe());
+	}
+
+	private void createDisputeMessage() {
+		String embedTitle = "The reporting at the moment the dispute was filed:";
+		EmbedCreateSpec embed = EmbedBuilder.createMatchEmbed(embedTitle, match);
+		disputeChannel.createMessage(String.format("""
+								Welcome %s. Since this match could not be auto-resolved, I created this dispute.
+								Only <@&%s> and affected players can view this channel.
+								Please state your side of the conflict so a moderator can resolve it.
+								The original match channel can be found here: <#%s>
+								Note that the Buttons on this message can only be used by moderators.
+								""",
+						match.getAllMentions(),
+						match.getServer().getModRoleId(),
+						match.getChannelId()))
+				.withEmbeds(embed)
+				.withComponents(Dispute.createActionRow(match))
+				.subscribe();
+	}
+
+		/*
 
 		boolean hasChallengerReported = challenge.getAcceptorReported() == ChallengeModel.ReportStatus.NOT_YET_REPORTED;
 		ChallengeModel.ReportStatus report = hasChallengerReported ?
@@ -59,7 +159,7 @@ public class AutoResolveMatch extends TimedCommand {
 				return;
 		}
 
-		/*
+
 		Game game = service.findGameByGuildId(challenge.getGuildId()).get();
 		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getChallengerUserId());
 		service.addNewPlayerIfPlayerNotPresent(challenge.getGuildId(), challenge.getAcceptorUserId());
@@ -76,7 +176,6 @@ public class AutoResolveMatch extends TimedCommand {
 				reportAbsentMessage.getId().asLong(), reportAbsentMessage.getChannelId().asLong(), match);
 
 		 */
-	}
 
 	private void postToInvolvedChannels(ChallengeModel challenge, MatchResult matchResult, Game game,
 										boolean hasChallengerReported, boolean isDraw, boolean isWin) {

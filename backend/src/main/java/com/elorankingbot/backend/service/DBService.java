@@ -74,6 +74,10 @@ public class DBService {
 		return matchDao.findById(matchId).get();
 	}
 
+	public Optional<Match> findMatch(UUID matchId) {
+		return matchDao.findById(matchId);
+	}
+
 	public void saveMatch(Match match) {
 		log.debug("Saving match " + match.getId());
 		matchDao.save(match);

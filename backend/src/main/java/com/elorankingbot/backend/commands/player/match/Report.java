@@ -7,25 +7,37 @@ import com.elorankingbot.backend.model.ReportStatus;
 import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 
+import java.util.Date;
 import java.util.UUID;
 
-import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
+import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE;
+import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.MATCH_WARN_MISSING_REPORTS;
 
 public abstract class Report extends ButtonCommandRelatedToMatch {
 
 	private final ReportStatus reportStatus;
+	private final boolean enforceWaitingPeriods;
 
 	public Report(ButtonInteractionEvent event, Services services, ReportStatus reportStatus) {
 		super(event, services);
 		this.reportStatus = reportStatus;
+		this.enforceWaitingPeriods = services.props.isEnforceWaitingPeriods();
 	}
 
 	public void execute() {
 		if (!activeUserIsInvolvedInMatch() || match.isDispute()) {
 			event.acknowledge().subscribe();
+			return;
+		}
+		long timePassed = new Date().getTime() - match.getTimestamp().getTime();
+		if (timePassed < 5*60*1000 && enforceWaitingPeriods) {// TODO
+			event.reply(String.format("Please wait another %s before making a report.",
+							DurationParser.minutesToString((int) Math.ceil(5 - timePassed / (60*1000)))))
+					.withEphemeral(true).subscribe();
 			return;
 		}
 
@@ -34,6 +46,11 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		switch (reportIntegrity) {
 			case INCOMPLETE -> {
 				processIncompleteReporting();
+				if (!match.isHasFirstReport()) {
+					timedTaskQueue.addTimedTask(MATCH_WARN_MISSING_REPORTS, 50, 0L, 0L, match.getId());// TODO
+					timedTaskQueue.addTimedTask(MATCH_AUTO_RESOLVE, 60, 0L, 0L, match.getId());
+					match.setHasFirstReport(true);
+				}
 				dbService.saveMatch(match);
 			}
 			case CONFLICT -> {
@@ -45,7 +62,8 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			}
 			case COMPLETE -> {
 				MatchResult matchResult = MatchService.generateMatchResult(match);
-				matchService.processMatchResult(matchResult, match);
+				String resolveMessage = "The match has been resolved. Below are your new ratings and the rating changes.";
+				matchService.processMatchResult(matchResult, match, resolveMessage);
 			}
 		}
 		event.acknowledge().subscribe();
@@ -57,10 +75,6 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 		bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
 				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match))
 				.withComponents(MatchService.createActionRow(match)).subscribe());
-
-		// TODO!  ...autoresolve bei 1? fehlendem vote, ansonsten dispute
-		//timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE, game.getMatchAutoResolveTime(),
-		//		challenge.getId(), 0L, null);
 	}
 
 	private void processConflictingReporting() {

@@ -29,4 +29,5 @@ public class ApplicationPropertiesLoader {
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
 	private String activityMessage;
+	private boolean enforceWaitingPeriods;
 }

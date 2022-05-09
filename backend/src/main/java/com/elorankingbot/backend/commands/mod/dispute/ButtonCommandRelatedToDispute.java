@@ -1,13 +1,13 @@
 package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.entity.Message;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -33,18 +33,13 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 		return isByAdminOrModerator;
 	}
 
-	protected void postToDisputeChannelAndUpdateButtons(String text) {
-		event.getInteraction().getMessage().get().edit()
-				.withComponents(none).subscribe();
-		event.getInteraction().getChannel().subscribe(messageChannel ->
-				messageChannel.createMessage(text)
-						.withComponents(channelDisposal()).subscribe());
+	protected Mono<Message> postToDisputeChannel(String text) {
+		return event.getInteraction().getChannel().flatMap(messageChannel -> messageChannel.createMessage(text));
 	}
 
-	private static ActionRow channelDisposal() {
-		return ActionRow.of(
-				Buttons.deleteChannelNow(),
-				Buttons.archiveAndDeleteChannelLater()
-		);
+	protected void updateButtons() {
+		event.getInteraction().getMessage().get().edit()
+				.withComponents(none).subscribe();
 	}
+
 }
