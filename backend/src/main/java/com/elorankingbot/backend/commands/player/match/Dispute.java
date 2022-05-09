@@ -1,6 +1,8 @@
 package com.elorankingbot.backend.commands.player.match;
 
 import com.elorankingbot.backend.components.Buttons;
+import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -35,21 +37,21 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 		match.setDispute(true);
 		dbService.saveMatch(match);
 		matchChannel = (TextChannel) event.getInteraction().getChannel().block();
-		makeMatchChannelVisibleToMods().subscribe();
+		makeMatchChannelVisibleToMods(matchChannel, match).subscribe();
 		disputeChannel = bot.createDisputeChannel(match).block();
 		sendDisputeLinkMessage();
 		createDisputeMessage();
 		event.acknowledge().subscribe();
 	}
 
-
-	private TextChannelEditMono makeMatchChannelVisibleToMods() {
+	public static TextChannelEditMono makeMatchChannelVisibleToMods(TextChannel channel, Match match) {
+		Server server = match.getServer();
 		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>();
 		permissionOverwrites.add(denyEveryoneView(server));
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
 		permissionOverwrites.add(allowAdminView(server));
 		permissionOverwrites.add(allowModView(server));
-		return matchChannel.edit().withPermissionOverwrites(permissionOverwrites);
+		return channel.edit().withPermissionOverwrites(permissionOverwrites);
 	}
 
 	private void sendDisputeLinkMessage() {
@@ -75,18 +77,18 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 						server.getModRoleId(),
 						match.getChannelId()))
 				.withEmbeds(embed)
-				.withComponents(createActionRow())
+				.withComponents(createActionRow(match))
 				.subscribe();
 	}
 
-	private ActionRow createActionRow() {
+	public static ActionRow createActionRow(Match match) {
 		int numTeams = match.getTeams().size();
 		UUID matchId = match.getId();
 		List<ActionComponent> buttons = new ArrayList<>(numTeams);
 		for (int i = 0; i < numTeams; i++) {
 			buttons.add(Buttons.ruleAsWin(matchId, i));
 		}
-		if (game.isAllowDraw()) buttons.add(Buttons.ruleAsDraw(matchId));
+		if (match.getGame().isAllowDraw()) buttons.add(Buttons.ruleAsDraw(matchId));
 		buttons.add(Buttons.ruleAsCancel(matchId));
 		return ActionRow.of(buttons);
 	}

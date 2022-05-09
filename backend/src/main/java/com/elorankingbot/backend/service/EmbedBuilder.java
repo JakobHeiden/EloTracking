@@ -152,7 +152,7 @@ public class EmbedBuilder {
 							.map(TeamMatchResult::getPlayers)
 							.filter(players -> !players.contains(player)).toList();
 					return String.format("`%s` %s %s %s %s",
-							dateFormat.format(matchResult.getDate()),
+							dateFormat.format(matchResult.getTimestamp()),
 							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
 							createOwnTeamString(ownTeam),
 							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,

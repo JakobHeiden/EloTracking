@@ -7,7 +7,6 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 import static com.elorankingbot.backend.model.ReportStatus.*;
-import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
 public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 
@@ -33,17 +32,15 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 			}
 		}
 		MatchResult matchResult = MatchService.generateMatchResult(match);
-		matchService.processMatchResult(matchResult, match);
-		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 24 * 60, match.getChannelId(), 0L, null);
-		// TODO sollte archiviert werden stattdessen
 
-		if (isRuleAsWin) {
-			postToDisputeChannelAndUpdateButtons(String.format("**%s has ruled this match a %s %s for team #%s.**",
-					moderatorTag, WIN.asNoun, WIN.asEmojiAsString(), winningTeamIndex + 1));
-		} else {
-			postToDisputeChannelAndUpdateButtons(String.format("**%s has ruled this match a %s %s.**",
-					moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString()));
-		}
+		String rulingMessage = isRuleAsWin ?
+				String.format("**%s has ruled this match a %s %s for team #%s.**",
+						moderatorTag, WIN.asNoun, WIN.asEmojiAsString(), winningTeamIndex + 1)
+				: String.format("**%s has ruled this match a %s %s.**", moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString());
+		matchService.processMatchResult(matchResult, match, rulingMessage);
+		updateButtons();
+		postToDisputeChannel(rulingMessage).block();
+		event.getInteraction().getChannel().subscribe(channel -> bot.moveToArchive(server, channel));
 		event.acknowledge().subscribe();
 	}
 }

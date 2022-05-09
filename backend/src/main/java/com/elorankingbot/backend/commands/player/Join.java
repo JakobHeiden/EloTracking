@@ -24,10 +24,7 @@ public class Join extends SlashCommand {
 	private final QueueService queueService;
 	private MatchFinderQueue queue;
 	private Game game;
-	private Match match;
 	private List<User> users;
-	private List<User> allUsers;// TODO aufraeumen
-	private List<Player> allPlayers;
 
 	public Join(ChatInputInteractionEvent event, Services services) {
 		super(event, services);

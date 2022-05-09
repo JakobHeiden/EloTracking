@@ -28,14 +28,14 @@ public class MatchResult implements Comparable<MatchResult> {
 	@DBRef(lazy = true)
 	private Server server;
 	private String gameName;
-	private Date date;
+	private Date timestamp;
 	private List<TeamMatchResult> teamMatchResults;
 
 	public MatchResult(Match match) {
 		this.id = match.getId();
 		this.server = match.getServer();
 		this.gameName = match.getGame().getName();
-		this.date = new Date();
+		this.timestamp = new Date();
 		this.teamMatchResults = new ArrayList<>();
 	}
 
@@ -71,6 +71,6 @@ public class MatchResult implements Comparable<MatchResult> {
 
 	@Override
 	public int compareTo(MatchResult other) {
-		return date.compareTo(other.date);
+		return timestamp.compareTo(other.timestamp);
 	}
 }

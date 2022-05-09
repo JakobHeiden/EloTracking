@@ -33,9 +33,7 @@ public class Match {
 	private final Server server;
 	private final String gameId, queueId;
 	@Setter
-	private boolean isDispute;
-	@Setter
-	private boolean isOrWasConflict;
+	private boolean isDispute, isOrWasConflict, hasFirstReport;
 	private final List<List<Player>> teams;
 	private final Map<UUID, ReportStatus> playerIdToReportStatus;
 	@Setter// TODO vllt doch @Data ?
@@ -43,6 +41,7 @@ public class Match {
 	private final Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
 	private List<Player> conflictingReports;
 	private ReportIntegrity reportIntegrity;
+	private Date timestamp;
 
 	// Match is constructed initially from queue, but persisted with server instead since queue has no collection
 	public Match(MatchFinderQueue queue, List<List<Player>> teams) {
@@ -61,12 +60,13 @@ public class Match {
 		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayersPerMatch());
 		this.conflictingReports = new ArrayList<>();
 		this.reportIntegrity = INCOMPLETE;
+		this.timestamp = new Date();
 	}
 
-	@PersistenceConstructor
+	@PersistenceConstructor// TODO wieso ist das hier? wieso nicht einfach @NoArgsConst?
 	public Match(UUID id, Server server, String gameId, String queueId, boolean isDispute, boolean isOrWasConflict,
 				 List<List<Player>> teams, Map<UUID, ReportStatus> playerIdToReportStatus, long messageId, Map<UUID, Long> playerIdToMessageId,
-				 Map<UUID, Long> playerIdToPrivateChannelId, List<Player> conflictingReports, ReportIntegrity reportIntegrity) {
+				 Map<UUID, Long> playerIdToPrivateChannelId, List<Player> conflictingReports, ReportIntegrity reportIntegrity, Date timestamp) {
 		this.id = id;
 		this.server = server;
 		this.gameId = gameId;
@@ -80,6 +80,7 @@ public class Match {
 		this.playerIdToPrivateChannelId = playerIdToPrivateChannelId;
 		this.conflictingReports = conflictingReports;
 		this.reportIntegrity = reportIntegrity;
+		this.timestamp = timestamp;
 	}
 
 	public void reportAndSetConflictData(UUID playerId, ReportStatus reportStatus) {
