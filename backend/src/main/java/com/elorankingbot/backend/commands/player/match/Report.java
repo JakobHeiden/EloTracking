@@ -34,7 +34,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			return;
 		}
 		long timePassed = new Date().getTime() - match.getTimestamp().getTime();
-		if (timePassed < 5*60*1000 && enforceWaitingPeriods) {// TODO
+		if (!this.getClass().equals(Cancel.class) && timePassed < 5*60*1000 && enforceWaitingPeriods) {// TODO
 			event.reply(String.format("Please wait another %s before making a report.",
 							DurationParser.minutesToString((int) Math.ceil(5 - timePassed / (60*1000)))))
 					.withEphemeral(true).subscribe();

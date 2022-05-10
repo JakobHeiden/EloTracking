@@ -41,6 +41,7 @@ public class Match {
 	private final Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
 	private List<Player> conflictingReports;
 	private ReportIntegrity reportIntegrity;
+	@Setter
 	private Date timestamp;
 
 	// Match is constructed initially from queue, but persisted with server instead since queue has no collection
