@@ -45,11 +45,9 @@ public class AutoResolveMatch {
 		// if ReportIntegrity != CONFLICT, the possible states of the reporting are greatly reduced
 		if (match.getPlayerIdToReportStatus().containsValue(DRAW)) {
 			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), DRAW));
-		}
-		if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
+		} else if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
 			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), CANCEL));
-		}
-		if (match.getPlayerIdToReportStatus().containsValue(WIN)) {
+		} else if (match.getPlayerIdToReportStatus().containsValue(WIN)) {
 			match.getTeams().forEach(team -> {
 				boolean thisTeamReportedWin = team.stream()
 						.anyMatch(player -> match.getReportStatus(player.getId()).equals(WIN));
@@ -61,7 +59,7 @@ public class AutoResolveMatch {
 			});
 		} else {
 			List<List<Player>> teamsReportedLose = match.getTeams().stream()
-					.filter(team -> team.stream().noneMatch(player -> match.getReportStatus(player.getId()).equals(LOSE)))
+					.filter(team -> team.stream().anyMatch(player -> match.getReportStatus(player.getId()).equals(LOSE)))
 					.toList();
 			if (teamsReportedLose.size() == match.getTeams().size() - 1) {
 				teamsReportedLose.forEach(team ->
