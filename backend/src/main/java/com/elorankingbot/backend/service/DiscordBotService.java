@@ -235,12 +235,13 @@ public class DiscordBotService {
 			try {
 				archiveCategory = (Category) getChannelById(categoryIds.get(index)).block();
 			} catch (ClientException e) {
+				sendToOwner("archiveCategory id " + categoryIds.get(index));
 				if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
 					// TODO warum bekomme ich manchmal Unknown Channel und macnhmal ChannelParentInvalid?
 					throw e;
 				}
 				Guild guild = getGuildById(server.getGuildId()).block();
-				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : index + 1))
+				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
 						.withPermissionOverwrites(
 								denyEveryoneView(server),
 								allowAdminView(server),

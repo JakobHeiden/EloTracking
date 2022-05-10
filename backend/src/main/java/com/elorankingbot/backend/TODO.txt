@@ -4,3 +4,7 @@ deploy devtools
 deploy
 execute
 update: join, deleteq, editq, createranks, deleteranks
+
+
+
+bug mit autoresolve -> dispute
