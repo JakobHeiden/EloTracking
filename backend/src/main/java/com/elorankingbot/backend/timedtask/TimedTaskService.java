@@ -72,8 +72,10 @@ public class TimedTaskService {
 	}
 
 	public void deleteChannel(long channelId) {
-		client.getChannelById(Snowflake.of(channelId)).block()
-				.delete().onErrorContinue((ignored, o) -> {}).subscribe();
+		try {
+			bot.getChannelById(channelId).block().delete().subscribe();
+		} catch (Exception ignored) {
+		}
 	}
 
 	public void unbanPlayer(long guildId, long userId, int duration) {
@@ -100,8 +102,10 @@ public class TimedTaskService {
 				mentions.append(String.format("<@%s>", player.getUserId()));
 			}
 		}
-		TextChannel channel = (TextChannel) bot.getChannelById(match.getChannelId()).block();
-		channel.createMessage(mentions + " there are 10 minutes left to make your report. After that, I will autoresolve " +
-				"the match if possible, or otherwise open a dispute.").subscribe();// TODO
+		if (mentions.isEmpty()) return;
+
+		((TextChannel) bot.getChannelById(match.getChannelId()).block())
+				.createMessage(mentions + " there are 10 minutes left to make your report. After that, I will autoresolve " +
+						"the match if possible, or otherwise open a dispute.").subscribe();// TODO
 	}
 }

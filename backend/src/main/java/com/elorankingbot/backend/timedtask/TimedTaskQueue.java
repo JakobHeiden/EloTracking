@@ -93,23 +93,24 @@ public class TimedTaskQueue {
 		if (!doRunQueue) return;
 
 		log.debug("tick " + currentIndex);
-		try {
-			if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
-				timedTaskService.deleteGamesMarkedForDeletion();
-				timedTaskService.markGamesForDeletion();
-			}
-
-			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
-			if (maybeTimeSlot.isPresent()) {
-				for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
-					processTimedTask(task);
-				}
-				timeSlotDao.delete(maybeTimeSlot.get());
-			}
-		} catch (Exception e) {
-			bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
-			e.printStackTrace();
+		if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
+			timedTaskService.deleteGamesMarkedForDeletion();
+			timedTaskService.markGamesForDeletion();
 		}
+
+		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
+		if (maybeTimeSlot.isPresent()) {
+			for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
+				try {
+					processTimedTask(task);
+				} catch (Exception e) {
+					bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
+					e.printStackTrace();
+				}
+			}
+			timeSlotDao.delete(maybeTimeSlot.get());
+		}
+
 		currentIndex++;
 		if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
 		timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
