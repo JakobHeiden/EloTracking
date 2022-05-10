@@ -1,17 +1,4 @@
-x SelectMenu bauen
-x shortDesc
-x longDesc
-x request
-x execute
-
-video how to setup
-video how to play
-
-general help
-x selectmenu
-x verknüpfen
-
-
+DeleteQueue:
 request
 deploy devtools
 deploy
