@@ -2,6 +2,7 @@ package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
+import com.elorankingbot.backend.commands.admin.DeleteQueue;
 import com.elorankingbot.backend.commands.admin.SetPermissions;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
@@ -54,6 +55,7 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
+						bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
 						//dbService.saveServer(server);
 
 						//bot.deleteCommand(server, "setrole").subscribe();

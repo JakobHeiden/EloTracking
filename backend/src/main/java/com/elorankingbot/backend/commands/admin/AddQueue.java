@@ -4,6 +4,7 @@ import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
+import com.elorankingbot.backend.commands.player.PlayerInfo;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
@@ -37,7 +38,7 @@ public class AddQueue extends SlashCommand {
 						.name(nameOfGame).value(nameOfGame).build()));
 
 		return ApplicationCommandRequest.builder()
-				.name("addqueue")
+				.name(AddQueue.class.getSimpleName().toLowerCase())
 				.description("Add a queue to a ranking")
 				.defaultPermission(false)
 				.addOption(gameOptionBuilder.build())
@@ -147,11 +148,13 @@ public class AddQueue extends SlashCommand {
 
 		bot.deployCommand(server, Join.getRequest(server)).subscribe();
 		bot.deployCommand(server, Leave.getRequest()).subscribe();
+		bot.deployCommand(server, PlayerInfo.getRequest()).subscribe();
 		bot.deployCommand(server, Edit.getRequest(server)).subscribe(commandData ->
 				bot.setPermissionsForAdminCommand(server, Edit.class.getSimpleName()));
+		bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
 		dbService.saveServer(server);
 
-		event.reply(String.format("Queue %s for ranking %s has been created. Command /join has been deployed or updated. " +
+		event.reply(String.format("Queue %s for ranking %s has been created. Relevant commands have been deployed or updated. " +
 						"This may take a few minutes to update on the server.",// TODO /join genauer bezeichnen
 				queue.getName(), game.getName())).subscribe();
 	}

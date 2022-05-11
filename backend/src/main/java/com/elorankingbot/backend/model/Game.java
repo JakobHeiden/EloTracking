@@ -45,6 +45,10 @@ public class Game {
         queueNameToQueue.put(queue.getName().toLowerCase(), queue);
     }
 
+    public void deleteQueue(String name) {
+        queueNameToQueue.remove(name);
+    }
+
     public MatchFinderQueue getQueue(String name) {
         return queueNameToQueue.get(name.toLowerCase());
     }

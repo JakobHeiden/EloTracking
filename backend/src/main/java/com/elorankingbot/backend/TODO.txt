@@ -1,10 +1,8 @@
 DeleteQueue:
-request
+x request
+x execute
+x descriptions
+x update: join, deleteq, editq, createranks, deleteranks
+x deploy
 deploy devtools
-deploy
-execute
-update: join, deleteq, editq, createranks, deleteranks
 
-
-
-bug mit autoresolve -> dispute
