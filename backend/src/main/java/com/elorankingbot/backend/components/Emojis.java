@@ -10,6 +10,7 @@ public class Emojis {
 	public static final ReactionEmoji loss = ReactionEmoji.codepoints("U+2B07");
 	public static final ReactionEmoji draw = ReactionEmoji.codepoints("U+2194");
 	public static final ReactionEmoji exclamation = ReactionEmoji.codepoints("U+2757");
+	public static final ReactionEmoji doubleExclamation = ReactionEmoji.codepoints("U+203C");
 	public static final ReactionEmoji redoArrow = ReactionEmoji.codepoints("U+21A9");
 	public static final ReactionEmoji shrug = ReactionEmoji.codepoints("U+1F937");
 	public static final ReactionEmoji hourglass = ReactionEmoji.codepoints("U+23F3");

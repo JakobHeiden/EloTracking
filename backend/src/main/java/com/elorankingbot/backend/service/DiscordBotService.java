@@ -132,6 +132,10 @@ public class DiscordBotService {
 	}
 
 	// Channels
+	public void deleteChannel(long channelId) {
+		client.getChannelById(Snowflake.of(channelId)).subscribe(channel -> channel.delete().subscribe());
+	}
+
 	public void postToResultChannel(MatchResult matchResult) {
 		Game game = matchResult.getGame();
 		TextChannel resultChannel = getOrCreateResultChannel(game);

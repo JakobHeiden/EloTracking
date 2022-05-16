@@ -1,10 +1,12 @@
 package com.elorankingbot.backend.components;
 
+import com.elorankingbot.backend.commands.admin.deleteranking.AbortDeleteRanking;
+import com.elorankingbot.backend.commands.admin.deleteranking.ConfirmDeleteRanking;
 import discord4j.core.object.component.Button;
 
 import java.util.UUID;
 
-public class Buttons {
+public class Buttons {// TODO string ersetzen duch klassennamen
 
 	// Challenge
 	public static Button accept(UUID matchId) {
@@ -82,18 +84,16 @@ public class Buttons {
 				Emojis.crossMark, "Rule the match as canceled");
 	}
 
-	public static Button deleteChannelNow() {
-		return Button.secondary("deletechannelnow",
-				Emojis.crossMark, "Delete this channel now");
+	// DeleteRanking confirmation dialog
+	public static Button confirmDeleteRanking(String gameName, long userId) {
+		return Button.danger(String.format("%s:%s:%s",
+						ConfirmDeleteRanking.class.getSimpleName().toLowerCase(), gameName, userId),
+				Emojis.doubleExclamation, "Yes, delete");
 	}
 
-	public static Button archiveAndDeleteChannelLater() {
-		return Button.secondary("deletechannellater",
-				Emojis.hourglass, "Archive this channel and delete it in 24h");// TODO vllt konfbar machen
-	}
-
-	public static Button archiveChannel() {
-		return Button.secondary("archivechannel",
-				Emojis.archive, "Archive this channel");
+	public static Button abortDeleteRanking(String gameName, long userId) {
+		return Button.danger(String.format("%s:%s:%s",
+						AbortDeleteRanking.class.getSimpleName().toLowerCase(), gameName, userId),
+				Emojis.crossMark, "No, do not delete");
 	}
 }

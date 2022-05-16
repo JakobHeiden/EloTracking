@@ -88,6 +88,10 @@ public class DBService {
 		matchDao.delete(match);
 	}
 
+	public void deleteAllMatches(Game game) {
+		matchDao.deleteAllByServerAndGameId(game.getServer(), game.getName());
+	}
+
 	// MatchResult
 	public void saveMatchResult(MatchResult matchResult) {
 		log.debug(String.format("saving match result %s", matchResult.getId()));
@@ -96,6 +100,10 @@ public class DBService {
 
 	public Optional<MatchResult> findMatchResult(UUID id) {
 		return matchResultDao.findById(id);
+	}
+
+	public void deleteAllMatchResults(Game game) {
+		matchResultDao.deleteAllByServerAndGameName(game.getServer(), game.getName());
 	}
 
 	// Challenge
@@ -157,6 +165,10 @@ public class DBService {
 	public void savePlayer(Player player) {
 		log.debug("saving player " + player.getTag());
 		playerDao.save(player);
+	}
+
+	public void saveAllPlayers(List<Player> players) {
+		playerDao.saveAll(players);
 	}
 
 	public Optional<Player> findPlayerByGuildIdAndUserId(long guildId, long userId) {
@@ -223,8 +235,7 @@ public class DBService {
 		return true;// TODO! pagination etc
 	}
 
-	// am ende weg
-	public Optional<Game> findGameByGuildId(long asLong) {
-		return null;
+	public void deleteAllRankingsEntries(Game game) {
+		rankingsEntryDao.deleteAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
 	}
 }

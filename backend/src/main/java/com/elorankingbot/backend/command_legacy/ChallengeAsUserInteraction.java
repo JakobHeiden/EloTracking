@@ -35,7 +35,7 @@ public class ChallengeAsUserInteraction {
 			return;
 		}
 
-		Game game = service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
+		Game game = null;//service.findGameByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		long guildId = event.getInteraction().getGuildId().get().asLong();
 		Challenge.staticExecute(
 				event.getTargetUser().block(), guildId, game,

@@ -64,6 +64,10 @@ public class Player  {
         else return Optional.of(playerGameStats);
     }
 
+    public void deleteGameStats(Game game) {
+        gameNameToPlayerGameStats.remove(game.getName());
+    }
+
     public void addMatchResult(MatchResult matchResult) {
         PlayerMatchResult playerMatchResult = matchResult.getPlayerMatchResult(id);
         PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(matchResult.getGame().getName());

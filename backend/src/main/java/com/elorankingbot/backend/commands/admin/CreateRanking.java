@@ -94,6 +94,7 @@ public class CreateRanking extends SlashCommand {
 				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
 		bot.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
 				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
+		bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +
