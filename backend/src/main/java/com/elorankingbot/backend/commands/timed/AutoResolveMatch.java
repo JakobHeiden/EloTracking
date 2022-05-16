@@ -42,11 +42,13 @@ public class AutoResolveMatch {
 			return;
 		}
 
+		String autoresolveMessage = "As 60 minutes have passed since the first report, I have auto-resolved the match.";// TODO
 		// if ReportIntegrity != CONFLICT, the possible states of the reporting are greatly reduced
-		if (match.getPlayerIdToReportStatus().containsValue(DRAW)) {
+		if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
+			matchService.processCancel(match, autoresolveMessage);
+			return;
+		} else if (match.getPlayerIdToReportStatus().containsValue(DRAW)) {
 			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), DRAW));
-		} else if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
-			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), CANCEL));
 		} else if (match.getPlayerIdToReportStatus().containsValue(WIN)) {
 			match.getTeams().forEach(team -> {
 				boolean thisTeamReportedWin = team.stream()
@@ -73,7 +75,6 @@ public class AutoResolveMatch {
 			}
 		}
 		MatchResult matchResult = MatchService.generateMatchResult(match);
-		String autoresolveMessage = "As 60 minutes have passed since the first report, I have auto-resolved the match.";// TODO
 		matchService.processMatchResult(matchResult, match, autoresolveMessage);
 	}
 

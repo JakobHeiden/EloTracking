@@ -58,7 +58,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 				dbService.saveMatch(match);
 			}
 			case CANCEL -> {
-				matchService.processCancel(match);
+				matchService.processCancel(match, "The match has been canceled.");
 			}
 			case COMPLETE -> {
 				MatchResult matchResult = MatchService.generateMatchResult(match);

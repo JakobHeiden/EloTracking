@@ -44,7 +44,8 @@ public class MatchService {
 					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
 			double numOtherTeams = match.getQueue().getNumTeams() - 1;
-			double expectedResult = 1 / (numOtherTeams * (1 + Math.pow(10, (averageOtherRating - averageTeamRating) / 400)));
+			// TODO erwartungswert skaliert bei zb 3 spielern lediglich von 0 bis 2/3. sollte vllt wie im speziellen fall von 0 bis 1?
+			double expectedResult = 1 / (numOtherTeams + Math.pow(10, (averageOtherRating - averageTeamRating) / 400));
 
 			TeamMatchResult teamResult = new TeamMatchResult();
 			for (Player player : team) {
@@ -103,11 +104,10 @@ public class MatchService {
 		}
 	}
 
-	public void processCancel(Match match) {
+	public void processCancel(Match match, String reason) {
 		bot.getMatchMessage(match)
 				.subscribe(message -> {
-					String title = "The match has been canceled.";
-					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match);
+					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(reason, match);
 					message.getChannel().subscribe(channel -> channel
 							.createMessage(embedCreateSpec)
 							.withContent(match.getAllMentions())
