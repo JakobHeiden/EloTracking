@@ -1,4 +1,9 @@
-
-MatchService, expectedResult?
+DeleteRanking:
+x request
+x descriptions
+x guards
+x execute
+devtools
+x deploy
 
 
