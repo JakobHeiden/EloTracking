@@ -4,6 +4,7 @@ import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.DeleteRanking;
 import com.elorankingbot.backend.commands.admin.SetPermissions;
+import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -55,9 +56,7 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						if (!server.getGames().isEmpty()) {
-							bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
-						}
+						bot.deployCommand(server, Ban.getRequest()).subscribe();
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

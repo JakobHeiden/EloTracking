@@ -1,9 +1,5 @@
-DeleteRanking:
-x request
-x descriptions
-x guards
-x execute
-devtools
-x deploy
+Help updaten
+tutorial admin
+tutorial player
 
 

@@ -12,6 +12,7 @@ import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.InteractionReplyEditMono;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -73,26 +74,26 @@ public class PlayerInfo extends SlashCommand {
 			event.reply("No player data found. That user has not yet used the bot.").subscribe();
 			return;
 		}
-		targetPlayer = maybeTargetPlayer.get();
 
+		event.deferReply().withEphemeral(isSelfInfo).subscribe();
+
+		targetPlayer = maybeTargetPlayer.get();
 		List<EmbedCreateSpec> embeds = new ArrayList<>();
 		for (String gameName : targetPlayer.getGameNameToPlayerGameStats().keySet()) {
 			Game game = server.getGame(gameName);
 			RankingsExcerpt rankingsExcerpt = dbService.getRankingsExcerptForPlayer(game, targetPlayer);
 			embeds.add(EmbedBuilder.createRankingsEmbed(rankingsExcerpt));
+			// TODO diese zeile dauert oft laenger als 3 sekunden. warum, und wie geht es schneller?
 			embeds.add(EmbedBuilder.createMatchHistoryEmbed(targetPlayer, getMatchHistory(game)));
 		}
 		String banString = createBanString();
 
 		if (embeds.isEmpty()) {
-			event.reply(banString + "No match data found. That user has likely not yet played a match.")
-					.withEphemeral(isSelfInfo).subscribe();
-			return;
+			event.editReply(banString + "No match data found. That user has likely not yet played a match.").subscribe();
+		} else {
+			InteractionReplyEditMono reply = targetPlayer.isBanned() ? event.editReply(banString) : event.editReply();
+			reply.withEmbeds(embeds).subscribe();
 		}
-
-		var reply = event.reply();
-		if (targetPlayer.isBanned()) reply = reply.withContent(banString);
-		reply.withEmbeds(embeds).withEphemeral(isSelfInfo).subscribe();
 	}
 
 	private String createBanString() {
