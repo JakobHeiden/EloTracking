@@ -4,7 +4,6 @@ import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.admin.*;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
-import com.elorankingbot.backend.commands.player.PlayerInfo;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;
