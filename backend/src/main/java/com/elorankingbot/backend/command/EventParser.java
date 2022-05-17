@@ -61,7 +61,6 @@ public class EventParser {
 				.subscribe();
 
 		client.on(SelectMenuInteractionEvent.class)
-				.filter(event -> event.getCustomId().equals(Help.customId))
 				.subscribe(event -> Help.executeSelectMenuSelection(services, event));
 
 		client.on(GuildCreateEvent.class)

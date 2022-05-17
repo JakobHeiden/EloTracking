@@ -22,7 +22,7 @@ public class Help extends SlashCommand {
 
 	private final Services services;
 	private final CommandClassScanner commandClassScanner;
-	public static final String customId = "help";
+	public static final String customId = Help.class.getSimpleName().toLowerCase();
 
 	public Help(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
@@ -32,7 +32,7 @@ public class Help extends SlashCommand {
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name("help")
+				.name(Help.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
 				.defaultPermission(true)
 				.build();
@@ -50,7 +50,8 @@ public class Help extends SlashCommand {
 	protected void execute() {
 		String topic = "General Help";
 		event.reply().withEmbeds(createHelpEmbed(services, topic))
-				.withComponents(createActionRow())
+				.withComponents(createConceptsActionRow(), createPlayerCommandsActionRow(), createModCommandsActionRow(),
+						createAdminCommandsActionRow())
 				.block();
 	}
 
@@ -124,14 +125,34 @@ public class Help extends SlashCommand {
 				.build();
 	}
 
-	private ActionRow createActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
-				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
-		menuOptions.add(0, SelectMenu.Option.of("Concept: Matchmaking, Rating Spread, Rating Elasticity",
+	private ActionRow createConceptsActionRow() {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>();
+		menuOptions.add(SelectMenu.Option.of("General Help", "General Help"));
+		menuOptions.add(SelectMenu.Option.of("Command List", "Command List"));
+		menuOptions.add(SelectMenu.Option.of("Concept: Rankings and Queues", "Concept: Rankings and Queues"));
+		menuOptions.add(SelectMenu.Option.of("Concept: Matchmaking, Rating Spread, Rating Elasticity",
 				"Concept: Matchmaking, Rating Spread, Rating Elasticity"));
-		menuOptions.add(0, SelectMenu.Option.of("Concept: Rankings and Queues", "Concept: Rankings and Queues"));
-		menuOptions.add(0, SelectMenu.Option.of("Command List", "Command List"));
-		menuOptions.add(0, SelectMenu.Option.of("General Help", "General Help"));
-		return ActionRow.of(SelectMenu.of(customId, menuOptions));
+		return ActionRow.of(SelectMenu.of(customId + ":concepts", menuOptions).withPlaceholder("General Help, Command List, and Concepts"));
+	}
+
+	private ActionRow createPlayerCommandsActionRow() {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
+				.filter(commandClassName -> commandClassScanner.getPlayerCommandClassNames().contains(commandClassName))
+				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		return ActionRow.of(SelectMenu.of(customId + ":playercommands", menuOptions).withPlaceholder("Player Commands"));
+	}
+
+	private ActionRow createModCommandsActionRow() {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
+				.filter(commandClassName -> commandClassScanner.getModCommandClassNames().contains(commandClassName))
+				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		return ActionRow.of(SelectMenu.of(customId + ":modcommands", menuOptions).withPlaceholder("Moderator Commands"));
+	}
+
+	private ActionRow createAdminCommandsActionRow() {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
+				.filter(commandClassName -> commandClassScanner.getAdminCommandClassNames().contains(commandClassName))
+				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		return ActionRow.of(SelectMenu.of(customId + ":admincommands", menuOptions).withPlaceholder("Admin Commands"));
 	}
 }
