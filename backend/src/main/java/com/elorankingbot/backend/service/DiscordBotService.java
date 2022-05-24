@@ -435,7 +435,12 @@ public class DiscordBotService {
 		int relevantRequiredRating = Iterables.getLast(applicableRequiredRatings);
 		Snowflake rankSnowflake = Snowflake.of(game.getRequiredRatingToRankId().get(relevantRequiredRating));
 
-		Member member = client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block();
+		Member member;
+		try {
+			member = client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block();
+		} catch (ClientException e) {
+			return;// TODO player loeschen etc
+		}
 		Set<Snowflake> currentRankSnowflakes = member.getRoleIds().stream()
 				.filter(snowflake -> game.getRequiredRatingToRankId().containsValue(snowflake.asLong()))
 				.collect(Collectors.toSet());
