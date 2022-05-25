@@ -115,6 +115,7 @@ public class PlayerInfo extends SlashCommand {
 	private List<Optional<MatchResult>> getMatchHistory(Game game) {
 		return targetPlayer.getOrCreateGameStats(game).getMatchHistory().stream()
 				.map(dbService::findMatchResult)
+				.limit(20)
 				.toList();
 	}
 }
