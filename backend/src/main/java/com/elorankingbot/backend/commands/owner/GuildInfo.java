@@ -33,7 +33,7 @@ public class GuildInfo extends SlashCommand {
 		try {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuildById(guildId).block();
-			event.reply(guild.getName()).withEphemeral(true).subscribe();
+			event.reply(String.format("%s:%s", guildId, guild.getName())).withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			event.reply(e.getMessage()).withEphemeral(true).subscribe();
 		}
