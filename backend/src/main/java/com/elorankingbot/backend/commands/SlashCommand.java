@@ -10,10 +10,12 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public abstract class SlashCommand {
 
 	protected final DBService dbService;
@@ -50,6 +52,10 @@ public abstract class SlashCommand {
 			execute();
 			return;
 		}
+
+		log.debug(String.format("execute %s on %s",
+				this.getClass().getSimpleName(),
+				event.getInteraction().getGuild().block().getName()));
 
 		List<Long> memberRoleIds = event.getInteraction().getMember().get().getRoleIds()
 				.stream().map(Snowflake::asLong).toList();

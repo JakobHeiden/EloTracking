@@ -87,8 +87,10 @@ public class DiscordBotService {
 	}
 
 	public void logCommand(Object command) {
+		// this is being used in EventParser::handleException
 		latestCommandLog = command.getClass().getSimpleName() + "::execute";
-		log.debug(latestCommandLog);
+		// TODO logging ueberarbeiten
+		// log.debug(latestCommandLog);
 	}
 
 	public Mono<PrivateChannel> getPrivateChannelByUserId(long userId) {
@@ -464,6 +466,7 @@ public class DiscordBotService {
 		Collection<Long> allRankIds = game.getRequiredRatingToRankId().values();
 		for (Player player : dbService.findAllPlayersForServer(game.getServer())) {
 			client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId()))
+					.onErrorContinue((throwable, o) -> {})// TODO wahrscheinlich den player loeschen
 					.subscribe(member -> member.getRoleIds().stream()
 							.filter(snowflake -> allRankIds.contains(snowflake.asLong()))
 							.forEach(snowflake -> member.removeRole(snowflake).subscribe()));
