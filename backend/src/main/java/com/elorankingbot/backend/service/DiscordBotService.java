@@ -425,29 +425,38 @@ public class DiscordBotService {
 	}
 
 	public void updatePlayerRank(Game game, Player player) {
+		log.debug("updating ranks for " + player.getTag());
 		List<Integer> applicableRequiredRatings = new ArrayList<>(game.getRequiredRatingToRankId().keySet().stream()
 				.filter(requiredRating -> player.findGameStats(game).isPresent()
 						&& player.findGameStats(game).get().getRating() > requiredRating)
 				.toList());
+		log.debug("applicableRequiredRatings " + applicableRequiredRatings);
 		if (applicableRequiredRatings.size() == 0) return;
 
 		Collections.sort(applicableRequiredRatings);
+		log.debug("applicableRequiredRatings sorted " + applicableRequiredRatings);
 		int relevantRequiredRating = Iterables.getLast(applicableRequiredRatings);
+		log.debug("relvantRequiredRating " + relevantRequiredRating);
 		Snowflake rankSnowflake = Snowflake.of(game.getRequiredRatingToRankId().get(relevantRequiredRating));
+		log.debug("rankId " + rankSnowflake.asLong());
 
 		Member member;
 		try {
 			member = client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block();
 		} catch (ClientException e) {
+			log.debug("exceptopm " + e.getMessage());
 			return;// TODO player loeschen etc
 		}
 		Set<Snowflake> currentRankSnowflakes = member.getRoleIds().stream()
 				.filter(snowflake -> game.getRequiredRatingToRankId().containsValue(snowflake.asLong()))
 				.collect(Collectors.toSet());
+		log.debug("currentRankIds " + currentRankSnowflakes.stream().map(Snowflake::asLong).toList());
 		if (!currentRankSnowflakes.contains(rankSnowflake)) {
+			log.debug("adding role " + rankSnowflake.asLong());
 			member.addRole(rankSnowflake).subscribe();
 		}
 		currentRankSnowflakes.stream().filter(roleSnowflake -> !roleSnowflake.equals(rankSnowflake))
+				.peek(snowflake -> log.debug("removing role " + snowflake.asLong()))
 				.forEach(roleIdSnowflake -> member.removeRole(roleIdSnowflake).subscribe());
 	}
 
