@@ -192,7 +192,8 @@ public class DiscordBotService {
 		try {
 			return (Category) getChannelById(server.getMatchCategoryId()).block();
 		} catch (ClientException e) {
-			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
+					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 				throw e;
 			}
 			Guild guild = getGuildById(server.getGuildId()).block();
@@ -208,7 +209,8 @@ public class DiscordBotService {
 		try {
 			return (Category) getChannelById(server.getDisputeCategoryId()).block();
 		} catch (ClientException e) {
-			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
+					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 				throw e;
 			}
 			Guild guild = getGuildById(server.getGuildId()).block();
@@ -241,8 +243,8 @@ public class DiscordBotService {
 			try {
 				archiveCategory = (Category) getChannelById(categoryIds.get(index)).block();
 			} catch (ClientException e) {
-				if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
-					// TODO warum bekomme ich manchmal Unknown Channel und macnhmal ChannelParentInvalid?
+				if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
+						&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 					throw e;
 				}
 				Guild guild = getGuildById(server.getGuildId()).block();
@@ -466,7 +468,8 @@ public class DiscordBotService {
 		Collection<Long> allRankIds = game.getRequiredRatingToRankId().values();
 		for (Player player : dbService.findAllPlayersForServer(game.getServer())) {
 			client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId()))
-					.onErrorContinue((throwable, o) -> {})// TODO wahrscheinlich den player loeschen
+					.onErrorContinue((throwable, o) -> {
+					})// TODO wahrscheinlich den player loeschen
 					.subscribe(member -> member.getRoleIds().stream()
 							.filter(snowflake -> allRankIds.contains(snowflake.asLong()))
 							.forEach(snowflake -> member.removeRole(snowflake).subscribe()));
