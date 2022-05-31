@@ -141,6 +141,15 @@ public class QueueService {
 		server.getGames().stream()
 				.flatMap(game -> game.getQueueNameToQueue().values().stream())
 				.forEach(queue -> queue.removeGroupsContainingPlayer(player));
-		dbService.saveServer(server);
+		dbService.saveServer(server);// TODO nur wenn noetig...
+	}
+
+	public void updatePlayerInAllQueuesOfGame(Game game, Player player) {
+		boolean hasGameChanged = false;
+		for (MatchFinderQueue queue : game.getQueues()) {
+			boolean hasQueueChanged = queue.updatePlayerIfPresent(player);
+			if (hasQueueChanged) hasGameChanged = true;
+		}
+		if (hasGameChanged) dbService.saveServer(game.getServer());
 	}
 }

@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.configuration;
 
 import com.elorankingbot.backend.service.Services;
-import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;

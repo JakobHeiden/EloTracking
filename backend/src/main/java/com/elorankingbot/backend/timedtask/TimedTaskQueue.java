@@ -60,7 +60,7 @@ public class TimedTaskQueue {
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int duration, long relationId, long otherId, Object value) {
 		if (!doRunQueue) return;
-		if (!enforceWaitingPeriods) duration = 0;
+		//if (!enforceWaitingPeriods) duration = 0; TODO
 
 		int targetTimeSlotIndex = (currentIndex + duration) % numberOfTimeSlots;
 		log.debug(String.format("adding timed task for %s of type %s with timer %s to slot %s",

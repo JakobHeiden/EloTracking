@@ -26,7 +26,16 @@ public class Group implements Comparable<Group> {
 	}
 
 	public boolean hasPlayer(Player player) {
-		return players.contains(player);
+		return players.contains(player);// Player::equals compares playerId
+	}
+
+	public boolean updatePlayerIfPresent(Player player) {
+		if (hasPlayer(player)) {
+			players.set(players.indexOf(player), player);
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public double getAverageRating() {

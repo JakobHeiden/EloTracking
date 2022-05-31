@@ -92,6 +92,10 @@ public class DBService {
 		matchDao.deleteAllByServerAndGameId(game.getServer(), game.getName());
 	}
 
+	public List<Match> findAllMatchesByServer(Server server) {
+		return matchDao.findAllByServer(server);
+	}
+
 	// MatchResult
 	public void saveMatchResult(MatchResult matchResult) {
 		log.debug(String.format("saving match result %s", matchResult.getId()));
