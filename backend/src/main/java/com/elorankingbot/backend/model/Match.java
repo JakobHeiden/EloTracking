@@ -201,9 +201,15 @@ public class Match {
 		return this.getTeams().stream().flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
-	public Player getPlayer(long userId) {
-		return this.getTeams().stream().flatMap(Collection::stream)
-				.filter(player -> player.getUserId() == userId).findAny().get();
+	public boolean updatePlayerIfPresent(Player player) {
+		boolean hasMatchChanged = false;
+		for (List<Player> team : teams) {
+			if (team.contains(player)) {
+				team.set(team.indexOf(player), player);
+				hasMatchChanged = true;
+			}
+		}
+		return hasMatchChanged;
 	}
 
 	public ReportStatus getReportStatus(UUID playerId) {

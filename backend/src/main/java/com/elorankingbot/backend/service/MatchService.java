@@ -91,12 +91,14 @@ public class MatchService {
 				});
 		bot.moveToArchive(game.getServer(), channel);
 		bot.postToResultChannel(matchResult);
+		dbService.saveMatchResult(matchResult);
+		dbService.deleteMatch(match);
 		matchResult.getPlayers().forEach(player -> {
 			player.addMatchResult(matchResult);
 			dbService.savePlayer(player);
+			queueService.updatePlayerInAllQueuesOfGame(game, player);
+			updatePlayerMatches(game, player);
 		});
-		dbService.saveMatchResult(matchResult);
-		dbService.deleteMatch(match);
 		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
 		if (hasLeaderboardChanged) bot.refreshLeaderboard(game).subscribe();
 		for (Player player : match.getPlayers()) {
@@ -119,9 +121,8 @@ public class MatchService {
 	}
 
 	public static ActionRow createActionRow(Match match) {
-		boolean allowDraw = match.getGame().isAllowDraw();
 		UUID matchId = match.getId();
-		if (allowDraw) return ActionRow.of(
+		if (match.getGame().isAllowDraw()) return ActionRow.of(
 				Buttons.win(matchId),
 				Buttons.lose(matchId),
 				Buttons.draw(matchId),
@@ -132,7 +133,15 @@ public class MatchService {
 				Buttons.cancel(matchId));
 	}
 
-	public static String formatRating(double rating) {
-		return String.format("%.1f", (float) Math.round(rating * 10) / 10);
+	public void updatePlayerMatches(Game game, Player player) {
+		for (Match match : dbService.findAllMatchesByServer(game.getServer())) {
+			boolean hasMatchChanged = match.updatePlayerIfPresent(player);
+			if (hasMatchChanged) {
+				dbService.saveMatch(match);
+				bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
+						.edit().withEmbeds(EmbedBuilder.createMatchEmbed(message.getEmbeds().get(0).getTitle().get(), match))
+						.subscribe());
+			}
+		}
 	}
 }

@@ -23,7 +23,7 @@ public class MatchFinderQueue {
 	@Id
 	private final String name;
 	private List<Group> groups;
-	private List<Group> formingGroups;
+	private List<Group> formingGroups;// TODO was ist es und kann es weg? vllt was mit team q?
 	@DBRef(lazy = true)
 	private final Game game;
 	private final int numTeams;
@@ -55,7 +55,16 @@ public class MatchFinderQueue {
 
 	public void removeGroupsContainingPlayer(Player player) {
 		groups.removeIf(group -> group.hasPlayer(player));
-		// TODO!
+		// TODO! spieler informieren? oder vllt solo q blocken wenn man in team queue ist?
+	}
+
+	public boolean updatePlayerIfPresent(Player player) {
+		boolean hasQueueChanged = false;
+		for (Group group : groups) {
+			boolean hasGroupChanged = group.updatePlayerIfPresent(player);
+			if (hasGroupChanged) hasQueueChanged = true;
+		}
+		return hasQueueChanged;
 	}
 
 	public int getNumPlayersPerMatch() {
