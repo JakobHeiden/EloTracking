@@ -53,8 +53,9 @@ public abstract class SlashCommand {
 			return;
 		}
 
-		log.debug(String.format("execute %s on %s",
+		log.debug(String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
+				event.getInteraction().getUser().getTag(),
 				event.getInteraction().getGuild().block().getName()));
 
 		List<Long> memberRoleIds = event.getInteraction().getMember().get().getRoleIds()

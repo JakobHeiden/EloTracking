@@ -7,10 +7,12 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Slf4j
 public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 
 	protected String moderatorTag;
@@ -23,6 +25,15 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 		this.match = dbService.getMatch(matchId);
 		this.server = match.getServer();
 		this.moderatorTag = event.getInteraction().getUser().getTag();
+	}
+
+	@Override
+	public void doExecute() {
+		log.debug(String.format("execute %s by %s on %s",
+				this.getClass().getSimpleName(),
+				event.getInteraction().getUser().getTag(),
+				event.getInteraction().getGuild().block().getName()));
+		execute();
 	}
 
 	protected boolean isByAdminOrModeratorDoReply() {// TODO das geht auch anders und schoener? vllt mit ButtonCommand::doExecute

@@ -59,9 +59,11 @@ public class QueueService {
 			double potentialHighestRating = potentialMatch.stream()
 					.mapToDouble(group -> group.getAverageRating() - group.getRatingElasticity(now, queue))
 					.max().getAsDouble();
+			System.out.println(potentialHighestRating);
 			double potentialLowestRating = potentialMatch.stream()
 					.mapToDouble(group -> group.getAverageRating() + group.getRatingElasticity(now, queue))
 					.min().getAsDouble();
+			System.out.println(potentialLowestRating);
 			if (potentialHighestRating - potentialLowestRating <= queue.getMaxRatingSpread())
 				return Optional.of(buildMatch(potentialMatch, queue));
 		}

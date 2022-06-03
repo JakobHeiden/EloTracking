@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -79,12 +80,14 @@ public class DBService {
 	}
 
 	public void saveMatch(Match match) {
-		log.debug("Saving match " + match.getId());
+		log.debug(String.format("Saving match %s: %s", match.getId(),
+				match.getPlayers().stream().map(Player::getTag).collect(Collectors.joining(","))));
 		matchDao.save(match);
 	}
 
 	public void deleteMatch(Match match) {
-		log.debug("Deleting match " + match.getId());
+		log.debug(String.format("Deleting match %s: %s", match.getId(),
+				match.getPlayers().stream().map(Player::getTag).collect(Collectors.joining(","))));
 		matchDao.delete(match);
 	}
 

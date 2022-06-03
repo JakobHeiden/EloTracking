@@ -31,5 +31,9 @@ public abstract class ButtonCommand {
 		this.matchService = services.matchService;
 	}
 
-	public abstract void execute();
+	public void doExecute() {
+		execute();
+	}
+
+	public abstract void execute();// TODO! logging wie in slashcommand. aber nur fuer related to dispute... mal schauen wie man das baut
 }
