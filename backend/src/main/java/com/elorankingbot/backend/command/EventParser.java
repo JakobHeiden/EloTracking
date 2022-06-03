@@ -104,7 +104,7 @@ public class EventParser {
 	void createAndExecuteButtonCommand(ButtonInteractionEvent event) {
 		ButtonCommand command = buttonCommandFactory.apply(event);
 		bot.logCommand(command);
-		command.execute();
+		command.doExecute();
 	}
 
 	private void handleException(Throwable throwable, Object event) {
