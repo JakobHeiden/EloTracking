@@ -68,7 +68,9 @@ public class Help extends SlashCommand {
 		switch (topic) {
 			case "General Help" -> {
 				embedTitle = topic;
-				embedText = "*work in progress*";//TODO!
+				embedText = "Please refer to these tutorials to get started:\n" +
+						"[Tutorial: Basic bot setup](https://www.youtube.com/watch?v=rq8kD-mQujI)\n" +
+						"[Tutorial: Join a queue, report a match](https://www.youtube.com/watch?v=u6VzIFM8md8)";
 			}
 			case "Command List" -> {
 				embedTitle = topic;
@@ -103,7 +105,7 @@ public class Help extends SlashCommand {
 						"which defines how fast (if at all) the matchmaker will consider matches that violate " +
 						"`maxratingspread`.\n" +
 						"Use `/edit` to change these settings. \n" +
-						"The default for `matchratingspread` is NO_LIMIT, which turns the feature off.\n" +
+						"The default for `maxratingspread` is NO_LIMIT, which turns the feature off.\n" +
 						"The default for `ratingelasticity` is 100 points per minute.\n" +
 						"`ratingelasticity` is applied in fractions, not only each full minute.\n";
 			}
