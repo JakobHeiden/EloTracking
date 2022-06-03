@@ -1,7 +1,3 @@
-x Help updaten
-tutorial admin
-tutorial player
-in help verlinken
 
 
 

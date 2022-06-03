@@ -64,8 +64,8 @@ public class QueueService {
 			double potentialLowestRating = potentialMatch.stream()
 					.mapToDouble(group -> group.getAverageRating() + group.getRatingElasticity(now, queue))
 					.min().getAsDouble();
-			log.debug(String.format("high %.1f low %.1f diff %.1f", potentialHighestRating, potentialLowestRating,
-					potentialHighestRating - potentialLowestRating));
+			log.debug(String.format("%.1f - %.1f = %.1f <? %s", potentialHighestRating, potentialLowestRating,
+					potentialHighestRating - potentialLowestRating, queue.getMaxRatingSpread()));
 			if (potentialHighestRating - potentialLowestRating <= queue.getMaxRatingSpread())
 				return Optional.of(buildMatch(potentialMatch, queue));
 		}

@@ -21,10 +21,6 @@ import java.util.stream.Collectors;
 public class MatchResult implements Comparable<MatchResult> {
 
 	private UUID id;
-	/*
-	@DBRef(lazy = true)
-	private Game game;
-	 */
 	@DBRef(lazy = true)
 	private Server server;
 	private String gameName;

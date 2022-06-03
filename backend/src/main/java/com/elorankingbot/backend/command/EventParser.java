@@ -140,7 +140,8 @@ public class EventParser {
 					.getConstructor(ButtonInteractionEvent.class, Services.class)
 					.newInstance(event, services);
 		} catch (Exception e) {
-			String errorMessage = "exception occurred while instantiating command " + commandClassName;
+			String errorMessage = String.format("exception creating %s on %s by %s",
+					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
 			bot.sendToOwner(errorMessage);
 			System.out.println(errorMessage);
 			e.printStackTrace();

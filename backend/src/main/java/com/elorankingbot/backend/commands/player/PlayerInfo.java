@@ -19,6 +19,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.USER;
 
@@ -83,7 +84,6 @@ public class PlayerInfo extends SlashCommand {
 			Game game = server.getGame(gameName);
 			RankingsExcerpt rankingsExcerpt = dbService.getRankingsExcerptForPlayer(game, targetPlayer);
 			embeds.add(EmbedBuilder.createRankingsEmbed(rankingsExcerpt));
-			// TODO diese zeile dauert oft laenger als 3 sekunden. warum, und wie geht es schneller?
 			embeds.add(EmbedBuilder.createMatchHistoryEmbed(targetPlayer, getMatchHistory(game)));
 		}
 		String banString = createBanString();
@@ -113,9 +113,8 @@ public class PlayerInfo extends SlashCommand {
 	}
 
 	private List<Optional<MatchResult>> getMatchHistory(Game game) {
-		var matchHistory = targetPlayer.getOrCreateGameStats(game).getMatchHistory().stream()
-				.map(dbService::findMatchResult)
-				.toList();
-		return matchHistory.subList(Math.max(0, matchHistory.size() - 20), matchHistory.size());
+		List<UUID> fullMatchHistory = targetPlayer.getOrCreateGameStats(game).getMatchHistory();
+		List<UUID> recentMatchHistory = fullMatchHistory.subList(Math.max(0, fullMatchHistory.size() - 20), fullMatchHistory.size());
+		return recentMatchHistory.stream().map(dbService::findMatchResult).toList();
 	}
 }
