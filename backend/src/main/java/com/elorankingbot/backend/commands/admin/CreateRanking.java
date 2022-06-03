@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
@@ -95,6 +96,7 @@ public class CreateRanking extends SlashCommand {
 		bot.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
 				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
 		bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
+		bot.deployCommand(server, Ban.getRequest()).subscribe();
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +
