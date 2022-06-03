@@ -29,11 +29,12 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 	}
 
 	public void execute() {
-		if (!activeUserIsInvolvedInMatch()) {
+		if (!activeUserIsInvolvedInMatch() || match.isDispute()) {
 			event.acknowledge().subscribe();
 			return;
 		}
 
+		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
 		match.setDispute(true);
 		dbService.saveMatch(match);
 		matchChannel = (TextChannel) event.getInteraction().getChannel().block();
