@@ -13,9 +13,8 @@ public class PlayerGameStats implements Comparable<PlayerGameStats> {
 	private int wins;
 	private int draws;
 	private int losses;
-	private List<UUID> matchHistory;
-	private List<PlayerMatchResult> recentMatches;// TODO kann wohl weg? ueber die ids in der matchHistory gehen ist schnell
-	// ansonsten erscheint das hier sinnlos?
+	private List<UUID> matchHistory;// TODO das hier vllt als referenz ablegen? das player-objekt wird ja immer groesser,
+	// die matchhistory wird aber nur manchmal gebraucht...
 
 	public PlayerGameStats(double rating) {
 		this.rating = rating;
@@ -23,7 +22,6 @@ public class PlayerGameStats implements Comparable<PlayerGameStats> {
 		this.draws = 0;
 		this.losses = 0;
 		this.matchHistory = new ArrayList<>();
-		this.recentMatches = new ArrayList<>();
 	}
 
 	public void addResultStatus(ReportStatus resultStatus) {
