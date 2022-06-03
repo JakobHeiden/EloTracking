@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -9,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class QueueService {
 
 	private final DBService dbService;
@@ -59,11 +61,11 @@ public class QueueService {
 			double potentialHighestRating = potentialMatch.stream()
 					.mapToDouble(group -> group.getAverageRating() - group.getRatingElasticity(now, queue))
 					.max().getAsDouble();
-			System.out.println(potentialHighestRating);
 			double potentialLowestRating = potentialMatch.stream()
 					.mapToDouble(group -> group.getAverageRating() + group.getRatingElasticity(now, queue))
 					.min().getAsDouble();
-			System.out.println(potentialLowestRating);
+			log.debug(String.format("high %.1f low %.1f diff %.1f", potentialHighestRating, potentialLowestRating,
+					potentialHighestRating - potentialLowestRating));
 			if (potentialHighestRating - potentialLowestRating <= queue.getMaxRatingSpread())
 				return Optional.of(buildMatch(potentialMatch, queue));
 		}
