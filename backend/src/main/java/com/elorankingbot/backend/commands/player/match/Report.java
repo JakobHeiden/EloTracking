@@ -74,33 +74,13 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 				"Please report the result of the match, if you haven't already.";
 		bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
 				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match))
-				.withComponents(MatchService.createActionRow(match)).subscribe());
+				.subscribe());
 	}
 
 	private void processConflictingReporting() {
 		String title = "There are conflicts. Please try to sort out the issue with the other players. " +
-				"If you cannot find a solution, you can file a dispute.";
+				"If you cannot find a solution, file a dispute.";
 		bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
-				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match))
-				.withComponents(createConflictActionRow(match)).subscribe());
-	}
-
-	static ActionRow createConflictActionRow(Match match) {
-		boolean allowDraw = match.getGame().isAllowDraw();
-		UUID matchId = match.getId();
-		if (allowDraw) {
-			return ActionRow.of(
-					Buttons.win(matchId),
-					Buttons.lose(matchId),
-					Buttons.draw(matchId),
-					Buttons.cancel(matchId),
-					Buttons.dispute(matchId));
-		} else {
-			return ActionRow.of(
-					Buttons.win(matchId),
-					Buttons.lose(matchId),
-					Buttons.cancel(matchId),
-					Buttons.dispute(matchId));
-		}
+				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match)).subscribe());
 	}
 }

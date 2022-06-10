@@ -120,17 +120,19 @@ public class MatchService {
 		dbService.deleteMatch(match);
 	}
 
-	public static ActionRow createActionRow(Match match) {
+	private static ActionRow createActionRow(Match match) {
 		UUID matchId = match.getId();
 		if (match.getGame().isAllowDraw()) return ActionRow.of(
 				Buttons.win(matchId),
 				Buttons.lose(matchId),
 				Buttons.draw(matchId),
-				Buttons.cancel(matchId));
+				Buttons.cancel(matchId),
+				Buttons.dispute(matchId));
 		else return ActionRow.of(
 				Buttons.win(matchId),
 				Buttons.lose(matchId),
-				Buttons.cancel(matchId));
+				Buttons.cancel(matchId),
+				Buttons.dispute(matchId));
 	}
 
 	public void updatePlayerMatches(Game game, Player player) {
