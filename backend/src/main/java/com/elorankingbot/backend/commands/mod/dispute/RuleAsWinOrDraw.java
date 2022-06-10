@@ -18,8 +18,6 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 	}
 
 	public void execute() {
-		if (!isByAdminOrModeratorDoReply()) return;
-
 		if (isRuleAsWin) {
 			for (int i = 0; i < match.getNumTeams(); i++) {
 				for (Player player : match.getTeams().get(i)) {
@@ -38,7 +36,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommandRelatedToDispute {
 						moderatorTag, WIN.asNoun, WIN.asEmojiAsString(), winningTeamIndex + 1)
 				: String.format("**%s has ruled this match a %s %s.**", moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString());
 		matchService.processMatchResult(matchResult, match, rulingMessage);
-		updateButtons();
+		removeButtons();
 		postToDisputeChannel(rulingMessage).block();
 		event.getInteraction().getChannel().subscribe(channel -> bot.moveToArchive(server, channel));
 		event.acknowledge().subscribe();

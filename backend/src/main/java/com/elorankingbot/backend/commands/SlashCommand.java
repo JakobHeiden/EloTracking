@@ -48,15 +48,16 @@ public abstract class SlashCommand {
 	}
 
 	public void doExecute() {
-		if (this.getClass() == SetPermissions.class && server.getAdminRoleId() == 0L) {
-			execute();
-			return;
-		}
-
 		log.debug(String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
 				event.getInteraction().getUser().getTag(),
 				event.getInteraction().getGuild().block().getName()));
+
+		// bypass permission check when admin role is not set
+		if (this.getClass() == SetPermissions.class && server.getAdminRoleId() == 0L) {
+			execute();
+			return;
+		}
 
 		List<Long> memberRoleIds = event.getInteraction().getMember().get().getRoleIds()
 				.stream().map(Snowflake::asLong).toList();

@@ -10,11 +10,9 @@ public class RuleAsCancel extends RuleAsWinOrDraw {
 	}
 
 	public void execute() {
-		if (!isByAdminOrModeratorDoReply()) return;
-
 		String reason = String.format("%s has ruled the match to be canceled.", moderatorTag);
 		matchService.processCancel(match, reason);
-		updateButtons();
+		removeButtons();
 		postToDisputeChannel("**" + reason + "**").block();
 		event.getInteraction().getChannel().subscribe(channel -> bot.moveToArchive(server, channel));
 		event.acknowledge().subscribe();
