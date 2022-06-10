@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.mod.dispute;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
@@ -29,6 +30,19 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 
 	@Override
 	public void doExecute() {
+		boolean isByAdmin = event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getAdminRoleId()));
+		boolean isByMod = event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getModRoleId()));
+		boolean isAdjudicatingOwnMatch = match.containsPlayer(Player.generateId(server.getGuildId(),
+				event.getInteraction().getUser().getId().asLong()));
+		if (!isByAdmin && !isByMod) {
+			event.reply("Only a Moderator can use this.").withEphemeral(true).subscribe();
+			return;
+		}
+		if (isByMod && isAdjudicatingOwnMatch && !isByAdmin) {
+			event.reply("You cannot adjudicate your own match.").withEphemeral(true).subscribe();
+			return;
+		}
+
 		log.debug(String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
 				event.getInteraction().getUser().getTag(),
@@ -36,19 +50,11 @@ public abstract class ButtonCommandRelatedToDispute extends ButtonCommand {
 		execute();
 	}
 
-	protected boolean isByAdminOrModeratorDoReply() {// TODO das geht auch anders und schoener? vllt mit ButtonCommand::doExecute
-		// wahrscheinlich anpassen zusammen mit error handling
-		boolean isByAdminOrModerator = event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getAdminRoleId()))
-				|| event.getInteraction().getMember().get().getRoleIds().contains(Snowflake.of(server.getModRoleId()));
-		if (!isByAdminOrModerator) event.reply("Only a Moderator can use this.").withEphemeral(true).subscribe();
-		return isByAdminOrModerator;
-	}
-
 	protected Mono<Message> postToDisputeChannel(String text) {
 		return event.getInteraction().getChannel().flatMap(messageChannel -> messageChannel.createMessage(text));
 	}
 
-	protected void updateButtons() {
+	protected void removeButtons() {
 		event.getInteraction().getMessage().get().edit()
 				.withComponents(none).subscribe();
 	}

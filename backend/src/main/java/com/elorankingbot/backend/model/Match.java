@@ -201,6 +201,10 @@ public class Match {
 		return this.getTeams().stream().flatMap(Collection::stream).collect(Collectors.toList());
 	}
 
+	public boolean containsPlayer(UUID playerId) {
+		return playerIdToReportStatus.containsKey(playerId);
+	}
+
 	public boolean updatePlayerIfPresent(Player player) {
 		boolean hasMatchChanged = false;
 		for (List<Player> team : teams) {
