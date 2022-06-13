@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.model;
 
+import com.elorankingbot.backend.service.DiscordBotService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -50,5 +51,9 @@ public class Server {
 
 	public List<MatchFinderQueue> getQueues() {
 		return getGames().stream().flatMap(game -> game.getQueues().stream()).toList();
+	}
+
+	public String getName(DiscordBotService bot) {
+		return bot.getGuildById(guildId).block().getName();
 	}
 }

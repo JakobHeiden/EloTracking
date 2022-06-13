@@ -117,6 +117,10 @@ public class DiscordBotService {
 		return client.getUserById(Snowflake.of(userId));
 	}
 
+	public String getServerName(Player player) {
+		return client.getGuildById(Snowflake.of(player.getGuildId())).block().getName();
+	}
+
 	public Mono<Message> getMessage(long messageId, long channelId) {
 		return client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId));
 	}
@@ -131,6 +135,11 @@ public class DiscordBotService {
 
 	public Mono<Guild> getGuildById(long guildId) {
 		return client.getGuildById(Snowflake.of(guildId));
+	}
+
+	// Server
+	public String getServerName(Server server) {
+		return client.getGuildById(Snowflake.of(server.getGuildId())).block().getName();
 	}
 
 	// Channels
@@ -290,6 +299,9 @@ public class DiscordBotService {
 		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>();
 		permissionOverwrites.add(denyEveryoneView(server));
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
+		permissionOverwrites.add(allowModView(server));
+		permissionOverwrites.add(allowAdminView(server));
+
 		String channelName = createMatchChannelName(match.getTeams());
 		Category matchCategory = getOrCreateMatchCategory(server);
 		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
