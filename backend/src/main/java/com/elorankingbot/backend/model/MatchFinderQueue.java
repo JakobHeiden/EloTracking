@@ -58,6 +58,10 @@ public class MatchFinderQueue {
 		// TODO! spieler informieren? oder vllt solo q blocken wenn man in team queue ist?
 	}
 
+	public int getNumPlayersWaiting() {
+		return groups.stream().map(group -> group.getPlayers().size()).reduce(0, Integer::sum);
+	}
+
 	public boolean updatePlayerIfPresent(Player player) {
 		boolean hasQueueChanged = false;
 		for (Group group : groups) {

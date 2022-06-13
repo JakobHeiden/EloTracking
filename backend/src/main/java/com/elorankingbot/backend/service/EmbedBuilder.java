@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import static com.elorankingbot.backend.components.FormatTools.formatRating;
 
-public class EmbedBuilder {
+public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch sortieren und nicht nach technischem detail?
 
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy hh:mm");
 
