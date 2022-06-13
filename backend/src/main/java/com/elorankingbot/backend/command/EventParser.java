@@ -111,7 +111,7 @@ public class EventParser {
 		if (throwable instanceof ClientException) {
 			log.error(((ClientException) throwable).getRequest().toString());
 		}
-		String errorMessage = String.format("Error in EventParser: %s\n" +
+		String errorMessage = String.format("Error in EventParser: %s - " +
 				"Occured during %s", throwable.toString(), bot.getLatestCommandLog());
 		log.error(errorMessage);
 		bot.sendToOwner(errorMessage);

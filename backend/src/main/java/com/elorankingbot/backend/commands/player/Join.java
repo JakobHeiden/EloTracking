@@ -11,6 +11,7 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ public class Join extends SlashCommand {
 	private MatchFinderQueue queue;
 	private Game game;
 	private List<User> users;
+	private static final int newMatchJoinTimeout = 30;
 
 	public Join(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
@@ -121,6 +123,18 @@ public class Join extends SlashCommand {
 						.collect(Collectors.toList()),
 				game);
 		for (Player player : group.getPlayers()) {
+			dbService.findAllMatchesByPlayer(player).forEach(match -> {
+				long secondsPassed = (new Date().getTime() - match.getTimestamp().getTime()) / 1000;
+				if (secondsPassed < newMatchJoinTimeout) {
+					event.reply((queue.getQueueType() == SOLO) ?
+							String.format("You have recently been assigned a match. " +
+									"Please wait another %s seconds before joining a queue again.", newMatchJoinTimeout - secondsPassed)
+							: String.format("The player %s has recently been assigned a match " +
+							"and cannot enter a queue for another %s seconds.", player.getTag(), newMatchJoinTimeout - secondsPassed))
+							.withEphemeral(true).subscribe();
+					return;
+				}
+			});
 			if (queueService.isPlayerInQueue(player, queue)) {// TODO alle auflisten
 				event.reply(String.format("The player %s is already in this queue an cannot be added a second time.",
 								player.getTag()))// TODO unterscheiden nach active player

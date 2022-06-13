@@ -63,6 +63,10 @@ public class DBService {
 		return serverDao.findById(guildId);
 	}
 
+	public Server getServerByGuildId(long guildId) {
+		return findServerByGuildId(guildId).get();
+	}
+
 	public void saveServer(Server server) {
 		log.debug(String.format("Saving server %s", bot.getServerName(server)));
 		serverDao.save(server);
@@ -104,6 +108,12 @@ public class DBService {
 
 	public List<Match> findAllMatchesByServer(Server server) {
 		return matchDao.findAllByServer(server);
+	}
+
+	public List<Match> findAllMatchesByPlayer(Player player) {
+		return findAllMatchesByServer(getServerByGuildId(player.getGuildId()))
+				.stream().filter(match -> match.containsPlayer(player.getId()))
+				.toList();
 	}
 
 	// MatchResult
