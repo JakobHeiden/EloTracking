@@ -330,7 +330,7 @@ public class DiscordBotService {
 	public Mono<ApplicationCommandData> deployCommand(Server server, ApplicationCommandRequest request) {
 		return applicationService.createGuildApplicationCommand(botId, server.getGuildId(), request)
 				.doOnNext(commandData -> log.debug(String.format("deployed command %s:%s to %s",
-						commandData.name(), commandData.id(), server.getGuildId())))
+						commandData.name(), commandData.id(), getServerName(server))))
 				.doOnError(ClientException.class, e ->
 						log.error("Error deploying command:\n" + e.getRequest().toString()
 								.replace(", ", ",\n")));

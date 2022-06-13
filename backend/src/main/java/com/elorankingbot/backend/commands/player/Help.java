@@ -1,7 +1,8 @@
-package com.elorankingbot.backend.commands;
+package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.PlayerCommand;
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
