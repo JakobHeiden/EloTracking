@@ -3,7 +3,7 @@ package com.elorankingbot.backend;
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetPermissions;
-import com.elorankingbot.backend.commands.player.QueueInfo;
+import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -56,7 +56,8 @@ public class DevTools {
 				server -> {
 					try {
 						log.info("deploying to " + bot.getServerName(server));
-						bot.deployCommand(server, QueueInfo.getRequest()).block();
+						bot.deleteCommand(server, "queueinfo").block();
+						bot.deployCommand(server, QueueStatus.getRequest()).block();
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
