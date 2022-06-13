@@ -11,15 +11,15 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import java.util.List;
 
 @PlayerCommand
-public class QueueInfo extends SlashCommand {
+public class QueueStatus extends SlashCommand {
 
-	public QueueInfo(ChatInputInteractionEvent event, Services services) {
+	public QueueStatus(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name(QueueInfo.class.getSimpleName().toLowerCase())
+				.name(QueueStatus.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
 				.build();
 	}
