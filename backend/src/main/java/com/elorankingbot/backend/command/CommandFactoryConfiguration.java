@@ -2,9 +2,11 @@ package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
+import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.MessageInteractionEvent;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +47,18 @@ public class CommandFactoryConfiguration {
 	public ButtonCommand createButtonCommand(ButtonInteractionEvent event) {
 		return eventParser.createButtonCommand(event);
 	}
+
+	@Bean
+	public Function<MessageInteractionEvent, MessageCommand> messageCommandFactory() {
+		return event -> createMessageCommand(event);
+	}
+
+	@Bean
+	@Scope("prototype")
+	public MessageCommand createMessageCommand(MessageInteractionEvent event) {
+		return eventParser.createMessageCommand(event);
+	}
+
 
 	@Bean
 	public Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory() {

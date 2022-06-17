@@ -20,8 +20,8 @@ public class SetPermissions extends SlashCommand {
 
 	public SetPermissions(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
-		this.adminCommands = dbService.getAdminCommands();
-		this.modCommands = dbService.getModCommands();
+		this.adminCommands = services.commandClassScanner.getAdminCommandClassNames();
+		this.modCommands = services.commandClassScanner.getModCommandClassNames();
 	}
 
 	public static ApplicationCommandRequest getRequest() {

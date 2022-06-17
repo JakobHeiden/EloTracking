@@ -1,7 +1,7 @@
 package com.elorankingbot.backend.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
@@ -11,12 +11,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.elorankingbot.backend.model.Match.ReportIntegrity.CONFLICT;
 import static com.elorankingbot.backend.model.Match.ReportIntegrity.INCOMPLETE;
 import static com.elorankingbot.backend.model.ReportStatus.*;
 
-@Getter
 @Slf4j
+@Data
+@AllArgsConstructor(onConstructor=@__({@PersistenceConstructor}))
 @Document(collection = "match")
 public class Match {
 
@@ -30,18 +30,14 @@ public class Match {
 	@Id
 	private UUID id;
 	@DBRef(lazy = true)
-	private final Server server;
-	private final String gameId, queueId;
-	@Setter
-	private boolean isDispute, isOrWasConflict, hasFirstReport;
-	private final List<List<Player>> teams;
-	private final Map<UUID, ReportStatus> playerIdToReportStatus;
-	@Setter// TODO vllt doch @Data ?
+	private Server server;
+	private String gameId, queueId;
+	private boolean isDispute, hasFirstReport;
+	private List<List<Player>> teams;
+	private Map<UUID, ReportStatus> playerIdToReportStatus;
 	private long messageId, channelId;
-	private final Map<UUID, Long> playerIdToMessageId, playerIdToPrivateChannelId;
 	private List<Player> conflictingReports;
 	private ReportIntegrity reportIntegrity;
-	@Setter
 	private Date timestamp;
 
 	// Match is constructed initially from queue, but persisted with server instead since queue has no collection
@@ -51,44 +47,20 @@ public class Match {
 		this.gameId = queue.getGame().getName();
 		this.queueId = queue.getName();
 		this.isDispute = false;
-		this.isOrWasConflict = false;
 		this.teams = teams;
 		this.playerIdToReportStatus = new HashMap<>(queue.getNumPlayersPerMatch());
 		for (Player player : this.teams.stream().flatMap(Collection::stream).toList()) {
 			this.playerIdToReportStatus.put(player.getId(), NOT_YET_REPORTED);
 		}
-		this.playerIdToMessageId = new HashMap<>(queue.getNumPlayersPerMatch());
-		this.playerIdToPrivateChannelId = new HashMap<>(queue.getNumPlayersPerMatch());
 		this.conflictingReports = new ArrayList<>();
 		this.reportIntegrity = INCOMPLETE;
 		this.timestamp = new Date();
-	}
-
-	@PersistenceConstructor// TODO wieso ist das hier? wieso nicht einfach @NoArgsConst?
-	public Match(UUID id, Server server, String gameId, String queueId, boolean isDispute, boolean isOrWasConflict,
-				 List<List<Player>> teams, Map<UUID, ReportStatus> playerIdToReportStatus, long messageId, Map<UUID, Long> playerIdToMessageId,
-				 Map<UUID, Long> playerIdToPrivateChannelId, List<Player> conflictingReports, ReportIntegrity reportIntegrity, Date timestamp) {
-		this.id = id;
-		this.server = server;
-		this.gameId = gameId;
-		this.queueId = queueId;
-		this.isDispute = isDispute;
-		this.isOrWasConflict = isOrWasConflict;
-		this.teams = teams;
-		this.playerIdToReportStatus = playerIdToReportStatus;
-		this.messageId = messageId;
-		this.playerIdToMessageId = playerIdToMessageId;
-		this.playerIdToPrivateChannelId = playerIdToPrivateChannelId;
-		this.conflictingReports = conflictingReports;
-		this.reportIntegrity = reportIntegrity;
-		this.timestamp = timestamp;
 	}
 
 	public void reportAndSetConflictData(UUID playerId, ReportStatus reportStatus) {
 		playerIdToReportStatus.put(playerId, reportStatus);
 		setConflictingReports();
 		setReportIntegrity();
-		isOrWasConflict = isOrWasConflict || reportIntegrity == CONFLICT;
 	}
 
 	private void setConflictingReports() {// TODO refaktorn. TRACE kann dann ueber die function calls automatisch laufen
@@ -224,24 +196,12 @@ public class Match {
 		return playerIdToReportStatus.values().stream().anyMatch(reportStatus -> reportStatus != NOT_YET_REPORTED);
 	}
 
-	public long getMessageId(UUID playerId) {
-		return playerIdToMessageId.get(playerId);
-	}
-
-	public long getPrivateChannelId(UUID playerId) {
-		return playerIdToPrivateChannelId.get(playerId);
-	}
-
 	public Game getGame() {
 		return server.getGame(gameId);
 	}
 
 	public MatchFinderQueue getQueue() {
 		return server.getGame(gameId).getQueue(queueId);
-	}
-
-	public void setIsOrWasConflict(boolean isOrWasConflict) {
-		this.isOrWasConflict = isOrWasConflict;
 	}
 
 	public String getAllMentions() {

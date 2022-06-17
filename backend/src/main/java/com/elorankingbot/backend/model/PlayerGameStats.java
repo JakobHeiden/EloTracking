@@ -32,6 +32,14 @@ public class PlayerGameStats implements Comparable<PlayerGameStats> {
 		}
 	}
 
+	public void subtractResultStatus(ReportStatus resultStatus) {
+		switch (resultStatus) {
+			case WIN -> wins--;
+			case LOSE -> losses--;
+			case DRAW -> draws--;
+		}
+	}
+
 	@Override
 	public int compareTo(PlayerGameStats otherPlayerGameStats) {
 		return Double.compare(this.rating, otherPlayerGameStats.rating);

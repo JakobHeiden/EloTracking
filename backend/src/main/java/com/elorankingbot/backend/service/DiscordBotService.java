@@ -16,7 +16,6 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.MessageCreateSpec;
-import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.TextChannelCreateMono;
 import discord4j.core.spec.TextChannelEditMono;
 import discord4j.discordjson.json.ApplicationCommandData;
@@ -129,10 +128,6 @@ public class DiscordBotService {
 		return getMessage(match.getMessageId(), match.getChannelId());
 	}
 
-	public Mono<Message> getPlayerMessage(Player player, Match match) {
-		return getMessage(match.getMessageId(player.getId()), match.getPrivateChannelId(player.getId()));
-	}
-
 	public Mono<Guild> getGuildById(long guildId) {
 		return client.getGuildById(Snowflake.of(guildId));
 	}
@@ -147,10 +142,10 @@ public class DiscordBotService {
 		client.getChannelById(Snowflake.of(channelId)).subscribe(channel -> channel.delete().subscribe());
 	}
 
-	public void postToResultChannel(MatchResult matchResult) {
+	public Message postToResultChannel(MatchResult matchResult) {
 		Game game = matchResult.getGame();
 		TextChannel resultChannel = getOrCreateResultChannel(game);
-		resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).subscribe();
+		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
 	}
 
 	public TextChannel getOrCreateResultChannel(Game game) {
@@ -170,17 +165,26 @@ public class DiscordBotService {
 		}
 	}
 
-	public MessageEditMono refreshLeaderboard(Game game) {
-		Message leaderboardMessage;
-		try {
-			leaderboardMessage = getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
-		} catch (ClientException e) {
-			leaderboardMessage = createLeaderboardChannelAndMessage(game);
-			dbService.saveServer(game.getServer());// TODO muss das?
+	// Leaderboard
+	public void updateLeaderboard(Game game, Optional<MatchResult> maybeMatchResult) {
+		boolean leaderboardNeedsRefresh;
+		if (maybeMatchResult.isPresent()) {
+			leaderboardNeedsRefresh = dbService.updateRankingsEntries(maybeMatchResult.get());
+		} else {
+			leaderboardNeedsRefresh = true;
 		}
-		return leaderboardMessage.edit()
-				.withContent(Possible.of(Optional.empty()))
-				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)));
+		if (leaderboardNeedsRefresh) {
+			Message leaderboardMessage;
+			try {
+				leaderboardMessage = getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+			} catch (ClientException e) {
+				leaderboardMessage = createLeaderboardChannelAndMessage(game);
+				dbService.saveServer(game.getServer());// TODO muss das?
+			}
+			leaderboardMessage.edit()
+					.withContent(Possible.of(Optional.empty()))
+					.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game))).subscribe();
+		}
 	}
 
 	private Message createLeaderboardChannelAndMessage(Game game) {

@@ -3,7 +3,6 @@ package com.elorankingbot.backend.service;
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.*;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,25 +20,24 @@ public class DBService {
 	private final ServerDao serverDao;
 	private final ChallengeDao challengeDao;
 	private final MatchResultDao matchResultDao;
+	private final MatchResultReferenceDao matchResultReferenceDao;
 	private final PlayerDao playerDao;
 	private final TimeSlotDao timeSlotDao;
 	private final MatchDao matchDao;
 	private final RankingsEntryDao rankingsEntryDao;
-	@Getter
-	private final Set<String> modCommands, adminCommands;// TODO weg
 
 	@Autowired
 	public DBService(Services services, CommandClassScanner scanner,
-					 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao, PlayerDao playerDao,
+					 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao,
+					 MatchResultReferenceDao matchResultReferenceDao, PlayerDao playerDao,
 					 TimeSlotDao timeSlotDao, MatchDao matchDao, RankingsEntryDao rankingsEntryDao) {
 		this.bot = services.bot;
 		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
 		this.matchResultDao = matchResultDao;
+		this.matchResultReferenceDao = matchResultReferenceDao;
 		this.playerDao = playerDao;
 		this.timeSlotDao = timeSlotDao;
-		this.adminCommands = scanner.getAdminCommandClassNames();
-		this.modCommands = scanner.getModCommandClassNames();
 		this.matchDao = matchDao;
 		this.rankingsEntryDao = rankingsEntryDao;
 	}
@@ -134,6 +132,22 @@ public class DBService {
 				game.getName(),
 				bot.getServerName(game.getServer())));
 		matchResultDao.deleteAllByServerAndGameName(game.getServer(), game.getName());
+	}
+
+	// MatchResultReference
+	public void saveMatchResultReference(MatchResultReference matchResultReference) {
+		matchResultReferenceDao.save(matchResultReference);
+	}
+
+	public Optional<MatchResultReference> findMatchResultReference(long messageId) {
+		Optional<MatchResultReference> maybeMatchResultReference = matchResultReferenceDao.findByResultMessageId(messageId);
+		if (maybeMatchResultReference.isEmpty()) {
+			maybeMatchResultReference = matchResultReferenceDao.findByMatchMessageId(messageId);
+			if (maybeMatchResultReference.isEmpty()) {
+				return Optional.empty();
+			}
+		}
+		return maybeMatchResultReference;
 	}
 
 	// Challenge
@@ -256,16 +270,15 @@ public class DBService {
 		return new RankingsExcerpt(game, entries, lowestIndex + 1, Optional.of(player.getTag()), numTotalPlayers);
 	}
 
-	public boolean persistRankings(MatchResult matchResult) {
-		long guildId = matchResult.getGame().getServer().getGuildId();
-		String gameName = matchResult.getGame().getName();
+	public boolean updateRankingsEntries(MatchResult matchResult) {
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
 			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
-					.findByGuildIdAndGameNameAndPlayerTag(guildId, gameName, playerMatchResult.getPlayerTag());
+					.findByGuildIdAndGameNameAndPlayerTag(matchResult.getGame().getServer().getGuildId(),
+							matchResult.getGame().getName(), playerMatchResult.getPlayerTag());
 			maybeRankingsEntry.ifPresent(rankingsEntryDao::delete);
 			rankingsEntryDao.save(new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer()));
 		}
-		return true;// TODO! pagination etc
+		return true;// TODO! pagination etc - aendert sich ueberhaupt was?
 	}
 
 	public void deleteAllRankingsEntries(Game game) {

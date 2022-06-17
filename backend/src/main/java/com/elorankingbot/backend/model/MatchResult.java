@@ -26,6 +26,7 @@ public class MatchResult implements Comparable<MatchResult> {
 	private String gameName;
 	private Date timestamp;
 	private List<TeamMatchResult> teamMatchResults;
+	private Date revertedWhen;
 
 	public MatchResult(Match match) {
 		this.id = match.getId();
@@ -33,6 +34,7 @@ public class MatchResult implements Comparable<MatchResult> {
 		this.gameName = match.getGame().getName();
 		this.timestamp = new Date();
 		this.teamMatchResults = new ArrayList<>();
+		this.revertedWhen = null;
 	}
 
 	public void addTeamMatchResult(TeamMatchResult teamMatchResult) {
@@ -63,6 +65,14 @@ public class MatchResult implements Comparable<MatchResult> {
 
 	public Game getGame() {
 		return server.getGame(gameName);
+	}
+
+	public boolean isReverted() {
+		return revertedWhen != null;
+	}
+
+	public void setReverted() {
+		this.revertedWhen = new Date();
 	}
 
 	@Override
