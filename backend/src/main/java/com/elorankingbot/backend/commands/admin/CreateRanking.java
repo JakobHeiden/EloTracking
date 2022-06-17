@@ -3,6 +3,7 @@ package com.elorankingbot.backend.commands.admin;
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.mod.Ban;
+import com.elorankingbot.backend.commands.mod.RevertMatch;
 import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -13,6 +14,8 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.http.client.ClientException;
+
+import java.util.Optional;
 
 import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
@@ -69,7 +72,7 @@ public class CreateRanking extends SlashCommand {
 		server.addGame(game);
 		try {
 			bot.getOrCreateResultChannel(game);
-			bot.refreshLeaderboard(game).subscribe();
+			bot.updateLeaderboard(game, Optional.empty());
 			bot.getOrCreateMatchCategory(server);
 			bot.getOrCreateDisputeCategory(server);
 			bot.getOrCreateArchiveCategory(server);
@@ -99,6 +102,7 @@ public class CreateRanking extends SlashCommand {
 		bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
 		bot.deployCommand(server, Ban.getRequest()).subscribe();
 		bot.deployCommand(server, QueueStatus.getRequest()).subscribe();
+		bot.deployCommand(server, RevertMatch.getRequest()).subscribe();
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +

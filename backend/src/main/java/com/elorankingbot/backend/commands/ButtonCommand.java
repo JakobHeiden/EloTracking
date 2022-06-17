@@ -11,7 +11,8 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ButtonCommand {
+public abstract class ButtonCommand {// TODO von Command erben, mit @ModCommand etc versehen, @NoHelp bauen damit Help
+	// es nicht anzeigt
 
 	protected final ButtonInteractionEvent event;
 	protected final DBService dbService;

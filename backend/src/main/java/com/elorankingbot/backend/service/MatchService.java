@@ -9,6 +9,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -52,7 +53,7 @@ public class MatchService {
 				double actualResult = match.getReportStatus(player.getId()).value;
 				double oldRating = player.getOrCreateGameStats(game).getRating();
 				double newRating = oldRating + k * (actualResult - expectedResult);
-				PlayerMatchResult playerMatchResult = new PlayerMatchResult(matchResult,
+				PlayerMatchResult playerMatchResult = new PlayerMatchResult(
 						player, player.getTag(),
 						ReportStatus.valueOf(match.getReportStatus(player.getId()).name()),
 						oldRating, newRating);
@@ -82,15 +83,14 @@ public class MatchService {
 		TextChannel channel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Game game = match.getGame();
 
+		Message newMatchMessage = channel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
+				.withContent(match.getAllMentions()).block();
+		newMatchMessage.pin().subscribe();
 		bot.getMessage(match.getMessageId(), match.getChannelId())
-				.subscribe(message -> {
-					channel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
-							.withContent(match.getAllMentions())
-							.subscribe(msg -> msg.pin().subscribe());
-					message.delete().subscribe();
-				});
+				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
 		bot.moveToArchive(game.getServer(), channel);
-		bot.postToResultChannel(matchResult);
+		Message resultChannelMessage = bot.postToResultChannel(matchResult);
+		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, newMatchMessage, matchResult.getId()));
 		dbService.saveMatchResult(matchResult);
 		dbService.deleteMatch(match);
 		matchResult.getPlayers().forEach(player -> {
@@ -99,8 +99,7 @@ public class MatchService {
 			queueService.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
 		});
-		boolean hasLeaderboardChanged = dbService.persistRankings(matchResult);
-		if (hasLeaderboardChanged) bot.refreshLeaderboard(game).subscribe();
+		bot.updateLeaderboard(game, Optional.of(matchResult));
 		for (Player player : match.getPlayers()) {
 			bot.updatePlayerRank(game, player);
 		}

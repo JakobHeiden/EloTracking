@@ -7,7 +7,7 @@ on:
       - master
 
 jobs:
-  build-backend: # hier folgt der Build-Prozess für das Backend
+  build-backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
           java-version: 17
       - name: Build with Maven
         run: mvn -B package -DskipTests --file backend/pom.xml
-      - uses: actions/upload-artifact@v2 # das Backend-Build wird anschließend (so wie zuvor das Frontend-Build) via der Upload Action hochgeladen und steht weiteren Actions somit zur Verfügung
+      - uses: actions/upload-artifact@v2
         with:
           name: elotracking.jar
           path: backend/target

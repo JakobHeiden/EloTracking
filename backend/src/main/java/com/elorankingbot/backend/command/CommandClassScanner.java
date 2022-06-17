@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommandClassScanner {
 
-	@Getter
-	private final Map<String, String> commandStringToClassName;
+	// command strings are simple class names in lowercase, full class name is class name with package path
+	private final Map<String, String> commandStringToFullClassName;
 	@Getter
 	private final Set<String> adminCommandClassNames, modCommandClassNames, playerCommandClassNames;
 
@@ -82,7 +82,7 @@ public class CommandClassScanner {
 
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
 		classes.forEach(clazz -> mapBuilder.put(clazz.getSimpleName().toLowerCase(), clazz.getName()));
-		this.commandStringToClassName = mapBuilder.build();
+		this.commandStringToFullClassName = mapBuilder.build();
 	}
 
 	public Set<String> getAllCommandClassNames() {// TODO macht das hier alles sinn? class name vs command string etc
@@ -91,5 +91,9 @@ public class CommandClassScanner {
 		allCommandClassnames.addAll(modCommandClassNames);
 		allCommandClassnames.addAll(adminCommandClassNames);
 		return allCommandClassnames;
+	}
+
+	public String getFullClassName(String commandStringOrClassName) {
+		return commandStringToFullClassName.get(commandStringOrClassName.toLowerCase());
 	}
 }

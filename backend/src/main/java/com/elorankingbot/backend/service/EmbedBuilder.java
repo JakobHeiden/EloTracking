@@ -17,7 +17,7 @@ import static com.elorankingbot.backend.components.FormatTools.formatRating;
 
 public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch sortieren und nicht nach technischem detail?
 
-	private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy hh:mm");
+	public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yy hh:mm");
 
 	// TODO in solo matches keine teams anzeigen
 	public static EmbedCreateSpec createMatchEmbed(String title, Match match) {
@@ -72,14 +72,6 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 		return embedBuilder.build();
 	}
 
-	public static EmbedCreateSpec createCompletedMatchEmbedOld(String title, Match match, MatchResult matchResult, String tagToHighlight) {
-		return createMatchEmbedOrCompletedMatchEmbed(title, match, matchResult, tagToHighlight);
-	}
-
-	public static EmbedCreateSpec createMatchEmbedOld(String title, Match match, String tagToHighlight) {
-		return createMatchEmbedOrCompletedMatchEmbed(title, match, null, tagToHighlight);
-	}
-
 	// TODO this really needs to be two separate methods that make use of common private methods
 	private static EmbedCreateSpec createMatchEmbedOrCompletedMatchEmbed(String title, Match match, MatchResult matchResult, String tagToHighlight) {
 		MatchFinderQueue queue = match.getQueue();
@@ -114,8 +106,6 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 			if (tagToHighlight != null) embedText = embedText.replace(tagToHighlight, "**" + tagToHighlight + "**");
 			embedBuilder.addField(EmbedCreateFields.Field.of("Team #" + (i + 1), embedText, true));
 		}
-		if (isCompletedMatch && match.isOrWasConflict()) embedBuilder.footer(EmbedCreateFields.Footer.of(
-				"There was conflicting reporting, but it has been resolved by players redoing their reports.", null));
 
 		return embedBuilder.build();
 	}
@@ -141,23 +131,7 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 
 	public static EmbedCreateSpec createMatchHistoryEmbed(Player player, List<Optional<MatchResult>> matchResults) {
 		String embedText = String.join("\n",
-				matchResults.stream().map(maybeMatchResult -> {
-					if (maybeMatchResult.isEmpty()) return "Match not found";
-					MatchResult matchResult = maybeMatchResult.get();
-
-					List<Player> ownTeam = matchResult.getTeamMatchResults().stream()
-							.filter(teamMatchResult -> teamMatchResult.getPlayers().contains(player))
-							.findAny().get().getPlayers().stream().filter(pl -> !pl.equals(player)).toList();
-					List<List<Player>> otherTeams = matchResult.getTeamMatchResults().stream()
-							.map(TeamMatchResult::getPlayers)
-							.filter(players -> !players.contains(player)).toList();
-					return String.format("`%s` %s %s %s %s",
-							dateFormat.format(matchResult.getTimestamp()),
-							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
-							createOwnTeamString(ownTeam),
-							matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,
-							createSeveralTeamsString(otherTeams));
-				}).toList());
+				matchResults.stream().map(maybeMatchResult -> createMatchHistoryEntry(player, maybeMatchResult)).toList());
 		Optional<MatchResult> maybeAnyMatchResult = matchResults.stream().filter(Optional::isPresent).map(Optional::get).findAny();
 		if (maybeAnyMatchResult.isEmpty()) {
 			return EmbedCreateSpec.builder()
@@ -169,6 +143,28 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 				.title(String.format("Match history for %s: %s", player.getTag(), maybeAnyMatchResult.get().getGame().getName()))
 				.description(embedText)
 				.build();
+	}
+
+	private static String createMatchHistoryEntry(Player player, Optional<MatchResult> maybeMatchResult) {
+			if (maybeMatchResult.isEmpty()) return "Match not found";
+
+			MatchResult matchResult = maybeMatchResult.get();
+			List<Player> ownTeam = matchResult.getTeamMatchResults().stream()
+					.filter(teamMatchResult -> teamMatchResult.getPlayers().contains(player))
+					.findAny().get().getPlayers().stream().filter(pl -> !pl.equals(player)).toList();
+			List<List<Player>> otherTeams = matchResult.getTeamMatchResults().stream()
+					.map(TeamMatchResult::getPlayers)
+					.filter(players -> !players.contains(player)).toList();
+			String result = String.format("`%s` %s %s %s %s",// TODO! hier cancel, undo einflechten. ausserdem den block hier in fkt auslagern
+					dateFormat.format(matchResult.getTimestamp()),
+					matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
+					createOwnTeamString(ownTeam),
+					matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,
+					createSeveralTeamsString(otherTeams));
+			if (matchResult.isReverted()) {
+				result = String.format("~~%s~~ reverted %s", result, EmbedBuilder.dateFormat.format(matchResult.getRevertedWhen()));
+			}
+			return result;
 	}
 
 	private static String createOwnTeamString(List<Player> team) {

@@ -6,7 +6,6 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -36,10 +35,6 @@ public abstract class ButtonCommandRelatedToMatch extends ButtonCommand {
 	protected boolean activeUserIsInvolvedInMatch() {
 		return match.getPlayers().stream()
 				.anyMatch(player -> player.getUserId() == activeUserId);
-	}
-
-	protected Mono<Message> getActiveMessage() {
-		return bot.getMessage(match.getMessageId(activePlayerId), match.getPrivateChannelId(activePlayerId));
 	}
 
 	protected void updateAndSaveChallenge(Message message) {// TODO vllt in interface, default method refaktorn

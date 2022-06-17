@@ -12,8 +12,6 @@ import static com.elorankingbot.backend.components.FormatTools.formatRating;
 public class PlayerMatchResult {
 
 	@DBRef(lazy = true)
-	private MatchResult matchResult;
-	@DBRef(lazy = true)
 	private Player player;
 	// redundant
 	private String playerTag;

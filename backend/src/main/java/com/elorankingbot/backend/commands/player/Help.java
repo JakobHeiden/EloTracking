@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.PlayerCommand;
+import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
@@ -50,7 +51,7 @@ public class Help extends SlashCommand {
 
 	protected void execute() {
 		String topic = "General Help";
-		event.reply().withEmbeds(createHelpEmbed(services, topic))
+		event.reply().withEmbeds(createHelpEmbed(services, topic))// TODO! wo kommen dann die anderen topics her? f[r Revert Match anpassen
 				.withComponents(createConceptsActionRow(), createPlayerCommandsActionRow(), createModCommandsActionRow(),
 						createAdminCommandsActionRow())
 				.block();
@@ -80,8 +81,7 @@ public class Help extends SlashCommand {
 						"commands will be absent until the moderator role is set with `/setrole`.\n";
 				for (String commandClassName : commandClassScanner.getAllCommandClassNames()) {
 					try {
-						shortDescription = (String) Class.forName(commandClassScanner.getCommandStringToClassName()
-										.get(commandClassName.toLowerCase()))
+						shortDescription = (String) Class.forName(commandClassScanner.getFullClassName(commandClassName))
 								.getMethod("getShortDescription").invoke(null);
 					} catch (ReflectiveOperationException e) {
 						bot.sendToOwner("Reflection error in Help");
@@ -111,11 +111,13 @@ public class Help extends SlashCommand {
 						"`ratingelasticity` is applied in fractions, not only each full minute.\n";
 			}
 			default -> {
-				embedTitle = "Help on /" + topic;
-				String commandClassName = commandClassScanner.getCommandStringToClassName().get(topic.toLowerCase());
+				String commandName = topic;
+				Class commandClass = classForName(commandClassScanner, commandName);
+				embedTitle = MessageCommand.class.isAssignableFrom(commandClass) ?
+						"Help on " + MessageCommand.getCommandName(commandClass)
+						: "Help on /" + commandName;
 				try {
-					embedText = (String) Class.forName(commandClassName)
-							.getMethod("getLongDescription").invoke(null);
+					embedText = (String) commandClass.getMethod("getLongDescription").invoke(null);
 				} catch (ReflectiveOperationException e) {
 					bot.sendToOwner("Reflection error in Help");
 					e.printStackTrace();
@@ -139,23 +141,37 @@ public class Help extends SlashCommand {
 	}
 
 	private ActionRow createPlayerCommandsActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
-				.filter(commandClassName -> commandClassScanner.getPlayerCommandClassNames().contains(commandClassName))
-				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getPlayerCommandClassNames().stream()
+				.map(this::createSelectMenuOption).toList());
 		return ActionRow.of(SelectMenu.of(customId + ":playercommands", menuOptions).withPlaceholder("Player Commands"));
 	}
 
 	private ActionRow createModCommandsActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
-				.filter(commandClassName -> commandClassScanner.getModCommandClassNames().contains(commandClassName))
-				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getModCommandClassNames().stream()
+				.map(this::createSelectMenuOption).toList());
 		return ActionRow.of(SelectMenu.of(customId + ":modcommands", menuOptions).withPlaceholder("Moderator Commands"));
 	}
 
 	private ActionRow createAdminCommandsActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAllCommandClassNames().stream()
-				.filter(commandClassName -> commandClassScanner.getAdminCommandClassNames().contains(commandClassName))
-				.map(commandClassName -> SelectMenu.Option.of("/" + commandClassName, commandClassName)).toList());
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAdminCommandClassNames().stream()
+				.map(this::createSelectMenuOption).toList());
 		return ActionRow.of(SelectMenu.of(customId + ":admincommands", menuOptions).withPlaceholder("Admin Commands"));
+	}
+
+	private SelectMenu.Option createSelectMenuOption(String commandClassName) {
+		Class commandClass = classForName(commandClassScanner, commandClassName);
+		String selectMenuOptionLabel = MessageCommand.class.isAssignableFrom(commandClass) ?
+				MessageCommand.getCommandName(commandClass)
+				: "/" + commandClassName.toLowerCase();
+		return SelectMenu.Option.of(selectMenuOptionLabel, commandClassName.toLowerCase());
+	}
+
+	private static Class classForName(CommandClassScanner commandClassScanner, String commandClassName) {
+		try {
+			return Class.forName(commandClassScanner.getFullClassName(commandClassName));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
