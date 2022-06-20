@@ -19,6 +19,7 @@ public class Buttons {// TODO string ersetzen duch klassennamen
 				Emojis.crossMark, "Decline");
 	}
 
+	// Match
 	public static Button win(UUID matchId) {
 		return Button.primary("win:" + matchId.toString(),
 				Emojis.win, "Win");
@@ -35,37 +36,12 @@ public class Buttons {// TODO string ersetzen duch klassennamen
 	}
 
 	public static Button cancel(UUID matchId) {
-		return Button.danger("cancel:" + matchId.toString(),
+		return Button.secondary("cancel:" + matchId.toString(),
 				Emojis.crossMark, "Cancel match");
 	}
 
-	public static Button redo(UUID matchId) {
-		return Button.primary("redo:" + matchId.toString(),
-				Emojis.redoArrow, "Redo your report");
-	}
-
-	public static Button cancelOnConflict(UUID matchId) {
-		return Button.danger("cancelonconflict:" + matchId.toString(),
-				Emojis.crossMark, "Call for a cancel");
-	}
-
-	public static Button redoOrCancelOnConflict(UUID matchId) {
-		return Button.primary("redoorcancel:" + matchId.toString(),
-				Emojis.shrug, "Redo or Cancel");
-	}
-
-	public static Button agreeToRedo(UUID matchId) {
-		return Button.primary("redo:" + matchId.toString(),
-				Emojis.redoArrow, "Agree to a redo");
-	}
-
-	public static Button agreeToCancelOnConflict(UUID matchId) {
-		return Button.danger("cancelonconflict:" + matchId.toString(),
-				Emojis.crossMark, "Agree to a cancel");
-	}
-
 	public static Button dispute(UUID matchId) {
-		return Button.secondary("dispute:" + matchId.toString(), "File a dispute");
+		return Button.danger("dispute:" + matchId.toString(), "File a dispute");
 	}
 
 	// Dispute
@@ -80,7 +56,7 @@ public class Buttons {// TODO string ersetzen duch klassennamen
 	}
 
 	public static Button ruleAsCancel(UUID matchId) {
-		return Button.danger("ruleascancel:" + matchId,
+		return Button.secondary("ruleascancel:" + matchId,
 				Emojis.crossMark, "Rule the match as canceled");
 	}
 
@@ -92,7 +68,7 @@ public class Buttons {// TODO string ersetzen duch klassennamen
 	}
 
 	public static Button abortDeleteRanking(String gameName, long userId) {
-		return Button.danger(String.format("%s:%s:%s",
+		return Button.secondary(String.format("%s:%s:%s",
 						AbortDeleteRanking.class.getSimpleName().toLowerCase(), gameName, userId),
 				Emojis.crossMark, "No, do not delete");
 	}
