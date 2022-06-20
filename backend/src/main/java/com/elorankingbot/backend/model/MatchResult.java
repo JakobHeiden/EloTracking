@@ -57,6 +57,10 @@ public class MatchResult implements Comparable<MatchResult> {
 				.map(PlayerMatchResult::getResultStatus).findAny().get();
 	}
 
+	public boolean isCanceled() {
+		return teamMatchResults.get(0).getResultStatus() == ReportStatus.CANCEL;
+	}
+
 	public List<Player> getPlayers() {
 		return teamMatchResults.stream()
 				.flatMap(teamMatchResult -> teamMatchResult.getPlayers().stream())

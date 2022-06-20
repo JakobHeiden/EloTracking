@@ -37,7 +37,7 @@ public class Match {
 	private Map<UUID, ReportStatus> playerIdToReportStatus;
 	private long messageId, channelId;
 	private List<Player> conflictingReports;
-	private ReportIntegrity reportIntegrity;
+	private ReportIntegrity reportIntegrity;// TODO muss nicht persistiert werden, oder?
 	private Date timestamp;
 
 	// Match is constructed initially from queue, but persisted with server instead since queue has no collection

@@ -36,12 +36,12 @@ public class MatchService {
 		MatchResult matchResult = new MatchResult(match);
 		Game game = match.getQueue().getGame();
 		for (List<Player> team : match.getTeams()) {
-			List<Player> otherPlayers = match.getPlayers();
-			team.forEach(otherPlayers::remove);
+			List<Player> allOtherPlayers = match.getPlayers();
+			team.forEach(allOtherPlayers::remove);
 			double averageTeamRating = team.stream()
 					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
-			double averageOtherRating = otherPlayers.stream()
+			double averageOtherRating = allOtherPlayers.stream()
 					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
 			double numOtherTeams = match.getQueue().getNumTeams() - 1;
@@ -65,6 +65,24 @@ public class MatchService {
 		return matchResult;
 	}
 
+	public static MatchResult generateCanceledMatchResult(Match match) {
+		MatchResult matchResult = new MatchResult(match);
+		Game game = match.getQueue().getGame();
+		for (List<Player> team : match.getTeams()) {
+			TeamMatchResult teamResult = new TeamMatchResult();
+			for (Player player : team) {
+				double oldRating = player.getOrCreateGameStats(game).getRating();
+				PlayerMatchResult playerMatchResult = new PlayerMatchResult(
+						player, player.getTag(),
+						ReportStatus.CANCEL,
+						oldRating, oldRating);
+				teamResult.add(playerMatchResult);
+			}
+			matchResult.addTeamMatchResult(teamResult);
+		}
+		return matchResult;
+	}
+
 	private void sendMatchMessage(TextChannel channel, Match match) {
 		String title = String.format("Your match of %s is starting. " +
 						"I removed you from all other queues you joined on this server, if any. " +
@@ -80,15 +98,15 @@ public class MatchService {
 	}
 
 	public void processMatchResult(MatchResult matchResult, Match match, String embedTitle) {
-		TextChannel channel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
+		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Game game = match.getGame();
 
-		Message newMatchMessage = channel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
+		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
 				.withContent(match.getAllMentions()).block();
 		newMatchMessage.pin().subscribe();
 		bot.getMessage(match.getMessageId(), match.getChannelId())
 				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
-		bot.moveToArchive(game.getServer(), channel);
+		bot.moveToArchive(game.getServer(), matchChannel);
 		Message resultChannelMessage = bot.postToResultChannel(matchResult);
 		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, newMatchMessage, matchResult.getId()));
 		dbService.saveMatchResult(matchResult);
@@ -96,6 +114,12 @@ public class MatchService {
 		matchResult.getPlayers().forEach(player -> {
 			player.addMatchResult(matchResult);
 			dbService.savePlayer(player);
+		});
+		if (matchResult.getAllPlayerMatchResults().get(0).getResultStatus().equals(ReportStatus.CANCEL)) {
+			return;
+		}
+
+		matchResult.getPlayers().forEach(player -> {
 			queueService.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
 		});
@@ -105,10 +129,24 @@ public class MatchService {
 		}
 	}
 
-	public void processCancel(Match match, String reason) {
+	public void processCancel(MatchResult canceledMatchResult, Match match, String embedTitle) {/// TODO! weg
+		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
+		Game game = match.getGame();
+
+		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, canceledMatchResult))
+				.withContent(match.getAllMentions()).block();
+		newMatchMessage.pin().subscribe();
+		bot.getMessage(match.getMessageId(), match.getChannelId())
+				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
+		bot.moveToArchive(game.getServer(), matchChannel);
+		Message resultChannelMessage = bot.postToResultChannel(canceledMatchResult);// EmbedBuilder::createMatchResultEmbed?
+		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, newMatchMessage, canceledMatchResult.getId()));
+		dbService.saveMatchResult(canceledMatchResult);
+		dbService.deleteMatch(match);
+
 		bot.getMatchMessage(match)
 				.subscribe(message -> {
-					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(reason, match);
+					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match);
 					message.getChannel().subscribe(channel -> channel
 							.createMessage(embedCreateSpec)
 							.withContent(match.getAllMentions())

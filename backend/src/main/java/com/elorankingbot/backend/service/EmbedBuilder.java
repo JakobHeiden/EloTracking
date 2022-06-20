@@ -146,25 +146,25 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 	}
 
 	private static String createMatchHistoryEntry(Player player, Optional<MatchResult> maybeMatchResult) {
-			if (maybeMatchResult.isEmpty()) return "Match not found";
+		if (maybeMatchResult.isEmpty()) return "Match not found";
 
-			MatchResult matchResult = maybeMatchResult.get();
-			List<Player> ownTeam = matchResult.getTeamMatchResults().stream()
-					.filter(teamMatchResult -> teamMatchResult.getPlayers().contains(player))
-					.findAny().get().getPlayers().stream().filter(pl -> !pl.equals(player)).toList();
-			List<List<Player>> otherTeams = matchResult.getTeamMatchResults().stream()
-					.map(TeamMatchResult::getPlayers)
-					.filter(players -> !players.contains(player)).toList();
-			String result = String.format("`%s` %s %s %s %s",// TODO! hier cancel, undo einflechten. ausserdem den block hier in fkt auslagern
-					dateFormat.format(matchResult.getTimestamp()),
-					matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
-					createOwnTeamString(ownTeam),
-					matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,
-					createSeveralTeamsString(otherTeams));
-			if (matchResult.isReverted()) {
-				result = String.format("~~%s~~ reverted %s", result, EmbedBuilder.dateFormat.format(matchResult.getRevertedWhen()));
-			}
-			return result;
+		MatchResult matchResult = maybeMatchResult.get();
+		List<Player> ownTeam = matchResult.getTeamMatchResults().stream()
+				.filter(teamMatchResult -> teamMatchResult.getPlayers().contains(player))
+				.findAny().get().getPlayers().stream().filter(pl -> !pl.equals(player)).toList();
+		List<List<Player>> otherTeams = matchResult.getTeamMatchResults().stream()
+				.map(TeamMatchResult::getPlayers)
+				.filter(players -> !players.contains(player)).toList();
+		String result = String.format("`%s` %s %s %s %s",
+				dateFormat.format(matchResult.getTimestamp()),
+				matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asEmojiAsString(),
+				createOwnTeamString(ownTeam),
+				matchResult.getPlayerMatchResult(player.getId()).getResultStatus().asRelationalVerb,
+				createSeveralTeamsString(otherTeams));
+		if (matchResult.isReverted()) {
+			result = String.format("~~%s~~ reverted %s", result, EmbedBuilder.dateFormat.format(matchResult.getRevertedWhen()));
+		}
+		return result;
 	}
 
 	private static String createOwnTeamString(List<Player> team) {
@@ -172,14 +172,13 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 		return "with " + String.join(", ", team.stream().map(Player::getTag).toList()) + ",";
 	}
 
-	private static String createOtherTeamString(List<Player> team) {
-		return String.join(", ", team.stream().map(Player::getTag).toList());
-	}
-
 	private static String createSeveralTeamsString(List<List<Player>> teams) {
 		if (teams.size() == 1) return createOtherTeamString(teams.get(0));
-
 		return String.join(", ", teams.stream().map(team -> String.format("(%s)", createOtherTeamString(team))).toList());
+	}
+
+	private static String createOtherTeamString(List<Player> team) {
+		return String.join(", ", team.stream().map(Player::getTag).toList());
 	}
 
 	private static int embedRankSpaces = 6;

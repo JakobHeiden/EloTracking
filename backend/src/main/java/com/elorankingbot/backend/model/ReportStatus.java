@@ -11,7 +11,7 @@ public enum ReportStatus {
 	WIN(Emojis.win, 1, "won", "defeated", "win"),// TODO das emoji ueber den value holen?
 	LOSE(Emojis.loss, 0, "lost", "lost to", "loss"),// noun vllt auch ueber value?
 	DRAW(Emojis.draw, .5, "drew", "drew", "draw"),
-	CANCEL(Emojis.crossMark, -1, null, null, null);
+	CANCEL(Emojis.crossMark, -1, null, "canceled with", "cancel");
 
 	public final ReactionEmoji emoji;
 	public final double value;

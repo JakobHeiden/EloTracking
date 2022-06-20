@@ -1,2 +1,2 @@
-channel sichtbarkeit ueberarbeiten
+channel sichtbarkeit ueberarbeiten, mods permission geben
 cancels in die matchistory
