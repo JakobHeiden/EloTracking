@@ -10,9 +10,7 @@ import java.util.UUID;
 public class PlayerGameStats implements Comparable<PlayerGameStats> {
 
 	private double rating;
-	private int wins;
-	private int draws;
-	private int losses;
+	private int wins, losses, draws, cancels;
 	private List<UUID> matchHistory;// TODO das hier vllt als referenz ablegen? das player-objekt wird ja immer groesser,
 	// die matchhistory wird aber nur manchmal gebraucht...
 
@@ -21,6 +19,7 @@ public class PlayerGameStats implements Comparable<PlayerGameStats> {
 		this.wins = 0;
 		this.draws = 0;
 		this.losses = 0;
+		this.cancels = 0;
 		this.matchHistory = new ArrayList<>();
 	}
 
@@ -29,6 +28,7 @@ public class PlayerGameStats implements Comparable<PlayerGameStats> {
 			case WIN -> wins++;
 			case LOSE -> losses++;
 			case DRAW -> draws++;
+			case CANCEL -> cancels++;
 		}
 	}
 
@@ -37,6 +37,7 @@ public class PlayerGameStats implements Comparable<PlayerGameStats> {
 			case WIN -> wins--;
 			case LOSE -> losses--;
 			case DRAW -> draws--;
+			case CANCEL -> cancels--;
 		}
 	}
 

@@ -62,6 +62,10 @@ public class RevertMatch extends MessageCommand {// TODO in help steht UndoMatch
 			event.reply("This match already has been reverted.").withEphemeral(true).subscribe();
 			return;
 		}
+		if (matchResult.isCanceled()) {
+			event.reply("Cannot revert a match that has been canceled.").withEphemeral(true).subscribe();
+			return;
+		}
 
 		matchResult.setReverted();
 		dbService.saveMatchResult(matchResult);
