@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -127,7 +128,7 @@ public class EventParser {
 				"Occured during %s", throwable.toString(), bot.getLatestCommandLog());
 		bot.sendToOwner(errorMessage);
 		log.error(errorMessage);
-		throwable.printStackTrace();
+		log.error(Arrays.toString(throwable.getStackTrace()));
 	}
 
 	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
