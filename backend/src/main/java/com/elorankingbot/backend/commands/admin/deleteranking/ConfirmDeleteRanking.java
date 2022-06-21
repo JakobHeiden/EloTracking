@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin.deleteranking;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.admin.*;
+import com.elorankingbot.backend.commands.mod.ForceWin;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
 import com.elorankingbot.backend.model.Game;
@@ -43,6 +44,18 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 		bot.deleteChannel(game.getResultChannelId());
 		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
 		event.reply(String.format("Ranking %s deleted.", game.getName())).subscribe();
+
+		if (server.getQueues().isEmpty()) {
+			bot.deleteCommand(server, Join.class.getSimpleName().toLowerCase()).subscribe();
+			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
+			bot.deleteCommand(server, Edit.class.getSimpleName().toLowerCase()).subscribe();
+			bot.deleteCommand(server, ForceWin.class.getSimpleName().toLowerCase()).subscribe();
+		} else {
+			bot.deployCommand(server, Join.getRequest(server)).subscribe();
+			bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
+			bot.deployCommand(server, Edit.getRequest(server)).subscribe();
+			bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
+		}
 	}
 
 	private void deleteRatingsFromPlayers() {

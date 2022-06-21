@@ -128,7 +128,8 @@ public class EventParser {
 				"Occured during %s", throwable.toString(), bot.getLatestCommandLog());
 		bot.sendToOwner(errorMessage);
 		log.error(errorMessage);
-		log.error(Arrays.toString(throwable.getStackTrace()));
+		throwable.printStackTrace();
+		log.error(Arrays.toString(throwable.getStackTrace()));// TODO auf dem server den error stream nach out umbiegen
 	}
 
 	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {

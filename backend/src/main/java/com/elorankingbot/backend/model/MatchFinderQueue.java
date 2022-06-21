@@ -83,6 +83,10 @@ public class MatchFinderQueue {
 		}
 	}
 
+	public boolean isSoloQueue() {
+		return queueType == QueueType.SOLO;
+	}
+
 	public String getDescription() {
 		if (numTeams == 2) {
 			if (numPlayersPerTeam == 1) return "Join this 1v1 queue";

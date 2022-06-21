@@ -63,6 +63,7 @@ public class Match {
 		setReportIntegrity();
 	}
 
+	// TODO reportIntegrity muss nicht persistiert werden. die ganze logik sollte in getReportIntegrity gekapselt werden.
 	private void setConflictingReports() {// TODO refaktorn. TRACE kann dann ueber die function calls automatisch laufen
 		MatchFinderQueue queue = server.getGame(gameId).getQueue(queueId);
 		conflictingReports = new ArrayList<>();

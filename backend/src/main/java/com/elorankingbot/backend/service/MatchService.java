@@ -4,9 +4,11 @@ import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.*;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -129,32 +131,26 @@ public class MatchService {
 		}
 	}
 
-	public void processCancel(MatchResult canceledMatchResult, Match match, String embedTitle) {/// TODO! weg
-		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
-		Game game = match.getGame();
-
-		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, canceledMatchResult))
-				.withContent(match.getAllMentions()).block();
-		newMatchMessage.pin().subscribe();
-		bot.getMessage(match.getMessageId(), match.getChannelId())
-				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
-		bot.moveToArchive(game.getServer(), matchChannel);
-		Message resultChannelMessage = bot.postToResultChannel(canceledMatchResult);// EmbedBuilder::createMatchResultEmbed?
-		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, newMatchMessage, canceledMatchResult.getId()));
-		dbService.saveMatchResult(canceledMatchResult);
-		dbService.deleteMatch(match);
-
-		bot.getMatchMessage(match)
-				.subscribe(message -> {
-					EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(embedTitle, match);
-					message.getChannel().subscribe(channel -> channel
-							.createMessage(embedCreateSpec)
-							.withContent(match.getAllMentions())
-							.subscribe(msg -> msg.pin().subscribe()));
-					message.delete().subscribe();
-				});
-		bot.getChannelById(match.getChannelId()).subscribe(channel -> bot.moveToArchive(match.getServer(), channel));
-		dbService.deleteMatch(match);
+	// TODO processMatchResult und die updates in channels und messages evtl trennen
+	public EmbedCreateSpec processForcedMatchResult(MatchResult forcedMatchResult, List<User> users, String embedTitle) {
+		EmbedCreateSpec matchEmbed = EmbedBuilder.createCompletedMatchEmbed(embedTitle, forcedMatchResult);
+		for (User user : users) {
+			user.getPrivateChannel().subscribe(privateChannel -> privateChannel.createMessage(matchEmbed)
+					.onErrorResume(e -> Mono.empty()).subscribe());
+		}
+		Message resultChannelMessage = bot.postToResultChannel(forcedMatchResult);
+		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, forcedMatchResult.getId()));
+		dbService.saveMatchResult(forcedMatchResult);
+		Game game = forcedMatchResult.getGame();
+		forcedMatchResult.getPlayers().forEach(player -> {
+			player.addMatchResult(forcedMatchResult);
+			dbService.savePlayer(player);
+			queueService.updatePlayerInAllQueuesOfGame(game, player);
+			updatePlayerMatches(game, player);
+			bot.updatePlayerRank(game, player);
+		});
+		bot.updateLeaderboard(game, Optional.of(forcedMatchResult));
+		return matchEmbed;
 	}
 
 	private static ActionRow createActionRow(Match match) {
