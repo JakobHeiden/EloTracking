@@ -46,7 +46,7 @@ public class AutoResolveMatch {
 		// if ReportIntegrity != CONFLICT, the possible states of the reporting are greatly reduced
 		if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
 			MatchResult canceledMatchResult = MatchService.generateCanceledMatchResult(match);
-			matchService.processCancel(canceledMatchResult, match, autoresolveMessage);
+			matchService.processMatchResult(canceledMatchResult, match, autoresolveMessage);
 			return;
 		} else if (match.getPlayerIdToReportStatus().containsValue(DRAW)) {
 			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), DRAW));

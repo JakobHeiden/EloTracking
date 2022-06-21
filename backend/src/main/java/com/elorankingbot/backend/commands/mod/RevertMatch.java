@@ -90,10 +90,12 @@ public class RevertMatch extends MessageCommand {// TODO in help steht UndoMatch
 		String thisMatchWasUndoneMessage = String.format("**This match has been reverted by %s on %s.**",
 				event.getInteraction().getUser().getTag(),
 				EmbedBuilder.dateFormat.format(matchResult.getRevertedWhen()));
-		bot.getMessage(matchResultReference.getMatchMessageId(), matchResultReference.getMatchChannelId())
-				.onErrorResume(e -> Mono.empty())
-				.subscribe(matchMessage -> matchMessage.edit()
-						.withContent(Possible.of(Optional.of(thisMatchWasUndoneMessage))).subscribe());
+		if (matchResultReference.getMatchMessageId() != 0L) {
+			bot.getMessage(matchResultReference.getMatchMessageId(), matchResultReference.getMatchChannelId())
+					.onErrorResume(e -> Mono.empty())
+					.subscribe(matchMessage -> matchMessage.edit()
+							.withContent(Possible.of(Optional.of(thisMatchWasUndoneMessage))).subscribe());
+		}
 		bot.getMessage(matchResultReference.getResultMessageId(), matchResultReference.getResultChannelId())
 				.onErrorResume(e -> Mono.empty())
 				.subscribe(matchMessage -> matchMessage.edit()

@@ -29,4 +29,12 @@ public class MatchResultReference {
 		this.matchChannelId = matchMessage.getChannelId().asLong();
 		this.matchResultId = matchResultId;
 	}
+
+	public MatchResultReference(Message resultMessage, UUID matchResultId) {
+		this.resultMessageId = resultMessage.getId().asLong();
+		this.resultChannelId = resultMessage.getChannelId().asLong();
+		this.matchMessageId = 0L;
+		this.matchChannelId = 0L;
+		this.matchResultId = matchResultId;
+	}
 }

@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.mod.ForceWin;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
 import com.elorankingbot.backend.commands.player.PlayerInfo;
@@ -152,6 +153,7 @@ public class AddQueue extends SlashCommand {
 		bot.deployCommand(server, Edit.getRequest(server)).subscribe(commandData ->
 				bot.setPermissionsForAdminCommand(server, Edit.class.getSimpleName()));
 		bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
+		bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. Relevant commands have been deployed or updated. " +
