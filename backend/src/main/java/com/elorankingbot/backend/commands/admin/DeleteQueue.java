@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.mod.ForceDraw;
 import com.elorankingbot.backend.commands.mod.ForceWin;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.model.Game;
@@ -62,11 +63,13 @@ public class DeleteQueue extends SlashCommand {
 			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, Edit.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, ForceWin.class.getSimpleName().toLowerCase()).subscribe();
+			bot.deleteCommand(server, ForceDraw.class.getSimpleName().toLowerCase()).subscribe();
 		} else {
 			bot.deployCommand(server, Join.getRequest(server)).subscribe();
 			bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
 			bot.deployCommand(server, Edit.getRequest(server)).subscribe();
 			bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
+			bot.maybeDeployForceDraw(server).subscribe();
 		}
 
 		event.reply(String.format("Deleted queue %s. Updated the relevant commands. This may take a few minutes to deploy on the server.",

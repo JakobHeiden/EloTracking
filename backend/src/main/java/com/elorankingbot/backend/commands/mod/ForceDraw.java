@@ -1,10 +1,7 @@
 package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.ModCommand;
-import com.elorankingbot.backend.model.MatchFinderQueue;
-import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.model.ReportStatus;
-import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -16,18 +13,21 @@ import java.util.List;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 @ModCommand
-public class ForceWin extends ForceMatch {
+public class ForceDraw extends ForceMatch {
 
-	public ForceWin(ChatInputInteractionEvent event, Services services) {
+
+	public ForceDraw(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {
 		var requestBuilder = ApplicationCommandRequest.builder()
-				.name(ForceWin.class.getSimpleName().toLowerCase())
+				.name(ForceDraw.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
 				.defaultPermission(false);
-		server.getGames().forEach(game -> {
+		server.getGames()
+				.stream().filter(Game::isAllowDraw)
+				.forEach(game -> {
 			if (game.getQueues().size() == 1) {
 				var queue = game.getQueues().stream().findAny().get();
 				var queueOptionBuilder = ApplicationCommandOptionData.builder()
@@ -57,19 +57,9 @@ public class ForceWin extends ForceMatch {
 			for (int playerIndex = 1; playerIndex < queue.getNumPlayersPerTeam() + 1; playerIndex++) {
 				String optionName;
 				if (queue.getNumPlayersPerTeam() == 1) {
-					if (queue.getNumTeams() == 2) {
-						optionName = teamIndex == 1 ? "winner" : "loser";
-					} else {
-						optionName = teamIndex == 1 ? "player-1-winner" : String.format("player-%s-loser", teamIndex);
-					}
+					optionName = "player-" + teamIndex;
 				} else {
-					if (queue.getNumTeams() == 2) {
-						optionName = teamIndex == 1 ? "winning-team-player-" + playerIndex
-								: "losing-team-player-" + playerIndex;
-					} else {
-						optionName = teamIndex == 1 ? "winning-team-1-player-" + playerIndex
-								: String.format("losing-team-%s-player-%s", teamIndex, playerIndex);
-					}
+					optionName = String.format("team-%s-player-%s", teamIndex, playerIndex);
 				}
 				queueOptionBuilder.addOption(ApplicationCommandOptionData.builder()
 						.name(optionName)
@@ -82,23 +72,21 @@ public class ForceWin extends ForceMatch {
 	}
 
 	public static String getShortDescription() {
-		return "Force a win.";
+		return "Force a draw.";
 	}
 
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
 				"This command will not be present unless the server is configured to have at least one ranking and one " +
-				"queue. There will be one `/" + ForceWin.class.getSimpleName().toLowerCase() + "` command for each queue.\n" +
+				"queue. There will be one `/" + ForceDraw.class.getSimpleName().toLowerCase() + "` command for each queue" +
+				"that belongs to a ranking that allows draws.\n" +
 				"`Required:` Select the players for the match.";
 	}
 
 	protected void doReports() {
-		for (Player player : teams.get(0)) {
-			match.reportAndSetConflictData(player.getId(), ReportStatus.WIN);
-		}
-		for (List<Player> team : teams.subList(1, teams.size())) {
+		for (List<Player> team : teams) {
 			for (Player player : team) {
-				match.reportAndSetConflictData(player.getId(), ReportStatus.LOSE);
+				match.reportAndSetConflictData(player.getId(), ReportStatus.DRAW);
 			}
 		}
 	}

@@ -154,6 +154,7 @@ public class AddQueue extends SlashCommand {
 				bot.setPermissionsForAdminCommand(server, Edit.class.getSimpleName()));
 		bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
 		bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
+		bot.maybeDeployForceDraw(server).subscribe();
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. Relevant commands have been deployed or updated. " +
