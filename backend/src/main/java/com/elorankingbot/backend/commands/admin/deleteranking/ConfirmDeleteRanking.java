@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin.deleteranking;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.admin.*;
+import com.elorankingbot.backend.commands.mod.ForceDraw;
 import com.elorankingbot.backend.commands.mod.ForceWin;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
@@ -50,11 +51,13 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, Edit.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, ForceWin.class.getSimpleName().toLowerCase()).subscribe();
+			bot.deleteCommand(server, ForceDraw.class.getSimpleName().toLowerCase()).subscribe();
 		} else {
 			bot.deployCommand(server, Join.getRequest(server)).subscribe();
 			bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
 			bot.deployCommand(server, Edit.getRequest(server)).subscribe();
 			bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
+			bot.maybeDeployForceDraw(server).subscribe();
 		}
 	}
 

@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.commands.mod.ForceDraw;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -15,7 +16,6 @@ import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.TextChannelCreateMono;
 import discord4j.core.spec.TextChannelEditMono;
 import discord4j.discordjson.json.ApplicationCommandData;
@@ -298,7 +298,7 @@ public class DiscordBotService {
 			}
 			Guild guild = getGuildById(server.getGuildId()).block();
 			Category disputeCategory = guild.createCategory("elo disputes")
-					.withPermissionOverwrites(denyEveryoneView(server),	allowAdminView(server),	allowModView(server))
+					.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
 					.block();
 			server.setDisputeCategoryId(disputeCategory.getId().asLong());
 			dbService.saveServer(server);
@@ -314,7 +314,7 @@ public class DiscordBotService {
 			if (index >= categoryIds.size()) {
 				Guild guild = getGuildById(server.getGuildId()).block();
 				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : index + 1))
-						.withPermissionOverwrites(denyEveryoneView(server),	allowAdminView(server),	allowModView(server))
+						.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
 						.block();
 				categoryIds.add(archiveCategory.getId().asLong());
 				dbService.saveServer(server);
@@ -329,7 +329,7 @@ public class DiscordBotService {
 				}
 				Guild guild = getGuildById(server.getGuildId()).block();
 				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
-						.withPermissionOverwrites(denyEveryoneView(server),	allowAdminView(server),	allowModView(server))
+						.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
 						.block();
 				categoryIds.set(index, archiveCategory.getId().asLong());
 				dbService.saveServer(server);
@@ -365,6 +365,15 @@ public class DiscordBotService {
 				.doOnError(ClientException.class, e ->
 						log.error("Error deploying command:\n" + e.getRequest().toString()
 								.replace(", ", ",\n")));
+	}
+
+	public Mono<ApplicationCommandData> maybeDeployForceDraw(Server server) {
+		if (server.getQueues().stream()
+				.filter(queue -> queue.getGame().isAllowDraw())
+				.toList().size() > 0) {
+			return deployCommand(server, ForceDraw.getRequest(server));
+		}
+		return Mono.empty();
 	}
 
 	private Mono<Long> getCommandIdByName(long guildid, String commandName) {
