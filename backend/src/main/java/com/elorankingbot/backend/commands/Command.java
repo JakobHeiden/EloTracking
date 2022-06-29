@@ -8,7 +8,7 @@ import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,7 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public abstract class Command {
+public abstract class Command {// TODO koennen die abstrakten zwischenklassen weg? die scheinen nichts zu machen
+	// die commands werden unterschiedlich gebaut, insbesondere der CommandClassName wird unterschiedlich gefolgert, das reicht aber nicht als grund
 
 	protected final DBService dbService;
 	protected final DiscordBotService bot;
@@ -24,7 +25,7 @@ public abstract class Command {
 	protected final MatchService matchService;
 	protected final QueueService queueService;
 	protected final TimedTaskQueue timedTaskQueue;
-	protected final ApplicationCommandInteractionEvent event;
+	protected final DeferrableInteractionEvent event;
 	protected final long guildId;
 	protected final Server server;
 	protected final User activeUser;
@@ -32,7 +33,7 @@ public abstract class Command {
 
 	protected static final List none = new ArrayList<>();
 
-	protected Command(ApplicationCommandInteractionEvent event, Services services) {
+	protected Command(DeferrableInteractionEvent event, Services services) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.matchService = services.matchService;
@@ -75,7 +76,7 @@ public abstract class Command {
 				return;
 			}
 		}
-		if (this.getClass().isAnnotationPresent(ModCommand.class)) {// TODO! admins koennen das auh ausfoheren
+		if (this.getClass().isAnnotationPresent(ModCommand.class)) {
 			if (!userIsAdmin && server.getModRoleId() == 0L) {
 				event.reply("This command requires Moderator permissions. The Moderator role is not currently set. " +
 						"Please use /setpermissions.").subscribe();
@@ -89,6 +90,10 @@ public abstract class Command {
 		}
 
 		execute();
+	}
+
+	protected void acknowledgeEvent() {
+		event.deferReply().subscribe();
 	}
 
 	protected abstract void execute();

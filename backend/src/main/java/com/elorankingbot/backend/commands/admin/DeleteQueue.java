@@ -33,7 +33,7 @@ public class DeleteQueue extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name(DeleteQueue.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("queue").description("Which queue to delete")
 						.type(STRING.getValue())

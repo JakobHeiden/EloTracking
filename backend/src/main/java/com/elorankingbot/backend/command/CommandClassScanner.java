@@ -18,8 +18,10 @@ import java.util.stream.Collectors;
 public class CommandClassScanner {
 
 	// command strings are simple class names in lowercase, full class name is class name with package path
+	// these are used for instantiating all Commands
 	private final Map<String, String> commandStringToFullClassName;
 	@Getter
+	// these are used in Help
 	private final Set<String> adminCommandClassNames, modCommandClassNames, playerCommandClassNames;
 
 	public CommandClassScanner() throws IOException {
@@ -44,38 +46,17 @@ public class CommandClassScanner {
 				.collect(Collectors.toSet());
 
 		this.adminCommandClassNames = classes.stream()
-				.filter(clazz -> {
-					try {
-						return Class.forName(clazz.getName()).isAnnotationPresent(AdminCommand.class);
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-						return false;
-					}
-				})
+				.filter(clazz -> clazz.isAnnotationPresent(AdminCommand.class) && !clazz.isAnnotationPresent(NoHelpEntry.class))
 				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
 		adminCommandClassNames.forEach(className -> log.trace("admin command " + className));
 		this.modCommandClassNames = classes.stream()
-				.filter(clazz -> {
-					try {
-						return Class.forName(clazz.getName()).isAnnotationPresent(ModCommand.class);
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-						return false;
-					}
-				})
+				.filter(clazz -> clazz.isAnnotationPresent(ModCommand.class) && !clazz.isAnnotationPresent(NoHelpEntry.class))
 				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
 		modCommandClassNames.forEach(className -> log.trace("mod command " + className));
 		this.playerCommandClassNames = classes.stream()
-				.filter(clazz -> {
-					try {
-						return Class.forName(clazz.getName()).isAnnotationPresent(PlayerCommand.class);
-					} catch (ClassNotFoundException e) {
-						e.printStackTrace();
-						return false;
-					}
-				})
+				.filter(clazz -> clazz.isAnnotationPresent(PlayerCommand.class) && !clazz.isAnnotationPresent(NoHelpEntry.class))
 				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
 		playerCommandClassNames.forEach(className -> log.trace("player command " + className));

@@ -110,7 +110,7 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 		return embedBuilder.build();
 	}
 
-	public static EmbedCreateSpec createMatchResultEmbed(MatchResult matchResult) {
+	public static EmbedCreateSpec createMatchResultEmbed(MatchResult matchResult) {// TODO anpassen, zb queue name und K...?
 		var embedBuilder = EmbedCreateSpec.builder()
 				.title(matchResult.getGame().getName());
 		for (TeamMatchResult teamMatchResult : matchResult.getTeamMatchResults()) {

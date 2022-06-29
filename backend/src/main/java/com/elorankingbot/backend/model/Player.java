@@ -52,7 +52,7 @@ public class Player  {
     public PlayerGameStats getOrCreateGameStats(Game game) {// TODO! durch alle uses gehen, nach bedarf durch findGameStats ersetzen
         PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
         if (playerGameStats == null) {
-            PlayerGameStats newPlayerGameStats = new PlayerGameStats(1200);
+            PlayerGameStats newPlayerGameStats = new PlayerGameStats(game.getInitialRating());
             gameNameToPlayerGameStats.put(game.getName(), newPlayerGameStats);
             playerGameStats = newPlayerGameStats;
         }

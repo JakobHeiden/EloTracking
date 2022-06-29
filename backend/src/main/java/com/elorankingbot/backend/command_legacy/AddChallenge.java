@@ -19,7 +19,7 @@ public class AddChallenge extends SlashCommand {
 		ImmutableApplicationCommandRequest.Builder requestBuilder = ApplicationCommandRequest.builder()
 				.name("addchallenge")
 				.description("Add a challenge option to a game")
-				.defaultPermission(false);
+				.defaultPermission(true);
 
 		if (server.getGames().size() > 1) {
 			ImmutableApplicationCommandOptionData.Builder gameOptionBuilder =

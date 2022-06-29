@@ -27,7 +27,7 @@ public class AddRank extends SlashCommand {
 		var requestBuilder = ApplicationCommandRequest.builder()
 				.name("addrank")
 				.description(getShortDescription())
-				.defaultPermission(false);
+				.defaultPermission(true);
 		if (server.getGames().size() > 1) {
 			requestBuilder.addOption(ApplicationCommandOptionData.builder()
 					.name("ranking")

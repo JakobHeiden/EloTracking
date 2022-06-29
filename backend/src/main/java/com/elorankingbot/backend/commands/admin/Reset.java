@@ -24,7 +24,7 @@ public class Reset extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name("reset")
 				.description(getShortDescription())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("ranking")
 						.description("Which ranking to reset")

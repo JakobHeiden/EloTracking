@@ -26,7 +26,7 @@ public class ForceWin extends ForceMatch {
 		var requestBuilder = ApplicationCommandRequest.builder()
 				.name(ForceWin.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
-				.defaultPermission(false);
+				.defaultPermission(true);
 		server.getGames().forEach(game -> {
 			if (game.getQueues().size() == 1) {
 				var queue = game.getQueues().stream().findAny().get();

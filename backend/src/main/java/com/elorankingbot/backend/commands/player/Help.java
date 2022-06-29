@@ -57,6 +57,7 @@ public class Help extends SlashCommand {
 				.block();
 	}
 
+	// TODO in eigenes Command auslagern
 	public static void executeSelectMenuSelection(Services services, SelectMenuInteractionEvent event) {
 		event.getMessage().get().edit().withEmbeds(createHelpEmbed(services, event.getValues().get(0))).subscribe();
 		event.deferEdit().subscribe();

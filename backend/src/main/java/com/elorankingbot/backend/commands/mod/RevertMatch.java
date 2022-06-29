@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 @ModCommand
-public class RevertMatch extends MessageCommand {// TODO in help steht UndoMatch, aendern in Undo Match
+public class RevertMatch extends MessageCommand {
 
 	private MatchResult matchResult;
 	private MatchResultReference matchResultReference;

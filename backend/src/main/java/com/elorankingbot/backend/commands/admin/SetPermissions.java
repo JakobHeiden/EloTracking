@@ -28,7 +28,7 @@ public class SetPermissions extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name(SetPermissions.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("adminormod").description("Link admin or moderator permissions to a role?")
 						.type(ApplicationCommandOption.Type.STRING.getValue())

@@ -11,6 +11,7 @@ public class RuleAsCancel extends RuleAsWinOrDraw {
 		super(event, services);
 	}
 
+	@Override
 	public void execute() {
 		String reason = String.format("%s has ruled the match to be canceled.", moderatorTag);
 		MatchResult canceledMatchResult = MatchService.generateCanceledMatchResult(match);

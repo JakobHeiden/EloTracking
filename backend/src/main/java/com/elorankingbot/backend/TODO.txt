@@ -1,2 +1,4 @@
 passierte bei /help, on select menu dings:
 Hooks::onErrorDropped: reactor.netty.http.client.PrematureCloseException: Connection has been closed BEFORE response, while sending request body
+
+game.name und game._id trennen

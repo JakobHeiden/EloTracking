@@ -60,7 +60,7 @@ public class Ban extends SlashCommand {
 						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.required(false)
 						.build())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.build();
 	}
 

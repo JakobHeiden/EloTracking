@@ -3,11 +3,9 @@ package com.elorankingbot.backend.command;
 import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
+import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.interaction.MessageInteractionEvent;
-import discord4j.core.event.domain.interaction.UserInteractionEvent;
+import discord4j.core.event.domain.interaction.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +26,7 @@ public class CommandFactoryConfiguration {
 
 	@Bean
 	public Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory() {
-		return event -> createSlashCommand(event);
+		return this::createSlashCommand;
 	}
 
 	@Bean
@@ -38,8 +36,19 @@ public class CommandFactoryConfiguration {
 	}
 
 	@Bean
+	public Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory() {
+		return this::createSelectMenuCommand;
+	}
+
+	@Bean
+	@Scope("prototype")
+	public SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) {
+		return eventParser.createSelectMenuCommand(event);
+	}
+
+	@Bean
 	public Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory() {
-		return event -> createButtonCommand(event);
+		return this::createButtonCommand;
 	}
 
 	@Bean
@@ -50,7 +59,7 @@ public class CommandFactoryConfiguration {
 
 	@Bean
 	public Function<MessageInteractionEvent, MessageCommand> messageCommandFactory() {
-		return event -> createMessageCommand(event);
+		return this::createMessageCommand;
 	}
 
 	@Bean
@@ -62,7 +71,7 @@ public class CommandFactoryConfiguration {
 
 	@Bean
 	public Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory() {
-		return event -> createUserInteractionChallenge(event);
+		return this::createUserInteractionChallenge;
 	}
 
 	@Bean

@@ -25,15 +25,18 @@ public class MatchFinderQueue {
 	private List<Group> groups;
 	private List<Group> formingGroups;// TODO was ist es und kann es weg? vllt was mit team q?
 	@DBRef(lazy = true)
-	private final Game game;
+	private Game game;
 	private final int numTeams;
 	private final int numPlayersPerTeam;
 	private final QueueType queueType;
 	private final int maxPremadeSize;
 	private int maxRatingSpread;
 	private int ratingElasticity;
+	private int k;
 	private boolean isBuildMatchFromTopPlayer;
 
+	// TODO warum funktioniert das mit der db? dieser konstruktor kann es ja wohl kaum sein...?
+	// vllt einfach umbauen auf @NoArgsConstructor, rein damit ich verstehe warum es funktioniert.
 	public MatchFinderQueue(Game game, String name, int numTeams, int numPlayersPerTeam,
 							QueueType queueType, int maxPremadeSize) {
 		this.game = game;
@@ -44,6 +47,7 @@ public class MatchFinderQueue {
 		this.maxPremadeSize = maxPremadeSize;
 		this.maxRatingSpread = NO_LIMIT;
 		this.ratingElasticity = 100;
+		this.k = 16;
 		this.groups = new ArrayList<>();
 		this.formingGroups = new ArrayList<>();
 		this.isBuildMatchFromTopPlayer = true;

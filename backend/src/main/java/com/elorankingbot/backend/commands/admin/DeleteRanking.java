@@ -35,7 +35,7 @@ public class DeleteRanking extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name(DeleteRanking.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("ranking").description("Which ranking to delete")
 						.type(STRING.getValue())
