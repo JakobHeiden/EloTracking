@@ -25,7 +25,7 @@ public class DeleteRanks extends SlashCommand {
 		var requestBuilder = ApplicationCommandRequest.builder()
 				.name("deleteranks")
 				.description(getShortDescription())
-				.defaultPermission(false);
+				.defaultPermission(true);
 		if (server.getGames().size() > 1) {
 			requestBuilder.addOption(ApplicationCommandOptionData.builder()
 					.name("ranking")

@@ -5,8 +5,8 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.commands.mod.RevertMatch;
 import com.elorankingbot.backend.commands.player.QueueStatus;
+import com.elorankingbot.backend.components.FormatTools;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -17,7 +17,6 @@ import discord4j.rest.http.client.ClientException;
 
 import java.util.Optional;
 
-import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
@@ -31,7 +30,7 @@ public class CreateRanking extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name(CreateRanking.class.getSimpleName().toLowerCase())
 				.description("Create a ranking")
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("nameofranking").description("What do you call this ranking?")
 						.type(ApplicationCommandOption.Type.STRING.getValue())
@@ -61,8 +60,8 @@ public class CreateRanking extends SlashCommand {
 
 	protected void execute() {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
-		if (!isLegalDiscordName(nameOfGame)) {
-			event.reply(DiscordBotService.illegalNameMessage()).subscribe();
+		if (!FormatTools.isLegalDiscordName(nameOfGame)) {
+			event.reply(FormatTools.illegalNameMessage()).subscribe();
 			return;
 		}
 

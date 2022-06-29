@@ -27,7 +27,7 @@ public class Set extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name("set")
 				.description("Set a variable for the server")
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("variable").description("The variable you wish to set")
 						.type(ApplicationCommandOption.Type.STRING.getValue())

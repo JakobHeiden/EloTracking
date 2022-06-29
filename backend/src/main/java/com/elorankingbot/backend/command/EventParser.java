@@ -3,8 +3,11 @@ package com.elorankingbot.backend.command;
 import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
+import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.SetPermissions;
+import com.elorankingbot.backend.commands.admin.settings.SetVariable;
+import com.elorankingbot.backend.commands.admin.settings.Settings;
 import com.elorankingbot.backend.commands.player.Help;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
@@ -34,6 +37,7 @@ public class EventParser {
 	private final DiscordBotService bot;
 	private final CommandClassScanner commandClassScanner;
 	private final Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory;
+	private final Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory;
 	private final Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory;
 	private final Function<MessageInteractionEvent, MessageCommand> messageCommandFactory;
 
@@ -41,7 +45,8 @@ public class EventParser {
 					   Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory,
 					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
 					   Function<MessageInteractionEvent, MessageCommand> messageCommandFactory,
-					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory, CommandClassScanner commandClassScanner) {
+					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory,
+					   CommandClassScanner commandClassScanner, Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory) {
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
@@ -49,6 +54,7 @@ public class EventParser {
 		this.buttonCommandFactory = buttonCommandFactory;
 		this.messageCommandFactory = messageCommandFactory;
 		this.commandClassScanner = commandClassScanner;
+		this.selectMenuCommandFactory = selectMenuCommandFactory;
 		GatewayDiscordClient client = services.client;
 
 		client.on(ChatInputInteractionEvent.class)
@@ -62,7 +68,21 @@ public class EventParser {
 				.subscribe();
 
 		client.on(SelectMenuInteractionEvent.class)
-				.subscribe(event -> Help.executeSelectMenuSelection(services, event));
+				.subscribe(event -> {// TODO zusammen mit Help umbauen
+					if (event.getCustomId().startsWith(Help.customId)) {
+						Help.executeSelectMenuSelection(services, event);
+					} else {
+						try {
+							createAndExecuteSelectMenuCommand(event);
+						} catch (Exception e) {
+							handleException(e, event);
+						}
+					}
+				});
+
+		client.on(ModalSubmitInteractionEvent.class)
+				// this will not create a Spring Bean and consequently will not trigger AOP logging...
+				.subscribe(event -> new SetVariable(event, services).doExecute());
 
 		client.on(MessageInteractionEvent.class)
 				.doOnNext(this::createAndExecuteMessageCommand)
@@ -76,6 +96,7 @@ public class EventParser {
 						Server server = new Server(event.getGuild().getId().asLong());
 						dbService.saveServer(server);
 						bot.deployCommand(server, SetPermissions.getRequest()).block();
+						bot.deployCommand(server, Settings.getRequest()).block();
 						//long everyoneRoleId = server.getGuildId();
 						//bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
 						bot.deployCommand(server, Help.getRequest()).subscribe();
@@ -102,6 +123,13 @@ public class EventParser {
 	@Transactional
 	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
 		SlashCommand command = slashCommandFactory.apply(event);
+		bot.logCommand(command);
+		command.doExecute();
+	}
+
+	@Transactional
+	void createAndExecuteSelectMenuCommand(SelectMenuInteractionEvent event) {
+		SelectMenuCommand command = selectMenuCommandFactory.apply(event);
 		bot.logCommand(command);
 		command.doExecute();
 	}
@@ -141,7 +169,28 @@ public class EventParser {
 					.getConstructor(ChatInputInteractionEvent.class, Services.class)
 					.newInstance(event, services);
 		} catch (Exception e) {
-			bot.sendToOwner("exception occurred while instantiating command " + e.getMessage());
+			String errorMessage = String.format("exception creating SlashCommand %s on %s by %s",
+					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
+			bot.sendToOwner(errorMessage);
+			System.out.println(errorMessage);
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) {
+		log.debug("customId = " + event.getCustomId());
+		String commandClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
+		log.trace("commandClassName = " + commandClassName);
+		try {
+			return (SelectMenuCommand) Class.forName(commandClassName)
+					.getConstructor(SelectMenuInteractionEvent.class, Services.class)
+					.newInstance(event, services);
+		} catch (Exception e) {
+			String errorMessage = String.format("exception creating SelectMenuCommand %s on %s by %s",
+					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
+			bot.sendToOwner(errorMessage);
+			System.out.println(errorMessage);
 			e.printStackTrace();
 			return null;
 		}

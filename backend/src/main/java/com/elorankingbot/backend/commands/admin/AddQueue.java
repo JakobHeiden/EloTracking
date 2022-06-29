@@ -6,6 +6,7 @@ import com.elorankingbot.backend.commands.mod.ForceWin;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.Leave;
 import com.elorankingbot.backend.commands.player.PlayerInfo;
+import com.elorankingbot.backend.components.FormatTools;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
@@ -17,8 +18,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.*;
-import static com.elorankingbot.backend.service.DiscordBotService.illegalNameMessage;
-import static com.elorankingbot.backend.service.DiscordBotService.isLegalDiscordName;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.INTEGER;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
@@ -41,7 +40,7 @@ public class AddQueue extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name(AddQueue.class.getSimpleName().toLowerCase())
 				.description("Add a queue to a ranking")
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(gameOptionBuilder.build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("playersperteam").description("How many players per team? Set to 1 if not a team game")
@@ -101,8 +100,8 @@ public class AddQueue extends SlashCommand {
 		}
 		Game game = server.getGame(event.getOption("ranking").get().getValue().get().asString());
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
-		if (!isLegalDiscordName(nameOfQueue)) {
-			event.reply(illegalNameMessage()).subscribe();
+		if (!FormatTools.isLegalDiscordName(nameOfQueue)) {
+			event.reply(FormatTools.illegalNameMessage()).subscribe();
 			return;
 		}
 		if (nameOfQueue.length() > 32) {

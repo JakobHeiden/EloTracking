@@ -24,7 +24,7 @@ public class ForceDraw extends ForceMatch {
 		var requestBuilder = ApplicationCommandRequest.builder()
 				.name(ForceDraw.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
-				.defaultPermission(false);
+				.defaultPermission(true);
 		server.getGames()
 				.stream().filter(Game::isAllowDraw)
 				.forEach(game -> {

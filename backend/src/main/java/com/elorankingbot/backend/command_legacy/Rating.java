@@ -42,7 +42,7 @@ public class Rating extends SlashCommand {
 						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.required(false)
 						.build())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.build();
 	}
 

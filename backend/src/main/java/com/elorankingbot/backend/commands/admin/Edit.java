@@ -55,7 +55,7 @@ public class Edit extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name("edit")
 				.description("Edit a variable for a queue")
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addAllOptions(subCommandGroupsAndSubCommands)
 				.build();
 	}

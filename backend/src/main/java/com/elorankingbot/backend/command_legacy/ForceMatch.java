@@ -57,7 +57,7 @@ public class ForceMatch extends SlashCommand {
 						.name("reason").description("Give a reason. This will be relayed to the players involved")
 						.type(ApplicationCommandOption.Type.STRING.getValue()).required(false)
 						.build())
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.build();
 	}
 

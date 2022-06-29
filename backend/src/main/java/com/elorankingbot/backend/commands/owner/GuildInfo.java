@@ -19,7 +19,7 @@ public class GuildInfo extends SlashCommand {
 		return ApplicationCommandRequest.builder()
 				.name(GuildInfo.class.getSimpleName().toLowerCase())
 				.description("GuildInfo")
-				.defaultPermission(false)
+				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("guildid")
 						.description("GuildId")

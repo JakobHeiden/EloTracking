@@ -20,7 +20,6 @@ public class MatchService {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final QueueService queueService;
-	private static int k = 16;// TODO
 
 	public MatchService(Services services) {
 		this.dbService = services.dbService;
@@ -41,10 +40,10 @@ public class MatchService {
 			List<Player> allOtherPlayers = match.getPlayers();
 			team.forEach(allOtherPlayers::remove);
 			double averageTeamRating = team.stream()
-					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
+					.mapToDouble(player -> player.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
 			double averageOtherRating = allOtherPlayers.stream()
-					.mapToDouble(pl -> pl.getOrCreateGameStats(game).getRating())
+					.mapToDouble(player -> player.getOrCreateGameStats(game).getRating())
 					.average().getAsDouble();
 			double numOtherTeams = match.getQueue().getNumTeams() - 1;
 			// TODO erwartungswert skaliert bei zb 3 spielern lediglich von 0 bis 2/3. sollte vllt wie im speziellen fall von 0 bis 1?
@@ -54,7 +53,7 @@ public class MatchService {
 			for (Player player : team) {
 				double actualResult = match.getReportStatus(player.getId()).value;
 				double oldRating = player.getOrCreateGameStats(game).getRating();
-				double newRating = oldRating + k * (actualResult - expectedResult);
+				double newRating = oldRating + match.getQueue().getK() * (actualResult - expectedResult);
 				PlayerMatchResult playerMatchResult = new PlayerMatchResult(
 						player, player.getTag(),
 						ReportStatus.valueOf(match.getReportStatus(player.getId()).name()),

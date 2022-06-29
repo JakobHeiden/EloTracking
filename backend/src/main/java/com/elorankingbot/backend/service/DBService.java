@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @Service
 public class DBService {
 
-	private static float initialRating = 1200;
 	private static float k = 16;
 	private final DiscordBotService bot;
 	private final ServerDao serverDao;
@@ -47,7 +46,7 @@ public class DBService {
 		List<Player> players = playerDao.findAllByGuildId(game.getGuildId());
 		players.forEach(player -> {
 			PlayerGameStats gameStats = player.getOrCreateGameStats(game);
-			gameStats.setRating(initialRating);
+			gameStats.setRating(game.getInitialRating());
 			gameStats.setWins(0);
 			gameStats.setLosses(0);
 			gameStats.setDraws(0);
