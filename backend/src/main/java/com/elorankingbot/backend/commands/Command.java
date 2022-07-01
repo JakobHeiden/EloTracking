@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public abstract class Command {// TODO koennen die abstrakten zwischenklassen weg? die scheinen nichts zu machen
@@ -42,7 +43,13 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 		this.timedTaskQueue = services.timedTaskQueue;
 		this.event = event;
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
-		this.server = dbService.findServerByGuildId(guildId).get();
+		Optional<Server> maybeServer = dbService.findServerByGuildId(guildId);
+		if (maybeServer.isEmpty()) {
+			String errorMessage = "Server not found";
+			log.error(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}
+		this.server = maybeServer.get();
 		this.activeUser = event.getInteraction().getUser();
 		this.activeUserId = activeUser.getId().asLong();
 	}

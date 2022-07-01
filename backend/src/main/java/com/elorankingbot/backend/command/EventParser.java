@@ -161,9 +161,7 @@ public class EventParser {
 	}
 
 	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
-		log.trace("commandName = " + event.getCommandName());
-		String commandClassName = commandClassScanner.getFullClassName(event.getCommandName());
-		log.trace("commandClassName = " + commandClassName);
+		String commandClassName = mapClassNameToFullName(event.getCommandName());
 		try {
 			return (SlashCommand) Class.forName(commandClassName)
 					.getConstructor(ChatInputInteractionEvent.class, Services.class)
@@ -179,9 +177,7 @@ public class EventParser {
 	}
 
 	public SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) {
-		log.debug("customId = " + event.getCustomId());
-		String commandClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
-		log.trace("commandClassName = " + commandClassName);
+		String commandClassName = mapClassNameToFullName(event.getCustomId().split(":")[0]);
 		try {
 			return (SelectMenuCommand) Class.forName(commandClassName)
 					.getConstructor(SelectMenuInteractionEvent.class, Services.class)
@@ -197,8 +193,7 @@ public class EventParser {
 	}
 
 	public ButtonCommand createButtonCommand(ButtonInteractionEvent event) {
-		String commandClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
-		log.trace("commandClassName = " + commandClassName);
+		String commandClassName = mapClassNameToFullName(event.getCustomId().split(":")[0]);
 		try {
 			return (ButtonCommand) Class.forName(commandClassName)
 					.getConstructor(ButtonInteractionEvent.class, Services.class)
@@ -214,8 +209,7 @@ public class EventParser {
 	}
 
 	public MessageCommand createMessageCommand(MessageInteractionEvent event) {
-		String commandClassName = commandClassScanner.getFullClassName(event.getCommandName().replace(" ", "").toLowerCase());
-		log.trace("commandClassName = " + commandClassName);
+		String commandClassName = mapClassNameToFullName(event.getCommandName().replace(" ", "").toLowerCase());
 		try {
 			return (MessageCommand) Class.forName(commandClassName)
 					.getConstructor(MessageInteractionEvent.class, Services.class)
@@ -228,6 +222,17 @@ public class EventParser {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	private String mapClassNameToFullName(String className) {
+		String fullClassName = commandClassScanner.getFullClassName(className);
+		if (fullClassName.equals("null")) {
+			String errorMessage = "Error mapping class name to full class name: " + className;
+			log.error(errorMessage);
+			bot.sendToOwner(errorMessage);
+			throw new RuntimeException(errorMessage);
+		}
+		return fullClassName;
 	}
 
 	// TODO weg

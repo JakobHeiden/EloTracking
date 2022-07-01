@@ -30,9 +30,8 @@ public class TimedTaskQueue {
 	@Getter
 	private int currentIndex;
 	private final Services services;
-	private final DBService service;
+	private final DBService dbService;
 	private final DiscordBotService bot;
-	private final GatewayDiscordClient client;
 	private final TimedTaskService timedTaskService;
 	private final TimeSlotDao timeSlotDao;
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
@@ -41,9 +40,8 @@ public class TimedTaskQueue {
 	public TimedTaskQueue(Services services,
 						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
 		this.services = services;
-		this.service = services.dbService;
+		this.dbService = services.dbService;
 		this.bot = services.bot;
-		this.client = services.client;
 		this.timedTaskService = services.timedTaskService;
 		this.timeSlotDao = timeSlotDao;
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
@@ -96,6 +94,9 @@ public class TimedTaskQueue {
 		if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
 			timedTaskService.deleteGamesMarkedForDeletion();
 			timedTaskService.markGamesForDeletion();
+		}
+		if (currentIndex % (24*60) == 0) {
+			dbService.persistBotStatsAndRestartAccumulator();
 		}
 
 		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);

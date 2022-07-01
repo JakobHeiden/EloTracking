@@ -2,6 +2,7 @@ package com.elorankingbot.backend.model;
 
 import com.elorankingbot.backend.service.DiscordBotService;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,11 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Document(collection = "server")
 public class Server {
 
 	@Id
+	@EqualsAndHashCode.Include
 	private long guildId;
 	private Map<String, Game> gameNameToGame;
 	private long adminRoleId, modRoleId;

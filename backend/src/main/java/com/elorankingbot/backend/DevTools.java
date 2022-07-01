@@ -3,7 +3,6 @@ package com.elorankingbot.backend;
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.commands.admin.SetPermissions;
-import com.elorankingbot.backend.commands.admin.settings.Settings;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.Server;
@@ -56,13 +55,8 @@ public class DevTools {
 				server -> {
 					try {
 						log.info("deploying to " + bot.getServerName(server));
-						bot.deployCommand(server, Settings.getRequest()).block();
-						bot.deployCommand(server, SetPermissions.getRequest()).block();
-						server.getGames().forEach(game -> {
-							game.setVariable("Initial Rating", "1200");
-							game.setVariable("K", "16");
-						});
-						dbService.saveServer(server);
+						//bot.deployCommand(server, Settings.getRequest()).block();
+						//bot.deployCommand(server, SetPermissions.getRequest()).block();
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

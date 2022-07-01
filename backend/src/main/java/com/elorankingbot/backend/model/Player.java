@@ -2,6 +2,7 @@ package com.elorankingbot.backend.model;
 
 import com.elorankingbot.backend.logging.UseToStringForLogging;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @UseToStringForLogging
 @Document(collection = "player")
@@ -21,6 +23,7 @@ public class Player  {
     private static final int NOT_BANNED = -2;
 
     @Id
+    @EqualsAndHashCode.Include
     private UUID id;
     private long userId;
     private long guildId;
@@ -75,11 +78,5 @@ public class Player  {
         playerGameStats.setRating(playerMatchResult.getNewRating());
         playerGameStats.getMatchHistory().add(matchResult.getId());
         playerGameStats.addResultStatus(matchResult.getResultStatus(this));
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (!(other instanceof Player)) return false;
-        return this.id.equals(((Player) other).id);
     }
 }
