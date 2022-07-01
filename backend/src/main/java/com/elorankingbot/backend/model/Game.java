@@ -2,6 +2,7 @@ package com.elorankingbot.backend.model;
 
 import com.elorankingbot.backend.components.FormatTools;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @NoArgsConstructor
 @Data
+@EqualsAndHashCode(exclude="server")
 public class Game {
 
     @Id

@@ -33,7 +33,7 @@ public class TimedTaskService {
 		this.client = services.client;
 	}
 
-	public void markGamesForDeletion() {
+	void markGamesForDeletion() {
 		List<Long> allGuildIds = client.getGuilds()
 				.map(guild -> guild.getId().asLong())
 				.collectList().block();
@@ -42,13 +42,13 @@ public class TimedTaskService {
 		//		.forEach(game -> game.setMarkedForDeletion(true));
 	}
 
-	public void deleteGamesMarkedForDeletion() {
+	void deleteGamesMarkedForDeletion() {
 		//service.findAllGames().stream()
 		//		.filter(game -> game.isMarkedForDeletion())
 		//		.forEach(game -> service.deleteGame(game.getGuildId()));
 	}
 
-	public void summarizeMatch(long messageId, long channelId, Object value) {
+	void summarizeMatch(long messageId, long channelId, Object value) {
 		/*
 		Match match = (Match) value;
 		Message message = client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block();
@@ -66,19 +66,19 @@ public class TimedTaskService {
 		 */
 	}
 
-	public void deleteMessage(long messageId, long channelId) {
+	void deleteMessage(long messageId, long channelId) {
 		// client uses messageId and channelId in reverse order
 		client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId)).block().delete().subscribe();
 	}
 
-	public void deleteChannel(long channelId) {
+	void deleteChannel(long channelId) {
 		try {
 			bot.getChannelById(channelId).block().delete().subscribe();
 		} catch (Exception ignored) {
 		}
 	}
 
-	public void unbanPlayer(long guildId, long userId, int duration) {
+	void unbanPlayer(long guildId, long userId, int duration) {
 		Player player = dbService.findPlayerByGuildIdAndUserId(guildId, userId).get();
 		if (!player.isBanned()) return;
 		if (player.getUnbanAtTimeSlot() != queue.getCurrentIndex()) return;
@@ -91,7 +91,7 @@ public class TimedTaskService {
 						DurationParser.minutesToString(duration))).subscribe());
 	}
 
-	public void warnMissingReports(UUID matchId) {
+	void warnMissingReports(UUID matchId) {
 		Optional<Match> maybeMatch = dbService.findMatch(matchId);
 		if (maybeMatch.isEmpty()) return;
 

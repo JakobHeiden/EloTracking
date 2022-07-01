@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -14,31 +13,33 @@ import java.util.stream.Collectors;
 @Service
 public class DBService {
 
-	private static float k = 16;
 	private final DiscordBotService bot;
 	private final ServerDao serverDao;
 	private final ChallengeDao challengeDao;
 	private final MatchResultDao matchResultDao;
 	private final MatchResultReferenceDao matchResultReferenceDao;
 	private final PlayerDao playerDao;
-	private final TimeSlotDao timeSlotDao;
 	private final MatchDao matchDao;
 	private final RankingsEntryDao rankingsEntryDao;
+	private final BotStatsAccumulatorDao botStatsAccumulatorDao;
+	private final BotStatsDao botStatsDao;
 
 	@Autowired
-	public DBService(Services services, CommandClassScanner scanner,
+	public DBService(Services services,
 					 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao,
 					 MatchResultReferenceDao matchResultReferenceDao, PlayerDao playerDao,
-					 TimeSlotDao timeSlotDao, MatchDao matchDao, RankingsEntryDao rankingsEntryDao) {
+					 MatchDao matchDao, RankingsEntryDao rankingsEntryDao, BotStatsAccumulatorDao botStatsAccumulatorDao,
+					 BotStatsDao botStatsDao) {
 		this.bot = services.bot;
 		this.serverDao = serverDao;
 		this.challengeDao = challengeDao;
 		this.matchResultDao = matchResultDao;
 		this.matchResultReferenceDao = matchResultReferenceDao;
 		this.playerDao = playerDao;
-		this.timeSlotDao = timeSlotDao;
 		this.matchDao = matchDao;
 		this.rankingsEntryDao = rankingsEntryDao;
+		this.botStatsAccumulatorDao = botStatsAccumulatorDao;
+		this.botStatsDao = botStatsDao;
 	}
 
 	public void resetAllPlayerRatings(Game game) {
@@ -282,5 +283,25 @@ public class DBService {
 
 	public void deleteAllRankingsEntries(Game game) {
 		rankingsEntryDao.deleteAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());
+	}
+
+	// Statistics
+	public void addMatchResultToStats(MatchResult matchResult) {
+		var maybeAccumulator = botStatsAccumulatorDao.findById(BotStatsAccumulator.SINGLETON_ID);
+		BotStatsAccumulator accumulator = maybeAccumulator.isEmpty() ? new BotStatsAccumulator() : maybeAccumulator.get();
+		accumulator.addMatchResult(matchResult);
+		botStatsAccumulatorDao.save(accumulator);
+	}
+
+	public void persistBotStatsAndRestartAccumulator() {
+		Optional<BotStatsAccumulator> maybeAccumulator = botStatsAccumulatorDao.findById(BotStatsAccumulator.SINGLETON_ID);
+		if (maybeAccumulator.isPresent()) {
+			botStatsDao.save(BotStats.botStatsOf(maybeAccumulator.get()));
+			botStatsAccumulatorDao.save(new BotStatsAccumulator());
+		} else {
+			String warnMessage = "BotStatsAccumulator not found.";
+			log.warn(warnMessage);
+			bot.sendToOwner(warnMessage);
+		}
 	}
 }

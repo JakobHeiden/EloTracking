@@ -128,9 +128,11 @@ public class MatchService {
 		for (Player player : match.getPlayers()) {
 			bot.updatePlayerRank(game, player);
 		}
+		dbService.addMatchResultToStats(matchResult);
 	}
 
 	// TODO processMatchResult und die updates in channels und messages evtl trennen
+	// TODO das ist ungluecklich, dass es 2 methoden gibt, die MatchResults prozessieren.
 	public EmbedCreateSpec processForcedMatchResult(MatchResult forcedMatchResult, List<User> users, String embedTitle) {
 		EmbedCreateSpec matchEmbed = EmbedBuilder.createCompletedMatchEmbed(embedTitle, forcedMatchResult);
 		for (User user : users) {
@@ -149,6 +151,7 @@ public class MatchService {
 			bot.updatePlayerRank(game, player);
 		});
 		bot.updateLeaderboard(game, Optional.of(forcedMatchResult));
+		dbService.addMatchResultToStats(forcedMatchResult);
 		return matchEmbed;
 	}
 
