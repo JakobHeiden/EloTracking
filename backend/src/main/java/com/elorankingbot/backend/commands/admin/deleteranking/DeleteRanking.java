@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.commands.admin;
+package com.elorankingbot.backend.commands.admin.deleteranking;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;

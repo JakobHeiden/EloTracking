@@ -1,7 +1,19 @@
 passierte bei /help, on select menu dings:
 Hooks::onErrorDropped: reactor.netty.http.client.PrematureCloseException: Connection has been closed BEFORE response, while sending request body
 
+/forcewin:
+Hooks::onErrorDropped: discord4j.rest.http.client.ClientException: GET /channels/981191323782623232/messages/981191325175128125 returned 404 Not Found with response {code=10003, message=Unknown Channel}
+
+
 game.name und game._id trennen
 
+liste machen welche happy paths
+liste abarbeiten
+1 happy path bauen:
+create ranking
+add q
+join q
+join q
+report match
+check for result
 
-botstats in processMatchResult aufrufen und persistieren

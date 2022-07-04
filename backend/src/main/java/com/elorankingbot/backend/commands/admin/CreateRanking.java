@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
 import com.elorankingbot.backend.commands.mod.Ban;
 import com.elorankingbot.backend.commands.mod.RevertMatch;
 import com.elorankingbot.backend.commands.player.QueueStatus;
@@ -62,6 +63,10 @@ public class CreateRanking extends SlashCommand {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfGame)) {
 			event.reply(FormatTools.illegalNameMessage()).subscribe();
+			return;
+		}
+		if (server.getGames().contains(new Game(server, nameOfGame, false))) {
+			event.reply("A ranking of that name already exists.").subscribe();
 			return;
 		}
 

@@ -167,7 +167,9 @@ public class DiscordBotService {
 	}
 
 	public void deleteChannel(long channelId) {
-		client.getChannelById(Snowflake.of(channelId)).subscribe(channel -> channel.delete().subscribe());
+		client.getChannelById(Snowflake.of(channelId))
+				.onErrorContinue(((throwable, o) -> log.info(String.format("Channel %s is already deleted.", channelId))))
+				.subscribe(channel -> channel.delete().subscribe());
 	}
 
 	public Message postToResultChannel(MatchResult matchResult) {

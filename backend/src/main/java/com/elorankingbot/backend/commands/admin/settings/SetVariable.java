@@ -4,6 +4,7 @@ import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.command.NoHelpEntry;
 import com.elorankingbot.backend.commands.Command;
 import com.elorankingbot.backend.commands.admin.*;
+import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.model.Game;
