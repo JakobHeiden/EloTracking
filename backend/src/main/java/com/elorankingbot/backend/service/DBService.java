@@ -214,7 +214,7 @@ public class DBService {
 	public void saveAllPlayers(List<Player> players) {
 		log.debug(String.format("Saving players %s on %s",
 				String.join(",", players.stream().map(Player::getTag).toList()),
-				bot.getServerName(players.get(0))));
+				players.isEmpty() ? "unknown" : bot.getServerName(players.get(0))));
 		playerDao.saveAll(players);
 	}
 

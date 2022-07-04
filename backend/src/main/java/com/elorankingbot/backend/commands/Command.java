@@ -67,8 +67,9 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 			return;
 		}
 
-		List<Long> memberRoleIds = event.getInteraction().getMember().get().getRoleIds()
-				.stream().map(Snowflake::asLong).toList();
+		List<Long> memberRoleIds = new ArrayList<>(event.getInteraction().getMember().get().getRoleIds()
+				.stream().map(Snowflake::asLong).toList());
+		memberRoleIds.add(Long.valueOf(guildId));
 		boolean userIsAdmin = memberRoleIds.contains(server.getAdminRoleId());
 		boolean userIsMod = memberRoleIds.contains(server.getModRoleId());
 		if (this.getClass().isAnnotationPresent(AdminCommand.class)) {

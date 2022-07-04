@@ -14,10 +14,11 @@ import java.util.Optional;
 
 @NoArgsConstructor
 @Data
-@EqualsAndHashCode(exclude="server")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Game {
 
     @Id
+    @EqualsAndHashCode.Include
     private String name;
     private Map<String, MatchFinderQueue> queueNameToQueue;
     @DBRef(lazy = true)
