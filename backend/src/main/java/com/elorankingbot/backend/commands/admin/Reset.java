@@ -40,7 +40,7 @@ public class Reset extends SlashCommand {
 						.build())
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("areyousure")
-						.description("This is not reversible. Are you completely sure? Enter the name of the game to proceed.")
+						.description("This is not reversible. Are you completely sure? Enter the name of the ranking to proceed.")
 						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.required(true)
 						.build())
@@ -58,7 +58,7 @@ public class Reset extends SlashCommand {
 				"Resets all player ratings, wins, losses, and possibly draws for a ranking. Match history is not affected.";
 	}
 
-	protected void execute() {
+	protected void execute() {// TODO areyousure mit confirm dialog ersetzen?
 		Game game = server.getGame(event.getOption("ranking").get().getValue().get().asString().toLowerCase());
 		String entered = event.getOption("areyousure").get().getValue().get().asString();
 		if (!entered.equals(game.getName())) {

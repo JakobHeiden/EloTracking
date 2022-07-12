@@ -33,8 +33,16 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 		boolean userIsAdmin = event.getInteraction().getMember().get()
 				.getRoleIds().stream().map(Snowflake::asLong).toList()
 				.contains(server.getAdminRoleId());
+		boolean userIsMod = event.getInteraction().getMember().get()
+				.getRoleIds().stream().map(Snowflake::asLong).toList()
+				.contains(server.getModRoleId());
 		boolean isAdjudicatingOwnMatch = match.containsPlayer(Player.generateId(server.getGuildId(),
 				event.getInteraction().getUser().getId().asLong()));
+		if (!userIsAdmin && !userIsMod) {
+			event.reply(String.format("Only <@&%s> and <@&%s> can adjudicate a match.",
+					server.getAdminRoleId(), server.getModRoleId())).withEphemeral(true).subscribe();
+			return;
+		}
 		if (isAdjudicatingOwnMatch && !userIsAdmin) {
 			event.reply("Moderators cannot adjudicate their own match.").withEphemeral(true).subscribe();
 			return;
