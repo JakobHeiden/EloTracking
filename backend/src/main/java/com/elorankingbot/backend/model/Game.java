@@ -109,6 +109,7 @@ public class Game {
                 try {
                     initialRating = Integer.parseInt(value);
                 } catch (NumberFormatException e) {
+                    // TODO different message for numbers that are too big
                     return Optional.of("Please enter an Integer.");
                 }
                 return Optional.empty();

@@ -10,10 +10,7 @@ def enter():
 
 def command(cmdString):
 	type(cmdString)
-	sleep(0.2)
-	type(Key.ENTER)
-	sleep(0.2)
-	type(Key.ENTER)
+	enter()
 
 def cleanChannels():
 	rightClick(channelRegion.find("1658756416028.png").getTarget().below(25))
@@ -24,12 +21,12 @@ def cleanChannels():
 	if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
 		click("1658492956277.png")
 		type(Key.ENTER)
-	if exists(Pattern("1658432253622.png").similar(0.90), 0.1):
+	if exists(Pattern("1658432253622.png").similar(0.75), 0.1):
 		numChannelsToDelete = 2
 	else: 
 		numChannelsToDelete = 0
 	for x in range(numChannelsToDelete):
-		rightClick(Pattern("1658318475566.png").similar(0.90).targetOffset(-16,10))
+		rightClick(find("1658855388884.png").getTarget().below(25))
 		sleep(0.3)
 		click(Pattern("1656949343471.png").similar(0.69))
 		type(Key.ENTER)
@@ -37,7 +34,7 @@ def cleanChannels():
 
 def deleteRanking():
 	sleep(0.1)
-	type("/deleteranking testranking" + Key.ENTER + Key.ENTER)
+	command("/deleteranking testranking")
 	sleep(0.5)
 	if exists("1656944142796.png"):
 		click("1656944142796.png")
@@ -50,16 +47,15 @@ def createChannel():
     sleep(1)
 
 def testPermissions():
-    type("/setpermission\n")
-    click("1658753288770.png")
-    click(Pattern("1656941051735.png").similar(0.90))
-    type("\n")
-    
-    type("/setpermission\n")
-    sleep(0.2)
-    click("1656941586792.png")
-    click(Pattern("1656941211451.png").similar(0.94))
-    type("\n")
+	type("/setpermission\n")
+	click("1658753288770.png")
+	click(Pattern("1656941051735.png").similar(0.90))
+	type("\n")
+	type("/setpermission\n")
+	sleep(0.2)
+	click("1656941586792.png")
+	click(Pattern("1656941211451.png").similar(0.94))
+	type("\n")
 
 def createRanking():
     type("/createranking" + Key.TAB + "testranking" + Key.TAB + "\n\n")
@@ -72,16 +68,14 @@ def addQueue():
         sleep(1)
 
 def deleteQueue():
-    # while not exists(Pattern("1658338286658.png").similar(0.90)):
-	type("/deletequeue testranking\n\n")
+    #while not exists(Pattern("1658338286658.png").similar(0.90)):
+	command("/deletequeue testranking")
 	sleep(0.5)
 
 def join():
-	#if exists(Pattern("1656952991305.png").similar(0.90).targetOffset(58,17)):
-	#	click(Pattern("1656952991305.png").similar(0.90).targetOffset(58,17))
-	#while not exists("1656952991305.png"):
-	type("/join testranking" + Key.ENTER + Key.ENTER)
-	#sleep(1)
+	while not exists("1656952991305.png"):
+		command("/join testranking")
+		sleep(1)
 
 def leave():
 	while not exists(Pattern("1658341665655.png").similar(0.90)):	
@@ -177,29 +171,68 @@ def testCancel():
 
 def testAddRankAndDeleteRanks():
 	gotoTestchannel()
-	type("/addrank @Gold\n 1200")
-	enter()
+	command("/addrank @Gold\n 1200")
 	sleep(2)
-	type("/deleteranks")
-	enter()
+	command("/deleteranks")
 	
 def testSettings():
 	gotoTestchannel()
 	command("/settings")
+	click("1658851858625.png")
+	click(Pattern("1658851875874.png").targetOffset(-5,21))
+	sleep(0.3)
+	click("1658851929626.png")
+	click("1658851951271.png")
+	wait("1658853366438.png")
+	type("1000")
+	click("1658853418852.png")
+	sleep(0.5)
+	click("1658853717062.png")
+	sleep(0.3)
+	click("1658853729560.png")
+	
+def testBan():
+	gotoTestchannel()
+	type("/ban")
+	click(Pattern("1658854155846.png").targetOffset(-76,-5))
+	click("1658854194498.png")
+	type("@Ente2\n")
+	type("duration:10")
+	enter()
+	type("/ban")
+	click(Pattern("1658854155846.png").targetOffset(-76,-5))
+	click("1658854488751.png")
+	type("@Ente2")
+	enter()
+	
+def testForcewin():
+	gotoTestchannel()
+	command("/forcewin testranking @Ente\n@Ente2")
+	
+def testRevertmatch():
+	channelRegion.click("1658855949366.png")
+	rightClick("1658855981102.png")
+	hover("1658856018344.png")
+	click("1658856034449.png")
+	
+	
+
+	
 	
 	
 
 
 setup()
-#testPermissions()	
-#testDeleteAndCreateRankingAndQueue()
-#testMisc()
-#testWinLose()
-#testCancel()
-#testAddRankAndDeleteRanks()
+testPermissions()	
+testDeleteAndCreateRankingAndQueue()
+testMisc()
+testWinLose()
+testCancel()
+testAddRankAndDeleteRanks()
 testSettings()
-
-
+testBan()
+testForcewin()
+testRevertmatch()
 
 
 
