@@ -28,7 +28,7 @@ public class SelectGameSetting extends SelectMenuCommand {
 		game = server.getGame(event.getValues().get(0).split(":")[0]);
 		selectedVariable = event.getValues().get(0).split(":")[1];
 		event.presentModal(
-				String.format("Enter a new value for %s : %s", game.getName(), selectedVariable),
+				String.format("Enter a new value for: %s", selectedVariable),
 				String.format("%s:%s:%s", SetVariable.class.getSimpleName().toLowerCase(), game.getName(), selectedVariable),
 				textInput()
 		).subscribe();

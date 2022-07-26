@@ -58,8 +58,8 @@ public class DevTools {
 				server -> {
 					try {
 						log.info("deploying to " + bot.getServerName(server));
-						bot.deployCommand(server, ForceWin.getRequest(server)).block();
-						bot.deployCommand(server, ForceDraw.getRequest(server)).block();
+						//bot.deployCommand(server, ForceWin.getRequest(server)).block();
+						//bot.deployCommand(server, ForceDraw.getRequest(server)).block();
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}

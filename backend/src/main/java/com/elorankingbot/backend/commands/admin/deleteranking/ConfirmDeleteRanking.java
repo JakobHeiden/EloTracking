@@ -69,14 +69,13 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 		dbService.saveAllPlayers(players);
 	}
 
-	private void updateCommands() {
+	private void updateCommands() {// TODO das hier is iwie quatsch, oben ist analog fast das gleiche
 		if (server.getGames().isEmpty()) {// TODO das hier generalisieren irgendwie... vllt ueber annotation
 			bot.deleteCommand(server, AddQueue.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, AddRank.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, DeleteRanking.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, Join.class.getSimpleName().toLowerCase()).subscribe();
 			bot.deleteCommand(server, Leave.class.getSimpleName().toLowerCase()).subscribe();
 		} else {
 			bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
