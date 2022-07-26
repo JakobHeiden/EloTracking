@@ -7,14 +7,3 @@ Hooks::onErrorDropped: discord4j.rest.http.client.ClientException: GET /channels
 
 game.name und game._id trennen
 
-edit
-reset
-
-dispute:
-- rulecancel
-- rulewin
-
-ban
-forcewin
-revertmatch
-
