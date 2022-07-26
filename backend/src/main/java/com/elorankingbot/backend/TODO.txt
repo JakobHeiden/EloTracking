@@ -7,13 +7,14 @@ Hooks::onErrorDropped: discord4j.rest.http.client.ClientException: GET /channels
 
 game.name und game._id trennen
 
-liste machen welche happy paths
-liste abarbeiten
-1 happy path bauen:
-create ranking
-add q
-join q
-join q
-report match
-check for result
+edit
+reset
+
+dispute:
+- rulecancel
+- rulewin
+
+ban
+forcewin
+revertmatch
 
