@@ -1,6 +1,11 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.commands.admin.*;
+import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
 import com.elorankingbot.backend.commands.mod.ForceDraw;
+import com.elorankingbot.backend.commands.mod.ForceWin;
+import com.elorankingbot.backend.commands.mod.RevertMatch;
+import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -356,6 +361,43 @@ public class DiscordBotService {
 	}
 
 	// Commands
+	public void updateGuildCommandsByRanking(Server server) {
+		if (server.getGames().isEmpty()) {
+			deleteCommand(server, DeleteRanking.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, AddQueue.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, AddRank.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, Reset.class.getSimpleName().toLowerCase()).subscribe();
+		} else {
+			deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
+			deployCommand(server, AddQueue.getRequest(server)).subscribe();
+			deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
+			deployCommand(server, AddRank.getRequest(server)).subscribe();
+			deployCommand(server, DeleteRanks.getRequest(server)).subscribe();
+			deployCommand(server, Reset.getRequest(server)).subscribe();
+		}
+	}
+
+	public void updateGuildCommandsByQueue(Server server) {
+		if (server.getQueues().isEmpty()) {
+			deleteCommand(server, Join.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, Edit.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, ForceWin.class.getSimpleName().toLowerCase()).subscribe();
+		} else {
+			deployCommand(server, Join.getRequest(server)).subscribe();
+			deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
+			deployCommand(server, Edit.getRequest(server)).subscribe();
+			deployCommand(server, ForceWin.getRequest(server)).subscribe();
+		}
+		if (server.getQueues().stream().filter(queue -> queue.getGame().isAllowDraw()).toList().isEmpty()) {
+			deleteCommand(server, ForceDraw.class.getSimpleName().toLowerCase()).subscribe();
+		} else {
+			deployCommand(server, ForceDraw.getRequest(server)).subscribe();
+		}
+	}
+
 	// TODO direkt schauen ob in dbService.adminCommands und entsprechend permissions setzen?
 	// schauen wie es ist mit CommandParser, on(GuildCreateEvent.class)
 	public Mono<ApplicationCommandData> deployCommand(Server server, ApplicationCommandRequest request) {
@@ -367,7 +409,7 @@ public class DiscordBotService {
 								.replace(", ", ",\n")));
 	}
 
-	public Mono<ApplicationCommandData> maybeDeployForceDraw(Server server) {
+	public Mono<ApplicationCommandData> maybeDeployForceDraw(Server server) {// TODO kann das weg?
 		if (server.getQueues().stream()
 				.filter(queue -> queue.getGame().isAllowDraw())
 				.toList().size() > 0) {

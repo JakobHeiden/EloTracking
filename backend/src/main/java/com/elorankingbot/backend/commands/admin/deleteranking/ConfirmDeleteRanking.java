@@ -40,24 +40,14 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 		dbService.deleteAllMatchResults(game);
 		server.removeGame(game);
 		dbService.saveServer(server);
-		updateCommands();
 		bot.deleteChannel(game.getLeaderboardChannelId());
 		bot.deleteChannel(game.getResultChannelId());
 		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
 		event.reply(String.format("Ranking %s deleted.", game.getName())).subscribe();
 
-		if (server.getQueues().isEmpty()) {
-			bot.deleteCommand(server, Join.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, Edit.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, ForceWin.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, ForceDraw.class.getSimpleName().toLowerCase()).subscribe();
-		} else {
-			bot.deployCommand(server, Join.getRequest(server)).subscribe();
-			bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
-			bot.deployCommand(server, Edit.getRequest(server)).subscribe();
-			bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
-			bot.maybeDeployForceDraw(server).subscribe();
+		bot.updateGuildCommandsByRanking(server);
+		if (!game.getQueues().isEmpty()) {
+			bot.updateGuildCommandsByQueue(server);
 		}
 	}
 
@@ -67,24 +57,5 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 			player.deleteGameStats(game);
 		}
 		dbService.saveAllPlayers(players);
-	}
-
-	private void updateCommands() {// TODO das hier is iwie quatsch, oben ist analog fast das gleiche
-		if (server.getGames().isEmpty()) {// TODO das hier generalisieren irgendwie... vllt ueber annotation
-			bot.deleteCommand(server, AddQueue.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, AddRank.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, DeleteRanking.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, Leave.class.getSimpleName().toLowerCase()).subscribe();
-		} else {
-			bot.deployCommand(server, AddQueue.getRequest(server)).subscribe();
-			bot.deployCommand(server, AddRank.getRequest(server)).subscribe();
-			bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
-			bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
-			bot.deployCommand(server, DeleteRanks.getRequest(server)).subscribe();
-			bot.deployCommand(server, Join.getRequest(server)).subscribe();
-			bot.deployCommand(server, Leave.getRequest()).subscribe();
-		}
 	}
 }

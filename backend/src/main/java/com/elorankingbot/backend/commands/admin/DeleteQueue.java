@@ -58,19 +58,7 @@ public class DeleteQueue extends SlashCommand {
 		game.deleteQueue(queueFullName.split(" ")[1]);
 		dbService.saveServer(server);
 
-		if (server.getQueues().isEmpty()) {
-			bot.deleteCommand(server, Join.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, Edit.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, ForceWin.class.getSimpleName().toLowerCase()).subscribe();
-			bot.deleteCommand(server, ForceDraw.class.getSimpleName().toLowerCase()).subscribe();
-		} else {
-			bot.deployCommand(server, Join.getRequest(server)).subscribe();
-			bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
-			bot.deployCommand(server, Edit.getRequest(server)).subscribe();
-			bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
-			bot.maybeDeployForceDraw(server).subscribe();
-		}
+		bot.updateGuildCommandsByQueue(server);
 
 		event.reply(String.format("Deleted queue %s. Updated the relevant commands. This may take a few minutes to deploy on the server.",
 				queueFullName)).subscribe();

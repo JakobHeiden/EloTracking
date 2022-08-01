@@ -2,18 +2,21 @@ package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
-import com.elorankingbot.backend.commands.admin.SetPermissions;
+import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.Settings;
-import com.elorankingbot.backend.commands.mod.ForceDraw;
-import com.elorankingbot.backend.commands.mod.ForceWin;
+import com.elorankingbot.backend.commands.mod.Ban;
+import com.elorankingbot.backend.commands.mod.RevertMatch;
+import com.elorankingbot.backend.commands.player.Help;
+import com.elorankingbot.backend.commands.player.Leave;
+import com.elorankingbot.backend.commands.player.PlayerInfo;
+import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
-import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +27,7 @@ public class DevTools {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final GatewayDiscordClient client;
+	private final ApplicationService applicationService;
 	private final CommandClassScanner commandClassScanner;
 	private final ApplicationPropertiesLoader props;
 	private final PlayerDao playerDao;
@@ -32,11 +36,12 @@ public class DevTools {
 	private final TimeSlotDao timeSlotDao;
 	private final ServerDao serverDao;
 
-	public DevTools(Services services,
-					PlayerDao playerDao, MatchDao matchDao, MatchResultDao matchResultDao, TimeSlotDao timeSlotDao, ServerDao serverDao) {
+	public DevTools(Services services, PlayerDao playerDao, MatchDao matchDao, MatchResultDao matchResultDao,
+					TimeSlotDao timeSlotDao, ServerDao serverDao) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.client = services.client;
+		this.applicationService = client.getRestClient().getApplicationService();
 		this.commandClassScanner = services.commandClassScanner;
 		this.playerDao = playerDao;
 		this.matchDao = matchDao;
@@ -45,19 +50,40 @@ public class DevTools {
 		this.timeSlotDao = timeSlotDao;
 		this.serverDao = serverDao;
 
-		if (props.isDeleteDataOnStartup()) {
-			deleteAllData();
-			deployInitialCommands();
-		}
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 	}
 
 	private void updateGuildCommands() {
+		log.warn("updating global commands...");
+		/*
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Settings.getRequest()).subscribe();
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), CreateRanking.getRequest()).subscribe();
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Leave.getRequest()).subscribe();
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), PlayerInfo.getRequest()).subscribe();
+
+		 */
+		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						log.info("deploying to " + bot.getServerName(server));
+						/*
+						bot.deleteCommand(server, "help").subscribe();
+						bot.deleteCommand(server, "settings").subscribe();
+						bot.deleteCommand(server, "createranking").subscribe();
+						bot.deleteCommand(server, "setpermissions").subscribe();
+						bot.deleteCommand(server, "ban").subscribe();
+						bot.deleteCommand(server, "leave").subscribe();
+						bot.deleteCommand(server, "playerinfo").subscribe();
+
+						 */
+
+						//bot.deleteCommand(server, "Revert Match").subscribe();
+
+						//log.info("deploying to " + bot.getServerName(server));
 						//bot.deployCommand(server, ForceWin.getRequest(server)).block();
 						//bot.deployCommand(server, ForceDraw.getRequest(server)).block();
 					} catch (Exception e) {
@@ -65,36 +91,5 @@ public class DevTools {
 					}
 				}
 		);
-	}
-
-	private void deployInitialCommands() {
-		log.warn("Deploying initial guild commands...");
-		long entenwieseId = props.getEntenwieseId();
-		Server entenwieseServer = new Server(entenwieseId);
-		dbService.saveServer(entenwieseServer);
-
-		bot.deleteAllGuildCommands(entenwieseId).blockLast();
-		bot.deployCommand(entenwieseServer, SetPermissions.getRequest()).block();
-		bot.setCommandPermissionForRole(entenwieseServer, "setrole", entenwieseId);
-		bot.deployCommand(entenwieseServer, CreateRanking.getRequest()).subscribe();
-	}
-
-	private void deleteAllData() {
-		if (props.getSpringDataMongodbDatabase().equals("deploy")) {
-			throw new RuntimeException("deleteAllData is being called on deploy database");
-		}
-
-		log.warn(String.format("Deleting all data on %s...", props.getSpringDataMongodbDatabase()));
-		matchDao.deleteAll();
-		matchResultDao.deleteAll();
-		playerDao.deleteAll();
-		timeSlotDao.deleteAll();
-		serverDao.deleteAll();
-	}
-
-	private void deleteAllChannels(Server server, String name) {
-		client.getGuildById(Snowflake.of(server.getGuildId())).block().getChannels()
-				.filter(channel -> channel.getName().contains(name))
-				.subscribe(channel -> channel.delete().subscribe());
 	}
 }

@@ -13,12 +13,12 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import java.util.Set;
 
 @AdminCommand
-public class SetPermissions extends SlashCommand {
+public class SetPermission extends SlashCommand {
 
 	private Set<String> adminCommands, modCommands;
 	private Role adminRole, modRole;
 
-	public SetPermissions(ChatInputInteractionEvent event, Services services) {
+	public SetPermission(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
 		this.adminCommands = services.commandClassScanner.getAdminCommandClassNames();
 		this.modCommands = services.commandClassScanner.getModCommandClassNames();
@@ -26,7 +26,7 @@ public class SetPermissions extends SlashCommand {
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name(SetPermissions.class.getSimpleName().toLowerCase())
+				.name(SetPermission.class.getSimpleName().toLowerCase())
 				.description(getShortDescription())
 				.defaultPermission(true)
 				.addOption(ApplicationCommandOptionData.builder()
@@ -79,11 +79,8 @@ public class SetPermissions extends SlashCommand {
 			nameOfRole = modRole.getName();
 		}
 		dbService.saveServer(server);
-		
-		bot.deployCommand(server, CreateRanking.getRequest()).subscribe();
 
-		event.reply(String.format("Linked %s permissions to %s. This may take a minute to update on the server.\n" +
-						"I added the `/%s` command to this server.",
-				adminOrMod, nameOfRole, CreateRanking.class.getSimpleName().toLowerCase())).subscribe();
+		event.reply(String.format("Linked %s permissions to %s. This may take a minute to update on the server.",
+				adminOrMod, nameOfRole)).subscribe();
 	}
 }

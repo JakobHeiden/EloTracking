@@ -52,7 +52,6 @@ public class SetVariable extends Command {
 				bot.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
 						bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
 				bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
-				bot.deployCommand(server, QueueStatus.getRequest()).subscribe();
 			}
 			userFeedback = String.format("\n**Variable %s for ranking %s is now set to %s.**", variableName, gameName, value);
 		}

@@ -95,18 +95,7 @@ public class CreateRanking extends SlashCommand {
 		}
 		dbService.saveServer(server);
 
-		bot.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
-				bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
-		bot.deployCommand(server, AddRank.getRequest(server)).subscribe(commandData ->
-				bot.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase()));
-		bot.deployCommand(server, DeleteRanks.getRequest(server)).subscribe(commandData ->
-				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
-		bot.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
-				bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
-		bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
-		bot.deployCommand(server, Ban.getRequest()).subscribe();
-		bot.deployCommand(server, QueueStatus.getRequest()).subscribe();
-		bot.deployCommand(server, RevertMatch.getRequest()).subscribe();
+		bot.updateGuildCommandsByRanking(server);
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 						"<#%s> where I put the leaderboard%s.\n" +
