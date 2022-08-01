@@ -59,12 +59,12 @@ public class DevTools {
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Settings.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), CreateRanking.getRequest()).subscribe();
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Leave.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), PlayerInfo.getRequest()).subscribe();
 
 		 */
+		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
 		dbService.findAllServers().forEach(
@@ -74,13 +74,13 @@ public class DevTools {
 						bot.deleteCommand(server, "help").subscribe();
 						bot.deleteCommand(server, "settings").subscribe();
 						bot.deleteCommand(server, "createranking").subscribe();
-						bot.deleteCommand(server, "setpermissions").subscribe();
 						bot.deleteCommand(server, "ban").subscribe();
 						bot.deleteCommand(server, "leave").subscribe();
 						bot.deleteCommand(server, "playerinfo").subscribe();
 
 						 */
 
+						bot.deleteCommand(server, "setpermissions").subscribe();
 						//bot.deleteCommand(server, "Revert Match").subscribe();
 
 						//log.info("deploying to " + bot.getServerName(server));

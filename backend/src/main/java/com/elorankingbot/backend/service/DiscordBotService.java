@@ -365,14 +365,12 @@ public class DiscordBotService {
 		if (server.getGames().isEmpty()) {
 			deleteCommand(server, DeleteRanking.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, AddQueue.class.getSimpleName().toLowerCase()).subscribe();
-			deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, AddRank.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, Reset.class.getSimpleName().toLowerCase()).subscribe();
 		} else {
 			deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
 			deployCommand(server, AddQueue.getRequest(server)).subscribe();
-			deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
 			deployCommand(server, AddRank.getRequest(server)).subscribe();
 			deployCommand(server, DeleteRanks.getRequest(server)).subscribe();
 			deployCommand(server, Reset.getRequest(server)).subscribe();
