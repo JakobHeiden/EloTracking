@@ -2,6 +2,8 @@ package com.elorankingbot.backend.commands.player;
 
 import com.elorankingbot.backend.command.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.admin.AddQueue;
+import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.spec.EmbedCreateFields;
@@ -36,7 +38,9 @@ public class QueueStatus extends SlashCommand {
 		List<EmbedCreateFields.Field> embedFields = server.getQueues().stream().map(queue -> EmbedCreateFields
 				.Field.of(queue.getFullName(), makeNumPlayersString(queue.getNumPlayersWaiting()), true)).toList();
 		if (embedFields.isEmpty()) {
-			embedFields.add(EmbedCreateFields.Field.of("No queues on the server", "No queues on the server", false));
+			String noQueuesMessage = String.format("No queues on the server. Use `/%s` and `/%s`.",
+					CreateRanking.class.getSimpleName().toLowerCase(), AddQueue.class.getSimpleName().toLowerCase());
+			embedFields = List.of(EmbedCreateFields.Field.of("No queues on the server", noQueuesMessage, false));
 		}
 		event.reply().withEmbeds(EmbedCreateSpec.builder()
 						.title("Queue Info")

@@ -21,9 +21,6 @@ public class ApplicationPropertiesLoader {
 	private String testBotChallengerId;
 	private String testBotAcceptorId;
 	private boolean useDevBotToken;
-	private boolean deleteDataOnStartup;
-	private boolean useGlobalCommands;
-	private boolean setupDevGame;
 	private boolean doUpdateGuildCommands;
 	private boolean doRunQueue;
 	@Value("${spring.data.mongodb.database}")

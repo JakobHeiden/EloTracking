@@ -5,9 +5,8 @@ import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.admin.SetPermissions;
+import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
-import com.elorankingbot.backend.commands.admin.settings.Settings;
 import com.elorankingbot.backend.commands.player.Help;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
@@ -95,11 +94,8 @@ public class EventParser {
 					if (maybeServer.isEmpty()) {
 						Server server = new Server(event.getGuild().getId().asLong());
 						dbService.saveServer(server);
-						bot.deployCommand(server, SetPermissions.getRequest()).block();
-						bot.deployCommand(server, Settings.getRequest()).block();
 						//long everyoneRoleId = server.getGuildId();
 						//bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
-						bot.deployCommand(server, Help.getRequest()).subscribe();
 					}
 				});
 
@@ -108,7 +104,7 @@ public class EventParser {
 					Server server = dbService.findServerByGuildId(event.getGuildId().asLong()).get();
 					if (server.getAdminRoleId() == event.getRoleId().asLong()) {
 						long everyoneRoleId = server.getGuildId();
-						bot.setCommandPermissionForRole(server, SetPermissions.class.getSimpleName().toLowerCase(), everyoneRoleId);
+						bot.setCommandPermissionForRole(server, SetPermission.class.getSimpleName().toLowerCase(), everyoneRoleId);
 					}
 				});
 

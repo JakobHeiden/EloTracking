@@ -2,7 +2,7 @@ package com.elorankingbot.backend.commands;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.command.ModCommand;
-import com.elorankingbot.backend.commands.admin.SetPermissions;
+import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -62,7 +62,7 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 
 		// bypass permission check when admin role is not set
 		// TODO checken ob admin role existiert
-		if (this.getClass() == SetPermissions.class && server.getAdminRoleId() == 0L) {
+		if (this.getClass() == SetPermission.class && server.getAdminRoleId() == 0L) {
 			execute();
 			return;
 		}

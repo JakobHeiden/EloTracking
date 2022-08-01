@@ -7,3 +7,27 @@ Hooks::onErrorDropped: discord4j.rest.http.client.ClientException: GET /channels
 
 game.name und game._id trennen
 
+
+commands:
+alle? inerten commands global deployen auf dev:
+Help x
+Settings x
+CreateRanking x
+SetPermission x
+Ban x
+Leave x
+PlayerInfo x
+QueueStatus x
+
+
+
+programmatisch entfernen x
+devtools entfernen x
+global deployen auf deploy x
+git push x
+devtools entfernen
+bot.deleteCommand nach uses suchen x
+help lesen ob noch korrekt
+RevertMatch command da?
+
+TODO! sikui testWinLose die notification wegklicken

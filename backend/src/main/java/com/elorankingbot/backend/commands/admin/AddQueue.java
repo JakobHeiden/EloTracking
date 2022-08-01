@@ -146,14 +146,8 @@ public class AddQueue extends SlashCommand {
 		// TODO log
 		// TODO inputs nach quatsch filtern
 
-		bot.deployCommand(server, Join.getRequest(server)).subscribe();
-		bot.deployCommand(server, Leave.getRequest()).subscribe();
-		bot.deployCommand(server, PlayerInfo.getRequest()).subscribe();
-		bot.deployCommand(server, Edit.getRequest(server)).subscribe(commandData ->
-				bot.setPermissionsForAdminCommand(server, Edit.class.getSimpleName()));
-		bot.deployCommand(server, DeleteQueue.getRequest(server)).subscribe();
-		bot.deployCommand(server, ForceWin.getRequest(server)).subscribe();
-		bot.maybeDeployForceDraw(server).subscribe();
+		bot.updateGuildCommandsByQueue(server);
+
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. Relevant commands have been deployed or updated. " +
