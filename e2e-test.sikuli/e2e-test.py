@@ -137,7 +137,10 @@ def setup():
 def testDeleteAndCreateRankingAndQueue():
 	deleteQueue()
 	deleteRanking()
-	sleep(40)
+	for x in range(30):
+		type(str(x) + " ")
+		sleep(1)
+	type(Key.ENTER)
 	createRanking()
 	addQueue()
 
