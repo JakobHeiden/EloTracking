@@ -33,7 +33,7 @@ jobs:
           host: ${{ secrets.BOT_HOST }}
           username: "root"
           password: ${{ secrets.BOT_PASSWORD }}
-          script: reboot
+          script: shutdown -r now
       - uses: actions/checkout@v2
       - name: create target folder
         run: mkdir bot
