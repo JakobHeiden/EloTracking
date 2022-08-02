@@ -35,7 +35,7 @@ public class TimedTaskQueue {
 	private final TimedTaskService timedTaskService;
 	private final TimeSlotDao timeSlotDao;
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
-	private boolean doRunQueue, enforceWaitingPeriods;
+	private boolean doRunQueue;
 
 	public TimedTaskQueue(Services services,
 						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
@@ -47,7 +47,6 @@ public class TimedTaskQueue {
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
 		this.numberOfTimeSlots = services.props.getNumberOfTimeSlots();
 		this.doRunQueue = services.props.isDoRunQueue();
-		this.enforceWaitingPeriods = services.props.isEnforceWaitingPeriods();
 
 		if (!timedTaskQueueCurrentIndexDao.existsById(1)) {
 			currentIndex = 0;
@@ -58,7 +57,6 @@ public class TimedTaskQueue {
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int duration, long relationId, long otherId, Object value) {
 		if (!doRunQueue) return;
-		//if (!enforceWaitingPeriods) duration = 0; TODO
 
 		int targetTimeSlotIndex = (currentIndex + duration) % numberOfTimeSlots;
 		log.debug(String.format("adding timed task for %s of type %s with timer %s to slot %s",

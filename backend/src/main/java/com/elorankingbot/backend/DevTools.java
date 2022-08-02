@@ -54,6 +54,7 @@ public class DevTools {
 	}
 
 	private void updateGuildCommands() {
+		props.getTestServerIds().forEach(System.out::println);
 		log.warn("updating global commands...");
 		/*
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
@@ -64,7 +65,7 @@ public class DevTools {
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), PlayerInfo.getRequest()).subscribe();
 
 		 */
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
+		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
 		dbService.findAllServers().forEach(
@@ -80,7 +81,7 @@ public class DevTools {
 
 						 */
 
-						bot.deleteCommand(server, "setpermissions").subscribe();
+						//bot.deleteCommand(server, "setpermissions").subscribe();
 						//bot.deleteCommand(server, "Revert Match").subscribe();
 
 						//log.info("deploying to " + bot.getServerName(server));

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Configuration
@@ -14,7 +16,6 @@ public class ApplicationPropertiesLoader {
 
 	private long ownerId;
 	private long ente2Id;
-	private long entenwieseId;
 	private long announcementChannelId;
 	private String baseUrl;
 	private int numberOfTimeSlots;
@@ -26,5 +27,6 @@ public class ApplicationPropertiesLoader {
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
 	private String activityMessage;
-	private boolean enforceWaitingPeriods;
+	@Value("#{'${elorankingbot.test-server-ids}'.split(',')}")
+	private List<Long> testServerIds;
 }
