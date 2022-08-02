@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.*;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ public class DBService {
 	private final RankingsEntryDao rankingsEntryDao;
 	private final BotStatsAccumulatorDao botStatsAccumulatorDao;
 	private final BotStatsDao botStatsDao;
+	private final ApplicationPropertiesLoader props;
 
 	@Autowired
 	public DBService(Services services,
@@ -40,6 +42,7 @@ public class DBService {
 		this.rankingsEntryDao = rankingsEntryDao;
 		this.botStatsAccumulatorDao = botStatsAccumulatorDao;
 		this.botStatsDao = botStatsDao;
+		this.props = services.props;
 	}
 
 	public void resetAllPlayerRatings(Game game) {
@@ -287,6 +290,10 @@ public class DBService {
 
 	// Statistics
 	public void addMatchResultToStats(MatchResult matchResult) {
+		if (props.getTestServerIds().contains(matchResult.getServer().getGuildId())) {
+			return;
+		}
+
 		var maybeAccumulator = botStatsAccumulatorDao.findById(BotStatsAccumulator.SINGLETON_ID);
 		BotStatsAccumulator accumulator = maybeAccumulator.isEmpty() ? new BotStatsAccumulator() : maybeAccumulator.get();
 		accumulator.addMatchResult(matchResult);

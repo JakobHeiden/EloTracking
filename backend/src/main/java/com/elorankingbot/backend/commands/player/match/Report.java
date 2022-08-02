@@ -10,6 +10,7 @@ import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
 import java.util.Date;
+import java.util.List;
 
 import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.MATCH_AUTO_RESOLVE;
 import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.MATCH_WARN_MISSING_REPORTS;
@@ -17,12 +18,12 @@ import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.MATCH_
 public abstract class Report extends ButtonCommandRelatedToMatch {
 
 	private final ReportStatus reportStatus;
-	private final boolean enforceWaitingPeriods;
+	private final List<Long> testServerIds;
 
 	public Report(ButtonInteractionEvent event, Services services, ReportStatus reportStatus) {
 		super(event, services);
 		this.reportStatus = reportStatus;
-		this.enforceWaitingPeriods = services.props.isEnforceWaitingPeriods();
+		this.testServerIds = services.props.getTestServerIds();
 	}
 
 	public void execute() {
@@ -31,7 +32,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			return;
 		}
 		long timePassed = new Date().getTime() - match.getTimestamp().getTime();
-		if (!this.getClass().equals(Cancel.class) && timePassed < 5*60*1000 && enforceWaitingPeriods) {// TODO
+		if (!this.getClass().equals(Cancel.class) && timePassed < 5*60*1000 && !testServerIds.contains(server.getGuildId())) {
 			event.reply(String.format("Please wait another %s before making a report.",
 							DurationParser.minutesToString((int) Math.ceil(5 - timePassed / (60*1000)))))
 					.withEphemeral(true).subscribe();

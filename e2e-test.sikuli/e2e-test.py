@@ -79,7 +79,7 @@ def join():
 	click(Pattern("1658926913568.png").similar(0.90).targetOffset(68,14))
 
 def leave():
-	while not exists(Pattern("1658341665655.png").similar(0.90)):	
+	while not exists("1659371576894.png"):	
 		type("/leave")
 		enter()
 
@@ -109,7 +109,7 @@ def gotoTestServer():
 	if not isProductionBot:
 		click("1658756254043.png")
 	else:
-		click("1658857732516.png")
+		click("1659465313255.png")
 
 def gotoTestchannel():
 	click(Pattern("1658498059044.png").similar(0.69).targetOffset(6,15))	
@@ -137,10 +137,11 @@ def setup():
 def testDeleteAndCreateRankingAndQueue():
 	deleteQueue()
 	deleteRanking()
-	for x in range(30):
-		type(str(x) + " ")
-		sleep(1)
-	type(Key.ENTER)
+	if exists("1658858301128.png"):
+		for x in range(30):
+			type(str(x) + " ")
+			sleep(1)
+		type(Key.ENTER)
 	createRanking()
 	addQueue()
 
@@ -149,7 +150,7 @@ def testMisc():
 	command("/queuestatus")
 	leave()
 	command("/help")
-	sleep(0.3)
+	enter()
 	command("/playerinfo")
 	
 def testWinLose():
@@ -221,14 +222,14 @@ def testRevertmatch():
 	hover("1658856018344.png")
 	click("1658856034449.png")
 
-if exists("1658857547495.png"):
+if exists("1659465294466.png"):
 	isProductionBot = True
 else:
 	isProductionBot = False
 setup()
-testPermissions()	
-testDeleteAndCreateRankingAndQueue()
-testMisc()
+#testPermissions()	
+#testDeleteAndCreateRankingAndQueue()
+#testMisc()
 testWinLose()
 testCancel()
 testAddRankAndDeleteRanks()

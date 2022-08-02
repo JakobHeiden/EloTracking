@@ -25,9 +25,12 @@ programmatisch entfernen x
 devtools entfernen x
 global deployen auf deploy x
 git push x
-devtools entfernen
+devtools entfernen x
 bot.deleteCommand nach uses suchen x
 help lesen ob noch korrekt
 RevertMatch command da?
 
 TODO! sikui testWinLose die notification wegklicken
+TODO! auf EloRankingWiese die regeln aendern
+herausfinden warum Ente die notification nicht kriegt
+
