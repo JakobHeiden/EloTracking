@@ -12,4 +12,5 @@ public interface RankingsEntryDao extends MongoRepository<RankingsEntry, UUID> {
 	List<RankingsEntry> getAllByGuildIdAndAndGameName(long guildId, String gameName);
 	Optional<RankingsEntry> findByGuildIdAndGameNameAndPlayerTag(long guildId, String gameName, String playerTag);
 	void deleteAllByGuildIdAndAndGameName(long guildId, String gameName);
+	void deleteAllByGuildId(long guildId);
 }

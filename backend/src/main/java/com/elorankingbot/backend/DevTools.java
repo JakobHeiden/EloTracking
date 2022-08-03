@@ -54,8 +54,8 @@ public class DevTools {
 	}
 
 	private void updateGuildCommands() {
-		props.getTestServerIds().forEach(System.out::println);
 		log.warn("updating global commands...");
+		bot.getAllGuildIds().stream().forEach(System.out::println);
 		/*
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Settings.getRequest()).subscribe();

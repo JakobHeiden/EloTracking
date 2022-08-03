@@ -20,6 +20,7 @@ def cleanChannels():
 	rightClick(channelRegion.find("1658749176570.png").getTarget().below(25))
 	if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
 		click("1658492956277.png")
+		sleep(0.2)
 		type(Key.ENTER)
 	if exists(Pattern("1658432253622.png").similar(0.75), 0.1):
 		numChannelsToDelete = 2
@@ -73,10 +74,11 @@ def deleteQueue():
 	sleep(0.5)
 
 def join():
-	while not exists(Pattern("1658858498270.png").similar(0.90)):
+	while not exists(Pattern("1658858498270.png").similar(0.90)) and not exists("1659467239403.png"):
 		command("/join testranking")
 		sleep(1)
-	click(Pattern("1658926913568.png").similar(0.90).targetOffset(68,14))
+	if exists(Pattern("1658858498270.png").similar(0.90)):
+		click(Pattern("1658926913568.png").similar(0.90).targetOffset(68,14))
 
 def leave():
 	while not exists("1659371576894.png"):	
@@ -109,7 +111,7 @@ def gotoTestServer():
 	if not isProductionBot:
 		click("1658756254043.png")
 	else:
-		click("1659465313255.png")
+		click("1659467137082.png")
 
 def gotoTestchannel():
 	click(Pattern("1658498059044.png").similar(0.69).targetOffset(6,15))	
@@ -128,6 +130,10 @@ def reportCancel():
 	wait(Pattern("1658499573390.png").similar(0.90))
 	click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 	click("1658750997165.png")
+
+def removeNotifications():
+	if exists(Pattern("1658499573390.png").similar(0.90)):
+		click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 
 def setup():
 	switchToEnte()
@@ -164,6 +170,10 @@ def testWinLose():
 	reportWin()
 	switchToEnte()
 	reportLoss()
+	removeNotifications()
+	switchToEnte2()
+	removeNotifications()
+	switchToEnte()
 
 def testCancel():
 	gotoTestchannel()

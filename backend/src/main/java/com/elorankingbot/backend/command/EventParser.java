@@ -16,7 +16,12 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.*;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.presence.ClientActivity;
+import discord4j.core.object.presence.ClientPresence;
+import discord4j.core.object.presence.Status;
 import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -55,6 +61,14 @@ public class EventParser {
 		this.commandClassScanner = commandClassScanner;
 		this.selectMenuCommandFactory = selectMenuCommandFactory;
 		GatewayDiscordClient client = services.client;
+
+		client.on(ReadyEvent.class)
+				.subscribe(event -> {
+					User self = event.getSelf();
+					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
+					String activityMessage = services.props.getActivityMessage();
+					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
+				});
 
 		client.on(ChatInputInteractionEvent.class)
 				.doOnNext(this::createAndExecuteSlashCommand)
@@ -96,6 +110,9 @@ public class EventParser {
 						dbService.saveServer(server);
 						//long everyoneRoleId = server.getGuildId();
 						//bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
+					} else {
+						maybeServer.get().setMarkedForDeletion(false);
+						dbService.saveServer(maybeServer.get());
 					}
 				});
 

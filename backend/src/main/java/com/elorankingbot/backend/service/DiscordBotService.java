@@ -98,15 +98,26 @@ public class DiscordBotService {
 
 	// Server
 	public String getServerName(Server server) {
-		return client.getGuildById(Snowflake.of(server.getGuildId())).block().getName();
+		try {
+			return client.getGuildById(Snowflake.of(server.getGuildId())).block().getName();
+		} catch (ClientException e) {
+			return "unknown";
+		}
 	}
 
 	public String getServerName(Player player) {
 		return client.getGuildById(Snowflake.of(player.getGuildId())).block().getName();
 	}
 
+	// Guild
 	public Mono<Guild> getGuildById(long guildId) {
 		return client.getGuildById(Snowflake.of(guildId));
+	}
+
+	public List<Long> getAllGuildIds() {
+		return client.getGuilds()
+				.map(guild -> guild.getId().asLong())
+				.collectList().block();
 	}
 
 	// Player, Ranks
@@ -407,15 +418,6 @@ public class DiscordBotService {
 								.replace(", ", ",\n")));
 	}
 
-	public Mono<ApplicationCommandData> maybeDeployForceDraw(Server server) {// TODO kann das weg?
-		if (server.getQueues().stream()
-				.filter(queue -> queue.getGame().isAllowDraw())
-				.toList().size() > 0) {
-			return deployCommand(server, ForceDraw.getRequest(server));
-		}
-		return Mono.empty();
-	}
-
 	private Mono<Long> getCommandIdByName(long guildid, String commandName) {
 		return applicationService.getGuildApplicationCommands(botId, guildid)
 				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName.toLowerCase()))
@@ -428,14 +430,6 @@ public class DiscordBotService {
 		return getCommandIdByName(server.getGuildId(), commandName)
 				.flatMap(commandId -> applicationService
 						.deleteGuildApplicationCommand(botId, server.getGuildId(), commandId));
-	}
-
-	public Flux<Object> deleteAllGuildCommands(long guildId) {
-		return applicationService.getGuildApplicationCommands(botId, guildId)
-				.doOnNext(commandData -> log.trace(String.format("deleting command %s:%s on %s",
-						commandData.name(), commandData.id(), guildId)))
-				.flatMap(commandData -> applicationService.deleteGuildApplicationCommand(
-						botId, guildId, Long.parseLong(commandData.id())));
 	}
 
 	// Command Permissions
@@ -507,5 +501,4 @@ public class DiscordBotService {
 				PermissionSet.of(Permission.VIEW_CHANNEL),
 				PermissionSet.none());
 	}
-
 }
