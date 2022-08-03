@@ -9,8 +9,5 @@ import java.util.UUID;
 public interface MatchResultDao extends MongoRepository<MatchResult, UUID> {
 
 	void deleteAllByServerAndGameName(Server server, String gameName);
-	//void deleteAllByGuildId(long guildId);
-	//Optional<Match> findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(long guildId, long winnerId, long loserId);
-	//List<Match> findAllByGuildIdAndWinnerId(long guildId, long winnerId);
-	//List<Match> findAllByGuildIdAndLoserId(long guildId, long loserId);
+	void deleteAllByServer(Server server);
 }

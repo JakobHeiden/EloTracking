@@ -4,33 +4,46 @@ Hooks::onErrorDropped: reactor.netty.http.client.PrematureCloseException: Connec
 /forcewin:
 Hooks::onErrorDropped: discord4j.rest.http.client.ClientException: GET /channels/981191323782623232/messages/981191325175128125 returned 404 Not Found with response {code=10003, message=Unknown Channel}
 
+pipeline fixen
 
 game.name und game._id trennen
 
+MatchResultReferences - timestamp, loeschen, wann? vllt alte match messages parsen zum identifizieren
 
-commands:
-alle? inerten commands global deployen auf dev:
-Help x
-Settings x
-CreateRanking x
-SetPermission x
-Ban x
-Leave x
-PlayerInfo x
-QueueStatus x
+schauen ob ich ueber guildId nen invite kriege
+jemanden finden der den bot invited aber nicht installiert hat
+alle social links sammeln
+googeln
+website updaten mit fehler-gefixt?
 
 
-
-programmatisch entfernen x
-devtools entfernen x
-global deployen auf deploy x
-git push x
-devtools entfernen x
-bot.deleteCommand nach uses suchen x
-help lesen ob noch korrekt
-RevertMatch command da?
-
-TODO! sikui testWinLose die notification wegklicken
-TODO! auf EloRankingWiese die regeln aendern
-herausfinden warum Ente die notification nicht kriegt
-
+168032661376466944
+984266367148625960
+727210100418150503
+990782170236870676
+768508620828573747
+103982893121929216
+846387997678501890
+895419627910357012
+942408774352773131
+882671829544734781
+929606305751130172
+973637270697549866
+984516743957458995
+983851952595157082
+621028645355520000
+930165580894466079
+976439336050507787
+980944118282850304
+983374686601760848
+988551157104394262
+274311299025076225
+929504858585845810
+945375894715904040
+907729885726933043
+935909293302108250
+966125440467103804
+987344982740434944
+982732828674494484
+920457253541273670
+727449050756022313

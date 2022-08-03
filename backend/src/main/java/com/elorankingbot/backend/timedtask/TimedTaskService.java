@@ -3,12 +3,14 @@ package com.elorankingbot.backend.timedtask;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.ReportStatus;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.TextChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class TimedTaskService {
 
 	private final DBService dbService;
@@ -33,19 +36,34 @@ public class TimedTaskService {
 		this.client = services.client;
 	}
 
-	void markGamesForDeletion() {
-		List<Long> allGuildIds = client.getGuilds()
-				.map(guild -> guild.getId().asLong())
-				.collectList().block();
-		//service.findAllGames().stream()
-		//		.filter(game -> !allGuildIds.contains(game.getGuildId()))
-		//		.forEach(game -> game.setMarkedForDeletion(true));
+	void markServersForDeletion(List<Long> allGuildIds) {
+		dbService.findAllServers().stream()
+				.filter(server -> !allGuildIds.contains(server.getGuildId()))
+				.forEach(server -> {
+					server.setMarkedForDeletion(true);
+					dbService.saveServer(server);
+				});
 	}
 
-	void deleteGamesMarkedForDeletion() {
-		//service.findAllGames().stream()
-		//		.filter(game -> game.isMarkedForDeletion())
-		//		.forEach(game -> service.deleteGame(game.getGuildId()));
+	void unmarkServersForDeletionIfAgainPresent(List<Long> allGuildIds) {
+		dbService.findAllServers().stream()
+				.filter(Server::isMarkedForDeletion)
+				.filter(server -> allGuildIds.contains(server.getGuildId()))
+				.forEach(server -> {
+					server.setMarkedForDeletion(false);
+					dbService.saveServer(server);
+				});
+	}
+
+	void deleteServersMarkedForDeletion() {
+		dbService.findAllServers().stream()
+				.filter(Server::isMarkedForDeletion)
+				.forEach(server -> {
+					String missingAccessMessage = String.format("Missing Access to guild %s. Deleting Server.", server.getGuildId());
+					bot.sendToOwner(missingAccessMessage);
+					log.warn(missingAccessMessage);
+					dbService.deleteServerAndAssociatedData(server);
+				});
 	}
 
 	void summarizeMatch(long messageId, long channelId, Object value) {

@@ -10,16 +10,12 @@ import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import discord4j.core.GatewayDiscordClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -89,9 +85,11 @@ public class TimedTaskQueue {
 		if (!doRunQueue) return;
 
 		log.debug("tick " + currentIndex);
-		if (currentIndex == 0) {// TODO 1 mal im jahr vllt zu selten?
-			timedTaskService.deleteGamesMarkedForDeletion();
-			timedTaskService.markGamesForDeletion();
+		if (currentIndex % (60) == 30) {
+			List<Long> allGuildIds = bot.getAllGuildIds();
+			timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
+			timedTaskService.deleteServersMarkedForDeletion();
+			timedTaskService.markServersForDeletion(allGuildIds);
 		}
 		if (currentIndex % (24*60) == 0) {
 			dbService.persistBotStatsAndRestartAccumulator();

@@ -10,5 +10,6 @@ import java.util.UUID;
 public interface MatchDao extends MongoRepository<Match, UUID> {
 
 	void deleteAllByServerAndGameId(Server server, String gameId);
+	void deleteAllByServer(Server server);
 	List<Match> findAllByServer(Server server);
 }

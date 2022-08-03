@@ -34,23 +34,6 @@ public class GatewayDiscordClientConfiguration {
 				.login()
 				.block();
 
-		client.getEventDispatcher().on(ReadyEvent.class)
-				.subscribe(event -> {
-					User self = event.getSelf();
-					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
-
-					String activityMessage = services.props.getActivityMessage();
-					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
-				});
-
 		return client;
-
-		/* TODO was ist hiermit?
-		String activityMessage = services.applicationPropertiesLoader().getActivityMessage();
-		GatewayDiscordClient client = GatewayBootstrap.create(DiscordClient.create(token))
-				.setInitialPresence(shardInfo -> ClientPresence.of(
-						Status.ONLINE, ClientActivity.of(Activity.Type.PLAYING, activityMessage, null)))
-				.login().block();
-		 */
 	}
 }

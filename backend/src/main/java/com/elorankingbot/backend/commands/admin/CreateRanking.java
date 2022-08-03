@@ -16,6 +16,7 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.http.client.ClientException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
@@ -23,8 +24,11 @@ import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING
 @AdminCommand
 public class CreateRanking extends SlashCommand {
 
+	private final List<Long> testServerIds;
+
 	public CreateRanking(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
+		this.testServerIds = services.props.getTestServerIds();
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -106,7 +110,9 @@ public class CreateRanking extends SlashCommand {
 				doCreateCategories ? ", " : " and ",
 				game.getLeaderboardChannelId(),
 				doCreateCategories ? ", and channel categories for disputes and an archive" : "")).subscribe();
-		bot.sendToOwner(String.format("Created ranking %s on %s : %s",
-				nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));
+		if (!testServerIds.contains(server.getGuildId())) {
+			bot.sendToOwner(String.format("Created ranking %s on %s : %s",
+					nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));
+		}
 	}
 }
