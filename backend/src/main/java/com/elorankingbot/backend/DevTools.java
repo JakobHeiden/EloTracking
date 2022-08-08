@@ -20,6 +20,8 @@ import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 @Slf4j
 public class DevTools {
@@ -55,9 +57,18 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating global commands...");
-		bot.getAllGuildIds().stream().forEach(System.out::println);
+		applicationService.getGlobalApplicationCommands(client.getSelfId().asLong())
+				.subscribe(commandData -> System.out.println(commandData.description()));
+		System.out.println("1001031572696338482");
+		long guildId = 1001031572696338482L;
+		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
+				.subscribe(commandData -> System.out.println(commandData.name()));
+		long guild2Id = 935909293302108250L;
+		System.out.println(guild2Id);
+		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), guild2Id)
+				.subscribe(commandData -> System.out.println(commandData.name()));
 		/*
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
+		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Settings.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), CreateRanking.getRequest()).subscribe();
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
@@ -65,12 +76,23 @@ public class DevTools {
 		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), PlayerInfo.getRequest()).subscribe();
 
 		 */
+
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
+		List<String> commandNames = List.of("help","settings","createranking","ban","leave","playerinfo","setpermission","Revert Match");
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
+						System.out.println(server.getGuildId());
+						applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), server.getGuildId())
+										.subscribe(commandData -> {
+											if (commandNames.contains(commandData.name())) {
+												System.out.println(commandData.name());
+												applicationService.deleteGuildApplicationCommand(client.getSelfId().asLong(),
+														server.getGuildId(), Long.parseLong(commandData.id())).block();
+											}
+										});
 						/*
 						bot.deleteCommand(server, "help").subscribe();
 						bot.deleteCommand(server, "settings").subscribe();
@@ -78,11 +100,10 @@ public class DevTools {
 						bot.deleteCommand(server, "ban").subscribe();
 						bot.deleteCommand(server, "leave").subscribe();
 						bot.deleteCommand(server, "playerinfo").subscribe();
+						bot.deleteCommand(server, "setpermission").subscribe();
+						bot.deleteCommand(server, "Revert Match").subscribe();
 
 						 */
-
-						//bot.deleteCommand(server, "setpermissions").subscribe();
-						//bot.deleteCommand(server, "Revert Match").subscribe();
 
 						//log.info("deploying to " + bot.getServerName(server));
 						//bot.deployCommand(server, ForceWin.getRequest(server)).block();
