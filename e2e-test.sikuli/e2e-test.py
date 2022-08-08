@@ -237,9 +237,9 @@ if exists("1659465294466.png"):
 else:
 	isProductionBot = False
 setup()
-#testPermissions()	
-#testDeleteAndCreateRankingAndQueue()
-#testMisc()
+testPermissions()	
+testDeleteAndCreateRankingAndQueue()
+testMisc()
 testWinLose()
 testCancel()
 testAddRankAndDeleteRanks()
