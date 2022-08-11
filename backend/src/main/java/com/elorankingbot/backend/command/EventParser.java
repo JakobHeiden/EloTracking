@@ -1,10 +1,7 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
-import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.commands.MessageCommand;
-import com.elorankingbot.backend.commands.SelectMenuCommand;
-import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
 import com.elorankingbot.backend.commands.player.Help;
@@ -29,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -41,13 +37,11 @@ public class EventParser {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final CommandClassScanner commandClassScanner;
-	private final Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory;
 	private final Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory;
 	private final Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory;
 	private final Function<MessageInteractionEvent, MessageCommand> messageCommandFactory;
 
-	public EventParser(Services services, CommandClassScanner scanner,
-					   Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory,
+	public EventParser(Services services,
 					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
 					   Function<MessageInteractionEvent, MessageCommand> messageCommandFactory,
 					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory,
@@ -55,7 +49,6 @@ public class EventParser {
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
-		this.slashCommandFactory = slashCommandFactory;
 		this.buttonCommandFactory = buttonCommandFactory;
 		this.messageCommandFactory = messageCommandFactory;
 		this.commandClassScanner = commandClassScanner;
@@ -71,9 +64,7 @@ public class EventParser {
 				});
 
 		client.on(ChatInputInteractionEvent.class)
-				.doOnNext(this::createAndExecuteSlashCommand)
-				.onErrorContinue(this::handleException)
-				.subscribe();
+				.subscribe(this::createAndExecuteSlashCommand);
 
 		client.on(ButtonInteractionEvent.class)
 				.doOnNext(this::createAndExecuteButtonCommand)
@@ -135,9 +126,13 @@ public class EventParser {
 
 	@Transactional
 	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
-		SlashCommand command = slashCommandFactory.apply(event);
-		bot.logCommand(command);
-		command.doExecute();
+		try {
+			Command command = createSlashCommand(event);
+			bot.logCommand(command);
+			command.doExecute();
+		} catch (Exception e) {
+			handleException(e, event);	// TODO!
+		}
 	}
 
 	@Transactional
@@ -161,7 +156,8 @@ public class EventParser {
 		command.doExecute();
 	}
 
-	private void handleException(Throwable throwable, Object event) {
+	private void handleException(Throwable throwable, Object event) {// TODO schauen ob event.reply vllt verallgemeinert werden muss
+		// bei ner exception kommt es evtl zu mehreren event.reply sonst
 		if (throwable instanceof ClientException) {
 			log.error(((ClientException) throwable).getRequest().toString());
 		}
@@ -173,24 +169,16 @@ public class EventParser {
 		log.error(Arrays.toString(throwable.getStackTrace()));// TODO auf dem server den error stream nach out umbiegen
 	}
 
-	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
-		String commandClassName = mapClassNameToFullName(event.getCommandName());
-		try {
-			return (SlashCommand) Class.forName(commandClassName)
-					.getConstructor(ChatInputInteractionEvent.class, Services.class)
-					.newInstance(event, services);
-		} catch (Exception e) {
-			String errorMessage = String.format("exception creating SlashCommand %s on %s by %s",
-					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
-			bot.sendToOwner(errorMessage);
-			System.out.println(errorMessage);
-			e.printStackTrace();
-			return null;
-		}
+	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) throws Exception {
+		String commandClassName = commandClassScanner.getFullClassName(event.getCommandName());
+		if (commandClassName == null) throw new RuntimeException("Unknown Command");
+		return (SlashCommand) Class.forName(commandClassName)
+				.getConstructor(ChatInputInteractionEvent.class, Services.class)
+				.newInstance(event, services);
 	}
 
 	public SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) {
-		String commandClassName = mapClassNameToFullName(event.getCustomId().split(":")[0]);
+		String commandClassName = mapCommandNameToFullClassName(event.getCustomId().split(":")[0]);
 		try {
 			return (SelectMenuCommand) Class.forName(commandClassName)
 					.getConstructor(SelectMenuInteractionEvent.class, Services.class)
@@ -206,7 +194,7 @@ public class EventParser {
 	}
 
 	public ButtonCommand createButtonCommand(ButtonInteractionEvent event) {
-		String commandClassName = mapClassNameToFullName(event.getCustomId().split(":")[0]);
+		String commandClassName = mapCommandNameToFullClassName(event.getCustomId().split(":")[0]);
 		try {
 			return (ButtonCommand) Class.forName(commandClassName)
 					.getConstructor(ButtonInteractionEvent.class, Services.class)
@@ -222,7 +210,7 @@ public class EventParser {
 	}
 
 	public MessageCommand createMessageCommand(MessageInteractionEvent event) {
-		String commandClassName = mapClassNameToFullName(event.getCommandName().replace(" ", "").toLowerCase());
+		String commandClassName = mapCommandNameToFullClassName(event.getCommandName().replace(" ", "").toLowerCase());
 		try {
 			return (MessageCommand) Class.forName(commandClassName)
 					.getConstructor(MessageInteractionEvent.class, Services.class)
@@ -237,13 +225,12 @@ public class EventParser {
 		}
 	}
 
-	private String mapClassNameToFullName(String className) {
+	private String mapCommandNameToFullClassName(String className) {
 		String fullClassName = commandClassScanner.getFullClassName(className);
-		if (fullClassName.equals("null")) {
-			String errorMessage = "Error mapping class name to full class name: " + className;
+		if (fullClassName == null) {
+			String errorMessage = "Error mapping command name to full class name: " + className;
 			log.error(errorMessage);
 			bot.sendToOwner(errorMessage);
-			throw new RuntimeException(errorMessage);
 		}
 		return fullClassName;
 	}

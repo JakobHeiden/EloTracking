@@ -122,7 +122,7 @@ public class TimedTaskService {
 		}
 		if (mentions.isEmpty()) return;
 
-		((TextChannel) bot.getChannelById(match.getChannelId()).block())
+		((TextChannel) bot.getChannelById(match.getChannelId()).block())// TODO exception wenn der channel weg ist fangen
 				.createMessage(mentions + " there are 10 minutes left to make your report. After that, I will autoresolve " +
 						"the match if possible, or otherwise open a dispute.").subscribe();// TODO
 	}

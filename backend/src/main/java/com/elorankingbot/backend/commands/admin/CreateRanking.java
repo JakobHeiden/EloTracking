@@ -95,6 +95,8 @@ public class CreateRanking extends SlashCommand {
 				}// TODO richtig machen, generisch machen, refaktorn
 			}
 			event.reply(failedRequest).subscribe();
+			e.printStackTrace();
+			bot.sendToOwner(failedRequest);
 			return;
 		}
 		dbService.saveServer(server);

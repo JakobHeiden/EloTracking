@@ -57,33 +57,14 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating global commands...");
-		applicationService.getGlobalApplicationCommands(client.getSelfId().asLong())
-				.subscribe(commandData -> System.out.println(commandData.description()));
-		System.out.println("1001031572696338482");
-		long guildId = 1001031572696338482L;
-		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), guildId)
-				.subscribe(commandData -> System.out.println(commandData.name()));
-		long guild2Id = 935909293302108250L;
-		System.out.println(guild2Id);
-		applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), guild2Id)
-				.subscribe(commandData -> System.out.println(commandData.name()));
-		/*
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Settings.getRequest()).subscribe();
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), CreateRanking.getRequest()).subscribe();
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Leave.getRequest()).subscribe();
-		applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), PlayerInfo.getRequest()).subscribe();
-
-		 */
-
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
-		List<String> commandNames = List.of("help","settings","createranking","ban","leave","playerinfo","setpermission","Revert Match");
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
+						/*
 						System.out.println(server.getGuildId());
 						applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), server.getGuildId())
 										.subscribe(commandData -> {
@@ -93,6 +74,7 @@ public class DevTools {
 														server.getGuildId(), Long.parseLong(commandData.id())).block();
 											}
 										});
+						 */
 						/*
 						bot.deleteCommand(server, "help").subscribe();
 						bot.deleteCommand(server, "settings").subscribe();

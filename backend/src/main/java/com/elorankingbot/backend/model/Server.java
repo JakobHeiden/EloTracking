@@ -56,7 +56,11 @@ public class Server {
 		return getGames().stream().flatMap(game -> game.getQueues().stream()).toList();
 	}
 
-	public String getName(DiscordBotService bot) {
-		return bot.getGuildById(guildId).block().getName();
+	public String getName(DiscordBotService bot) {// TODO umziehen nach bot
+		return String.format("%s:%s", guildId, bot.getGuildById(guildId).block().getName());
+	}
+
+	public long getEveryoneId() {
+		return guildId;
 	}
 }
