@@ -191,24 +191,33 @@ public class DiscordBotService {
 	public Message postToResultChannel(MatchResult matchResult) {
 		Game game = matchResult.getGame();
 		TextChannel resultChannel = getOrCreateResultChannel(game);
+		System.out.println(resultChannel.getName());
 		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
 	}
 
 	public TextChannel getOrCreateResultChannel(Game game) {
 		try {
 			return (TextChannel) client.getChannelById(Snowflake.of(game.getResultChannelId())).block();
-		} catch (ClientException e) {
+		} catch (ClientException e) {// TODO funktioniert das ueberhaupt? testen!
 			Guild guild = getGuildById(game.getGuildId()).block();
 			TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
-					.withPermissionOverwrites(PermissionOverwrite.forRole(
-							Snowflake.of(guild.getId().asLong()),
-							PermissionSet.none(),
-							PermissionSet.of(Permission.SEND_MESSAGES)))
+					.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
 					.block();
 			game.setResultChannelId(resultChannel.getId().asLong());
 			dbService.saveServer(game.getServer());
 			return resultChannel;
 		}
+	}
+
+	private List<PermissionOverwrite> onlyBotCanSend(Server server) {
+		return List.of(PermissionOverwrite.forRole(
+						Snowflake.of(server.getEveryoneId()),
+						PermissionSet.none(),
+						PermissionSet.of(Permission.SEND_MESSAGES)),
+				PermissionOverwrite.forMember(
+						client.getSelfId(),
+						PermissionSet.of(Permission.SEND_MESSAGES),
+						PermissionSet.none()));
 	}
 
 	public TextChannelCreateMono createDisputeChannel(Match match) {
@@ -230,6 +239,7 @@ public class DiscordBotService {
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
 		permissionOverwrites.add(allowModView(server));
 		permissionOverwrites.add(allowAdminView(server));
+		permissionOverwrites.add(allowBotView());
 
 		String channelName = createMatchChannelName(match.getTeams());
 		Category matchCategory = getOrCreateMatchCategory(server);
@@ -274,10 +284,7 @@ public class DiscordBotService {
 	private Message createLeaderboardChannelAndMessage(Game game) {
 		Guild guild = getGuildById(game.getGuildId()).block();
 		TextChannel leaderboardChannel = guild.createTextChannel(String.format("%s Leaderboard", game.getName()))
-				.withPermissionOverwrites(PermissionOverwrite.forRole(
-						Snowflake.of(guild.getId().asLong()),
-						PermissionSet.none(),
-						PermissionSet.of(Permission.SEND_MESSAGES)))
+				.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
 				.block();
 		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();
 		game.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
@@ -296,7 +303,7 @@ public class DiscordBotService {
 			}
 			Guild guild = getGuildById(server.getGuildId()).block();
 			Category matchCategory = guild.createCategory("elo matches")
-					.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
+					.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView())
 					.block();
 			server.setMatchCategoryId(matchCategory.getId().asLong());
 			dbService.saveServer(server);
@@ -314,7 +321,7 @@ public class DiscordBotService {
 			}
 			Guild guild = getGuildById(server.getGuildId()).block();
 			Category disputeCategory = guild.createCategory("elo disputes")
-					.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
+					.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView())
 					.block();
 			server.setDisputeCategoryId(disputeCategory.getId().asLong());
 			dbService.saveServer(server);
@@ -330,7 +337,7 @@ public class DiscordBotService {
 			if (index >= categoryIds.size()) {
 				Guild guild = getGuildById(server.getGuildId()).block();
 				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : index + 1))
-						.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
+						.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView())
 						.block();
 				categoryIds.add(archiveCategory.getId().asLong());
 				dbService.saveServer(server);
@@ -345,7 +352,7 @@ public class DiscordBotService {
 				}
 				Guild guild = getGuildById(server.getGuildId()).block();
 				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
-						.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server))
+						.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView())
 						.block();
 				categoryIds.set(index, archiveCategory.getId().asLong());
 				dbService.saveServer(server);
@@ -498,6 +505,12 @@ public class DiscordBotService {
 
 	public static PermissionOverwrite allowPlayerView(Player player) {
 		return PermissionOverwrite.forMember(Snowflake.of(player.getUserId()),
+				PermissionSet.of(Permission.VIEW_CHANNEL),
+				PermissionSet.none());
+	}
+
+	public PermissionOverwrite allowBotView() {
+		return PermissionOverwrite.forMember(client.getSelfId(),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
 				PermissionSet.none());
 	}

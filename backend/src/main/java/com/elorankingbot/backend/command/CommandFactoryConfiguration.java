@@ -25,17 +25,6 @@ public class CommandFactoryConfiguration {
 	}
 
 	@Bean
-	public Function<ChatInputInteractionEvent, SlashCommand> slashCommandFactory() {
-		return this::createSlashCommand;
-	}
-
-	@Bean
-	@Scope("prototype")
-	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) {
-		return eventParser.createSlashCommand(event);
-	}
-
-	@Bean
 	public Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory() {
 		return this::createSelectMenuCommand;
 	}

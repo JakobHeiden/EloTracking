@@ -13,15 +13,17 @@ def command(cmdString):
 	enter()
 
 def cleanChannels():
-	rightClick(channelRegion.find("1658756416028.png").getTarget().below(25))
-	if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
-		click("1658492956277.png")
-		type(Key.ENTER)
-	rightClick(channelRegion.find("1658749176570.png").getTarget().below(25))
-	if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
-		click("1658492956277.png")
-		sleep(0.2)
-		type(Key.ENTER)
+	if exists("1658756416028.png", 0.3):
+		rightClick(channelRegion.find("1658756416028.png").getTarget().below(25))
+		if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
+			click("1658492956277.png")
+			type(Key.ENTER)
+	if exists("1658749176570.png", 0.3):
+		rightClick(channelRegion.find("1658749176570.png").getTarget().below(25))
+		if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
+			click("1658492956277.png")
+			sleep(0.2)
+			type(Key.ENTER)
 	if exists(Pattern("1658432253622.png").similar(0.75), 0.1):
 		numChannelsToDelete = 2
 	else: 
@@ -74,7 +76,7 @@ def deleteQueue():
 	sleep(0.5)
 
 def join():
-	while not exists(Pattern("1658858498270.png").similar(0.90)) and not exists("1659467239403.png"):
+	while not exists(Pattern("1658858498270.png").similar(0.90), 0.3) and not exists("1659467239403.png", 0.3):
 		command("/join testranking")
 		sleep(1)
 	if exists(Pattern("1658858498270.png").similar(0.90)):
@@ -132,7 +134,7 @@ def reportCancel():
 	click("1658750997165.png")
 
 def removeNotifications():
-	if exists(Pattern("1658499573390.png").similar(0.90)):
+	while exists(Pattern("1658499573390.png").similar(0.90)):
 		click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 
 def setup():
@@ -144,8 +146,8 @@ def testDeleteAndCreateRankingAndQueue():
 	deleteQueue()
 	deleteRanking()
 	if exists("1658858301128.png"):
-		for x in range(30):
-			type(str(x) + " ")
+		for x in range(20):
+			type(str(x + 1) + " ")
 			sleep(1)
 		type(Key.ENTER)
 	createRanking()
@@ -161,24 +163,24 @@ def testMisc():
 	
 def testWinLose():
 	switchToEnte()
+	removeNotifications()
 	gotoTestchannel()
 	join()
 	switchToEnte2()
+	removeNotifications()
 	gotoTestchannel()
 	join()
 	sleep(3)
 	reportWin()
 	switchToEnte()
 	reportLoss()
-	removeNotifications()
-	switchToEnte2()
-	removeNotifications()
-	switchToEnte()
 
 def testCancel():
+	removeNotifications()
 	gotoTestchannel()
 	join()
 	switchToEnte2()
+	removeNotifications()
 	gotoTestchannel()
 	join()
 	sleep(3)
@@ -227,8 +229,8 @@ def testForcewin():
 	command("/forcewin testranking @Ente\n@Ente2")
 	
 def testRevertmatch():
-	channelRegion.click("1658855949366.png")
-	rightClick("1658855981102.png")
+	channelRegion.click(Pattern("1658855949366.png").similar(0.59))
+	rightClick("1660214456993.png")
 	hover("1658856018344.png")
 	click("1658856034449.png")
 
@@ -237,15 +239,15 @@ if exists("1659465294466.png"):
 else:
 	isProductionBot = False
 setup()
-testPermissions()	
-testDeleteAndCreateRankingAndQueue()
-testMisc()
-testWinLose()
-testCancel()
-testAddRankAndDeleteRanks()
-testSettings()
-testBan()
-testForcewin()
+#testPermissions()	
+#testDeleteAndCreateRankingAndQueue()
+#testMisc()
+#testWinLose()
+#testCancel()
+#testAddRankAndDeleteRanks()
+#testSettings()
+#testBan()
+#testForcewin()
 testRevertmatch()
 
 

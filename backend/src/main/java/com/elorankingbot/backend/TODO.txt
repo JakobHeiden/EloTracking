@@ -12,38 +12,42 @@ MatchResultReferences - timestamp, loeschen, wann? vllt alte match messages pars
 
 schauen ob ich ueber guildId nen invite kriege
 jemanden finden der den bot invited aber nicht installiert hat
-alle social links sammeln
-googeln
-website updaten mit fehler-gefixt?
+die botverzeichnisse abarbeiten
+
+TODO!
+hab gerade ein paar permissionOverwrites gefixt. schauen ob die tests jetzt durchlaufen.
+ansonsten weiter dran arbeiten dass der bot ohne admin permission laeuft.
+dann top.gg bewerben.
+dann das im eventparser zuende bearbeiten. oder andersrum?
 
 
-168032661376466944
-984266367148625960
-727210100418150503
-990782170236870676
-768508620828573747
-103982893121929216
-846387997678501890
-895419627910357012
-942408774352773131
-882671829544734781
-929606305751130172
-973637270697549866
-984516743957458995
-983851952595157082
-621028645355520000
-930165580894466079
-976439336050507787
-980944118282850304
-983374686601760848
-988551157104394262
-274311299025076225
-929504858585845810
-945375894715904040
-907729885726933043
-935909293302108250
-966125440467103804
-987344982740434944
-982732828674494484
-920457253541273670
-727449050756022313
+2022-08-03 13:17:30.872 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Grey Goo Hangout
+2022-08-03 13:17:31.059 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server BryanChess99 YT
+2022-08-03 13:17:31.090 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Quantum Chess
+2022-08-03 13:17:31.129 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Sonic Riders Competitive
+2022-08-03 13:17:31.172 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Frostbite Esports Community
+2022-08-03 13:17:31.205 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Tavi Tournaments
+2022-08-03 13:17:31.235 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server KOTH
+2022-08-03 13:17:31.288 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Aus Grind Server
+2022-08-03 13:17:31.330 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server LF2 Brasil (Little Fighter 2)
+2022-08-03 13:17:31.370 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Extreme Gaming and Streams
+2022-08-03 13:17:31.398 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Challenger Discord
+2022-08-03 13:17:31.448 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Elo Ranking Bot
+2022-08-03 13:17:31.503 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Coconut Mall
+2022-08-03 13:17:31.541 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server UZU
+2022-08-03 13:17:31.574 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Test
+2022-08-03 13:17:31.667 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server EloBotTest
+2022-08-03 13:17:31.724 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server England's server
+2022-08-03 13:17:31.755 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server uppy test
+2022-08-03 13:17:31.786 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Snowlites' Habitat
+2022-08-03 13:17:31.819 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Battles 2
+2022-08-03 13:17:31.851 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server EloRankingBot Tutorial
+2022-08-03 13:17:31.893 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server WalkingTime's server
+2022-08-03 13:17:31.918 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Zen TMs | Powered By ETERNITYGG
+2022-08-03 13:17:31.953 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server echo mmaking
+2022-08-03 13:17:31.993 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Syphonix Twitch Hub
+2022-08-03 13:17:32.029 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server LightWhisp's server
+2022-08-03 13:17:32.062 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Competetive Brawl Stars
+2022-08-03 13:17:32.118 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server 暗影共和国
+2022-08-03 13:17:32.163 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server As
+2022-08-03 13:17:32.188 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Zeqa Competitive Bridge (Beta)

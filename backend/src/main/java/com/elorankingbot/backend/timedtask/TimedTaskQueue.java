@@ -85,7 +85,7 @@ public class TimedTaskQueue {
 		if (!doRunQueue) return;
 
 		log.debug("tick " + currentIndex);
-		if (currentIndex % (60) == 30) {
+		if (currentIndex % (7*24*60) == 0) {// TODO wohl laenger
 			List<Long> allGuildIds = bot.getAllGuildIds();
 			timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
 			timedTaskService.deleteServersMarkedForDeletion();
