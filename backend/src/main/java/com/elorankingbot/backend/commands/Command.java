@@ -55,10 +55,12 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 	}
 
 	public void doExecute() {
-		log.debug(String.format("execute %s by %s on %s",
+		String executeLog = String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
 				event.getInteraction().getUser().getTag(),
-				event.getInteraction().getGuild().block().getName()));
+				event.getInteraction().getGuild().block().getName());
+		log.debug(executeLog);
+		bot.setLatestCommandLog(executeLog);
 
 		// bypass permission check when admin role is not set
 		// TODO checken ob admin role existiert
@@ -98,6 +100,11 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 		}
 
 		execute();
+
+		log.trace(String.format("Done executing %s by %s on %s",
+				this.getClass().getSimpleName(),
+				event.getInteraction().getUser().getTag(),
+				event.getInteraction().getGuild().block().getName()));
 	}
 
 	protected void acknowledgeEvent() {

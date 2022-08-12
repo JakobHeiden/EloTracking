@@ -1,6 +1,8 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.commands.player.Help;
+import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -46,24 +48,21 @@ public class DevTools {
 
 	private void updateGuildCommands() {
 		log.warn("updating global commands...");
-		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						/*
-						System.out.println(server.getGuildId());
 						applicationService.getGuildApplicationCommands(client.getSelfId().asLong(), server.getGuildId())
 										.subscribe(commandData -> {
-											if (commandNames.contains(commandData.name())) {
+											if (commandData.name().equals("queuestatus")) {
+												System.out.println(server.getGuildId());
 												System.out.println(commandData.name());
 												applicationService.deleteGuildApplicationCommand(client.getSelfId().asLong(),
 														server.getGuildId(), Long.parseLong(commandData.id())).block();
 											}
 										});
-						 */
 						/*
 						bot.deleteCommand(server, "help").subscribe();
 						bot.deleteCommand(server, "settings").subscribe();

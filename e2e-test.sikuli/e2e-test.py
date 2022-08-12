@@ -24,16 +24,17 @@ def cleanChannels():
 			click("1658492956277.png")
 			sleep(0.2)
 			type(Key.ENTER)
-	if exists(Pattern("1658432253622.png").similar(0.75), 0.1):
-		numChannelsToDelete = 2
-	else: 
-		numChannelsToDelete = 0
-	for x in range(numChannelsToDelete):
-		rightClick(find("1658855388884.png").getTarget().below(25))
-		sleep(0.3)
-		click(Pattern("1656949343471.png").similar(0.69))
-		type(Key.ENTER)
+	rightClick(channelRegion.find("1658855388884.png").getTarget().below(25))
+	if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
+		click("1658492956277.png")
 		sleep(0.2)
+		type(Key.ENTER)
+		rightClick(channelRegion.find("1658855388884.png").getTarget().below(25))
+		if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
+			click("1658492956277.png")
+			sleep(0.2)
+			type(Key.ENTER)
+
 
 def deleteRanking():
 	sleep(0.1)
