@@ -3,6 +3,7 @@ package com.elorankingbot.backend.commands.player.match;
 import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
@@ -38,20 +39,16 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 		match.setDispute(true);
 		dbService.saveMatch(match);
 		matchChannel = (TextChannel) event.getInteraction().getChannel().block();
-		makeMatchChannelVisibleToMods(matchChannel, match).subscribe();
 		disputeChannel = bot.createDisputeChannel(match).block();
 		sendDisputeLinkMessage();
 		createDisputeMessage();
 		event.acknowledge().subscribe();
 	}
 
-	public static TextChannelEditMono makeMatchChannelVisibleToMods(TextChannel channel, Match match) {
+	public static TextChannelEditMono makeMatchChannelVisibleToMods(DiscordBotService bot, TextChannel channel, Match match) {
 		Server server = match.getServer();
-		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>();
-		permissionOverwrites.add(denyEveryoneView(server));
+		List<PermissionOverwrite> permissionOverwrites = bot.excludePublic(server);
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
-		permissionOverwrites.add(allowAdminView(server));
-		permissionOverwrites.add(allowModView(server));
 		return channel.edit().withPermissionOverwrites(permissionOverwrites);
 	}
 

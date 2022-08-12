@@ -187,6 +187,7 @@ def testCancel():
 	reportCancel()
 	switchToEnte()
 	reportCancel()
+	sleep(0.8)
 
 def testAddRankAndDeleteRanks():
 	gotoTestchannel()
@@ -202,24 +203,25 @@ def testSettings():
 	sleep(0.3)
 	click("1658851929626.png")
 	click("1658851951271.png")
-	wait("1658853366438.png")
+	sleep(1.2)
 	type("1000")
 	click("1658853418852.png")
 	sleep(0.5)
 	click("1658853717062.png")
 	sleep(0.3)
 	click("1658853729560.png")
+	sleep(0.5)
 	
 def testBan():
 	gotoTestchannel()
 	type("/ban")
-	click(Pattern("1658854155846.png").targetOffset(-76,-5))
+	click("1660217335718.png")
 	click("1658854194498.png")
 	type("@Ente2\n")
 	type("duration:10")
 	enter()
 	type("/ban")
-	click(Pattern("1658854155846.png").targetOffset(-76,-5))
+	click("1660217335718.png")
 	click("1658854488751.png")
 	type("@Ente2")
 	enter()
@@ -232,22 +234,22 @@ def testRevertmatch():
 	channelRegion.click(Pattern("1658855949366.png").similar(0.59))
 	rightClick("1660214456993.png")
 	hover("1658856018344.png")
-	click("1658856034449.png")
+	click("1660217537383.png")
 
 if exists("1659465294466.png"):
 	isProductionBot = True
 else:
 	isProductionBot = False
 setup()
-#testPermissions()	
-#testDeleteAndCreateRankingAndQueue()
-#testMisc()
-#testWinLose()
-#testCancel()
-#testAddRankAndDeleteRanks()
-#testSettings()
-#testBan()
-#testForcewin()
+testPermissions()	
+testDeleteAndCreateRankingAndQueue()
+testMisc()
+testWinLose()
+testCancel()
+testAddRankAndDeleteRanks()
+testSettings()
+testBan()
+testForcewin()
 testRevertmatch()
 
 
