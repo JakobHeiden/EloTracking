@@ -222,10 +222,9 @@ public class DiscordBotService {
 
 	public TextChannelCreateMono createDisputeChannel(Match match) {
 		Server server = match.getServer();
-		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>(match.getNumPlayers());
+		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
 		Category disputeCategory = getOrCreateDisputeCategory(server);
-		permissionOverwrites.addAll(disputeCategory.getPermissionOverwrites());
 		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
 				.createTextChannel(createMatchChannelName(match.getTeams()))
 				.withParentId(disputeCategory.getId())
@@ -234,13 +233,8 @@ public class DiscordBotService {
 
 	public TextChannelCreateMono createMatchChannel(Match match) {
 		Server server = match.getServer();
-		List<PermissionOverwrite> permissionOverwrites = new ArrayList<>();
-		permissionOverwrites.add(denyEveryoneView(server));
+		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
-		permissionOverwrites.add(allowModView(server));
-		permissionOverwrites.add(allowAdminView(server));
-		permissionOverwrites.add(allowBotView());
-
 		String channelName = createMatchChannelName(match.getTeams());
 		Category matchCategory = getOrCreateMatchCategory(server);
 		return client.getGuildById(Snowflake.of(match.getGame().getGuildId())).block()
@@ -321,7 +315,7 @@ public class DiscordBotService {
 			}
 			Guild guild = getGuildById(server.getGuildId()).block();
 			Category disputeCategory = guild.createCategory("elo disputes")
-					.withPermissionOverwrites(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView())
+					.withPermissionOverwrites(excludePublic(server))
 					.block();
 			server.setDisputeCategoryId(disputeCategory.getId().asLong());
 			dbService.saveServer(server);
@@ -513,5 +507,9 @@ public class DiscordBotService {
 		return PermissionOverwrite.forMember(client.getSelfId(),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
 				PermissionSet.none());
+	}
+
+	public List<PermissionOverwrite> excludePublic(Server server) {// TODO die ganzen categories aufraeumen
+		return new ArrayList<>(List.of(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView()));
 	}
 }

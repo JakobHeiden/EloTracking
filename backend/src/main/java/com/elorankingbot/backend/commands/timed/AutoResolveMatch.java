@@ -83,7 +83,6 @@ public class AutoResolveMatch {
 		match.setDispute(true);
 		dbService.saveMatch(match);
 		matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();
-		Dispute.makeMatchChannelVisibleToMods(matchChannel, match).subscribe();
 		disputeChannel = bot.createDisputeChannel(match).block();
 		sendDisputeLinkMessage();
 		createDisputeMessage();
