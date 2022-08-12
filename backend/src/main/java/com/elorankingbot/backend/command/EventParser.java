@@ -29,7 +29,6 @@ import reactor.core.publisher.Hooks;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Slf4j
 @Component
@@ -39,22 +38,12 @@ public class EventParser {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final CommandClassScanner commandClassScanner;
-	private final Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory;
-	private final Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory;
-	private final Function<MessageInteractionEvent, MessageCommand> messageCommandFactory;
 
-	public EventParser(Services services,
-					   Function<ButtonInteractionEvent, ButtonCommand> buttonCommandFactory,
-					   Function<MessageInteractionEvent, MessageCommand> messageCommandFactory,
-					   Function<UserInteractionEvent, ChallengeAsUserInteraction> userInteractionChallengeFactory,
-					   CommandClassScanner commandClassScanner, Function<SelectMenuInteractionEvent, SelectMenuCommand> selectMenuCommandFactory) {
+	public EventParser(Services services, CommandClassScanner commandClassScanner) {
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
-		this.buttonCommandFactory = buttonCommandFactory;
-		this.messageCommandFactory = messageCommandFactory;
 		this.commandClassScanner = commandClassScanner;
-		this.selectMenuCommandFactory = selectMenuCommandFactory;
 		GatewayDiscordClient client = services.client;
 
 		client.on(ReadyEvent.class)
@@ -70,31 +59,22 @@ public class EventParser {
 				.subscribe(this::createAndExecuteSlashCommand);
 
 		client.on(ButtonInteractionEvent.class)
-				.doOnNext(this::createAndExecuteButtonCommand)
-				//.onErrorContinue(this::handleException)
-				.subscribe();
+				.subscribe(this::processButtonInteractionEvent);
 
 		client.on(SelectMenuInteractionEvent.class)
 				.subscribe(event -> {// TODO zusammen mit Help umbauen
 					if (event.getCustomId().startsWith(Help.customId)) {
 						Help.executeSelectMenuSelection(services, event);
 					} else {
-						try {
-							createAndExecuteSelectMenuCommand(event);
-						} catch (Exception e) {
-							handleException(e, event, "placeholder");
-						}
+						processSelectMenuInteractionEvent(event);
 					}
 				});
 
 		client.on(ModalSubmitInteractionEvent.class)
-				// this will not create a Spring Bean and consequently will not trigger AOP logging...
 				.subscribe(event -> new SetVariable(event, services).doExecute());
 
 		client.on(MessageInteractionEvent.class)
-				.doOnNext(this::createAndExecuteMessageCommand)
-				//.onErrorContinue(this::handleException)
-				.subscribe();
+				.subscribe(this::processMessageInteractionEvent);
 
 		client.on(GuildCreateEvent.class)
 				.subscribe(event -> {
@@ -137,22 +117,76 @@ public class EventParser {
 		}
 	}
 
-	@Transactional
-	void createAndExecuteSelectMenuCommand(SelectMenuInteractionEvent event) {
-		SelectMenuCommand command = selectMenuCommandFactory.apply(event);
-		command.doExecute();
+	private SlashCommand createSlashCommand(ChatInputInteractionEvent event) throws Exception {
+		String commandFullClassName = commandClassScanner.getFullClassName(event.getCommandName());
+		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
+		return (SlashCommand) Class.forName(commandFullClassName)
+				.getConstructor(ChatInputInteractionEvent.class, Services.class)
+				.newInstance(event, services);
 	}
 
 	@Transactional
-	void createAndExecuteButtonCommand(ButtonInteractionEvent event) {
-		ButtonCommand command = buttonCommandFactory.apply(event);
-		command.doExecute();
+	void processButtonInteractionEvent(ButtonInteractionEvent event) {
+		try {
+			Command command = createButtonCommand(event);
+			command.doExecute();
+		} catch (Exception e) {
+			handleException(e, event, event.getCustomId().split(":")[0]);
+		}
+	}
+
+	private ButtonCommand createButtonCommand(ButtonInteractionEvent event) throws Exception {
+		String commandFullClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
+		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
+		return (ButtonCommand) Class.forName(commandFullClassName)
+				.getConstructor(ButtonInteractionEvent.class, Services.class)
+				.newInstance(event, services);
 	}
 
 	@Transactional
-	void createAndExecuteMessageCommand(MessageInteractionEvent event) {
-		MessageCommand command = messageCommandFactory.apply(event);
-		command.doExecute();
+	void processSelectMenuInteractionEvent(SelectMenuInteractionEvent event) {
+		try {
+			Command command = createSelectMenuCommand(event);
+			command.doExecute();
+		} catch (Exception e) {
+			handleException(e, event, event.getCustomId().split(":")[0]);
+		}
+	}
+
+	private SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) throws Exception {
+		String commandFullClassName = mapCommandNameToFullClassName(event.getCustomId().split(":")[0]);
+		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
+		return (SelectMenuCommand) Class.forName(commandFullClassName)
+				.getConstructor(SelectMenuInteractionEvent.class, Services.class)
+				.newInstance(event, services);
+	}
+
+	@Transactional
+	void processMessageInteractionEvent(MessageInteractionEvent event) {
+		try {
+			Command command = createMessageCommand(event);
+			command.doExecute();
+		} catch (Exception e) {
+			handleException(e, event, event.getCommandName().replace(" ", "").toLowerCase());
+		}
+	}
+
+	private MessageCommand createMessageCommand(MessageInteractionEvent event) throws Exception {
+		String commandFullClassName = mapCommandNameToFullClassName(event.getCommandName().replace(" ", "").toLowerCase());
+		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
+		return (MessageCommand) Class.forName(commandFullClassName)
+				.getConstructor(MessageInteractionEvent.class, Services.class)
+				.newInstance(event, services);
+	}
+
+	private String mapCommandNameToFullClassName(String className) {// TODO! weg
+		String fullClassName = commandClassScanner.getFullClassName(className);
+		if (fullClassName == null) {
+			String errorMessage = "Error mapping command name to full class name: " + className;
+			log.error(errorMessage);
+			bot.sendToOwner(errorMessage);
+		}
+		return fullClassName;
 	}
 
 	private void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
@@ -174,82 +208,11 @@ public class EventParser {
 		}
 	}
 
-	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) throws Exception {
-		String commandClassName = commandClassScanner.getFullClassName(event.getCommandName());
-		if (commandClassName == null) throw new RuntimeException("Unknown Command");
-		return (SlashCommand) Class.forName(commandClassName)
-				.getConstructor(ChatInputInteractionEvent.class, Services.class)
-				.newInstance(event, services);
-	}
-
-	public SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) {
-		String commandClassName = mapCommandNameToFullClassName(event.getCustomId().split(":")[0]);
-		try {
-			return (SelectMenuCommand) Class.forName(commandClassName)
-					.getConstructor(SelectMenuInteractionEvent.class, Services.class)
-					.newInstance(event, services);
-		} catch (Exception e) {
-			String errorMessage = String.format("exception creating SelectMenuCommand %s on %s by %s",
-					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
-			bot.sendToOwner(errorMessage);
-			System.out.println(errorMessage);
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	public ButtonCommand createButtonCommand(ButtonInteractionEvent event) {
-		String commandClassName = mapCommandNameToFullClassName(event.getCustomId().split(":")[0]);
-		try {
-			return (ButtonCommand) Class.forName(commandClassName)
-					.getConstructor(ButtonInteractionEvent.class, Services.class)
-					.newInstance(event, services);
-		} catch (Exception e) {
-			String errorMessage = String.format("exception creating %s on %s by %s",
-					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
-			bot.sendToOwner(errorMessage);
-			System.out.println(errorMessage);
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	public MessageCommand createMessageCommand(MessageInteractionEvent event) {
-		String commandClassName = mapCommandNameToFullClassName(event.getCommandName().replace(" ", "").toLowerCase());
-		try {
-			return (MessageCommand) Class.forName(commandClassName)
-					.getConstructor(MessageInteractionEvent.class, Services.class)
-					.newInstance(event, services);
-		} catch (Exception e) {
-			String errorMessage = String.format("exception creating %s on %s by %s",
-					commandClassName, event.getInteraction().getGuild().block().getName(), event.getInteraction().getUser().getTag());
-			bot.sendToOwner(errorMessage);
-			System.out.println(errorMessage);
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private String mapCommandNameToFullClassName(String className) {
-		String fullClassName = commandClassScanner.getFullClassName(className);
-		if (fullClassName == null) {
-			String errorMessage = "Error mapping command name to full class name: " + className;
-			log.error(errorMessage);
-			bot.sendToOwner(errorMessage);
-		}
-		return fullClassName;
-	}
-
 	private void logGlobalCommands() {
 		List<ApplicationCommandData> globalCommands = bot.getAllGlobalCommands().block();
 		log.info("Global Commands:");
 		for (ApplicationCommandData globalCommand : globalCommands) {
 			log.info(globalCommand.name());
 		}
-	}
-
-	// TODO weg
-	public ChallengeAsUserInteraction createUserInteractionChallenge(UserInteractionEvent event) {
-		return new ChallengeAsUserInteraction(event, services);
 	}
 }

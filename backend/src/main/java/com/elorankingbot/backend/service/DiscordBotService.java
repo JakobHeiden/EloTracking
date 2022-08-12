@@ -181,7 +181,6 @@ public class DiscordBotService {
 	public Message postToResultChannel(MatchResult matchResult) {
 		Game game = matchResult.getGame();
 		TextChannel resultChannel = getOrCreateResultChannel(game);
-		System.out.println(resultChannel.getName());
 		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
 	}
 

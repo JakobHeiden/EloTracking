@@ -60,7 +60,6 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 				event.getInteraction().getUser().getTag(),
 				event.getInteraction().getGuild().block().getName());
 		log.debug(executeLog);
-		bot.setLatestCommandLog(executeLog);
 
 		// bypass permission check when admin role is not set
 		// TODO checken ob admin role existiert
