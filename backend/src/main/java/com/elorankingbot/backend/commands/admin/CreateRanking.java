@@ -2,10 +2,6 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
-import com.elorankingbot.backend.commands.mod.Ban;
-import com.elorankingbot.backend.commands.mod.RevertMatch;
-import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.components.FormatTools;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.Services;

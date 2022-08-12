@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.elorankingbot.backend.service.DiscordBotService.*;
+import static com.elorankingbot.backend.service.DiscordBotService.allowPlayerView;
 
 public class Dispute extends ButtonCommandRelatedToMatch {
 

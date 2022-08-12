@@ -1,15 +1,6 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.commands.admin.CreateRanking;
-import com.elorankingbot.backend.commands.admin.SetPermission;
-import com.elorankingbot.backend.commands.admin.settings.Settings;
-import com.elorankingbot.backend.commands.mod.Ban;
-import com.elorankingbot.backend.commands.mod.RevertMatch;
-import com.elorankingbot.backend.commands.player.Help;
-import com.elorankingbot.backend.commands.player.Leave;
-import com.elorankingbot.backend.commands.player.PlayerInfo;
-import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -19,8 +10,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @Slf4j

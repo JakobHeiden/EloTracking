@@ -4,8 +4,11 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Guild;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+
+import java.util.List;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
@@ -33,7 +36,12 @@ public class GuildInfo extends SlashCommand {
 		try {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuildById(guildId).block();
-			event.reply(String.format("%s:%s", guildId, guild.getName())).withEphemeral(true).subscribe();
+			String reply = String.format("%s:%s", guildId, guild.getName());
+			List<ApplicationCommandData> guildCommands = bot.getAllGuildCommands(guildId).block();
+			for (ApplicationCommandData guildCommand : guildCommands) {
+				reply += "\n" + guildCommand.name();
+			}
+			event.reply(reply).withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			event.reply(e.getMessage()).withEphemeral(true).subscribe();
 		}

@@ -4,7 +4,6 @@ import com.elorankingbot.backend.commands.admin.*;
 import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
 import com.elorankingbot.backend.commands.mod.ForceDraw;
 import com.elorankingbot.backend.commands.mod.ForceWin;
-import com.elorankingbot.backend.commands.mod.RevertMatch;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.*;
@@ -35,7 +34,6 @@ import discord4j.rest.util.PermissionSet;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
@@ -431,6 +429,14 @@ public class DiscordBotService {
 		return getCommandIdByName(server.getGuildId(), commandName)
 				.flatMap(commandId -> applicationService
 						.deleteGuildApplicationCommand(botId, server.getGuildId(), commandId));
+	}
+
+	public Mono<List<ApplicationCommandData>> getAllGlobalCommands() {
+		return applicationService.getGlobalApplicationCommands(botId).collectList();
+	}
+
+	public Mono<List<ApplicationCommandData>> getAllGuildCommands(long guildId) {
+		return applicationService.getGuildApplicationCommands(botId, guildId).collectList();
 	}
 
 	// Command Permissions
