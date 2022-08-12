@@ -32,6 +32,7 @@ import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -54,8 +55,6 @@ public class DiscordBotService {
 	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
 	private final long botId;
-	@Getter
-	private String latestCommandLog;
 
 	private static int embedRankSpaces = 6;
 	private static int embedRatingSpaces = 8;
@@ -85,13 +84,6 @@ public class DiscordBotService {
 		if (text == null) text = "null";
 		if (text.equals("")) text = "empty String";
 		ownerPrivateChannel.createMessage(text).subscribe();
-	}
-
-	public void logCommand(Object command) {
-		// this is being used in EventParser::handleException
-		latestCommandLog = command.getClass().getSimpleName() + "::execute";
-		// TODO logging ueberarbeiten
-		// log.debug(latestCommandLog);
 	}
 
 	// Server

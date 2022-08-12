@@ -15,6 +15,7 @@ import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -71,7 +71,7 @@ public class EventParser {
 
 		client.on(ButtonInteractionEvent.class)
 				.doOnNext(this::createAndExecuteButtonCommand)
-				.onErrorContinue(this::handleException)
+				//.onErrorContinue(this::handleException)
 				.subscribe();
 
 		client.on(SelectMenuInteractionEvent.class)
@@ -82,7 +82,7 @@ public class EventParser {
 						try {
 							createAndExecuteSelectMenuCommand(event);
 						} catch (Exception e) {
-							handleException(e, event);
+							handleException(e, event, "placeholder");
 						}
 					}
 				});
@@ -93,7 +93,7 @@ public class EventParser {
 
 		client.on(MessageInteractionEvent.class)
 				.doOnNext(this::createAndExecuteMessageCommand)
-				.onErrorContinue(this::handleException)
+				//.onErrorContinue(this::handleException)
 				.subscribe();
 
 		client.on(GuildCreateEvent.class)
@@ -131,45 +131,47 @@ public class EventParser {
 	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
 		try {
 			Command command = createSlashCommand(event);
-			bot.logCommand(command);
 			command.doExecute();
 		} catch (Exception e) {
-			handleException(e, event);	// TODO!
+			handleException(e, event, event.getCommandName());
 		}
 	}
 
 	@Transactional
 	void createAndExecuteSelectMenuCommand(SelectMenuInteractionEvent event) {
 		SelectMenuCommand command = selectMenuCommandFactory.apply(event);
-		bot.logCommand(command);
 		command.doExecute();
 	}
 
 	@Transactional
 	void createAndExecuteButtonCommand(ButtonInteractionEvent event) {
 		ButtonCommand command = buttonCommandFactory.apply(event);
-		bot.logCommand(command);
 		command.doExecute();
 	}
 
 	@Transactional
 	void createAndExecuteMessageCommand(MessageInteractionEvent event) {
 		MessageCommand command = messageCommandFactory.apply(event);
-		bot.logCommand(command);
 		command.doExecute();
 	}
 
-	private void handleException(Throwable throwable, Object event) {// TODO schauen ob event.reply vllt verallgemeinert werden muss
-		// bei ner exception kommt es evtl zu mehreren event.reply sonst
+	private void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
+		String guildName = event.getInteraction().getGuild().map(Guild::getName).onErrorReturn("unknown").block();
+		String errorReport = String.format("Error executing %s on %s by %s:\n%s", commandName,
+				guildName, event.getInteraction().getUser().getTag(), throwable.getMessage());
+		log.error(errorReport);
+		bot.sendToOwner(errorReport);
 		if (throwable instanceof ClientException) {
-			log.error(((ClientException) throwable).getRequest().toString());
+			log.error("ClientException caused by request:\n" + ((ClientException) throwable).getRequest());
 		}
-		String errorMessage = String.format("Error in EventParser: %s - " +
-				"Occured during %s", throwable.toString(), bot.getLatestCommandLog());
-		bot.sendToOwner(errorMessage);
-		log.error(errorMessage);
 		throwable.printStackTrace();
-		log.error(Arrays.toString(throwable.getStackTrace()));// TODO auf dem server den error stream nach out umbiegen
+
+		String userErrorMessage = "Error: " + throwable.getMessage() + "\nI sent a report to the developer.";
+		try {
+			event.reply(userErrorMessage).block();
+		} catch (ClientException e) {
+			event.createFollowup(userErrorMessage).subscribe();
+		}
 	}
 
 	public SlashCommand createSlashCommand(ChatInputInteractionEvent event) throws Exception {
