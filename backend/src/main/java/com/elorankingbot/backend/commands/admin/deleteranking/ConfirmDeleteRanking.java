@@ -1,11 +1,6 @@
 package com.elorankingbot.backend.commands.admin.deleteranking;
 
 import com.elorankingbot.backend.commands.ButtonCommand;
-import com.elorankingbot.backend.commands.admin.*;
-import com.elorankingbot.backend.commands.mod.ForceDraw;
-import com.elorankingbot.backend.commands.mod.ForceWin;
-import com.elorankingbot.backend.commands.player.Join;
-import com.elorankingbot.backend.commands.player.Leave;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;

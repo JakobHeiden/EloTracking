@@ -19,6 +19,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
+import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -61,6 +63,7 @@ public class EventParser {
 					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
 					String activityMessage = services.props.getActivityMessage();
 					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
+					logGlobalCommands();
 				});
 
 		client.on(ChatInputInteractionEvent.class)
@@ -233,6 +236,14 @@ public class EventParser {
 			bot.sendToOwner(errorMessage);
 		}
 		return fullClassName;
+	}
+
+	private void logGlobalCommands() {
+		List<ApplicationCommandData> globalCommands = bot.getAllGlobalCommands().block();
+		log.info("Global Commands:");
+		for (ApplicationCommandData globalCommand : globalCommands) {
+			log.info(globalCommand.name());
+		}
 	}
 
 	// TODO weg
