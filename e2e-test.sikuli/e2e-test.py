@@ -130,12 +130,12 @@ def reportLoss():
 	click("1658491457637.png")
 
 def reportCancel():
-	wait(Pattern("1658499573390.png").similar(0.90))
+	wait(Pattern("1658499573390.png").similar(0.94))
 	click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 	click("1658750997165.png")
 
 def removeNotifications():
-	while exists(Pattern("1658499573390.png").similar(0.90)):
+	while exists(Pattern("1658499573390.png").similar(0.94)):
 		click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 
 def setup():
