@@ -6,33 +6,26 @@ import com.elorankingbot.backend.commands.mod.ForceDraw;
 import com.elorankingbot.backend.commands.mod.ForceWin;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.Player;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.google.common.collect.Iterables;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.TextChannelCreateMono;
-import discord4j.core.spec.TextChannelEditMono;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.discordjson.possible.Possible;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
-import discord4j.rest.util.Permission;
-import discord4j.rest.util.PermissionSet;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -40,8 +33,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
 @Slf4j
 @Component

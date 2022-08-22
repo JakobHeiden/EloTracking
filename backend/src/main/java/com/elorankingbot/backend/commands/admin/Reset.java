@@ -11,8 +11,6 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import java.util.Optional;
-
 @AdminCommand
 public class Reset extends SlashCommand {
 
@@ -68,7 +66,7 @@ public class Reset extends SlashCommand {
 		}
 
 		dbService.resetAllPlayerRatings(game);
-		channelManager.updateLeaderboard(game, Optional.empty());
+		channelManager.refreshLeaderboard(game);
 		event.reply(String.format("Resetting all player ratings, wins%s for %s.",
 				game.isAllowDraw() ? ", losses and draws" : " and losses",
 				game.getName())).subscribe();

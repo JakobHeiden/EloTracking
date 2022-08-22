@@ -1,6 +1,8 @@
 package com.elorankingbot.backend.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -8,11 +10,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Document(collection = "rankingsentry")
 @CompoundIndex(def = "{'guildId': 1, 'gameName': 1, 'rating': -1}")
 @CompoundIndex(def = "{'guildId': 1, 'gameName': 1, 'playerTag': 1}")
 public class RankingsEntry implements Comparable<RankingsEntry> {
 
+	@Id
+	@EqualsAndHashCode.Include
 	private UUID id;
 	private long guildId;
 	private String gameName;

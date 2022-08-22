@@ -101,25 +101,17 @@ public class ChannelManager {
 	}
 
 	// Leaderboard
-	public void updateLeaderboard(Game game, Optional<MatchResult> maybeMatchResult) {
-		boolean leaderboardNeedsRefresh;
-		if (maybeMatchResult.isPresent()) {
-			leaderboardNeedsRefresh = dbService.updateRankingsEntries(maybeMatchResult.get());
-		} else {
-			leaderboardNeedsRefresh = true;
+	public void refreshLeaderboard(Game game) {
+		Message leaderboardMessage;
+		try {
+			leaderboardMessage = bot.getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+		} catch (ClientException e) {
+			leaderboardMessage = createLeaderboardChannelAndMessage(game);
+			dbService.saveServer(game.getServer());// TODO muss das?
 		}
-		if (leaderboardNeedsRefresh) {
-			Message leaderboardMessage;
-			try {
-				leaderboardMessage = bot.getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
-			} catch (ClientException e) {
-				leaderboardMessage = createLeaderboardChannelAndMessage(game);
-				dbService.saveServer(game.getServer());// TODO muss das?
-			}
-			leaderboardMessage.edit()
-					.withContent(Possible.of(Optional.empty()))
-					.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game))).subscribe();
-		}
+		leaderboardMessage.edit()
+				.withContent(Possible.of(Optional.empty()))
+				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game))).subscribe();
 	}
 
 	private Message createLeaderboardChannelAndMessage(Game game) {
