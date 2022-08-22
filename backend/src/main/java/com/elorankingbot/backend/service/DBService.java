@@ -5,6 +5,7 @@ import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -282,14 +283,26 @@ public class DBService {
 	}
 
 	public boolean updateRankingsEntries(MatchResult matchResult) {
+		int leaderboardLength = matchResult.getGame().getLeaderboardLength();
+		List<RankingsEntry> leaderboard = rankingsEntryDao.findTopByGuildIdAndGameName(
+				matchResult.getServer().getGuildId(),
+				matchResult.getGame().getName(),
+				PageRequest.of(0, leaderboardLength));
+		double lowestLeaderboardRating = leaderboard.get(leaderboardLength - 1).getRating();
+		boolean hasLeaderboardChanged = false;
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
 			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
 					.findByGuildIdAndGameNameAndPlayerTag(matchResult.getGame().getServer().getGuildId(),
 							matchResult.getGame().getName(), playerMatchResult.getPlayerTag());
-			maybeRankingsEntry.ifPresent(rankingsEntryDao::delete);
-			rankingsEntryDao.save(new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer()));
+			if (maybeRankingsEntry.isPresent()) {
+				if (leaderboard.contains(maybeRankingsEntry.get())) hasLeaderboardChanged = true;
+				rankingsEntryDao.delete(maybeRankingsEntry.get());
+			}
+			RankingsEntry newRankingsEntry = new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer());
+			if (newRankingsEntry.getRating() >= lowestLeaderboardRating) hasLeaderboardChanged = true;
+			rankingsEntryDao.save(newRankingsEntry);
 		}
-		return true;// TODO! pagination etc - aendert sich ueberhaupt was?
+		return hasLeaderboardChanged;
 	}
 
 	public void deleteAllRankingsEntries(Game game) {

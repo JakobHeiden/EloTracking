@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -126,7 +125,8 @@ public class MatchService {
 			queueService.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
 		});
-		channelManager.updateLeaderboard(game, Optional.of(matchResult));
+		boolean leaderboardNeedsRefresh = dbService.updateRankingsEntries(matchResult);
+		if (leaderboardNeedsRefresh) channelManager.refreshLeaderboard(game);
 		for (Player player : match.getPlayers()) {
 			bot.updatePlayerRank(game, player);
 		}
@@ -152,7 +152,8 @@ public class MatchService {
 			updatePlayerMatches(game, player);
 			bot.updatePlayerRank(game, player);
 		});
-		channelManager.updateLeaderboard(game, Optional.of(forcedMatchResult));
+		boolean leaderboardNeedsRefresh = dbService.updateRankingsEntries(forcedMatchResult);
+		if (leaderboardNeedsRefresh) channelManager.refreshLeaderboard(game);
 		dbService.addMatchResultToStats(forcedMatchResult);
 		return matchEmbed;
 	}

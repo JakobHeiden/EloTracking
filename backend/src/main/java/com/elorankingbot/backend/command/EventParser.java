@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.command;
 
-import com.elorankingbot.backend.command_legacy.ChallengeAsUserInteraction;
 import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;

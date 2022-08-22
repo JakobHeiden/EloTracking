@@ -13,7 +13,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.http.client.ClientException;
 
 import java.util.List;
-import java.util.Optional;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
@@ -76,7 +75,7 @@ public class CreateRanking extends SlashCommand {
 		server.addGame(game);
 		try {
 			channelManager.getOrCreateResultChannel(game);
-			channelManager.updateLeaderboard(game, Optional.empty());
+			channelManager.refreshLeaderboard(game);
 			channelManager.getOrCreateMatchCategory(server);
 			channelManager.getOrCreateDisputeCategory(server);
 			channelManager.getOrCreateArchiveCategory(server);
