@@ -22,6 +22,7 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 
 	protected final DBService dbService;
 	protected final DiscordBotService bot;
+	protected final ChannelManager channelManager;
 	protected final GatewayDiscordClient client;
 	protected final MatchService matchService;
 	protected final QueueService queueService;
@@ -37,6 +38,7 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 	protected Command(DeferrableInteractionEvent event, Services services) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
+		this.channelManager = services.channelManager;
 		this.matchService = services.matchService;
 		this.queueService = services.queueService;
 		this.client = services.client;// TODO alles an bot weiterleiten

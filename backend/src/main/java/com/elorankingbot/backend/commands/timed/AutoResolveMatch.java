@@ -17,6 +17,7 @@ public class AutoResolveMatch {
 
 	private final DBService dbService;
 	private final DiscordBotService bot;
+	private final ChannelManager channelManager;
 	private final MatchService matchService;
 	private final int duration;
 	private final UUID matchId;
@@ -26,6 +27,7 @@ public class AutoResolveMatch {
 	public AutoResolveMatch(Services services, UUID matchId, int duration) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
+		this.channelManager = services.channelManager;
 		this.matchService = services.matchService;
 		this.duration = duration;
 		this.matchId = matchId;
@@ -83,7 +85,7 @@ public class AutoResolveMatch {
 		match.setDispute(true);
 		dbService.saveMatch(match);
 		matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();
-		disputeChannel = bot.createDisputeChannel(match).block();
+		disputeChannel = channelManager.createDisputeChannel(match).block();
 		sendDisputeLinkMessage();
 		createDisputeMessage();
 	}

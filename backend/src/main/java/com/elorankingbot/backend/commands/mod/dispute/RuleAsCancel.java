@@ -38,7 +38,7 @@ public class RuleAsCancel extends RuleAsWinOrDraw {
 		matchService.processMatchResult(canceledMatchResult, match, reason);
 		removeButtons();
 		postToDisputeChannel("**" + reason + "**").block();
-		event.getInteraction().getChannel().subscribe(channel -> bot.moveToArchive(server, channel));
+		event.getInteraction().getChannel().subscribe(channel -> channelManager.moveToArchive(server, channel));
 		event.acknowledge().subscribe();
 	}
 }

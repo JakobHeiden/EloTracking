@@ -71,7 +71,7 @@ public class RevertMatch extends MessageCommand {
 		dbService.saveMatchResult(matchResult);
 		updatePlayers();
 		updateMessages();
-		bot.updateLeaderboard(matchResult.getGame(), Optional.of(matchResult));
+		channelManager.updateLeaderboard(matchResult.getGame(), Optional.of(matchResult));
 		event.reply("Match reverted.").withEphemeral(true).subscribe();
 	}
 

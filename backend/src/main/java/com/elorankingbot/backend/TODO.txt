@@ -1,5 +1,4 @@
 MatchResultReferences - timestamp, loeschen, wann? vllt alte match messages parsen zum identifizieren
-dann top.gg bewerben.
 schauen ob ich ueber guildId nen invite kriege
 jemanden finden der den bot invited aber nicht installiert hat
 die botverzeichnisse abarbeiten
@@ -8,7 +7,6 @@ pipeline fixen
 game.name und game._id trennen
 
 TODO!
-dann das im eventparser zuende bearbeiten. oder andersrum?
 
 
 2022-08-03 13:17:30.872 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Grey Goo Hangout

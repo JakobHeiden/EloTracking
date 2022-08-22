@@ -19,16 +19,18 @@ public class MatchService {
 
 	private final DBService dbService;
 	private final DiscordBotService bot;
+	private final ChannelManager channelManager;
 	private final QueueService queueService;
 
 	public MatchService(Services services) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
+		this.channelManager = services.channelManager;
 		this.queueService = services.queueService;
 	}
 
 	public void startMatch(Match match) {
-		TextChannel channel = bot.createMatchChannel(match).block();
+		TextChannel channel = channelManager.createMatchChannel(match).block();
 		sendMatchMessage(channel, match);
 		dbService.saveMatch(match);
 	}
@@ -107,8 +109,8 @@ public class MatchService {
 		newMatchMessage.pin().subscribe();
 		bot.getMessage(match.getMessageId(), match.getChannelId())
 				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
-		bot.moveToArchive(game.getServer(), matchChannel);
-		Message resultChannelMessage = bot.postToResultChannel(matchResult);
+		channelManager.moveToArchive(game.getServer(), matchChannel);
+		Message resultChannelMessage = channelManager.postToResultChannel(matchResult);
 		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, newMatchMessage, matchResult.getId()));
 		dbService.saveMatchResult(matchResult);
 		dbService.deleteMatch(match);
@@ -124,7 +126,7 @@ public class MatchService {
 			queueService.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
 		});
-		bot.updateLeaderboard(game, Optional.of(matchResult));
+		channelManager.updateLeaderboard(game, Optional.of(matchResult));
 		for (Player player : match.getPlayers()) {
 			bot.updatePlayerRank(game, player);
 		}
@@ -139,7 +141,7 @@ public class MatchService {
 			user.getPrivateChannel().subscribe(privateChannel -> privateChannel.createMessage(matchEmbed)
 					.onErrorResume(e -> Mono.empty()).subscribe());
 		}
-		Message resultChannelMessage = bot.postToResultChannel(forcedMatchResult);
+		Message resultChannelMessage = channelManager.postToResultChannel(forcedMatchResult);
 		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, forcedMatchResult.getId()));
 		dbService.saveMatchResult(forcedMatchResult);
 		Game game = forcedMatchResult.getGame();
@@ -150,7 +152,7 @@ public class MatchService {
 			updatePlayerMatches(game, player);
 			bot.updatePlayerRank(game, player);
 		});
-		bot.updateLeaderboard(game, Optional.of(forcedMatchResult));
+		channelManager.updateLeaderboard(game, Optional.of(forcedMatchResult));
 		dbService.addMatchResultToStats(forcedMatchResult);
 		return matchEmbed;
 	}

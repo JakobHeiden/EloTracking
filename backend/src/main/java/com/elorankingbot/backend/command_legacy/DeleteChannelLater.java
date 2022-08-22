@@ -25,7 +25,7 @@ public class DeleteChannelLater extends ButtonCommand {
 		event.getInteraction().getMessage().get().edit()
 				.withComponents(none).subscribe();
 		event.getInteraction().getChannel()
-				.subscribe(channel -> bot.moveToArchive(server, channel));
+				.subscribe(channel -> channelManager.moveToArchive(server, channel));
 
 		timedTaskQueue.addTimedTask(
 				TimedTask.TimedTaskType.CHANNEL_DELETE, 24 * 60,
