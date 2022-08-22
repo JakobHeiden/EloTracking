@@ -44,7 +44,7 @@ public class SetVariable extends Command {
 			dbService.saveServer(server);
 			if (variableName.equals("Name")) {// TODO die ganze fallunterscheidung von Game nach hier. die deployCommands verallgemeinern
 				bot.deployCommand(server, Join.getRequest(server)).subscribe();
-				bot.updateLeaderboard(game, Optional.empty());// TODO channel ggf umbenennen...
+				channelManager.updateLeaderboard(game, Optional.empty());// TODO channel ggf umbenennen...
 				bot.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
 						bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
 				bot.deployCommand(server, AddRank.getRequest(server)).subscribe(commandData ->

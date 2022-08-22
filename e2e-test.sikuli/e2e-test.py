@@ -147,7 +147,7 @@ def testDeleteAndCreateRankingAndQueue():
 	deleteQueue()
 	deleteRanking()
 	if exists("1658858301128.png"):
-		for x in range(20):
+		for x in range(15):
 			type(str(x + 1) + " ")
 			sleep(1)
 		type(Key.ENTER)
@@ -237,7 +237,7 @@ def testRevertmatch():
 	hover("1658856018344.png")
 	click("1660217537383.png")
 
-if exists("1659465294466.png"):
+if exists("1659465294466.png", 0.1):
 	isProductionBot = True
 else:
 	isProductionBot = False

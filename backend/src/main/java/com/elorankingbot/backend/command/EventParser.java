@@ -154,7 +154,7 @@ public class EventParser {
 	}
 
 	private SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) throws Exception {
-		String commandFullClassName = mapCommandNameToFullClassName(event.getCustomId().split(":")[0]);
+		String commandFullClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
 		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
 		return (SelectMenuCommand) Class.forName(commandFullClassName)
 				.getConstructor(SelectMenuInteractionEvent.class, Services.class)
@@ -172,21 +172,11 @@ public class EventParser {
 	}
 
 	private MessageCommand createMessageCommand(MessageInteractionEvent event) throws Exception {
-		String commandFullClassName = mapCommandNameToFullClassName(event.getCommandName().replace(" ", "").toLowerCase());
+		String commandFullClassName = commandClassScanner.getFullClassName(event.getCommandName().replace(" ", "").toLowerCase());
 		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
 		return (MessageCommand) Class.forName(commandFullClassName)
 				.getConstructor(MessageInteractionEvent.class, Services.class)
 				.newInstance(event, services);
-	}
-
-	private String mapCommandNameToFullClassName(String className) {// TODO! weg
-		String fullClassName = commandClassScanner.getFullClassName(className);
-		if (fullClassName == null) {
-			String errorMessage = "Error mapping command name to full class name: " + className;
-			log.error(errorMessage);
-			bot.sendToOwner(errorMessage);
-		}
-		return fullClassName;
 	}
 
 	private void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {

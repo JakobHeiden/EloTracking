@@ -68,7 +68,8 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 		matchService.processMatchResult(matchResult, match, rulingMessage);
 		removeButtons();
 		postToDisputeChannel(rulingMessage).block();
-		event.getInteraction().getChannel().subscribe(channel -> bot.moveToArchive(server, channel));
+		event.getInteraction().getChannel().subscribe(channel ->
+				channelManager.moveToArchive(server, channel));
 		event.acknowledge().subscribe();
 	}
 

@@ -1,0 +1,16 @@
+Ranked matchmaking, true elo ratings and rankings for Discord. Play and track any game! Easy to use and set up.
+
+Features:
+- true elo. Other ranking systems coming soon
+- simple and streamlined interface for both players and moderators
+- full usage of discord's new command functions: slash commands, buttons, etc
+- automatic matchmaking
+- 1v1,team vs team, FFA, team FFA
+- run multiple leaderboards per server and multiple queues per leaderboard
+- designate roles as ranks based on player rating
+- ongoing development, new features all the time
+- a responsive developer who cares about your feature requests
+
+Visit the website at www.elorankingbot.com
+Watch the basic setup tutorial at https://www.youtube.com/watch?v=rq8kD-mQujI
+Watch the player tutorial at https://www.youtube.com/watch?v=u6VzIFM8md8

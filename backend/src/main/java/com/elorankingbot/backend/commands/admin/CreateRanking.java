@@ -75,11 +75,11 @@ public class CreateRanking extends SlashCommand {
 		Game game = new Game(server, nameOfGame, allowDraw);// TODO duplikate verhindern
 		server.addGame(game);
 		try {
-			bot.getOrCreateResultChannel(game);
-			bot.updateLeaderboard(game, Optional.empty());
-			bot.getOrCreateMatchCategory(server);
-			bot.getOrCreateDisputeCategory(server);
-			bot.getOrCreateArchiveCategory(server);
+			channelManager.getOrCreateResultChannel(game);
+			channelManager.updateLeaderboard(game, Optional.empty());
+			channelManager.getOrCreateMatchCategory(server);
+			channelManager.getOrCreateDisputeCategory(server);
+			channelManager.getOrCreateArchiveCategory(server);
 		} catch (ClientException e) {
 			String failedRequest = "Unknown error.\\nPlease contact the developer, Ente#3460";
 			if (e.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")) {
