@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
+import com.elorankingbot.backend.commands.player.help.HelpComponents;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.MatchResultReference;
 import com.elorankingbot.backend.model.Player;
@@ -27,7 +28,7 @@ public class RevertMatch extends MessageCommand {
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name(formatCommandName(RevertMatch.class))
+				.name(HelpComponents.helpEntryNameOf(RevertMatch.class))
 				.type(3)
 				.build();
 	}
@@ -39,7 +40,7 @@ public class RevertMatch extends MessageCommand {
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
 				"This is not a slash command, but rather a message command. Access it by right-clicking on a match result " +
-				"-> Apps -> " + formatCommandName(RevertMatch.class) + ".\n" +
+				"-> Apps -> " + HelpComponents.helpEntryNameOf(RevertMatch.class) + ".\n" +
 				"This command does not apply a full rollback with its implications for subsequent matches, but rather simply " +
 				"reverts the rating gains/losses as well as the win/loss/draw count of the players.";
 	}

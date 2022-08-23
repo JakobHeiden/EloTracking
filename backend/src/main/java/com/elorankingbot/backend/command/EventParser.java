@@ -63,7 +63,13 @@ public class EventParser {
 				.subscribe(this::processSelectMenuInteractionEvent);
 
 		client.on(ModalSubmitInteractionEvent.class)
-				.subscribe(event -> new SetVariable(event, services).doExecute());
+				.subscribe(event -> {
+					try {
+						new SetVariable(event, services).doExecute();
+					} catch (Exception e) {
+						handleException(e, event, SetVariable.class.getSimpleName());
+					}
+				});
 
 		client.on(MessageInteractionEvent.class)
 				.subscribe(this::processMessageInteractionEvent);
@@ -171,7 +177,7 @@ public class EventParser {
 				.newInstance(event, services);
 	}
 
-	private void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
+	public void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
 		String guildName = event.getInteraction().getGuild().map(Guild::getName).onErrorReturn("unknown").block();
 		String errorReport = String.format("Error executing %s on %s by %s:\n%s", commandName,
 				guildName, event.getInteraction().getUser().getTag(), throwable.getMessage());

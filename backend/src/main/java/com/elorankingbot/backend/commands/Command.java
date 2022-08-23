@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands;
 
 import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.EventParser;
 import com.elorankingbot.backend.command.ModCommand;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.model.Server;
@@ -27,6 +28,7 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 	protected final MatchService matchService;
 	protected final QueueService queueService;
 	protected final TimedTaskQueue timedTaskQueue;
+	private final EventParser eventParser;
 	protected final DeferrableInteractionEvent event;
 	protected final long guildId;
 	protected final Server server;
@@ -43,6 +45,7 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 		this.queueService = services.queueService;
 		this.client = services.client;// TODO alles an bot weiterleiten
 		this.timedTaskQueue = services.timedTaskQueue;
+		this.eventParser = services.eventParser;
 		this.event = event;
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
 		Optional<Server> maybeServer = dbService.findServerByGuildId(guildId);
@@ -56,7 +59,7 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 		this.activeUserId = activeUser.getId().asLong();
 	}
 
-	public void doExecute() {
+	public void doExecute() throws Exception {
 		String executeLog = String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
 				event.getInteraction().getUser().getTag(),
@@ -108,9 +111,13 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 				event.getInteraction().getGuild().block().getName()));
 	}
 
+	protected abstract void execute() throws Exception;
+
 	protected void acknowledgeEvent() {
 		event.deferReply().subscribe();
 	}
 
-	protected abstract void execute();
+	protected void forwardToEventParser(Throwable throwable) {
+		eventParser.handleException(throwable, event, this.getClass().getSimpleName());
+	}
 }

@@ -18,8 +18,10 @@ public class SelectTopic extends SelectMenuCommand {
 		this.services = services;
 	}
 
-	protected void execute() {
-		event.getMessage().get().edit().withEmbeds(createHelpEmbed(services, event.getValues().get(0))).subscribe();
+	protected void execute() throws Exception {
+		event.getMessage().get().edit().withEmbeds(createHelpEmbed(services, event.getValues().get(0)))
+				.doOnError(super::forwardToEventParser)
+				.subscribe();
 		event.deferEdit().subscribe();
 	}
 }

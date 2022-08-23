@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,8 +18,17 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommandClassScanner {
 
-	// command strings are simple class names in lowercase, full class name is class name with package path
-	// these are used for instantiating all Commands
+	/*
+	Command class names are camel case, as per java convention.
+	Discord slash command names must be lowercase.
+	"Command strings" are either discord command names (for slash commands), or the first token of the event's custom id.
+	To accommodate mapping to command classes, all command strings are lowercase.
+	Message Commands differ: discord allows capitalization and spaces for their command names, and for UX reasons
+	both are used in the command name. The command string is still lowercase for these.
+
+	Java class names map to discord command names by going toLowerCase().
+	Incoming events are mapped from command string to Java class name using this.commandStringToFullClassName.
+	*/
 	private final Map<String, String> commandStringToFullClassName;
 	@Getter
 	// these are also used for setting permissions, which is currently out of order
@@ -70,14 +78,6 @@ public class CommandClassScanner {
 
 	private boolean superclassImpliesHelpEntry(Class clazz) {
 		return SlashCommand.class.isAssignableFrom(clazz) || MessageCommand.class.isAssignableFrom(clazz);
-	}
-
-	public Set<String> getAllCommandClassNames() {// TODO macht das hier alles sinn? class name vs command string etc
-		Set<String> allCommandClassnames = new HashSet<>();
-		allCommandClassnames.addAll(playerCommandHelpEntries);
-		allCommandClassnames.addAll(modCommandHelpEntries);
-		allCommandClassnames.addAll(adminCommandHelpEntries);
-		return allCommandClassnames;
 	}
 
 	public String getFullClassName(String commandStringOrClassName) {

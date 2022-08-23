@@ -14,37 +14,45 @@ import java.util.List;
 
 public class HelpComponents {
 
-	static EmbedCreateSpec createHelpEmbed(Services services, String topic) {
+	static EmbedCreateSpec createHelpEmbed(Services services, String topic) throws Exception {
 		DiscordBotService bot = services.bot;
 		CommandClassScanner commandClassScanner = services.commandClassScanner;
-		String embedTitle;
+		String embedTitle = null;
 		String embedText = "";
 		switch (topic) {
 			case "General Help" -> {
-				embedTitle = topic;
 				embedText = "Please refer to these tutorials to get started:\n" +
 						"[Tutorial: Basic bot setup](https://www.youtube.com/watch?v=rq8kD-mQujI)\n" +
 						"[Tutorial: Join a queue, report a match](https://www.youtube.com/watch?v=u6VzIFM8md8)";
 			}
-			case "Command List" -> {// TODO! das hier macht irgendwas an der message zu lang. handleException klappt nicht weil im EventParser noch
-				// eine einzelloeslung fuer /help steht. einzelloesung muss weg, dann die command list irgendwie angezeigt werden
-				embedTitle = topic;
-				String shortDescription = null;
-				embedText = "Not all commands will be present on the server at all times. For example, all moderator " +
-						"commands will be absent until the moderator role is set with `/setrole`.\n";
-				for (String commandClassName : commandClassScanner.getAllCommandClassNames()) {
-					try {
-						shortDescription = (String) Class.forName(commandClassScanner.getFullClassName(commandClassName))
-								.getMethod("getShortDescription").invoke(null);
-					} catch (ReflectiveOperationException e) {
-						bot.sendToOwner("Reflection error in Help");
-						e.printStackTrace();
-					}
-					embedText += String.format("`/%s` %s\n", commandClassName.toLowerCase(), shortDescription);
+			case "Player Command List" -> {
+				embedText = "Not all commands will be present on the server at all times. For example, /join " +
+						"will be absent unless there is at least one ranking and one queue.\n";
+				for (String playerHelpEntry : commandClassScanner.getPlayerCommandHelpEntries()) {
+					Class clazz = Class.forName(commandClassScanner.getFullClassName(playerHelpEntry));
+					String shortDescription = (String) clazz.getMethod("getShortDescription").invoke(null);
+					embedText += String.format("`%s` %s\n", helpEntryNameOf(clazz), shortDescription);
+				}
+			}
+			case "Moderator Command List" -> {
+				embedText = "Not all commands will be present on the server at all times. For example, /forcewin " +
+						"will be absent unless there is at least one ranking and one queue.\n";
+				for (String moderatorHelpEntry : commandClassScanner.getModCommandHelpEntries()) {
+					Class clazz = Class.forName(commandClassScanner.getFullClassName(moderatorHelpEntry));
+					String shortDescription = (String) clazz.getMethod("getShortDescription").invoke(null);
+					embedText += String.format("`%s` %s\n", helpEntryNameOf(clazz), shortDescription);
+				}
+			}
+			case "Admin Command List" -> {
+				embedText = "Not all commands will be present on the server at all times. For example, /addqueue " +
+						"will be absent unless there is at least one ranking.\n";
+				for (String adminHelpEntry : commandClassScanner.getAdminCommandHelpEntries()) {
+					Class clazz = Class.forName(commandClassScanner.getFullClassName(adminHelpEntry));
+						String shortDescription = (String) clazz.getMethod("getShortDescription").invoke(null);
+					embedText += String.format("`%s` %s\n", helpEntryNameOf(clazz), shortDescription);
 				}
 			}
 			case "Concept: Rankings and Queues" -> {
-				embedTitle = topic;
 				embedText = "One server can have several rankings. Each ranking can have several queues.\n" +
 						"A ranking can be a game, or it you can have several rankings for the same game.\n" +
 						"For example: You could have a ranking \"Starcraft-versus\" with one queue \"1v1\", and a ranking " +
@@ -52,7 +60,6 @@ public class HelpComponents {
 						"share a rating and a leaderboard, while 1v1 would be separate.";
 			}
 			case "Concept: Matchmaking, Rating Spread, Rating Elasticity" -> {
-				embedTitle = topic;
 				embedText = "Queues have a setting called `maxratingspread`. This defines the maximum rating distance " +
 						"between the strongest player and the weakest player in a match.\n" +
 						"There is also another setting called `ratingelasticity`, given in ratings points per minute, " +
@@ -65,10 +72,8 @@ public class HelpComponents {
 			}
 			default -> {
 				String commandName = topic;
-				Class commandClass = classForName(commandClassScanner, commandName);
-				embedTitle = MessageCommand.class.isAssignableFrom(commandClass) ?
-						"Help on " + MessageCommand.formatCommandName(commandClass)
-						: "Help on /" + commandName;
+				Class commandClass = Class.forName(commandClassScanner.getFullClassName(commandName));
+				embedTitle = "Help on " + helpEntryNameOf(commandClass);
 				try {
 					embedText = (String) commandClass.getMethod("getLongDescription").invoke(null);
 				} catch (ReflectiveOperationException e) {
@@ -77,57 +82,65 @@ public class HelpComponents {
 				}
 			}
 		}
+		if (embedTitle == null) {
+			embedTitle = topic;
+		}
 
-		return EmbedCreateSpec.builder()
-				.addField(EmbedCreateFields.Field.of(embedTitle, embedText, true))
-				.build();
+		var builder = EmbedCreateSpec.builder()
+				.addField(EmbedCreateFields.Field.of(embedTitle, embedText, true));
+		return builder.build();
 	}
 
 	static ActionRow createConceptsActionRow() {
 		List<SelectMenu.Option> menuOptions = new ArrayList<>();
 		menuOptions.add(SelectMenu.Option.of("General Help", "General Help"));
-		menuOptions.add(SelectMenu.Option.of("Command List", "Command List"));
 		menuOptions.add(SelectMenu.Option.of("Concept: Rankings and Queues", "Concept: Rankings and Queues"));
 		menuOptions.add(SelectMenu.Option.of("Concept: Matchmaking, Rating Spread, Rating Elasticity",
 				"Concept: Matchmaking, Rating Spread, Rating Elasticity"));
 		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":concepts", menuOptions).withPlaceholder("General Help, Command List, and Concepts"));
 	}
 
-	static ActionRow createPlayerCommandsActionRow(CommandClassScanner commandClassScanner) {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getPlayerCommandHelpEntries().stream()
-				.map(playerCommandClassName -> createSelectMenuOption(commandClassScanner, playerCommandClassName))
-				.toList());
+	static ActionRow createPlayerCommandsActionRow(CommandClassScanner commandClassScanner) throws ClassNotFoundException {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>();
+		menuOptions.add(SelectMenu.Option.of("Player Command List", "Player Command List"));
+		for (String playerCommandHelpEntry : commandClassScanner.getPlayerCommandHelpEntries()) {
+			menuOptions.add(createSelectMenuOption(commandClassScanner, playerCommandHelpEntry));
+		}
 		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":playercommands", menuOptions).withPlaceholder("Player Commands"));
 	}
 
-	static ActionRow createModCommandsActionRow(CommandClassScanner commandClassScanner) {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getModCommandHelpEntries().stream()
-				.map(modCommandClassName -> createSelectMenuOption(commandClassScanner, modCommandClassName))
-				.toList());
+	static ActionRow createModCommandsActionRow(CommandClassScanner commandClassScanner) throws ClassNotFoundException {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>();
+		menuOptions.add(SelectMenu.Option.of("Moderator Command List", "Moderator Command List"));
+		for (String modCommandClassName : commandClassScanner.getModCommandHelpEntries()) {
+			SelectMenu.Option selectMenuOption = createSelectMenuOption(commandClassScanner, modCommandClassName);
+			menuOptions.add(selectMenuOption);
+		}
 		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":modcommands", menuOptions).withPlaceholder("Moderator Commands"));
 	}
 
-	static ActionRow createAdminCommandsActionRow(CommandClassScanner commandClassScanner) {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAdminCommandHelpEntries().stream()
-				.map(adminCommandClassName -> createSelectMenuOption(commandClassScanner, adminCommandClassName))
-				.toList());
+	static ActionRow createAdminCommandsActionRow(CommandClassScanner commandClassScanner) throws ClassNotFoundException {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>();
+		menuOptions.add(SelectMenu.Option.of("Admin Command List", "Admin Command List"));
+		for (String adminCommandClassName : commandClassScanner.getAdminCommandHelpEntries()) {
+			SelectMenu.Option selectMenuOption = createSelectMenuOption(commandClassScanner, adminCommandClassName);
+			menuOptions.add(selectMenuOption);
+		}
 		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":admincommands", menuOptions).withPlaceholder("Admin Commands"));
 	}
 
-	static SelectMenu.Option createSelectMenuOption(CommandClassScanner commandClassScanner, String commandClassName) {
-		Class commandClass = classForName(commandClassScanner, commandClassName);
-		String selectMenuOptionLabel = MessageCommand.class.isAssignableFrom(commandClass) ?
-				MessageCommand.formatCommandName(commandClass)
-				: "/" + commandClassName.toLowerCase();
-		return SelectMenu.Option.of(selectMenuOptionLabel, commandClassName.toLowerCase());
+	static SelectMenu.Option createSelectMenuOption(CommandClassScanner commandClassScanner, String commandClassName) throws ClassNotFoundException {
+		Class commandClass = Class.forName(commandClassScanner.getFullClassName(commandClassName));
+		return SelectMenu.Option.of(helpEntryNameOf(commandClass), commandClassName.toLowerCase());
 	}
 
-	static Class classForName(CommandClassScanner commandClassScanner, String commandClassName) {
-		try {
-			return Class.forName(commandClassScanner.getFullClassName(commandClassName));
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+	public static String helpEntryNameOf(Class clazz) {
+		if (MessageCommand.class.isAssignableFrom(clazz)) {
+				String regex = "([a-z])([A-Z])";
+				String replacement = "$1 $2";
+				return clazz.getSimpleName().replaceAll(regex, replacement);
+		} else {
+			return "/" + clazz.getSimpleName().toLowerCase();
 		}
-		return null;
 	}
 }
