@@ -40,7 +40,7 @@ public class Help extends SlashCommand {
 				"The command will display some general help, and a menu to to display help on selected topics, and every bot command.";
 	}
 
-	protected void execute() {
+	protected void execute() throws Exception {
 		String initialTopic = "General Help";
 		event.reply().withEmbeds(createHelpEmbed(services, initialTopic))
 				.withComponents(

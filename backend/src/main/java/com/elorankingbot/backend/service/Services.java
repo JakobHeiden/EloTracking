@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.command.EventParser;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import com.elorankingbot.backend.timedtask.TimedTaskService;
@@ -21,12 +22,13 @@ public class Services {
 	public final TimedTaskService timedTaskService;
 	public final QueueService queueService;
 	public final CommandClassScanner commandClassScanner;
+	public final EventParser eventParser;
 
 	public Services(ApplicationPropertiesLoader props,
 					@Lazy DBService dbService, @Lazy DiscordBotService bot, @Lazy ChannelManager channelManager,
 					@Lazy MatchService matchService, @Lazy GatewayDiscordClient client,
 					@Lazy TimedTaskQueue timedTaskQueue, @Lazy TimedTaskService timedTaskService, @Lazy QueueService queueService,
-					@Lazy CommandClassScanner commandClassScanner) {
+					@Lazy CommandClassScanner commandClassScanner, @Lazy EventParser eventParser) {
 		this.props = props;
 		this.dbService = dbService;
 		this.bot = bot;
@@ -37,5 +39,6 @@ public class Services {
 		this.timedTaskService = timedTaskService;
 		this.queueService = queueService;
 		this.commandClassScanner = commandClassScanner;
+		this.eventParser = eventParser;
 	}
 }
