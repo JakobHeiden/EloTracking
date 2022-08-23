@@ -11,10 +11,10 @@ import discord4j.core.spec.EmbedCreateSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Components {
+public class SettingsComponents {
 
 	static List<EmbedCreateSpec> allGamesSettingsEmbeds(Server server) {
-		return server.getGames().stream().map(Components::gameSettingsEmbed).toList();
+		return server.getGames().stream().map(SettingsComponents::gameSettingsEmbed).toList();
 	}
 
 	static EmbedCreateSpec gameSettingsEmbed(Game game) {

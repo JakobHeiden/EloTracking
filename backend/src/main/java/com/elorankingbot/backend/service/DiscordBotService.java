@@ -233,7 +233,7 @@ public class DiscordBotService {
 	// Command Permissions
 	public void setCommandPermissionForRole(Server server, String commandName, long roleId) {
 		// discord api changes invalidated this code, and Discord4J does not currently support the workaround.
-		// currently, command permissions are checked on our side in SlashCommand
+		// currently, command permissions are checked on our side in Command
 		/*
 		client.getRoleById(Snowflake.of(server.getGuildId()), Snowflake.of(roleId))
 				.subscribe(role -> {
@@ -274,6 +274,4 @@ public class DiscordBotService {
 		getCommandIdByName(server.getGuildId(), commandName).subscribe(commandId -> applicationService
 				.modifyApplicationCommandPermissions(botId, server.getGuildId(), commandId, request).subscribe());
 	}
-
-
 }

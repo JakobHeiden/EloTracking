@@ -5,7 +5,7 @@ import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
-import static com.elorankingbot.backend.commands.admin.settings.Components.*;
+import static com.elorankingbot.backend.commands.admin.settings.SettingsComponents.*;
 
 public class Escape extends ButtonCommand {
 

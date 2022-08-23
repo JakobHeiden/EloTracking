@@ -7,7 +7,7 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import static com.elorankingbot.backend.commands.admin.settings.Components.*;
+import static com.elorankingbot.backend.commands.admin.settings.SettingsComponents.*;
 
 @AdminCommand
 public class Settings extends SlashCommand {

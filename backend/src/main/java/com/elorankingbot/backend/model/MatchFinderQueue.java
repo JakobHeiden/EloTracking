@@ -59,7 +59,7 @@ public class MatchFinderQueue {
 
 	public void removeGroupsContainingPlayer(Player player) {
 		groups.removeIf(group -> group.hasPlayer(player));
-		// TODO! spieler informieren? oder vllt solo q blocken wenn man in team queue ist?
+		// TODO spieler informieren? oder vllt solo q blocken wenn man in team queue ist?
 	}
 
 	public int getNumPlayersWaiting() {

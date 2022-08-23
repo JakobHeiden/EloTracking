@@ -1,69 +1,20 @@
-package com.elorankingbot.backend.commands.player;
+package com.elorankingbot.backend.commands.player.help;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.command.PlayerCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
-import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.discordjson.json.ApplicationCommandRequest;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
-@PlayerCommand
-public class Help extends SlashCommand {
+public class HelpComponents {
 
-	private final Services services;
-	private final CommandClassScanner commandClassScanner;
-	public static final String customId = Help.class.getSimpleName().toLowerCase();
-
-	public Help(ChatInputInteractionEvent event, Services services) {
-		super(event, services);
-		this.services = services;
-		this.commandClassScanner = services.commandClassScanner;
-	}
-
-	public static ApplicationCommandRequest getRequest() {
-		return ApplicationCommandRequest.builder()
-				.name(Help.class.getSimpleName().toLowerCase())
-				.description(getShortDescription())
-				.defaultPermission(true)
-				.build();
-	}
-
-	public static String getShortDescription() {
-		return "Get help on how to use the bot.";
-	}
-
-	public static String getLongDescription() {
-		return getShortDescription() + "\n" +
-				"The command will display some general help, and a menu to to display help on selected topics, and every bot command.";
-	}
-
-	protected void execute() {
-		String topic = "General Help";
-		event.reply().withEmbeds(createHelpEmbed(services, topic))// TODO! wo kommen dann die anderen topics her? f[r Revert Match anpassen
-				.withComponents(createConceptsActionRow(), createPlayerCommandsActionRow(), createModCommandsActionRow(),
-						createAdminCommandsActionRow())
-				.block();
-	}
-
-	// TODO in eigenes Command auslagern
-	public static void executeSelectMenuSelection(Services services, SelectMenuInteractionEvent event) {
-		event.getMessage().get().edit().withEmbeds(createHelpEmbed(services, event.getValues().get(0))).subscribe();
-		event.deferEdit().subscribe();
-	}
-
-	private static EmbedCreateSpec createHelpEmbed(Services services, String topic) {
+	static EmbedCreateSpec createHelpEmbed(Services services, String topic) {
 		DiscordBotService bot = services.bot;
 		CommandClassScanner commandClassScanner = services.commandClassScanner;
 		String embedTitle;
@@ -75,7 +26,8 @@ public class Help extends SlashCommand {
 						"[Tutorial: Basic bot setup](https://www.youtube.com/watch?v=rq8kD-mQujI)\n" +
 						"[Tutorial: Join a queue, report a match](https://www.youtube.com/watch?v=u6VzIFM8md8)";
 			}
-			case "Command List" -> {
+			case "Command List" -> {// TODO! das hier macht irgendwas an der message zu lang. handleException klappt nicht weil im EventParser noch
+				// eine einzelloeslung fuer /help steht. einzelloesung muss weg, dann die command list irgendwie angezeigt werden
 				embedTitle = topic;
 				String shortDescription = null;
 				embedText = "Not all commands will be present on the server at all times. For example, all moderator " +
@@ -115,7 +67,7 @@ public class Help extends SlashCommand {
 				String commandName = topic;
 				Class commandClass = classForName(commandClassScanner, commandName);
 				embedTitle = MessageCommand.class.isAssignableFrom(commandClass) ?
-						"Help on " + MessageCommand.getCommandName(commandClass)
+						"Help on " + MessageCommand.formatCommandName(commandClass)
 						: "Help on /" + commandName;
 				try {
 					embedText = (String) commandClass.getMethod("getLongDescription").invoke(null);
@@ -131,43 +83,46 @@ public class Help extends SlashCommand {
 				.build();
 	}
 
-	private ActionRow createConceptsActionRow() {
+	static ActionRow createConceptsActionRow() {
 		List<SelectMenu.Option> menuOptions = new ArrayList<>();
 		menuOptions.add(SelectMenu.Option.of("General Help", "General Help"));
 		menuOptions.add(SelectMenu.Option.of("Command List", "Command List"));
 		menuOptions.add(SelectMenu.Option.of("Concept: Rankings and Queues", "Concept: Rankings and Queues"));
 		menuOptions.add(SelectMenu.Option.of("Concept: Matchmaking, Rating Spread, Rating Elasticity",
 				"Concept: Matchmaking, Rating Spread, Rating Elasticity"));
-		return ActionRow.of(SelectMenu.of(customId + ":concepts", menuOptions).withPlaceholder("General Help, Command List, and Concepts"));
+		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":concepts", menuOptions).withPlaceholder("General Help, Command List, and Concepts"));
 	}
 
-	private ActionRow createPlayerCommandsActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getPlayerCommandClassNames().stream()
-				.map(this::createSelectMenuOption).toList());
-		return ActionRow.of(SelectMenu.of(customId + ":playercommands", menuOptions).withPlaceholder("Player Commands"));
+	static ActionRow createPlayerCommandsActionRow(CommandClassScanner commandClassScanner) {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getPlayerCommandHelpEntries().stream()
+				.map(playerCommandClassName -> createSelectMenuOption(commandClassScanner, playerCommandClassName))
+				.toList());
+		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":playercommands", menuOptions).withPlaceholder("Player Commands"));
 	}
 
-	private ActionRow createModCommandsActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getModCommandClassNames().stream()
-				.map(this::createSelectMenuOption).toList());
-		return ActionRow.of(SelectMenu.of(customId + ":modcommands", menuOptions).withPlaceholder("Moderator Commands"));
+	static ActionRow createModCommandsActionRow(CommandClassScanner commandClassScanner) {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getModCommandHelpEntries().stream()
+				.map(modCommandClassName -> createSelectMenuOption(commandClassScanner, modCommandClassName))
+				.toList());
+		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":modcommands", menuOptions).withPlaceholder("Moderator Commands"));
 	}
 
-	private ActionRow createAdminCommandsActionRow() {
-		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAdminCommandClassNames().stream()
-				.map(this::createSelectMenuOption).toList());
-		return ActionRow.of(SelectMenu.of(customId + ":admincommands", menuOptions).withPlaceholder("Admin Commands"));
+	static ActionRow createAdminCommandsActionRow(CommandClassScanner commandClassScanner) {
+		List<SelectMenu.Option> menuOptions = new ArrayList<>(commandClassScanner.getAdminCommandHelpEntries().stream()
+				.map(adminCommandClassName -> createSelectMenuOption(commandClassScanner, adminCommandClassName))
+				.toList());
+		return ActionRow.of(SelectMenu.of(SelectTopic.customId + ":admincommands", menuOptions).withPlaceholder("Admin Commands"));
 	}
 
-	private SelectMenu.Option createSelectMenuOption(String commandClassName) {
+	static SelectMenu.Option createSelectMenuOption(CommandClassScanner commandClassScanner, String commandClassName) {
 		Class commandClass = classForName(commandClassScanner, commandClassName);
 		String selectMenuOptionLabel = MessageCommand.class.isAssignableFrom(commandClass) ?
-				MessageCommand.getCommandName(commandClass)
+				MessageCommand.formatCommandName(commandClass)
 				: "/" + commandClassName.toLowerCase();
 		return SelectMenu.Option.of(selectMenuOptionLabel, commandClassName.toLowerCase());
 	}
 
-	private static Class classForName(CommandClassScanner commandClassScanner, String commandClassName) {
+	static Class classForName(CommandClassScanner commandClassScanner, String commandClassName) {
 		try {
 			return Class.forName(commandClassScanner.getFullClassName(commandClassName));
 		} catch (ClassNotFoundException e) {

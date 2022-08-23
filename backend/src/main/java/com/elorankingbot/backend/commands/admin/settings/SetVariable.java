@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.AdminCommand;
-import com.elorankingbot.backend.command.NoHelpEntry;
 import com.elorankingbot.backend.commands.Command;
 import com.elorankingbot.backend.commands.admin.AddQueue;
 import com.elorankingbot.backend.commands.admin.AddRank;
@@ -17,10 +16,9 @@ import discord4j.discordjson.possible.Possible;
 
 import java.util.Optional;
 
-import static com.elorankingbot.backend.commands.admin.settings.Components.*;
+import static com.elorankingbot.backend.commands.admin.settings.SettingsComponents.*;
 
 @AdminCommand
-@NoHelpEntry
 public class SetVariable extends Command {
 
 	private ModalSubmitInteractionEvent event;
