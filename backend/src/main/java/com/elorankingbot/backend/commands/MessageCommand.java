@@ -12,7 +12,8 @@ public abstract class MessageCommand extends Command {
 		this.event = event;
 	}
 
-	public static String getCommandName(Class thisClass) {
+	// this is needed for the Help entry as well as deploying the discord command
+	public static String formatCommandName(Class thisClass) {
 		String regex = "([a-z])([A-Z])";
 		String replacement = "$1 $2";
 		return thisClass.getSimpleName().replaceAll(regex, replacement);

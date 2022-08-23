@@ -70,7 +70,7 @@ public class CreateRanking extends SlashCommand {
 		}
 
 		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
-		boolean doCreateCategories = server.getDisputeCategoryId() == 0L;// TODO! stimmt nicht so ganz
+		boolean doCreateCategories = server.getDisputeCategoryId() == 0L;
 		Game game = new Game(server, nameOfGame, allowDraw);// TODO duplikate verhindern
 		server.addGame(game);
 		try {

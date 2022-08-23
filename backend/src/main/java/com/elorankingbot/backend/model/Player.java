@@ -52,7 +52,7 @@ public class Player  {
         return unbanAtTimeSlot == PERMABANNED;
     }
 
-    public PlayerGameStats getOrCreateGameStats(Game game) {// TODO! durch alle uses gehen, nach bedarf durch findGameStats ersetzen
+    public PlayerGameStats getOrCreateGameStats(Game game) {
         PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
         if (playerGameStats == null) {
             PlayerGameStats newPlayerGameStats = new PlayerGameStats(game.getInitialRating());

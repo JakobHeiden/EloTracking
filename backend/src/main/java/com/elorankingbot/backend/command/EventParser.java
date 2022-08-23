@@ -3,7 +3,6 @@ package com.elorankingbot.backend.command;
 import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
-import com.elorankingbot.backend.commands.player.Help;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
@@ -61,13 +60,7 @@ public class EventParser {
 				.subscribe(this::processButtonInteractionEvent);
 
 		client.on(SelectMenuInteractionEvent.class)
-				.subscribe(event -> {// TODO zusammen mit Help umbauen
-					if (event.getCustomId().startsWith(Help.customId)) {
-						Help.executeSelectMenuSelection(services, event);
-					} else {
-						processSelectMenuInteractionEvent(event);
-					}
-				});
+				.subscribe(this::processSelectMenuInteractionEvent);
 
 		client.on(ModalSubmitInteractionEvent.class)
 				.subscribe(event -> new SetVariable(event, services).doExecute());

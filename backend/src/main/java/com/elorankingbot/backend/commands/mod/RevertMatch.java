@@ -27,7 +27,7 @@ public class RevertMatch extends MessageCommand {
 
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
-				.name(getCommandName(RevertMatch.class))
+				.name(formatCommandName(RevertMatch.class))
 				.type(3)
 				.build();
 	}
@@ -39,7 +39,7 @@ public class RevertMatch extends MessageCommand {
 	public static String getLongDescription() {
 		return getShortDescription() + "\n" +
 				"This is not a slash command, but rather a message command. Access it by right-clicking on a match result " +
-				"-> Apps -> " + getCommandName(RevertMatch.class) + ".\n" +
+				"-> Apps -> " + formatCommandName(RevertMatch.class) + ".\n" +
 				"This command does not apply a full rollback with its implications for subsequent matches, but rather simply " +
 				"reverts the rating gains/losses as well as the win/loss/draw count of the players.";
 	}

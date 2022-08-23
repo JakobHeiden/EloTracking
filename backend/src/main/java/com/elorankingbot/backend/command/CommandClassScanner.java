@@ -1,5 +1,7 @@
 package com.elorankingbot.backend.command;
 
+import com.elorankingbot.backend.commands.MessageCommand;
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import lombok.Getter;
@@ -21,11 +23,11 @@ public class CommandClassScanner {
 	// these are used for instantiating all Commands
 	private final Map<String, String> commandStringToFullClassName;
 	@Getter
-	// these are used in Help
-	private final Set<String> adminCommandClassNames, modCommandClassNames, playerCommandClassNames;
+	// these are also used for setting permissions, which is currently out of order
+	private final Set<String> adminCommandHelpEntries, modCommandHelpEntries, playerCommandHelpEntries;
 
 	public CommandClassScanner() throws IOException {
-		Set<Class> classes = ClassPath.from(ClassLoader.getSystemClassLoader())
+		Set<Class> allMyClasses = ClassPath.from(ClassLoader.getSystemClassLoader())
 				.getAllClasses()
 				.stream()
 				.filter(classInfo -> classInfo.getPackageName().contains("com.elorankingbot.backend.commands"))
@@ -45,32 +47,36 @@ public class CommandClassScanner {
 				.filter(clazz -> !clazz.getSimpleName().equals(""))
 				.collect(Collectors.toSet());
 
-		this.adminCommandClassNames = classes.stream()
-				.filter(clazz -> clazz.isAnnotationPresent(AdminCommand.class) && !clazz.isAnnotationPresent(NoHelpEntry.class))
+		this.adminCommandHelpEntries = allMyClasses.stream()
+				.filter(clazz -> clazz.isAnnotationPresent(AdminCommand.class) && superclassImpliesHelpEntry(clazz))
 				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
-		adminCommandClassNames.forEach(className -> log.trace("admin command " + className));
-		this.modCommandClassNames = classes.stream()
-				.filter(clazz -> clazz.isAnnotationPresent(ModCommand.class) && !clazz.isAnnotationPresent(NoHelpEntry.class))
+		adminCommandHelpEntries.forEach(className -> log.trace("admin command " + className));
+		this.modCommandHelpEntries = allMyClasses.stream()
+				.filter(clazz -> clazz.isAnnotationPresent(ModCommand.class) && superclassImpliesHelpEntry(clazz))
 				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
-		modCommandClassNames.forEach(className -> log.trace("mod command " + className));
-		this.playerCommandClassNames = classes.stream()
-				.filter(clazz -> clazz.isAnnotationPresent(PlayerCommand.class) && !clazz.isAnnotationPresent(NoHelpEntry.class))
+		modCommandHelpEntries.forEach(className -> log.trace("mod command " + className));
+		this.playerCommandHelpEntries = allMyClasses.stream()
+				.filter(clazz -> clazz.isAnnotationPresent(PlayerCommand.class) && superclassImpliesHelpEntry(clazz))
 				.map(Class::getSimpleName)
 				.collect(Collectors.toSet());
-		playerCommandClassNames.forEach(className -> log.trace("player command " + className));
+		playerCommandHelpEntries.forEach(className -> log.trace("player command " + className));
 
 		ImmutableMap.Builder<String, String> mapBuilder = ImmutableMap.builder();
-		classes.forEach(clazz -> mapBuilder.put(clazz.getSimpleName().toLowerCase(), clazz.getName()));
+		allMyClasses.forEach(clazz -> mapBuilder.put(clazz.getSimpleName().toLowerCase(), clazz.getName()));
 		this.commandStringToFullClassName = mapBuilder.build();
+	}
+
+	private boolean superclassImpliesHelpEntry(Class clazz) {
+		return SlashCommand.class.isAssignableFrom(clazz) || MessageCommand.class.isAssignableFrom(clazz);
 	}
 
 	public Set<String> getAllCommandClassNames() {// TODO macht das hier alles sinn? class name vs command string etc
 		Set<String> allCommandClassnames = new HashSet<>();
-		allCommandClassnames.addAll(playerCommandClassNames);
-		allCommandClassnames.addAll(modCommandClassNames);
-		allCommandClassnames.addAll(adminCommandClassNames);
+		allCommandClassnames.addAll(playerCommandHelpEntries);
+		allCommandClassnames.addAll(modCommandHelpEntries);
+		allCommandClassnames.addAll(adminCommandHelpEntries);
 		return allCommandClassnames;
 	}
 

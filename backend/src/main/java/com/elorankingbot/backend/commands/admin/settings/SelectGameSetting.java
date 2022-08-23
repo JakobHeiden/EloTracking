@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.AdminCommand;
-import com.elorankingbot.backend.command.NoHelpEntry;
 import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.Services;
@@ -14,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 
 @AdminCommand
-@NoHelpEntry
 public class SelectGameSetting extends SelectMenuCommand {
 
 	private String selectedVariable;

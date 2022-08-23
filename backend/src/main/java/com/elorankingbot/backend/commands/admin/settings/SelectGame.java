@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.AdminCommand;
-import com.elorankingbot.backend.command.NoHelpEntry;
 import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.model.Game;
@@ -11,10 +10,9 @@ import discord4j.discordjson.possible.Possible;
 
 import java.util.Optional;
 
-import static com.elorankingbot.backend.commands.admin.settings.Components.*;
+import static com.elorankingbot.backend.commands.admin.settings.SettingsComponents.*;
 
 @AdminCommand
-@NoHelpEntry
 public class SelectGame extends SelectMenuCommand {
 
 	private Game game;
