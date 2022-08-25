@@ -41,19 +41,15 @@ public class DiscordBotService {
 	@Getter
 	private final GatewayDiscordClient client;
 	private final DBService dbService;
-	private final TimedTaskQueue timedTaskQueue;
 	private final ApplicationService applicationService;
 	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
 	public final long botId;
-	public final Snowflake botSnowflake;
 
 	public DiscordBotService(Services services) {
 		this.client = services.client;
 		this.dbService = services.dbService;
-		this.timedTaskQueue = services.timedTaskQueue;
-		this.botSnowflake = client.getSelfId();
-		this.botId = botSnowflake.asLong();
+		this.botId = client.getSelfId().asLong();
 		this.props = services.props;
 		this.applicationService = client.getRestClient().getApplicationService();
 	}
@@ -162,7 +158,7 @@ public class DiscordBotService {
 	}
 
 	// Commands
-	public void updateGuildCommandsByRanking(Server server) {
+	public String updateGuildCommandsByRanking(Server server) {
 		if (server.getGames().isEmpty()) {
 			deleteCommand(server, DeleteRanking.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, AddQueue.class.getSimpleName().toLowerCase()).subscribe();
@@ -176,9 +172,15 @@ public class DiscordBotService {
 			deployCommand(server, DeleteRanks.getRequest(server)).subscribe();
 			deployCommand(server, Reset.getRequest(server)).subscribe();
 		}
+		return String.format("/%s, /%s, /%s, /%s, /%s",
+				DeleteRanking.class.getSimpleName().toLowerCase(),
+				AddQueue.class.getSimpleName().toLowerCase(),
+				AddRank.class.getSimpleName().toLowerCase(),
+				DeleteRanks.class.getSimpleName().toLowerCase(),
+				Reset.class.getSimpleName().toLowerCase());
 	}
 
-	public void updateGuildCommandsByQueue(Server server) {
+	public String updateGuildCommandsByQueue(Server server) {
 		if (server.getQueues().isEmpty()) {
 			deleteCommand(server, Join.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, DeleteQueue.class.getSimpleName().toLowerCase()).subscribe();
@@ -195,6 +197,12 @@ public class DiscordBotService {
 		} else {
 			deployCommand(server, ForceDraw.getRequest(server)).subscribe();
 		}
+		return String.format("/%s, /%s, /%s, /%s, (/%s)",
+				Join.class.getSimpleName().toLowerCase(),
+				DeleteQueue.class.getSimpleName().toLowerCase(),
+				Edit.class.getSimpleName().toLowerCase(),
+				ForceWin.class.getSimpleName().toLowerCase(),
+				ForceDraw.class.getSimpleName().toLowerCase());
 	}
 
 	// TODO direkt schauen ob in dbService.adminCommands und entsprechend permissions setzen?

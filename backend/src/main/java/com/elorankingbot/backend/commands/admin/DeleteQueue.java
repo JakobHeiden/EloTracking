@@ -54,10 +54,10 @@ public class DeleteQueue extends SlashCommand {
 		Game game = server.getGame(queueFullName.split(" ")[0]);
 		game.deleteQueue(queueFullName.split(" ")[1]);
 		dbService.saveServer(server);
+		String updatedCommands = bot.updateGuildCommandsByQueue(server);
 
-		bot.updateGuildCommandsByQueue(server);
-
-		event.reply(String.format("Deleted queue %s. Updated the relevant commands. This may take a few minutes to deploy on the server.",
-				queueFullName)).subscribe();
+		event.reply(String.format("Deleted queue %s. Updated or deleted these commands: %s" +
+						"\nThis may take a few minutes to deploy on the server.",
+				queueFullName, updatedCommands)).subscribe();
 	}
 }

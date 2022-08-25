@@ -79,6 +79,10 @@ public class MatchFinderQueue {
 		return numTeams * numPlayersPerTeam;
 	}
 
+	public boolean hasPlayer(Player player) {
+		return getGroups().stream().anyMatch(group -> group.hasPlayer(player));
+	}
+
 	public String getFullName() {
 		if (game.getQueues().size() == 1) {
 			return game.getName();
