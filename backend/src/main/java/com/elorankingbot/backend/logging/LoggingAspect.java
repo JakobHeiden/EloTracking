@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -49,7 +50,7 @@ public class LoggingAspect {
     }
 
     private static String getStringRepresentation(Object value) {
-        if (value == null)// TODO void
+        if (value == null)
             return "NULL";
 
         if (value instanceof Optional) {
@@ -69,7 +70,7 @@ public class LoggingAspect {
         }
 
         if (value.getClass().isArray()) {
-            return "Array";// TODO besser machen
+            return "Array";
         }
 
         if (hasSimpleStringRepresentation(value.getClass())) {

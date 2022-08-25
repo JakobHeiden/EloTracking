@@ -77,7 +77,7 @@ public class Challenge extends SlashCommand {
 		if (maybeChallenge.isPresent()) {
 			if (maybeChallenge.get().isDispute())
 				event.reply("You cannot challenge that player again while there is an unresolved dispute")
-						.withEphemeral(true).subscribe();//TODO verlinken
+						.withEphemeral(true).subscribe();
 			else
 				event.reply("You already challenged that player. You should have received a private message from me...")
 						.withEphemeral(true).subscribe();

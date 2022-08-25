@@ -62,7 +62,7 @@ public class ChannelManager {
 						PermissionSet.none(),
 						PermissionSet.of(Permission.SEND_MESSAGES)),
 				PermissionOverwrite.forMember(
-						bot.botSnowflake,
+						Snowflake.of(bot.botId),
 						PermissionSet.of(Permission.SEND_MESSAGES),
 						PermissionSet.none()));
 	}
@@ -241,7 +241,7 @@ public class ChannelManager {
 	}
 
 	private PermissionOverwrite allowBotView() {
-		return PermissionOverwrite.forMember(bot.botSnowflake,
+		return PermissionOverwrite.forMember(Snowflake.of(bot.botId),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
 				PermissionSet.none());
 	}

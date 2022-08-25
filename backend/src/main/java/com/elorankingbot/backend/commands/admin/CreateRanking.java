@@ -96,17 +96,20 @@ public class CreateRanking extends SlashCommand {
 		}
 		dbService.saveServer(server);
 
-		bot.updateGuildCommandsByRanking(server);
+		String updatedCommands = bot.updateGuildCommandsByRanking(server);
 
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
-						"<#%s> where I put the leaderboard%s.\n" +
-						"However, there is no way yet for players to find a match. " +
-						"Use `/addqueue` to either add a queue the ranking.",
+						"<#%s> where I put the leaderboard%s." +
+						"\nHowever, there is no way yet for players to find a match. " +
+						"Use `/addqueue` to either add a queue the ranking." +
+						"\nThese commands have been updated: %s",
 				nameOfGame,
 				game.getResultChannelId(),
 				doCreateCategories ? ", " : " and ",
 				game.getLeaderboardChannelId(),
-				doCreateCategories ? ", and channel categories for disputes and an archive" : "")).subscribe();
+				doCreateCategories ? ", and channel categories for disputes and an archive" : "",
+				updatedCommands))
+				.doOnError(super::forwardToEventParser).subscribe();
 		if (!testServerIds.contains(server.getGuildId())) {
 			bot.sendToOwner(String.format("Created ranking %s on %s : %s",
 					nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));

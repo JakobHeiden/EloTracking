@@ -6,7 +6,8 @@ bot aufraeumen, refaktorn
 pipeline fixen
 game.name und game._id trennen
 
-TODO!
+T ODOs abarbeiten
+fehlermeldungen abarbeiten
 
 
 2022-08-03 13:17:30.872 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Grey Goo Hangout

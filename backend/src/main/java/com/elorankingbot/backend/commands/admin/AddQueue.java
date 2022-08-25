@@ -139,15 +139,11 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
 		game.addQueue(queue);
-		// TODO log
-		// TODO inputs nach quatsch filtern
-
-		bot.updateGuildCommandsByQueue(server);
-
+		String updatedCommands = bot.updateGuildCommandsByQueue(server);
 		dbService.saveServer(server);
 
-		event.reply(String.format("Queue %s for ranking %s has been created. Relevant commands have been deployed or updated. " +
-						"This may take a few minutes to update on the server.",// TODO /join genauer bezeichnen
-				queue.getName(), game.getName())).subscribe();
+		event.reply(String.format("Queue %s for ranking %s has been created. These commands have been updated: %s" +
+						"\nThis may take a few minutes to update on the server.",
+				queue.getName(), game.getName(), updatedCommands)).subscribe();
 	}
 }

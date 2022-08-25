@@ -135,7 +135,7 @@ public class Join extends SlashCommand {
 					return;
 				}
 			});
-			if (queueService.isPlayerInQueue(player, queue)) {// TODO alle auflisten
+			if (queue.hasPlayer(player)) {// TODO alle auflisten
 				event.reply(String.format("The player %s is already in this queue an cannot be added a second time.",
 								player.getTag()))// TODO unterscheiden nach active player
 						.withEphemeral(true).subscribe();

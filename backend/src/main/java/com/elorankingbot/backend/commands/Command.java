@@ -18,13 +18,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
-public abstract class Command {// TODO koennen die abstrakten zwischenklassen weg? die scheinen nichts zu machen
-	// die commands werden unterschiedlich gebaut, insbesondere der CommandClassName wird unterschiedlich gefolgert, das reicht aber nicht als grund
+public abstract class Command {
 
 	protected final DBService dbService;
 	protected final DiscordBotService bot;
 	protected final ChannelManager channelManager;
-	protected final GatewayDiscordClient client;
 	protected final MatchService matchService;
 	protected final QueueService queueService;
 	protected final TimedTaskQueue timedTaskQueue;
@@ -43,7 +41,6 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 		this.channelManager = services.channelManager;
 		this.matchService = services.matchService;
 		this.queueService = services.queueService;
-		this.client = services.client;// TODO alles an bot weiterleiten
 		this.timedTaskQueue = services.timedTaskQueue;
 		this.eventParser = services.eventParser;
 		this.event = event;
@@ -66,11 +63,15 @@ public abstract class Command {// TODO koennen die abstrakten zwischenklassen we
 				event.getInteraction().getGuild().block().getName());
 		log.debug(executeLog);
 
-		// bypass permission check when admin role is not set
-		// TODO checken ob admin role existiert
-		if (this.getClass() == SetPermission.class && server.getAdminRoleId() == 0L) {
-			execute();
-			return;
+		// bypass permission check when admin role is not set or not present
+		if (this.getClass() == SetPermission.class) {
+			boolean adminRoleExists = event.getInteraction().getGuild().block()
+					.getRoles().map(role -> role.getId().asLong()).collectList().block()
+					.contains(server.getAdminRoleId());
+			if (server.getAdminRoleId() == 0L || !adminRoleExists) {
+				execute();
+				return;
+			}
 		}
 
 		List<Long> memberRoleIds = new ArrayList<>(event.getInteraction().getMember().get().getRoleIds()
