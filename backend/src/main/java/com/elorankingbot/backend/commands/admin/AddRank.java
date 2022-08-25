@@ -13,6 +13,8 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 @Slf4j
@@ -65,9 +67,7 @@ public class AddRank extends SlashCommand {
 				"This option won't be present if the server only has one ranking.\n" +
 				"`Required:` `role` The role to make into a rank.\n" +
 				"`Required:` `rating` The minimum rating to attain the new rank.\n" +
-				"If a player qualifies for more than one rank, only the highest rank will apply.\n" +
-				"Note that using the same roles as ranks in different rankings will lead to unspecified behavior and is " +
-				"recommended against.";// TODO programmatisch ausschliessen. ausserdem ausschliessen dass die gleiche role in 1 ranking mehrmals verwendent wird
+				"If a player qualifies for more than one rank, only the highest rank will apply.";
 	}
 
 	protected void execute() {
@@ -83,18 +83,17 @@ public class AddRank extends SlashCommand {
 			event.reply("Cannot make @everyone a rank.").subscribe();
 			return;
 		}
+		List<Long> allRanks = server.getGames().stream().flatMap(game -> game.getRequiredRatingToRankId().values().stream()).toList();
+		if (allRanks.contains(role.getId().asLong())) {
+			event.reply("This role is already assigned to a rank and cannot be assigned to a rank again.").subscribe();
+			return;
+		}
 		Game game = null;
 		if (server.getGames().size() > 1) {
 			game = server.getGame(event.getOption("ranking").get().getValue().get().asString());
 		}
 		if (server.getGames().size() == 1) {
 			game = server.getGames().get(0);
-		}
-		if (server.getGames().size() == 0) {
-			String errorMessage = "Error: no ranking found";
-			event.reply(errorMessage).subscribe();
-			log.error(errorMessage);// TODO was sinnvolleres
-			return;
 		}
 
 		game.getRequiredRatingToRankId().put(rating, role.getId().asLong());
