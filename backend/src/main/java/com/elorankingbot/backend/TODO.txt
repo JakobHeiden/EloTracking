@@ -6,7 +6,6 @@ bot aufraeumen, refaktorn
 pipeline fixen
 game.name und game._id trennen
 
-error handling pruefen
 settings erweitern
 
 T ODOs abarbeiten

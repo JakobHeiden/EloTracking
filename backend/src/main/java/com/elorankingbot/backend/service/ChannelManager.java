@@ -36,12 +36,11 @@ public class ChannelManager {
 		this.timedTaskQueue = services.timedTaskQueue;
 	}
 
-	public Message postToResultChannel(MatchResult matchResult) {
-		Game game = matchResult.getGame();
-		TextChannel resultChannel = getOrCreateResultChannel(game);
-		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
+	private TextChannelEditMono setParentCategory(Channel channel, long categoryId) {
+		return ((TextChannel) channel).edit().withParentId(Possible.of(Optional.of(Snowflake.of(categoryId))));
 	}
 
+	// Result
 	public TextChannel getOrCreateResultChannel(Game game) {
 		try {
 			return (TextChannel) bot.getChannelById(game.getResultChannelId()).block();
@@ -56,26 +55,29 @@ public class ChannelManager {
 		}
 	}
 
-	private List<PermissionOverwrite> onlyBotCanSend(Server server) {
-		return List.of(PermissionOverwrite.forRole(
-						Snowflake.of(server.getEveryoneId()),
-						PermissionSet.none(),
-						PermissionSet.of(Permission.SEND_MESSAGES)),
-				PermissionOverwrite.forMember(
-						Snowflake.of(bot.botId),
-						PermissionSet.of(Permission.SEND_MESSAGES),
-						PermissionSet.none()));
+	public Message postToResultChannel(MatchResult matchResult) {
+		Game game = matchResult.getGame();
+		TextChannel resultChannel = getOrCreateResultChannel(game);
+		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
 	}
 
-	public TextChannelCreateMono createDisputeChannel(Match match) {
-		Server server = match.getServer();
-		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
-		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
-		Category disputeCategory = getOrCreateDisputeCategory(server);
-		return bot.getGuildById(match.getGame().getGuildId()).block()
-				.createTextChannel(createMatchChannelName(match.getTeams()))
-				.withParentId(disputeCategory.getId())
-				.withPermissionOverwrites(permissionOverwrites);
+	// Match
+	public Category getOrCreateMatchCategory(Server server) {
+		try {
+			return (Category) bot.getChannelById(server.getMatchCategoryId()).block();
+		} catch (ClientException e) {
+			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
+					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
+				throw e;
+			}
+			Guild guild = bot.getGuildById(server.getGuildId()).block();
+			Category matchCategory = guild.createCategory("elo matches")
+					.withPermissionOverwrites(excludePublic(server))
+					.block();
+			server.setMatchCategoryId(matchCategory.getId().asLong());
+			dbService.saveServer(server);
+			return matchCategory;
+		}
 	}
 
 	public TextChannelCreateMono createMatchChannel(Match match) {
@@ -100,50 +102,7 @@ public class ChannelManager {
 		}
 	}
 
-	// Leaderboard
-	public void refreshLeaderboard(Game game) {
-		Message leaderboardMessage;
-		try {
-			leaderboardMessage = bot.getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
-		} catch (ClientException e) {
-			leaderboardMessage = createLeaderboardChannelAndMessage(game);
-			dbService.saveServer(game.getServer());// TODO muss das?
-		}
-		leaderboardMessage.edit()
-				.withContent(Possible.of(Optional.empty()))
-				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game))).subscribe();
-	}
-
-	private Message createLeaderboardChannelAndMessage(Game game) {
-		Guild guild = bot.getGuildById(game.getGuildId()).block();
-		TextChannel leaderboardChannel = guild.createTextChannel(String.format("%s Leaderboard", game.getName()))
-				.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
-				.block();
-		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();
-		game.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
-		game.setLeaderboardChannelId(leaderboardChannel.getId().asLong());
-		return leaderboardMessage;
-	}
-
-	// Categories
-	public Category getOrCreateMatchCategory(Server server) {
-		try {
-			return (Category) bot.getChannelById(server.getMatchCategoryId()).block();
-		} catch (ClientException e) {
-			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
-					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
-				throw e;
-			}
-			Guild guild = bot.getGuildById(server.getGuildId()).block();
-			Category matchCategory = guild.createCategory("elo matches")
-					.withPermissionOverwrites(excludePublic(server))
-					.block();
-			server.setMatchCategoryId(matchCategory.getId().asLong());
-			dbService.saveServer(server);
-			return matchCategory;
-		}
-	}
-
+	// Dispute
 	public Category getOrCreateDisputeCategory(Server server) {// TODO evtl Optional<Guild> mit als parameter, um den request zu sparen?
 		try {
 			return (Category) bot.getChannelById(server.getDisputeCategoryId()).block();
@@ -162,6 +121,43 @@ public class ChannelManager {
 		}
 	}
 
+	public TextChannelCreateMono createDisputeChannel(Match match) {
+		Server server = match.getServer();
+		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
+		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
+		Category disputeCategory = getOrCreateDisputeCategory(server);
+		return bot.getGuildById(match.getGame().getGuildId()).block()
+				.createTextChannel(createMatchChannelName(match.getTeams()))
+				.withParentId(disputeCategory.getId())
+				.withPermissionOverwrites(permissionOverwrites);
+	}
+
+	// Leaderboard
+	private Message createLeaderboardChannelAndMessage(Game game) {
+		Guild guild = bot.getGuildById(game.getGuildId()).block();
+		TextChannel leaderboardChannel = guild.createTextChannel(String.format("%s Leaderboard", game.getName()))
+				.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
+				.block();
+		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();
+		game.setLeaderboardMessageId(leaderboardMessage.getId().asLong());
+		game.setLeaderboardChannelId(leaderboardChannel.getId().asLong());
+		return leaderboardMessage;
+	}
+
+	public void refreshLeaderboard(Game game) {
+		Message leaderboardMessage;
+		try {
+			leaderboardMessage = bot.getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
+		} catch (ClientException e) {
+			leaderboardMessage = createLeaderboardChannelAndMessage(game);
+			dbService.saveServer(game.getServer());// TODO muss das?
+		}
+		leaderboardMessage.edit()
+				.withContent(Possible.of(Optional.empty()))
+				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game))).subscribe();
+	}
+
+	// Archive
 	public Category getOrCreateArchiveCategory(Server server) {
 		List<Long> categoryIds = server.getArchiveCategoryIds();
 		Category archiveCategory;
@@ -207,8 +203,16 @@ public class ChannelManager {
 				"I will delete this channel in one hour.**").subscribe();
 	}
 
-	public TextChannelEditMono setParentCategory(Channel channel, long categoryId) {
-		return ((TextChannel) channel).edit().withParentId(Possible.of(Optional.of(Snowflake.of(categoryId))));
+	// write permissions
+	private List<PermissionOverwrite> onlyBotCanSend(Server server) {
+		return List.of(PermissionOverwrite.forRole(
+						Snowflake.of(server.getEveryoneId()),
+						PermissionSet.none(),
+						PermissionSet.of(Permission.SEND_MESSAGES)),
+				PermissionOverwrite.forMember(
+						Snowflake.of(bot.botId),
+						PermissionSet.of(Permission.SEND_MESSAGES),
+						PermissionSet.none()));
 	}
 
 	// view permissions
