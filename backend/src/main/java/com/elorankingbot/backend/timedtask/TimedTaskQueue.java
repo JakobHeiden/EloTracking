@@ -10,6 +10,7 @@ import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
+import discord4j.rest.http.client.ClientException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -82,35 +83,49 @@ public class TimedTaskQueue {
 
 	@Scheduled(fixedRate = 60000)
 	public void tick() {
-		if (!doRunQueue) return;
+		try {
+			if (!doRunQueue) return;
 
-		log.debug("tick " + currentIndex);
-		if (currentIndex % (7*24*60) == 0) {// TODO wohl laenger
-			List<Long> allGuildIds = bot.getAllGuildIds();
-			timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
-			timedTaskService.deleteServersMarkedForDeletion();
-			timedTaskService.markServersForDeletion(allGuildIds);
-		}
-		if (currentIndex % (24*60) == 0) {
-			dbService.persistBotStatsAndRestartAccumulator();
-		}
-
-		Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
-		if (maybeTimeSlot.isPresent()) {
-			for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
-				try {
-					processTimedTask(task);
-				} catch (Exception e) {
-					bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
-					e.printStackTrace();
-				}
+			log.debug("tick " + currentIndex);
+			if (currentIndex % (7 * 24 * 60) == 0) {// TODO wohl laenger
+				List<Long> allGuildIds = bot.getAllGuildIds();
+				timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
+				timedTaskService.deleteServersMarkedForDeletion();
+				timedTaskService.markServersForDeletion(allGuildIds);
 			}
-			timeSlotDao.delete(maybeTimeSlot.get());
-		}
+			if (currentIndex % (24 * 60) == 0) {
+				dbService.persistBotStatsAndRestartAccumulator();
+			}
 
-		currentIndex++;
-		if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
-		timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
+			Optional<TimeSlot> maybeTimeSlot = timeSlotDao.findById(currentIndex);
+			if (maybeTimeSlot.isPresent()) {
+				for (TimedTask task : maybeTimeSlot.get().getTimedTasks()) {
+					try {
+						processTimedTask(task);
+					} catch (Exception e) {
+						bot.sendToOwner(String.format("Error in TimedTaskQueue::tick\n%s", e.getMessage()));
+						e.printStackTrace();
+					}
+				}
+				timeSlotDao.delete(maybeTimeSlot.get());
+			}
+
+			currentIndex++;
+			if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
+			timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
+		} catch (Exception e) {
+			handleException(e);
+		}
+	}
+
+	private void handleException(Exception e) {
+		String errorReport = String.format("Error during tick:\n%s", e.getMessage());
+		log.error(errorReport);
+		bot.sendToOwner(errorReport);
+		if (e instanceof ClientException) {
+			log.error("ClientException caused by request:\n" + ((ClientException) e).getRequest());
+		}
+		e.printStackTrace();
 	}
 
 	public int getRemainingDuration(int index) {
