@@ -1,6 +1,8 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
+import discord4j.core.object.entity.Guild;
+import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -15,31 +17,46 @@ public class QueueService {
 
 	private final DBService dbService;
 	private final MatchService matchService;
+	private DiscordBotService bot;
 
 	public QueueService(Services services) {
 		this.dbService = services.dbService;
 		this.matchService = services.matchService;
+		this.bot = services.bot;
 	}
 
-	// TODO logging
 	@Scheduled(fixedRate = 3000)
 	public void generateAndStartMatches() {
-		dbService.findAllServers().stream()
-				.flatMap(server -> server.getGames().stream())
-				.flatMap(game -> game.getQueues().stream()).forEach(queue -> {
-					boolean foundMatch;
-					do {
-						Optional<Match> maybeMatch = generateMatchIfPossible(queue);
-						if (maybeMatch.isPresent()) {
-							for (Player player : maybeMatch.get().getPlayers())
-								removePlayerFromAllQueues(queue.getServer(), player);
-							matchService.startMatch(maybeMatch.get());
-							foundMatch = true;
-						} else {
-							foundMatch = false;
-						}
-					} while (foundMatch);
-				});
+		try {
+			dbService.findAllServers().stream()
+					.flatMap(server -> server.getGames().stream())
+					.flatMap(game -> game.getQueues().stream()).forEach(queue -> {
+						boolean foundMatch;
+						do {
+							Optional<Match> maybeMatch = generateMatchIfPossible(queue);
+							if (maybeMatch.isPresent()) {
+								for (Player player : maybeMatch.get().getPlayers())
+									removePlayerFromAllQueues(queue.getServer(), player);
+								matchService.startMatch(maybeMatch.get());
+								foundMatch = true;
+							} else {
+								foundMatch = false;
+							}
+						} while (foundMatch);
+					});
+		} catch (Exception e) {
+			handleException(e);
+		}
+	}
+
+	private void handleException(Exception e) {
+		String errorReport = String.format("Error during generateAndStartMatches:\n%s", e.getMessage());
+		log.error(errorReport);
+		bot.sendToOwner(errorReport);
+		if (e instanceof ClientException) {
+			log.error("ClientException caused by request:\n" + ((ClientException) e).getRequest());
+		}
+		e.printStackTrace();
 	}
 
 	public Optional<Match> generateMatchIfPossible(MatchFinderQueue queue) {
