@@ -31,6 +31,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,6 +46,8 @@ public class DiscordBotService {
 	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
 	public final long botId;
+
+	private SimpleDateFormat sendToOwnerTimeStamp = new SimpleDateFormat("HH:mm:ss");
 
 	public DiscordBotService(Services services) {
 		this.client = services.client;
@@ -66,7 +69,7 @@ public class DiscordBotService {
 	public void sendToOwner(String text) {
 		if (text == null) text = "null";
 		if (text.equals("")) text = "empty String";
-		ownerPrivateChannel.createMessage(text).subscribe();
+		ownerPrivateChannel.createMessage(sendToOwnerTimeStamp.format(new Date()) + "\n" + text).subscribe();
 	}
 
 	// Server
