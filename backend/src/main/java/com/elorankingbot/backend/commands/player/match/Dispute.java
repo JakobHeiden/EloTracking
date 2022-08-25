@@ -33,6 +33,12 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 		match.setDispute(true);
 		dbService.saveMatch(match);
 		matchChannel = (TextChannel) event.getInteraction().getChannel().block();
+
+		// TODO
+		// match channel verschieben
+		// funktionalitaet in den matchchannel uebertragen
+		// disputechennel entfernen
+
 		disputeChannel = channelManager.createDisputeChannel(match).block();
 		sendDisputeLinkMessage();
 		createDisputeMessage();
