@@ -114,7 +114,7 @@ public class AutoResolveMatch {
 						match.getServer().getModRoleId(),
 						match.getChannelId()))
 				.withEmbeds(embed)
-				.withComponents(Dispute.createActionRow(match))
+				.withComponents(ChannelManager.createDisputeActionRow(match))
 				.subscribe();
 	}
 

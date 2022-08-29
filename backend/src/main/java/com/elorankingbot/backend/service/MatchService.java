@@ -1,8 +1,6 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.*;
-import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class MatchService {
@@ -30,7 +27,7 @@ public class MatchService {
 
 	public void startMatch(Match match) {
 		TextChannel channel = channelManager.createMatchChannel(match).block();
-		sendMatchMessage(channel, match);
+		channelManager.sendMatchMessage(channel, match);
 		dbService.saveMatch(match);
 	}
 
@@ -83,20 +80,6 @@ public class MatchService {
 			matchResult.addTeamMatchResult(teamResult);
 		}
 		return matchResult;
-	}
-
-	private void sendMatchMessage(TextChannel channel, Match match) {
-		String title = String.format("Your match of %s is starting. " +
-						"I removed you from all other queues you joined on this server, if any. " +
-						"Please play the match and come back to report the result afterwards.",
-				match.getQueue().getFullName());
-		EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match);
-		Message message = channel.createMessage(match.getAllMentions())
-				.withEmbeds(embedCreateSpec)
-				.withComponents(createActionRow(match)).block();
-		message.pin().subscribe();
-		match.setMessageId(message.getId().asLong());
-		match.setChannelId(message.getChannelId().asLong());
 	}
 
 	public void processMatchResult(MatchResult matchResult, Match match, String embedTitle) {
@@ -156,21 +139,6 @@ public class MatchService {
 		if (leaderboardNeedsRefresh) channelManager.refreshLeaderboard(game);
 		dbService.addMatchResultToStats(forcedMatchResult);
 		return matchEmbed;
-	}
-
-	private static ActionRow createActionRow(Match match) {
-		UUID matchId = match.getId();
-		if (match.getGame().isAllowDraw()) return ActionRow.of(
-				Buttons.win(matchId),
-				Buttons.lose(matchId),
-				Buttons.draw(matchId),
-				Buttons.cancel(matchId),
-				Buttons.dispute(matchId));
-		else return ActionRow.of(
-				Buttons.win(matchId),
-				Buttons.lose(matchId),
-				Buttons.cancel(matchId),
-				Buttons.dispute(matchId));
 	}
 
 	public void updatePlayerMatches(Game game, Player player) {

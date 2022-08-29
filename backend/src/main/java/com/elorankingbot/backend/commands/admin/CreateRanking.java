@@ -61,7 +61,8 @@ public class CreateRanking extends SlashCommand {
 	protected void execute() {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfGame)) {
-			event.reply(FormatTools.illegalNameMessage()).subscribe();
+			event.reply(FormatTools.illegalNameMessage())
+					.doOnError(super::forwardToEventParser).subscribe();
 			return;
 		}
 		if (server.getGames().contains(new Game(server, nameOfGame, false))) {
@@ -89,7 +90,7 @@ public class CreateRanking extends SlashCommand {
 					failedRequest = "Error: cannot create message due to missing permission: Send Messages";
 				}// TODO richtig machen, generisch machen, refaktorn
 			}
-			event.reply(failedRequest).subscribe();
+			event.reply(failedRequest).doOnError(super::forwardToEventParser).subscribe();
 			e.printStackTrace();
 			bot.sendToOwner(failedRequest);
 			return;

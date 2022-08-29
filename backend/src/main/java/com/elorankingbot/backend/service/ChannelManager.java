@@ -1,14 +1,18 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.component.ActionComponent;
+import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.TextChannelCreateMono;
 import discord4j.core.spec.TextChannelEditMono;
 import discord4j.discordjson.possible.Possible;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
@@ -102,6 +107,35 @@ public class ChannelManager {
 		}
 	}
 
+	void sendMatchMessage(TextChannel channel, Match match) {
+		String title = String.format("Your match of %s is starting. " +
+						"I removed you from all other queues you joined on this server, if any. " +
+						"Please play the match and come back to report the result afterwards.",
+				match.getQueue().getFullName());
+		EmbedCreateSpec embedCreateSpec = EmbedBuilder.createMatchEmbed(title, match);
+		Message message = channel.createMessage(match.getAllMentions())
+				.withEmbeds(embedCreateSpec)
+				.withComponents(createMatchActionRow(match)).block();
+		message.pin().subscribe();
+		match.setMessageId(message.getId().asLong());
+		match.setChannelId(message.getChannelId().asLong());
+	}
+
+	private static ActionRow createMatchActionRow(Match match) {
+		UUID matchId = match.getId();
+		if (match.getGame().isAllowDraw()) return ActionRow.of(
+				Buttons.win(matchId),
+				Buttons.lose(matchId),
+				Buttons.draw(matchId),
+				Buttons.cancel(matchId),
+				Buttons.dispute(matchId));
+		else return ActionRow.of(
+				Buttons.win(matchId),
+				Buttons.lose(matchId),
+				Buttons.cancel(matchId),
+				Buttons.dispute(matchId));
+	}
+
 	// Dispute
 	public Category getOrCreateDisputeCategory(Server server) {// TODO evtl Optional<Guild> mit als parameter, um den request zu sparen?
 		try {
@@ -119,6 +153,30 @@ public class ChannelManager {
 			dbService.saveServer(server);
 			return disputeCategory;
 		}
+	}
+
+	public void moveToDisputes(Server server, Channel channel) {
+		Category disputeCategory = getOrCreateDisputeCategory(server);
+		setParentCategory(channel, disputeCategory.getId().asLong()).subscribe();
+	}
+
+	public void createDisputeMessage(TextChannel channel, Match match, String activeUserTag) {
+		channel.createMessage(String.format("**%s filed a dispute. Please state your view of the conflict so a <@&%s> can resolve it.**",
+						activeUserTag, match.getServer().getModRoleId()))
+				.withComponents(createDisputeActionRow(match))
+				.subscribe();
+	}
+
+	public static ActionRow createDisputeActionRow(Match match) {
+		int numTeams = match.getTeams().size();
+		UUID matchId = match.getId();
+		List<ActionComponent> buttons = new ArrayList<>(numTeams);
+		for (int i = 0; i < numTeams; i++) {
+			buttons.add(Buttons.ruleAsWin(matchId, i));
+		}
+		if (match.getGame().isAllowDraw()) buttons.add(Buttons.ruleAsDraw(matchId));
+		buttons.add(Buttons.ruleAsCancel(matchId));
+		return ActionRow.of(buttons);
 	}
 
 	public TextChannelCreateMono createDisputeChannel(Match match) {
