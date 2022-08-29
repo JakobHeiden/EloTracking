@@ -41,9 +41,10 @@ public class GuildInfo extends SlashCommand {
 			for (ApplicationCommandData guildCommand : guildCommands) {
 				reply += "\n" + guildCommand.name();
 			}
-			event.reply(reply).withEphemeral(true).subscribe();
+			event.reply(reply).withEphemeral(true).doOnError(super::forwardToEventParser).subscribe();
 		} catch (Exception e) {
-			event.reply(e.getMessage()).withEphemeral(true).subscribe();
+			event.reply(e.getMessage()).withEphemeral(true)
+					.doOnError(super::forwardToEventParser).subscribe();
 		}
 	}
 }
