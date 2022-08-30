@@ -83,16 +83,17 @@ public class MatchService {
 	}
 
 	public void processMatchResult(MatchResult matchResult, Match match, String embedTitle) {
-		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Game game = match.getGame();
-
+		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
 				.withContent(match.getAllMentions()).block();
 		newMatchMessage.pin().subscribe();
 		bot.getMessage(match.getMessageId(), match.getChannelId())
 				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
 		channelManager.moveToArchive(game.getServer(), matchChannel);
+
 		Message resultChannelMessage = channelManager.postToResultChannel(matchResult);
+
 		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, newMatchMessage, matchResult.getId()));
 		dbService.saveMatchResult(matchResult);
 		dbService.deleteMatch(match);

@@ -1,0 +1,3 @@
+Support and community for the Elo Ranking Bot
+
+Bot updates, help, feature requests, bug report, general discussion - everything related to the Elo Ranking Bot.

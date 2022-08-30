@@ -12,5 +12,12 @@ Features:
 - a responsive developer who cares about your feature requests
 
 Visit the website at www.elorankingbot.com
+
 Watch the basic setup tutorial at https://www.youtube.com/watch?v=rq8kD-mQujI
+
 Watch the player tutorial at https://www.youtube.com/watch?v=u6VzIFM8md8
+
+773933332396245003
+https://discord.com/oauth2/authorize?client_id=773933332396245003&permissions=138781452304&scope=bot%20applications.commands
+http://www.elorankingbot.com/
+https://discord.com/invite/hCAJXasrhd

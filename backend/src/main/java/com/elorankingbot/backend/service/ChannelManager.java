@@ -49,7 +49,7 @@ public class ChannelManager {
 	public TextChannel getOrCreateResultChannel(Game game) {
 		try {
 			return (TextChannel) bot.getChannelById(game.getResultChannelId()).block();
-		} catch (ClientException e) {// TODO funktioniert das ueberhaupt? testen!
+		} catch (ClientException e) {
 			Guild guild = bot.getGuildById(game.getGuildId()).block();
 			TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
 					.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
@@ -61,8 +61,7 @@ public class ChannelManager {
 	}
 
 	public Message postToResultChannel(MatchResult matchResult) {
-		Game game = matchResult.getGame();
-		TextChannel resultChannel = getOrCreateResultChannel(game);
+		TextChannel resultChannel = getOrCreateResultChannel(matchResult.getGame());
 		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
 	}
 
@@ -268,7 +267,7 @@ public class ChannelManager {
 						PermissionSet.none(),
 						PermissionSet.of(Permission.SEND_MESSAGES)),
 				PermissionOverwrite.forMember(
-						Snowflake.of(bot.botId),
+						Snowflake.of(bot.getBotId()),
 						PermissionSet.of(Permission.SEND_MESSAGES),
 						PermissionSet.none()));
 	}
@@ -303,7 +302,7 @@ public class ChannelManager {
 	}
 
 	private PermissionOverwrite allowBotView() {
-		return PermissionOverwrite.forMember(Snowflake.of(bot.botId),
+		return PermissionOverwrite.forMember(Snowflake.of(bot.getBotId()),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
 				PermissionSet.none());
 	}
