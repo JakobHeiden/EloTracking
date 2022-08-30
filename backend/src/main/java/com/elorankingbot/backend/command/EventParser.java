@@ -80,6 +80,7 @@ public class EventParser {
 					if (maybeServer.isEmpty()) {
 						Server server = new Server(event.getGuild().getId().asLong());
 						dbService.saveServer(server);
+						bot.sendToOwner("New server: " + event.getGuild().getName());
 						//long everyoneRoleId = server.getGuildId();
 						//bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
 					} else {

@@ -19,6 +19,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandPermissionsRequest;
@@ -45,7 +46,8 @@ public class DiscordBotService {
 	private final ApplicationService applicationService;
 	private final ApplicationPropertiesLoader props;
 	private PrivateChannel ownerPrivateChannel;
-	public final long botId;
+	@Getter
+	private final long botId;
 
 	private SimpleDateFormat sendToOwnerTimeStamp = new SimpleDateFormat("HH:mm:ss");
 
@@ -69,7 +71,7 @@ public class DiscordBotService {
 	public void sendToOwner(String text) {
 		if (text == null) text = "null";
 		if (text.equals("")) text = "empty String";
-		ownerPrivateChannel.createMessage(sendToOwnerTimeStamp.format(new Date()) + "\n" + text).subscribe();
+		ownerPrivateChannel.createMessage(sendToOwnerTimeStamp.format(new Date()) + ": " + text).subscribe();
 	}
 
 	// Server
@@ -151,6 +153,7 @@ public class DiscordBotService {
 	}
 
 	public Mono<Channel> getChannelById(long channelId) {
+		//return client.withRetrievalStrategy(EntityRetrievalStrategy.REST).getChannelById(Snowflake.of(channelId));
 		return client.getChannelById(Snowflake.of(channelId));
 	}
 

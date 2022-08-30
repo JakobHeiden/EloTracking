@@ -65,14 +65,9 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 				String.format("**%s has ruled this match a %s %s for team #%s.**",
 						moderatorTag, WIN.asNoun, WIN.asEmojiAsString(), winningTeamIndex + 1)
 				: String.format("**%s has ruled this match a %s %s.**", moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString());
-		postToDisputeChannel(rulingMessage).block();
 		matchService.processMatchResult(matchResult, match, rulingMessage);
 		removeButtons();
 		event.acknowledge().subscribe();
-		// TODO! ClientException finden, beheben
-		// das match-embed sollte wohl nicht geloescht werden?
-		// nochmal angucken alles
-		// tests schreiben
 	}
 
 	protected Mono<Message> postToDisputeChannel(String text) {
