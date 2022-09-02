@@ -8,14 +8,12 @@ import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public abstract class Command {
@@ -45,13 +43,7 @@ public abstract class Command {
 		this.eventParser = services.eventParser;
 		this.event = event;
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
-		Optional<Server> maybeServer = dbService.findServerByGuildId(guildId);
-		if (maybeServer.isEmpty()) {
-			String errorMessage = "Server not found";
-			log.error(errorMessage);
-			throw new RuntimeException(errorMessage);
-		}
-		this.server = maybeServer.get();
+		this.server = dbService.getOrCreateServer(guildId);
 		this.activeUser = event.getInteraction().getUser();
 		this.activeUserId = activeUser.getId().asLong();
 	}

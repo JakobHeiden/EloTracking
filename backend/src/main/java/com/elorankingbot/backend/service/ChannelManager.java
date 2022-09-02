@@ -273,7 +273,7 @@ public class ChannelManager {
 	}
 
 	// view permissions
-	public List<PermissionOverwrite> excludePublic(Server server) {// TODO die ganzen categories aufraeumen
+	public List<PermissionOverwrite> excludePublic(Server server) {
 		return new ArrayList<>(List.of(denyEveryoneView(server), allowAdminView(server), allowModView(server), allowBotView()));
 	}
 

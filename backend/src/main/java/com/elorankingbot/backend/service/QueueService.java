@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
-import discord4j.core.object.entity.Guild;
 import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

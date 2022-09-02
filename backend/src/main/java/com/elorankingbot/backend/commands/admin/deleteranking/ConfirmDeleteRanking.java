@@ -3,7 +3,6 @@ package com.elorankingbot.backend.commands.admin.deleteranking;
 import com.elorankingbot.backend.commands.ButtonCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
-import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 
@@ -11,7 +10,6 @@ import java.util.List;
 
 public class ConfirmDeleteRanking extends ButtonCommand {
 
-	private Server server;
 	private Game game;
 
 	public ConfirmDeleteRanking(ButtonInteractionEvent event, Services services) {
@@ -27,7 +25,6 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 			return;
 		}
 
-		server = dbService.findServerByGuildId(event.getInteraction().getGuildId().get().asLong()).get();
 		game = server.getGame(event.getCustomId().split(":")[1]);
 		deleteRatingsFromPlayers();
 		dbService.deleteAllRankingsEntries(game);
