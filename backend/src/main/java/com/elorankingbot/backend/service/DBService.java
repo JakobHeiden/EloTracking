@@ -171,61 +171,6 @@ public class DBService {
 		return maybeMatchResultReference;
 	}
 
-	// Challenge
-	public Optional<ChallengeModel> findChallengeByParticipants(long guildId, long challengerId, long acceptorId) {
-		//return challengeDao.findAllByGuildIdAndChallengerId(guildId, challengerId).stream()
-		//		.filter(challenge -> challenge.getAcceptorUserId() == acceptorId)
-		//		.findAny();
-		return null;
-	}
-
-	public Optional<ChallengeModel> findChallengeById(UUID id) {
-		return challengeDao.findById(id);
-	}
-
-	public void saveChallenge(ChallengeModel challenge) {
-		log.debug("saving challenge " + challenge.getId());
-		challengeDao.save(challenge);
-	}
-
-	public void deleteChallenge(ChallengeModel challenge) {
-		//deleteChallengeById(challenge.getId());
-	}
-
-	public void deleteChallengeById(UUID id) {
-		challengeDao.deleteById(id);
-	}
-
-	public List<ChallengeModel> findAllChallengesByGuildIdAndPlayerId(long guildId, long playerId) {
-		List<ChallengeModel> allChallengesForPlayer = new ArrayList<>();
-		//allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndChallengerId(guildId, playerId));
-		//allChallengesForPlayer.addAll(challengeDao.findAllByGuildIdAndAcceptorId(guildId, playerId));
-		return allChallengesForPlayer;
-	}
-
-	// Match legacy
-
-	public Optional<MatchResult> findMostRecentMatchResult(long guildId, long player1Id, long player2Id) {
-		return null;
-		/*
-		Optional<Match> search = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player1Id, player2Id);
-		Optional<Match> searchReverseParams = matchDao.findFirstByGuildIdAndWinnerIdAndLoserIdOrderByDate(guildId, player2Id, player1Id);
-
-		if (search.isEmpty()) {
-			return searchReverseParams;
-		} else if (searchReverseParams.isEmpty()) {
-			return search;
-		} else {
-			if (search.get().getDate().after(searchReverseParams.get().getDate())) {
-				return search;
-			} else {
-				return searchReverseParams;
-			}
-		}
-
-		 */
-	}
-
 	// Player
 	public void savePlayer(Player player) {
 		log.debug(String.format("saving player %s on %s", player.getTag(), bot.getServerName(player)));
@@ -292,28 +237,39 @@ public class DBService {
 	}
 
 	public boolean updateRankingsEntries(MatchResult matchResult) {
+		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
+			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
+					.findByGuildIdAndGameNameAndPlayerTag(matchResult.getGame().getServer().getGuildId(),
+							matchResult.getGame().getName(), playerMatchResult.getPlayerTag());
+			maybeRankingsEntry.ifPresent(rankingsEntryDao::delete);
+			RankingsEntry newRankingsEntry = new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer());
+			rankingsEntryDao.save(newRankingsEntry);
+		}
+		return hasLeaderboardChanged(matchResult);
+	}
+
+	private boolean hasLeaderboardChanged(MatchResult matchResult) {
 		int leaderboardLength = matchResult.getGame().getLeaderboardLength();
 		List<RankingsEntry> leaderboard = rankingsEntryDao.findTopByGuildIdAndGameName(
 				matchResult.getServer().getGuildId(),
 				matchResult.getGame().getName(),
 				PageRequest.of(0, leaderboardLength));
-		// TODO! hier failt er mit nem arrayIndexOutOfBounds
+		if (leaderboard.size() < leaderboardLength)
+			return true;
 		double lowestLeaderboardRating = leaderboard.get(leaderboardLength - 1).getRating();
-		boolean hasLeaderboardChanged = false;
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {
 			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
 					.findByGuildIdAndGameNameAndPlayerTag(matchResult.getGame().getServer().getGuildId(),
 							matchResult.getGame().getName(), playerMatchResult.getPlayerTag());
-			if (maybeRankingsEntry.isPresent()) {
-				if (leaderboard.contains(maybeRankingsEntry.get())) hasLeaderboardChanged = true;
-				rankingsEntryDao.delete(maybeRankingsEntry.get());
-			}
-			RankingsEntry newRankingsEntry = new RankingsEntry(matchResult.getGame(), playerMatchResult.getPlayer());
-			if (newRankingsEntry.getRating() >= lowestLeaderboardRating) hasLeaderboardChanged = true;
-			rankingsEntryDao.save(newRankingsEntry);
+			if (maybeRankingsEntry.isPresent() && leaderboard.contains(maybeRankingsEntry.get()))
+				return true;
+			if (playerMatchResult.getNewRating() >= lowestLeaderboardRating)
+				return true;
 		}
-		return hasLeaderboardChanged;
+		return false;
 	}
+
+
 
 	public void deleteAllRankingsEntries(Game game) {
 		rankingsEntryDao.deleteAllByGuildIdAndAndGameName(game.getGuildId(), game.getName());

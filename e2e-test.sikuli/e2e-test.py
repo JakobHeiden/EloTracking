@@ -123,6 +123,12 @@ def reportCancel():
 	click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 	click("1658750997165.png")
 
+def fileDispute():
+	wait(Pattern("1658499573390.png").similar(0.94))
+	click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
+	click("1662113169384.png")
+	
+
 def removeNotifications():
 	while exists(Pattern("1658499573390.png").similar(0.94)):
 		click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
@@ -190,6 +196,20 @@ def testCancel():
 	reportCancel()
 	sleep(0.8)
 
+def testDisputeRuleAsWin():
+	switchToEnte2()
+	removeNotifications()
+	gotoTestchannel()
+	join()
+	switchToEnte()
+	removeNotifications()
+	gotoTestchannel()
+	join()
+	sleep(3)
+	fileDispute()
+	sleep(0.5)
+	click("1662113308919.png")	
+
 def testAddRankAndDeleteRanks():
 	gotoTestchannel()
 	command("/addrank @Gold\n 1200")
@@ -242,11 +262,12 @@ if exists("1659465294466.png", 0.1):
 else:
 	isProductionBot = False
 setup()
-#testPermissions()	
-#testDeleteAndCreateRankingAndQueue()
-#testMisc()
+testPermissions()	
+testDeleteAndCreateRankingAndQueue()
+testMisc()
 testWinLose()
 testCancel()
+testDisputeRuleAsWin()
 testAddRankAndDeleteRanks()
 testSettings()
 testBan()
