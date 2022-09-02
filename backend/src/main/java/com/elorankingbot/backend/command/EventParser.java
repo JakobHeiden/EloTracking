@@ -81,7 +81,7 @@ public class EventParser {
 					}
 				});
 
-		client.on(Event.class).subscribe(event -> log.debug(event.getClass().getSimpleName()));
+		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
 
 		Hooks.onErrorDropped(this::handleDroppedException);
 	}

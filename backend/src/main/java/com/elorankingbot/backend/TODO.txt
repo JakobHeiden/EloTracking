@@ -7,14 +7,11 @@ game.name und game._id trennen
 
 settings erweitern
 
-		// ClientException fangen
-		// nochmal angucken alles
 		// tests schreiben
 was mache ich mit den geloeschten cahnnels? das sollte eigentlich von der normalen exception handling bearbeitet werden.
 der fehler geht ja weg nach ner minute. das einfach so lassen? oder die ChannelDeleteEvents fangen?
 dann: testen, pushen, testen
-... fehler in DBService beheben
-die fehlermeldung durch den findServerFailed nochmal angucken: application did not respond ist ungluecklich
+matchService::updatePlayerMatches fehlerbehandlung, channel fehlt...
 
 
 2022-08-03 13:17:30.872 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Grey Goo Hangout
