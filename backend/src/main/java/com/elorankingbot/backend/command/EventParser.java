@@ -9,7 +9,6 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
@@ -26,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -74,36 +72,18 @@ public class EventParser {
 		client.on(MessageInteractionEvent.class)
 				.subscribe(this::processMessageInteractionEvent);
 
-		client.on(GuildCreateEvent.class)
-				.subscribe(event -> {
-					Optional<Server> maybeServer = dbService.findServerByGuildId(event.getGuild().getId().asLong());
-					if (maybeServer.isEmpty()) {
-						Server server = new Server(event.getGuild().getId().asLong());
-						dbService.saveServer(server);
-						bot.sendToOwner("New server: " + event.getGuild().getName());
-						//long everyoneRoleId = server.getGuildId();
-						//bot.setCommandPermissionForRole(server, SetPermissions.getRequest().name(), everyoneRoleId);
-					} else {
-						maybeServer.get().setMarkedForDeletion(false);
-						dbService.saveServer(maybeServer.get());
-					}
-				});
-
 		client.on(RoleDeleteEvent.class)
 				.subscribe(event -> {
-					Server server = dbService.findServerByGuildId(event.getGuildId().asLong()).get();
+					Server server = dbService.getOrCreateServer(event.getGuildId().asLong());
 					if (server.getAdminRoleId() == event.getRoleId().asLong()) {
 						long everyoneRoleId = server.getGuildId();
 						bot.setCommandPermissionForRole(server, SetPermission.class.getSimpleName().toLowerCase(), everyoneRoleId);
 					}
 				});
 
-		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
+		client.on(Event.class).subscribe(event -> log.debug(event.getClass().getSimpleName()));
 
-		Hooks.onErrorDropped(throwable -> {
-			throwable.printStackTrace();
-			bot.sendToOwner("Hooks::onErrorDropped: " + throwable.getMessage());
-		});
+		Hooks.onErrorDropped(this::handleDroppedException);
 	}
 
 	@Transactional
@@ -195,6 +175,11 @@ public class EventParser {
 		} catch (ClientException e) {
 			event.createFollowup(userErrorMessage).subscribe();
 		}
+	}
+
+	private void handleDroppedException(Throwable throwable) {
+		throwable.printStackTrace();
+		bot.sendToOwner("Hooks::onErrorDropped: " + throwable.getMessage());
 	}
 
 	private void logGlobalCommands() {

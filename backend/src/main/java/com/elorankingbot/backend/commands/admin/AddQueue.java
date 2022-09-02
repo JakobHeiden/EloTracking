@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.AdminCommand;
-import com.elorankingbot.backend.command.EventParser;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.components.FormatTools;
 import com.elorankingbot.backend.model.Game;

@@ -147,9 +147,12 @@ public class MatchService {
 			boolean hasMatchChanged = match.updatePlayerIfPresent(player);
 			if (hasMatchChanged) {
 				dbService.saveMatch(match);
-				bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
-						.edit().withEmbeds(EmbedBuilder.createMatchEmbed(message.getEmbeds().get(0).getTitle().get(), match))
-						.subscribe());
+				bot.getMessage(match.getMessageId(), match.getChannelId())
+						.subscribe(message -> {
+							message.edit()
+									.withEmbeds(EmbedBuilder.createMatchEmbed(message.getEmbeds().get(0).getTitle().get(), match))
+									.subscribe();
+						});
 			}
 		}
 	}

@@ -61,12 +61,21 @@ public class DBService {
 	}
 
 	// Server
-	public Optional<Server> findServerByGuildId(long guildId) {
-		return serverDao.findById(guildId);
-	}
-
-	public Server getServerByGuildId(long guildId) {
-		return findServerByGuildId(guildId).get();
+	public Server getOrCreateServer(long guildId) {
+		Optional<Server> maybeServer = serverDao.findById(guildId);
+		if (maybeServer.isPresent()) {
+			Server server = maybeServer.get();
+			if (server.isMarkedForDeletion()) {
+				server.setMarkedForDeletion(false);
+				serverDao.save(server);
+			}
+			return server;
+		} else {
+			Server newServer = new Server(guildId);
+			serverDao.save(newServer);
+			bot.sendToOwner("New server: " + guildId);
+			return newServer;
+		}
 	}
 
 	public void saveServer(Server server) {
@@ -121,7 +130,7 @@ public class DBService {
 	}
 
 	public List<Match> findAllMatchesByPlayer(Player player) {
-		return findAllMatchesByServer(getServerByGuildId(player.getGuildId()))
+		return findAllMatchesByServer(getOrCreateServer(player.getGuildId()))
 				.stream().filter(match -> match.containsPlayer(player.getId()))
 				.toList();
 	}
@@ -288,6 +297,7 @@ public class DBService {
 				matchResult.getServer().getGuildId(),
 				matchResult.getGame().getName(),
 				PageRequest.of(0, leaderboardLength));
+		// TODO! hier failt er mit nem arrayIndexOutOfBounds
 		double lowestLeaderboardRating = leaderboard.get(leaderboardLength - 1).getRating();
 		boolean hasLeaderboardChanged = false;
 		for (PlayerMatchResult playerMatchResult : matchResult.getAllPlayerMatchResults()) {

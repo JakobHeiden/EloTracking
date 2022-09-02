@@ -1,17 +1,8 @@
 package com.elorankingbot.backend.commands.player.match;
 
-import com.elorankingbot.backend.components.Buttons;
-import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
-import discord4j.core.object.component.ActionComponent;
-import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateSpec;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class Dispute extends ButtonCommandRelatedToMatch {
 

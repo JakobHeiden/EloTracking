@@ -50,17 +50,6 @@ def createChannel():
     type("testchannel\n")
     sleep(1)
 
-def testPermissions():
-	type("/setpermission\n")
-	click("1658753288770.png")
-	click(Pattern("1656941051735.png").similar(0.90))
-	type("\n")
-	type("/setpermission\n")
-	sleep(0.2)
-	click("1656941586792.png")
-	click(Pattern("1656941211451.png").similar(0.94))
-	type("\n")
-
 def createRanking():
     type("/createranking" + Key.TAB + "testranking" + Key.TAB + "\n\n")
     sleep(1)
@@ -94,7 +83,7 @@ def switchToEnte2():
 		sleep(0.1)
 		hover("1658340245588.png")
 		click(Pattern("1658340917271.png").similar(0.90))
-		sleep(0.7)
+		sleep(1)
 	gotoTestServer()
 	sleep(1)
 
@@ -106,7 +95,7 @@ def switchToEnte():
 		hover("1658340245588.png")
 		mouseMove(200, 0)
 		click(Pattern("1658340892108.png").similar(0.90))
-		sleep(0.7)
+		sleep(1)
 	gotoTestServer()
 	sleep(1)
 
@@ -142,6 +131,17 @@ def setup():
 	switchToEnte()
 	cleanChannels()
 	createChannel()
+
+def testPermissions():
+	type("/setpermission\n")
+	click("1658753288770.png")
+	click(Pattern("1656941051735.png").similar(0.90))
+	type("\n")
+	type("/setpermission\n")
+	sleep(0.2)
+	click("1656941586792.png")
+	click(Pattern("1656941211451.png").similar(0.94))
+	type("\n")
 
 def testDeleteAndCreateRankingAndQueue():
 	deleteQueue()
@@ -242,9 +242,9 @@ if exists("1659465294466.png", 0.1):
 else:
 	isProductionBot = False
 setup()
-testPermissions()	
-testDeleteAndCreateRankingAndQueue()
-testMisc()
+#testPermissions()	
+#testDeleteAndCreateRankingAndQueue()
+#testMisc()
 testWinLose()
 testCancel()
 testAddRankAndDeleteRanks()

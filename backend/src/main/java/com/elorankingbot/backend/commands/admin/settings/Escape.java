@@ -14,7 +14,7 @@ public class Escape extends ButtonCommand {
 	}
 
 	public void execute() {
-		Server server = dbService.getServerByGuildId(event.getInteraction().getGuildId().get().asLong());
+		Server server = dbService.getOrCreateServer(event.getInteraction().getGuildId().get().asLong());
 		event.getMessage().get().edit()
 				.withEmbeds(allGamesSettingsEmbeds(server))
 				.withComponents(selectGameMenu(server), exitButton()).subscribe();
