@@ -148,11 +148,10 @@ public class MatchService {
 			if (hasMatchChanged) {
 				dbService.saveMatch(match);
 				bot.getMessage(match.getMessageId(), match.getChannelId())
-						.subscribe(message -> {
-							message.edit()
-									.withEmbeds(EmbedBuilder.createMatchEmbed(message.getEmbeds().get(0).getTitle().get(), match))
-									.subscribe();
-						});
+						.subscribe(message -> message.edit()
+										.withEmbeds(EmbedBuilder.createMatchEmbed(message.getEmbeds().get(0).getTitle().get(), match))
+										.subscribe(),
+								throwable -> {});
 			}
 		}
 	}

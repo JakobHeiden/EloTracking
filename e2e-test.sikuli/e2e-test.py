@@ -3,7 +3,7 @@ Settings.ObserveScanRate = 3
 channelRegion = Region(80,100,250,1000)
 
 def enter():
-	sleep(0.2)
+	sleep(0.3)
 	type(Key.ENTER)
 	sleep(0.2)
 	type(Key.ENTER)
@@ -11,6 +11,11 @@ def enter():
 def command(cmdString):
 	type(cmdString)
 	enter()
+
+def setup():
+	switchToEnte()
+	cleanChannels()
+	createChannel()
 
 def cleanChannels():
 	if exists("1658756416028.png", 0.3):
@@ -35,6 +40,11 @@ def cleanChannels():
 			sleep(0.2)
 			type(Key.ENTER)
 
+def createChannel():
+    click(Pattern("1656953157582.png").targetOffset(95,0))
+    sleep(0.3)
+    type("testchannel\n")
+    sleep(1.5)
 
 def deleteRanking():
 	sleep(0.1)
@@ -43,12 +53,6 @@ def deleteRanking():
 	if exists("1656944142796.png"):
 		click("1656944142796.png")
 		wait("1658858301128.png")
-
-def createChannel():
-    click(Pattern("1656953157582.png").targetOffset(95,0))
-    sleep(0.3)
-    type("testchannel\n")
-    sleep(1)
 
 def createRanking():
     type("/createranking" + Key.TAB + "testranking" + Key.TAB + "\n\n")
@@ -132,11 +136,6 @@ def fileDispute():
 def removeNotifications():
 	while exists(Pattern("1658499573390.png").similar(0.94)):
 		click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
-
-def setup():
-	switchToEnte()
-	cleanChannels()
-	createChannel()
 
 def testPermissions():
 	type("/setpermission\n")
