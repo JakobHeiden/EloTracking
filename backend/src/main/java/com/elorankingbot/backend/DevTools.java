@@ -1,6 +1,7 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.commands.owner.GuildInfo;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -49,6 +50,7 @@ public class DevTools {
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
+		applicationService.createGuildApplicationCommand(client.getSelfId().asLong(), 612347065762054165L, GuildInfo.getRequest()).subscribe();
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
