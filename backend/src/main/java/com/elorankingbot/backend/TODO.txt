@@ -1,18 +1,23 @@
 MatchResultReferences - timestamp, loeschen, wann? vllt alte match messages parsen zum identifizieren
-schauen ob ich ueber guildId nen invite kriege
-jemanden finden der den bot invited aber nicht installiert hat
 bot aufraeumen, refaktorn
 pipeline fixen
-game.name und game._id trennen
+game.name und game._id trennen, wegen umbenennen...?
+
+DEV
+schauen ob ich ueber guildId nen invite kriege
 
 settings erweitern
-
-		// tests schreiben
 was mache ich mit den geloeschten cahnnels? das sollte eigentlich von der normalen exception handling bearbeitet werden.
 der fehler geht ja weg nach ner minute. das einfach so lassen? oder die ChannelDeleteEvents fangen?
-dann: testen, pushen, testen
 matchService::updatePlayerMatches fehlerbehandlung, channel fehlt...
+bot kann roles nicht managen die hoeher sind als seine rolle
+kann an diesen user nicht senden wirft nen fehler (ban zb)
 
+da scheint noch autoresolve zu passieren auch wenn ein dispute offen ist. siehe KOTH
+error braucht link auf server
+
+SOCIAL
+jemanden finden der den bot invited aber nicht installiert hat
 
 2022-08-03 13:17:30.872 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server Grey Goo Hangout
 2022-08-03 13:17:31.059 DEBUG 1110 --- [d4j-events-1] c.e.backend.service.DBService            : Saving server BryanChess99 YT
