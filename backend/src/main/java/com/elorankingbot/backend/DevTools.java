@@ -58,7 +58,7 @@ public class DevTools {
 												System.out.println(server.getGuildId());
 												System.out.println(commandData.name());
 												applicationService.deleteGuildApplicationCommand(client.getSelfId().asLong(),
-														server.getGuildId(), Long.parseLong(commandData.id())).block();
+														server.getGuildId(), commandData.id().asLong()).block();
 											}
 										});
 						/*

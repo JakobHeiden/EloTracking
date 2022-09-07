@@ -224,7 +224,7 @@ public class DiscordBotService {
 		return applicationService.getGuildApplicationCommands(botId, guildid)
 				.filter(applicationCommandData -> applicationCommandData.name().equals(commandName.toLowerCase()))
 				.next()
-				.map(commandData -> Long.parseLong(commandData.id()));
+				.map(commandData -> commandData.id().asLong());
 	}
 
 	public Mono<Void> deleteCommand(Server server, String commandName) {
