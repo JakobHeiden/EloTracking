@@ -1,9 +1,11 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.AdminCommand;
 import com.elorankingbot.backend.command.EventParser;
-import com.elorankingbot.backend.command.ModCommand;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.ModCommand;
+import com.elorankingbot.backend.command.annotations.OwnerCommand;
 import com.elorankingbot.backend.commands.admin.SetPermission;
+import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
@@ -24,6 +26,7 @@ public abstract class Command {
 	protected final MatchService matchService;
 	protected final QueueService queueService;
 	protected final TimedTaskQueue timedTaskQueue;
+	protected final ApplicationPropertiesLoader props;
 	private final EventParser eventParser;
 	protected final DeferrableInteractionEvent event;
 	protected final long guildId;
@@ -40,6 +43,7 @@ public abstract class Command {
 		this.matchService = services.matchService;
 		this.queueService = services.queueService;
 		this.timedTaskQueue = services.timedTaskQueue;
+		this.props = services.props;
 		this.eventParser = services.eventParser;
 		this.event = event;
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
@@ -49,11 +53,10 @@ public abstract class Command {
 	}
 
 	public void doExecute() throws Exception {
-		String executeLog = String.format("execute %s by %s on %s",
+		log.debug(String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
 				event.getInteraction().getUser().getTag(),
-				event.getInteraction().getGuild().block().getName());
-		log.debug(executeLog);
+				event.getInteraction().getGuild().block().getName()));
 
 		// bypass permission check when admin role is not set or not present
 		if (this.getClass() == SetPermission.class) {
@@ -68,9 +71,15 @@ public abstract class Command {
 
 		List<Long> memberRoleIds = new ArrayList<>(event.getInteraction().getMember().get().getRoleIds()
 				.stream().map(Snowflake::asLong).toList());
-		memberRoleIds.add(Long.valueOf(guildId));
+		memberRoleIds.add(guildId);
 		boolean userIsAdmin = memberRoleIds.contains(server.getAdminRoleId());
 		boolean userIsMod = memberRoleIds.contains(server.getModRoleId());
+		if (this.getClass().isAnnotationPresent(OwnerCommand.class)
+				&& event.getInteraction().getUser().getId().asLong() != props.getOwnerId()) {
+			event.reply("This command requires Owner permissions.").withEphemeral(true).subscribe();
+			bot.sendToOwner(String.format("User %s tried executing %s on %s", activeUser.getTag(), this.getClass().getSimpleName(), server.getGuildId()));
+			return;
+		}
 		if (this.getClass().isAnnotationPresent(AdminCommand.class)) {
 			if (server.getAdminRoleId() == 0L) {
 				event.reply("This command requires Admin permissions. The Admin role is not currently set. " +

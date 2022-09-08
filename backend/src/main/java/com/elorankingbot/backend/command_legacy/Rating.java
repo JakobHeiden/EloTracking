@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.command_legacy;
 
-import com.elorankingbot.backend.command.ModCommand;
+import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;

@@ -34,8 +34,10 @@ public class EventParser {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final CommandClassScanner commandClassScanner;
+	private static final String supportServerInvite = "https://discord.com/invite/hCAJXasrhd";
 
 	public EventParser(Services services, CommandClassScanner commandClassScanner) {
+
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
@@ -169,7 +171,10 @@ public class EventParser {
 		}
 		throwable.printStackTrace();
 
-		String userErrorMessage = "Error: " + throwable.getMessage() + "\nI sent a report to the developer.";
+		String userErrorMessage = "Error: " + throwable.getMessage()
+				+ "\nI sent a report to the developer."
+				+ "\nIf this error persists, please join the bot support server: "
+				+ supportServerInvite;
 		try {
 			event.reply(userErrorMessage).block();
 		} catch (ClientException e) {
@@ -184,9 +189,6 @@ public class EventParser {
 
 	private void logGlobalCommands() {
 		List<ApplicationCommandData> globalCommands = bot.getAllGlobalCommands().block();
-		log.info("Global Commands:");
-		for (ApplicationCommandData globalCommand : globalCommands) {
-			log.info(globalCommand.name());
-		}
+		log.info("Global Commands: " + String.join(", ", globalCommands.stream().map(ApplicationCommandData::name).toList()));
 	}
 }

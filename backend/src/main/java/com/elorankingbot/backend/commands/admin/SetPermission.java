@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
-import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;

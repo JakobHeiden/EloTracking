@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.mod;
 
-import com.elorankingbot.backend.command.ModCommand;
+import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.Services;

@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.player.help;
 
-import com.elorankingbot.backend.command.PlayerCommand;
+import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
