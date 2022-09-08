@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.command_legacy;
 
-import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;

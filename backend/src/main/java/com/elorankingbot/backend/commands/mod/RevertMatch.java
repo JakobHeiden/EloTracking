@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.mod;
 
-import com.elorankingbot.backend.command.ModCommand;
+import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.commands.player.help.HelpComponents;
 import com.elorankingbot.backend.model.MatchResult;

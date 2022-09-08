@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.admin.settings;
 
-import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SelectMenuCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.Services;

@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands.admin.deleteranking;
 
-import com.elorankingbot.backend.command.AdminCommand;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.Server;

@@ -1,11 +1,11 @@
 package com.elorankingbot.backend.commands.owner;
 
+import com.elorankingbot.backend.command.annotations.OwnerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -14,6 +14,7 @@ import java.util.List;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
+@OwnerCommand
 public class GuildInfo extends SlashCommand {
 
 	public GuildInfo(ChatInputInteractionEvent event, Services services) {
@@ -34,7 +35,7 @@ public class GuildInfo extends SlashCommand {
 				.build();
 	}
 
-	protected void execute() {
+	protected void execute() throws Exception {
 		try {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuildById(guildId).block();

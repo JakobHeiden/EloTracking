@@ -1,5 +1,8 @@
 package com.elorankingbot.backend.command;
 
+import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.ModCommand;
+import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.google.common.collect.ImmutableMap;
