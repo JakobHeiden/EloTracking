@@ -161,23 +161,37 @@ public class EventParser {
 	}
 
 	public void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
-		String guildName = event.getInteraction().getGuild().map(Guild::getName).onErrorReturn("unknown").block();
-		String errorReport = String.format("Error executing %s on %s by %s:\n%s", commandName,
-				guildName, event.getInteraction().getUser().getTag(), throwable.getMessage());
-		log.error(errorReport);
-		bot.sendToOwner(errorReport);
-		if (throwable instanceof ClientException) {
-			log.error("ClientException caused by request:\n" + ((ClientException) throwable).getRequest());
+		String userErrorMessage = "Error message not set";
+		boolean isKnownException = false;
+		if (throwable instanceof ClientException clientException) {
+			log.error("ClientException caused by request:\n" + clientException.getRequest());
+			if (clientException.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")) {
+				if (clientException.getRequest().getBody().toString().startsWith("ChannelCreateRequest")) {
+					userErrorMessage = "Error: cannot create channel due to missing permission: Manage Channels";
+					isKnownException = true;
+				}
+				if (clientException.getRequest().getBody().toString().startsWith("MessageCreateRequest")) {
+					userErrorMessage = "Error: cannot create message due to missing permission: Send Messages";
+					isKnownException = true;
+				}
+			}
 		}
-		throwable.printStackTrace();
+		if (!isKnownException) {
+			String guildName = event.getInteraction().getGuild().map(Guild::getName).onErrorReturn("unknown").block();
+			String ownerErrorMessage = String.format("Error executing %s on %s by %s:\n%s", commandName,
+					guildName, event.getInteraction().getUser().getTag(), throwable.getMessage());
+			bot.sendToOwner(ownerErrorMessage);
+			log.error(ownerErrorMessage);
+			throwable.printStackTrace();
 
-		String userErrorMessage = "Error: " + throwable.getMessage()
-				+ "\nI sent a report to the developer."
-				+ "\nIf this error persists, please join the bot support server: "
-				+ supportServerInvite;
+			userErrorMessage = "Error: " + throwable.getMessage()
+					+ "\nI sent a report to the developer."
+					+ "\nIf this error persists, please join the bot support server: "
+					+ supportServerInvite;
+		}
 		try {
 			event.reply(userErrorMessage).block();
-		} catch (ClientException e) {
+		} catch (ClientException e) {// this can happen if the event has already been replied to
 			event.createFollowup(userErrorMessage).subscribe();
 		}
 	}

@@ -43,7 +43,7 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 		event.reply(String.format("Ranking %s deleted. These commands have been updated or deleted: %s" +
 				"\nThis may take a minute to update on the server.",
 				game.getName(), updatedCommands))
-				.doOnError(super::forwardToEventParser).subscribe();
+				.doOnError(super::handleExceptionCallback).subscribe();
 	}
 
 	private void deleteRatingsFromPlayers() {

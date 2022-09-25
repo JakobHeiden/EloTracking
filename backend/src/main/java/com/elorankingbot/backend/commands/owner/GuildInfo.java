@@ -50,12 +50,12 @@ public class GuildInfo extends SlashCommand {
 					reply += "\nhttps://discord.gg/" + invite.getCode();
 				}
 			}
-			event.reply(reply).withEphemeral(true).doOnError(super::forwardToEventParser).subscribe();
+			event.reply(reply).withEphemeral(true).doOnError(super::handleExceptionCallback).subscribe();
 		} catch (NumberFormatException e) {
 			event.reply("That's not a number").withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			event.reply(e.getMessage()).withEphemeral(true)
-					.doOnError(super::forwardToEventParser).subscribe();
+					.doOnError(super::handleExceptionCallback).subscribe();
 		}
 	}
 }
