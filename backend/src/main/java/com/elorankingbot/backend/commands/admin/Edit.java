@@ -108,6 +108,6 @@ public class Edit extends SlashCommand {
 		dbService.saveServer(server);
 
 		event.reply(String.join("\n", botReplies))
-				.doOnError(super::forwardToEventParser).subscribe();
+				.doOnError(super::handleExceptionCallback).subscribe();
 	}
 }

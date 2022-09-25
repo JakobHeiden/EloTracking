@@ -50,7 +50,7 @@ public class DevTools {
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
 		log.warn("updating guild commands...");
-		applicationService.createGuildApplicationCommand(bot.getBotId(), 929504858585845810L, AllGuilds.getRequest()).subscribe();
+		//applicationService.createGuildApplicationCommand(bot.getBotId(), 929504858585845810L, AllGuilds.getRequest()).subscribe();
 		dbService.findAllServers().forEach(
 				server -> {
 					try {

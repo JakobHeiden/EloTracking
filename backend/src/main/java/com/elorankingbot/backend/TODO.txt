@@ -14,11 +14,11 @@ kann an diesen user nicht senden wirft nen fehler (ban zb)
 da scheint noch autoresolve zu passieren auch wenn ein dispute offen ist. siehe KOTH
 error braucht link auf server
 
+fehlerbearbeitung ueberarbeiten, vllt die 3 funktionen in EventParser zusammenfuehren
+was war der fehler auf orid? wahrscheinlich weil wenige minuten nach einladen. rechtezeugs?
+
 SOCIAL
 wo kommt der link für vote hin?
-/AllGuilds
-..???...
-
 
 
 2022-08-11 11:18:55.719 DEBUG 1094 --- [d4j-events-4] c.e.backend.commands.Command             : execute Help by Ente#3460 on EloBotTest

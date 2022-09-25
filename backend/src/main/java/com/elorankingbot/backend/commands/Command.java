@@ -119,7 +119,7 @@ public abstract class Command {
 		event.deferReply().subscribe();
 	}
 
-	protected void forwardToEventParser(Throwable throwable) {
+	protected void handleExceptionCallback(Throwable throwable) {
 		eventParser.handleException(throwable, event, this.getClass().getSimpleName());
 	}
 }
