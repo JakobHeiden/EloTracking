@@ -81,7 +81,7 @@ public class CreateRanking extends SlashCommand {
 			channelManager.getOrCreateDisputeCategory(server);
 			channelManager.getOrCreateArchiveCategory(server);
 		} catch (ClientException e) {
-			String failedRequest = "Unknown error.\\nPlease contact the developer, Ente#3460";
+			String failedRequest = "Unknown error. Please contact the developer, Ente#3460";
 			if (e.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")) {
 				if (e.getRequest().getBody().toString().startsWith("ChannelCreateRequest")) {
 					failedRequest = "Error: cannot create channel due to missing permission: Manage Channels";
