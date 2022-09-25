@@ -184,7 +184,7 @@ public class EventParser {
 
 	private void handleDroppedException(Throwable throwable) {
 		throwable.printStackTrace();
-		bot.sendToOwner("Hooks::onErrorDropped: " + throwable.getMessage());
+		bot.sendToOwner("Dropped Exception: " + throwable.getMessage());
 	}
 
 	private void logGlobalCommands() {
