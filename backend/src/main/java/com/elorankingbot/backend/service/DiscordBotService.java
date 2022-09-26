@@ -4,6 +4,7 @@ import com.elorankingbot.backend.commands.admin.*;
 import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
 import com.elorankingbot.backend.commands.mod.ForceDraw;
 import com.elorankingbot.backend.commands.mod.ForceWin;
+import com.elorankingbot.backend.commands.mod.SetRating;
 import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Game;
@@ -169,19 +170,22 @@ public class DiscordBotService {
 			deleteCommand(server, AddRank.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()).subscribe();
 			deleteCommand(server, Reset.class.getSimpleName().toLowerCase()).subscribe();
+			deleteCommand(server, SetRating.class.getSimpleName().toLowerCase()).subscribe();
 		} else {
 			deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
 			deployCommand(server, AddQueue.getRequest(server)).subscribe();
 			deployCommand(server, AddRank.getRequest(server)).subscribe();
 			deployCommand(server, DeleteRanks.getRequest(server)).subscribe();
 			deployCommand(server, Reset.getRequest(server)).subscribe();
+			deployCommand(server, SetRating.getRequest(server)).subscribe();
 		}
-		return String.format("/%s, /%s, /%s, /%s, /%s",
+		return String.format("/%s, /%s, /%s, /%s, /%s, /%s",
 				DeleteRanking.class.getSimpleName().toLowerCase(),
 				AddQueue.class.getSimpleName().toLowerCase(),
 				AddRank.class.getSimpleName().toLowerCase(),
 				DeleteRanks.class.getSimpleName().toLowerCase(),
-				Reset.class.getSimpleName().toLowerCase());
+				Reset.class.getSimpleName().toLowerCase(),
+				SetRating.class.getSimpleName().toLowerCase());
 	}
 
 	public String updateGuildCommandsByQueue(Server server) {

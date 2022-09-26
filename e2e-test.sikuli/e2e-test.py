@@ -18,6 +18,12 @@ def setup():
 	createChannel()
 
 def cleanChannels():
+	if exists("1664199908377.png", 0.3):
+		rightClick(channelRegion.find("1664199908377.png").getTarget().below(25))
+		if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
+			click("1658492956277.png")
+			sleep(0.2)
+			type(Key.ENTER)
 	if exists("1658756416028.png", 0.3):
 		rightClick(channelRegion.find("1658756416028.png").getTarget().below(25))
 		if exists(Pattern("1658492956277.png").similar(0.90), 0.4):
@@ -256,25 +262,30 @@ def testRevertmatch():
 	hover("1658856018344.png")
 	click("1660217537383.png")
 
+def testSetRating():
+	gotoTestchannel()
+	command("/setrating\n@Ente2\nset\n999")
+	
 if exists("1659465294466.png", 0.1):
 	isProductionBot = True
 else:
 	isProductionBot = False
 setup()
-testPermissions()	
-testDeleteAndCreateRankingAndQueue()
-testMisc()
-testWinLose()
-testCancel()
-testDisputeRuleAsWin()
-testAddRankAndDeleteRanks()
-testSettings()
-testBan()
-testForcewin()
-testRevertmatch()
-
-
-
-
+if True:
+	testPermissions()	
+	testDeleteAndCreateRankingAndQueue()
+	testMisc()
+	testWinLose()
+	testCancel()
+	testDisputeRuleAsWin()
+	testAddRankAndDeleteRanks()
+	testSettings()
+	testBan()
+	testForcewin()
+	testRevertmatch()
+	testSetRating()	
+	
+	
+	
 
 

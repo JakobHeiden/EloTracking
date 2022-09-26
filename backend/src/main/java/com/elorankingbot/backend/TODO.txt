@@ -7,30 +7,10 @@ DEV
 settings erweitern
 was mache ich mit den geloeschten cahnnels? das sollte eigentlich von der normalen exception handling bearbeitet werden.
 der fehler geht ja weg nach ner minute. das einfach so lassen? oder die ChannelDeleteEvents fangen?
-matchService::updatePlayerMatches fehlerbehandlung, channel fehlt...
 bot kann roles nicht managen die hoeher sind als seine rolle
 kann an diesen user nicht senden wirft nen fehler (ban zb)
 
-da scheint noch autoresolve zu passieren auch wenn ein dispute offen ist. siehe KOTH
-error braucht link auf server
-
-fehlerbearbeitung ueberarbeiten, vllt die 3 funktionen in EventParser zusammenfuehren
-was war der fehler auf orid? wahrscheinlich weil wenige minuten nach einladen. rechtezeugs?
+user::getPrivateChannel.send vllt ersetzen - errors?
 
 SOCIAL
 wo kommt der link für vote hin?
-
-
-2022-08-11 11:18:55.719 DEBUG 1094 --- [d4j-events-4] c.e.backend.commands.Command             : execute Help by Ente#3460 on EloBotTest
-2022-08-11 11:18:55.762  WARN 1094 --- [reactor-http-epoll-1] r.netty.http.client.HttpClientConnect    : [93c3a41e-5, L:/45.77.53.94:42104 ! R:discord.com/162.159.138.232:443] The connection observed an error
-
-reactor.netty.http.client.PrematureCloseException: Connection has been closed BEFORE response, while sending request body
-
-2022-08-11 11:18:55.768 ERROR 1094 --- [d4j-events-4] c.e.backend.command.EventParser          : Error in EventParser: reactor.core.Exceptions$ReactiveException: reactor.netty.http.client.PrematureCloseException: Connection has been closed BEFORE response, while sending request body - Occured during Help::execute
-2022-08-11 11:18:55.777 ERROR 1094 --- [d4j-events-4] c.e.backend.command.EventParser          : [reactor.core.Exceptions.propagate(Exceptions.java:392), reactor.core.publisher.BlockingSingleSubscriber.blockingGet(BlockingSingleSubscriber.java:97), reactor.core.publisher.Mono.block(Mono.java:1707), com.elorankingbot.backend.commands.player.help.Help.execute(Help.java:57), com.elorankingbot.backend.commands.Command.doExecute(Command.java:100), com.elorankingbot.backend.command.EventParser.createAndExecuteSlashCommand(EventParser.java:132), reactor.core.publisher.LambdaSubscriber.onNext(LambdaSubscriber.java:160), reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.tryOnNext(FluxContextWrite.java:115), reactor.core.publisher.FluxDoFinally$DoFinallyFuseableConditionalSubscriber.tryOnNext(FluxDoFinally.java:255), reactor.core.publisher.FluxPeekFuseable$PeekFuseableConditionalSubscriber.tryOnNext(FluxPeekFuseable.java:530), reactor.core.publisher.FluxHandleFuseable$HandleFuseableConditionalSubscriber.tryOnNext(FluxHandleFuseable.java:546), reactor.core.publisher.FluxMapFuseable$MapFuseableConditionalSubscriber.tryOnNext(FluxMapFuseable.java:311), reactor.core.publisher.FluxFilterFuseable$FilterFuseableConditionalSubscriber.tryOnNext(FluxFilterFuseable.java:367), reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.runAsync(FluxPublishOn.java:992), reactor.core.publisher.FluxPublishOn$PublishOnConditionalSubscriber.run(FluxPublishOn.java:1067), reactor.scheduler.forkjoin.ForkJoinPoolScheduler$DisposableWorkerTask.run(ForkJoinPoolScheduler.java:443), reactor.scheduler.forkjoin.ForkJoinPoolScheduler$Worker.processTaskQueue(ForkJoinPoolScheduler.java:407), java.base/java.util.concurrent.ForkJoinTask$RunnableExecuteAction.exec(ForkJoinTask.java:1395), java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:373), java.base/java.util.concurrent.ForkJoinPool$WorkQueue.topLevelExec(ForkJoinPool.java:1182), java.base/java.util.concurrent.ForkJoinPool.scan(ForkJoinPool.java:1655), java.base/java.util.concurrent.ForkJoinPool.runWorker(ForkJoinPool.java:1622), java.base/java.util.concurrent.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:165)]
-
-passierte bei /help, on select menu dings:
-Hooks::onErrorDropped: reactor.netty.http.client.PrematureCloseException: Connection has been closed BEFORE response, while sending request body
-
-/forcewin:
-Hooks::onErrorDropped: discord4j.rest.http.client.ClientException: GET /channels/981191323782623232/messages/981191325175128125 returned 404 Not Found with response {code=10003, message=Unknown Channel}
