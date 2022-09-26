@@ -23,9 +23,7 @@ public class RankingsEntry implements Comparable<RankingsEntry> {
 	private String gameName;
 	private double rating;
 	private String playerTag;
-	private int wins;
-	private int draws;
-	private int losses;
+	private int wins, draws, losses;
 
 	public RankingsEntry(Game game, Player player) {
 		this.id = UUID.randomUUID();

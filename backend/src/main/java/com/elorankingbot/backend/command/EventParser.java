@@ -87,6 +87,9 @@ public class EventParser {
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
 
+		client.on(InteractionCreateEvent.class).subscribe(event ->
+				log.debug(event.getClass().getSimpleName() + " : " + event.getInteraction().getId().asString()));
+
 		Hooks.onErrorDropped(this::handleDroppedException);
 	}
 

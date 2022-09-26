@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+// TODO this class should probably be replaced with a db reference to RankingsEntry
 public class PlayerGameStats implements Comparable<PlayerGameStats> {
 
 	private double rating;
