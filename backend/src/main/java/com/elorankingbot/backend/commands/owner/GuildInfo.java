@@ -40,7 +40,7 @@ public class GuildInfo extends SlashCommand {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuildById(guildId).block();
 			String reply = String.format("%s:%s:%s\n", guildId, guild.getName(), guild.getMemberCount());
-			List<ApplicationCommandData> guildCommands = bot.getAllGuildCommands(guildId).block();
+			List<ApplicationCommandData> guildCommands = discordCommandService.getAllGuildCommands(guildId).block();
 			for (ApplicationCommandData guildCommand : guildCommands) {
 				reply += guildCommand.name() + ", ";
 			}

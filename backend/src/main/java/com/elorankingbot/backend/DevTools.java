@@ -6,6 +6,7 @@ import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
+import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.service.ApplicationService;
@@ -18,6 +19,7 @@ public class DevTools {
 
 	private final DBService dbService;
 	private final DiscordBotService bot;
+	private final DiscordCommandService discordCommandService;
 	private final GatewayDiscordClient client;
 	private final ApplicationService applicationService;
 	private final CommandClassScanner commandClassScanner;
@@ -32,6 +34,7 @@ public class DevTools {
 					TimeSlotDao timeSlotDao, ServerDao serverDao) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
+		this.discordCommandService = services.discordCommandService;
 		this.client = services.client;
 		this.applicationService = client.getRestClient().getApplicationService();
 		this.commandClassScanner = services.commandClassScanner;
@@ -57,7 +60,7 @@ public class DevTools {
 				server -> {
 					try {
 						log.info("deploying to " + bot.getServerName(server));
-						bot.deployCommand(server, SetRating.getRequest(server)).block();
+						discordCommandService.deployCommand(server, SetRating.getRequest(server)).block();
 						//bot.deployCommand(server, ForceDraw.getRequest(server)).block();
 					} catch (Exception e) {
 						log.error(e.getMessage());

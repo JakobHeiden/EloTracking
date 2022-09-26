@@ -140,7 +140,7 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
 		game.addQueue(queue);
-		String updatedCommands = bot.updateGuildCommandsByQueue(server);
+		String updatedCommands = discordCommandService.updateGuildCommandsByQueue(server);
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. These commands have been updated: %s" +
