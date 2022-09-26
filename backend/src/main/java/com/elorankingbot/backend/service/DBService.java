@@ -272,17 +272,25 @@ public class DBService {
 		return false;
 	}
 
+	public void updateRankingsEntry(Game game, Player player, double newRating) {
+		Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao.findByGuildIdAndGameNameAndPlayerTag(
+				game.getServer().getGuildId(), game.getName(), player.getTag());
+		maybeRankingsEntry.ifPresent(rankingsEntryDao::delete);
+		RankingsEntry newRankingsEntry = new RankingsEntry(game, player);
+		rankingsEntryDao.save(newRankingsEntry);
+	}
+
 	public boolean hasLeaderboardChanged(Game game, double oldRating, double newRating) {
 		int leaderboardLength = game.getLeaderboardLength();
-		List<RankingsEntry> leaderboard = rankingsEntryDao.findTopByGuildIdAndGameName(
+		List<RankingsEntry> actualLeaderboard = rankingsEntryDao.findTopByGuildIdAndGameName(
 				game.getServer().getGuildId(),
 				game.getName(),
 				PageRequest.of(0, leaderboardLength));
-		if (leaderboard.size() < leaderboardLength)	{
+		if (actualLeaderboard.size() < leaderboardLength) {
 			return true;
 		}
-		double lowestLeaderboardRating = leaderboard.get(leaderboardLength - 1).getRating();
-		return lowestLeaderboardRating < Math.max(oldRating, newRating);
+		double lowestLeaderboardRating = actualLeaderboard.get(leaderboardLength - 1).getRating();
+		return lowestLeaderboardRating <= Math.max(oldRating, newRating);
 	}
 
 

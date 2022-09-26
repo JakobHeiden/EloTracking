@@ -12,5 +12,7 @@ kann an diesen user nicht senden wirft nen fehler (ban zb)
 
 user::getPrivateChannel.send vllt ersetzen - errors?
 
+SetRating - match history?
+
 SOCIAL
 wo kommt der link für vote hin?

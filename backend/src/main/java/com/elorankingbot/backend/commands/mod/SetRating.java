@@ -96,7 +96,7 @@ public class SetRating extends SlashCommand {
 			return;
 		}
 
-		Player player = dbService.getPlayerOrGenerateIfNotPresent(guildId, activeUser);
+		Player player = dbService.getPlayerOrGenerateIfNotPresent(guildId, event.getOption("player").get().getValue().get().asUser().block());
 		boolean isSingularGame = server.getGames().size() == 1;
 		Game game = isSingularGame ?
 				server.getGames().get(0)
@@ -108,6 +108,8 @@ public class SetRating extends SlashCommand {
 		double newRating = isSetRating ? points : oldRating + points;
 		playerGameStats.setRating(newRating);
 		dbService.savePlayer(player);
+		if (dbService.hasLeaderboardChanged(game, oldRating, newRating))
+			dbService.updateRankingsEntry(game, player, newRating);
 
 		event.reply(String.format("%s's %srating is now set to %s.", player.getTag(),
 				isSingularGame ? "" : game.getName() + " ", FormatTools.formatRating(newRating))).subscribe();
@@ -117,8 +119,7 @@ public class SetRating extends SlashCommand {
 		playerUser.getPrivateChannel().block().createMessage(String.format("Your rating for %s has been set to %s by %s.%s",
 				game.getName(), FormatTools.formatRating(newRating), activeUser.getTag(), reason)).subscribe();
 
-		if (dbService.hasLeaderboardChanged(game, oldRating, newRating)) {
+		if (dbService.hasLeaderboardChanged(game, oldRating, newRating))
 			channelManager.refreshLeaderboard(game);
-		}
 	}
 }
