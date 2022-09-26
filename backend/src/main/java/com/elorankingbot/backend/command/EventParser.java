@@ -6,6 +6,7 @@ import com.elorankingbot.backend.commands.admin.settings.SetVariable;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
+import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
@@ -33,14 +34,15 @@ public class EventParser {
 	private final Services services;
 	private final DBService dbService;
 	private final DiscordBotService bot;
+	private final DiscordCommandService discordCommandService;
 	private final CommandClassScanner commandClassScanner;
 	private static final String supportServerInvite = "https://discord.com/invite/hCAJXasrhd";
 
 	public EventParser(Services services, CommandClassScanner commandClassScanner) {
-
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
+		this.discordCommandService = services.discordCommandService;
 		this.commandClassScanner = commandClassScanner;
 		GatewayDiscordClient client = services.client;
 
@@ -79,7 +81,7 @@ public class EventParser {
 					Server server = dbService.getOrCreateServer(event.getGuildId().asLong());
 					if (server.getAdminRoleId() == event.getRoleId().asLong()) {
 						long everyoneRoleId = server.getGuildId();
-						bot.setCommandPermissionForRole(server, SetPermission.class.getSimpleName().toLowerCase(), everyoneRoleId);
+						discordCommandService.setCommandPermissionForRole(server, SetPermission.class.getSimpleName().toLowerCase(), everyoneRoleId);
 					}
 				});
 
@@ -202,7 +204,7 @@ public class EventParser {
 	}
 
 	private void logGlobalCommands() {
-		List<ApplicationCommandData> globalCommands = bot.getAllGlobalCommands().block();
+		List<ApplicationCommandData> globalCommands = discordCommandService.getAllGlobalCommands().block();
 		log.info("Global Commands: " + String.join(", ", globalCommands.stream().map(ApplicationCommandData::name).toList()));
 	}
 }

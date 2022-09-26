@@ -41,17 +41,17 @@ public class SetVariable extends Command {
 		} else {
 			dbService.saveServer(server);
 			if (variableName.equals("Name")) {// TODO die ganze fallunterscheidung von Game nach hier. die deployCommands verallgemeinern
-				bot.deployCommand(server, Join.getRequest(server)).subscribe();
+				discordCommandService.deployCommand(server, Join.getRequest(server)).subscribe();
 				channelManager.refreshLeaderboard(game);// TODO channel ggf umbenennen...
-				bot.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
-						bot.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
-				bot.deployCommand(server, AddRank.getRequest(server)).subscribe(commandData ->
-						bot.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase()));
-				bot.deployCommand(server, DeleteRanks.getRequest(server)).subscribe(commandData ->
-						bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
-				bot.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
-						bot.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
-				bot.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
+				discordCommandService.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
+						discordCommandService.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
+				discordCommandService.deployCommand(server, AddRank.getRequest(server)).subscribe(commandData ->
+						discordCommandService.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase()));
+				discordCommandService.deployCommand(server, DeleteRanks.getRequest(server)).subscribe(commandData ->
+						discordCommandService.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
+				discordCommandService.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
+						discordCommandService.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
+				discordCommandService.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
 			}
 			userFeedback = String.format("\n**Variable %s for ranking %s is now set to %s.**", variableName, gameName, value);
 		}

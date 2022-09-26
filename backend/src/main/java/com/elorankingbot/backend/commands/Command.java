@@ -23,6 +23,7 @@ public abstract class Command {
 	protected final DBService dbService;
 	protected final DiscordBotService bot;
 	protected final ChannelManager channelManager;
+	protected final DiscordCommandService discordCommandService;
 	protected final MatchService matchService;
 	protected final QueueService queueService;
 	protected final TimedTaskQueue timedTaskQueue;
@@ -41,6 +42,7 @@ public abstract class Command {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.channelManager = services.channelManager;
+		this.discordCommandService = services.discordCommandService;
 		this.matchService = services.matchService;
 		this.queueService = services.queueService;
 		this.timedTaskQueue = services.timedTaskQueue;

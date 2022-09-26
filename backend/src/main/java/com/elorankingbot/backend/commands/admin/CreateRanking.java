@@ -10,7 +10,6 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -81,7 +80,7 @@ public class CreateRanking extends SlashCommand {
 		channelManager.getOrCreateDisputeCategory(server);
 		channelManager.getOrCreateArchiveCategory(server);
 		dbService.saveServer(server);
-		String updatedCommands = bot.updateGuildCommandsByRanking(server);
+		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server);
 
 		boolean didCreateCategories = server.getDisputeCategoryId() == 0L;
 		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
