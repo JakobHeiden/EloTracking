@@ -33,6 +33,7 @@ public abstract class Command {
 	protected final Server server;
 	protected final User activeUser;
 	protected final long activeUserId;
+	protected boolean userIsAdmin;
 
 	protected static final List none = new ArrayList<>();
 
@@ -72,7 +73,7 @@ public abstract class Command {
 		List<Long> memberRoleIds = new ArrayList<>(event.getInteraction().getMember().get().getRoleIds()
 				.stream().map(Snowflake::asLong).toList());
 		memberRoleIds.add(guildId);
-		boolean userIsAdmin = memberRoleIds.contains(server.getAdminRoleId());
+		userIsAdmin = memberRoleIds.contains(server.getAdminRoleId());
 		boolean userIsMod = memberRoleIds.contains(server.getModRoleId());
 		if (this.getClass().isAnnotationPresent(OwnerCommand.class)
 				&& event.getInteraction().getUser().getId().asLong() != props.getOwnerId()) {

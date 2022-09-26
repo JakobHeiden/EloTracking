@@ -1,7 +1,7 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.commands.owner.AllGuilds;
+import com.elorankingbot.backend.commands.mod.SetRating;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -45,6 +45,8 @@ public class DevTools {
 		if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 	}
 
+	// Commands to deploy to production:
+	// SetRating
 	private void updateGuildCommands() {
 		log.warn("updating global commands...");
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
@@ -54,20 +56,8 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						/*
-						bot.deleteCommand(server, "help").subscribe();
-						bot.deleteCommand(server, "settings").subscribe();
-						bot.deleteCommand(server, "createranking").subscribe();
-						bot.deleteCommand(server, "ban").subscribe();
-						bot.deleteCommand(server, "leave").subscribe();
-						bot.deleteCommand(server, "playerinfo").subscribe();
-						bot.deleteCommand(server, "setpermission").subscribe();
-						bot.deleteCommand(server, "Revert Match").subscribe();
-
-						 */
-
-						//log.info("deploying to " + bot.getServerName(server));
-						//bot.deployCommand(server, ForceWin.getRequest(server)).block();
+						log.info("deploying to " + bot.getServerName(server));
+						bot.deployCommand(server, SetRating.getRequest(server)).block();
 						//bot.deployCommand(server, ForceDraw.getRequest(server)).block();
 					} catch (Exception e) {
 						log.error(e.getMessage());

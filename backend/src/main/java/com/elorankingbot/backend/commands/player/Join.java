@@ -119,7 +119,7 @@ public class Join extends SlashCommand {
 
 		Group group = new Group(
 				users.stream()
-						.map(user -> dbService.getPlayerOrGenerateIfNotPresent(guildId, user.getId().asLong(), user.getTag()))
+						.map(user -> dbService.getPlayerOrGenerateIfNotPresent(guildId, user))
 						.collect(Collectors.toList()),
 				game);
 		for (Player player : group.getPlayers()) {

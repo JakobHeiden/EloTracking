@@ -87,7 +87,7 @@ public class Ban extends SlashCommand {
 			return;
 		}
 
-		dbService.getPlayerOrGenerateIfNotPresent(guildId, playerUser.getId().asLong(), playerUser.getTag());
+		dbService.getPlayerOrGenerateIfNotPresent(guildId, playerUser);
 		player = dbService.findPlayerByGuildIdAndUserId(guildId, playerUser.getId().asLong()).get();
 		reasonGiven = event.getOption("reason").isPresent() ?
 				String.format(" Reason given: \"%s\"", event.getOption("reason").get().getValue().get().asString())

@@ -3,6 +3,7 @@ package com.elorankingbot.backend.service;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.model.*;
+import discord4j.core.object.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -188,11 +189,11 @@ public class DBService {
 		return playerDao.findById(Player.generateId(guildId, userId));
 	}
 
-	public Player getPlayerOrGenerateIfNotPresent(long guildId, long userId, String tag) {
-		Optional<Player> maybePlayer = playerDao.findById(Player.generateId(guildId, userId));
+	public Player getPlayerOrGenerateIfNotPresent(long guildId, User user) {
+		Optional<Player> maybePlayer = playerDao.findById(Player.generateId(guildId, user.getId().asLong()));
 		if (maybePlayer.isPresent()) return maybePlayer.get();
 
-		Player player = new Player(guildId, userId, tag);
+		Player player = new Player(guildId, user.getId().asLong(), user.getTag());
 		playerDao.save(player);
 		return player;
 	}
@@ -261,14 +262,28 @@ public class DBService {
 			Optional<RankingsEntry> maybeRankingsEntry = rankingsEntryDao
 					.findByGuildIdAndGameNameAndPlayerTag(matchResult.getGame().getServer().getGuildId(),
 							matchResult.getGame().getName(), playerMatchResult.getPlayerTag());
-			if (maybeRankingsEntry.isPresent() && leaderboard.contains(maybeRankingsEntry.get()))
+			if (maybeRankingsEntry.isPresent() && leaderboard.contains(maybeRankingsEntry.get())) {
 				return true;
-			if (playerMatchResult.getNewRating() >= lowestLeaderboardRating)
+			}
+			if (playerMatchResult.getNewRating() >= lowestLeaderboardRating) {
 				return true;
+			}
 		}
 		return false;
 	}
 
+	public boolean hasLeaderboardChanged(Game game, double oldRating, double newRating) {
+		int leaderboardLength = game.getLeaderboardLength();
+		List<RankingsEntry> leaderboard = rankingsEntryDao.findTopByGuildIdAndGameName(
+				game.getServer().getGuildId(),
+				game.getName(),
+				PageRequest.of(0, leaderboardLength));
+		if (leaderboard.size() < leaderboardLength)	{
+			return true;
+		}
+		double lowestLeaderboardRating = leaderboard.get(leaderboardLength - 1).getRating();
+		return lowestLeaderboardRating < Math.max(oldRating, newRating);
+	}
 
 
 	public void deleteAllRankingsEntries(Game game) {

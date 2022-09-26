@@ -30,7 +30,7 @@ public class CommandClassScanner {
 	both are used in the command name. The command string is still lowercase for these.
 
 	Java class names map to discord command names by going toLowerCase().
-	Incoming events are mapped from command string to Java class name using this.commandStringToFullClassName.
+	Incoming events are mapped from command string to Java class name using CommandClassScanner.commandStringToFullClassName.
 	*/
 	private final Map<String, String> commandStringToFullClassName;
 	@Getter

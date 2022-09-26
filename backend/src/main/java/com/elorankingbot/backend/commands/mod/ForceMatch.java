@@ -61,8 +61,7 @@ public abstract class ForceMatch extends SlashCommand {
 			result.add(new ArrayList<>(queue.getNumPlayersPerTeam()));
 			for (int playerIndex = 0; playerIndex < queue.getNumPlayersPerTeam(); playerIndex++) {
 				User user = users.get(teamIndex * queue.getNumPlayersPerTeam() + playerIndex);
-				result.get(teamIndex).add(dbService.getPlayerOrGenerateIfNotPresent(
-						server.getGuildId(), user.getId().asLong(), user.getTag()));
+				result.get(teamIndex).add(dbService.getPlayerOrGenerateIfNotPresent(server.getGuildId(), user));
 			}
 		}
 		return result;
