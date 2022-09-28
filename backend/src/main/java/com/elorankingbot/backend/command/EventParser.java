@@ -87,8 +87,17 @@ public class EventParser {
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
 
-		client.on(InteractionCreateEvent.class).subscribe(event ->
-				log.debug(event.getClass().getSimpleName() + " : " + event.getInteraction().getId().asString()));
+		client.on(InteractionCreateEvent.class).subscribe(event -> {
+			String commandString = "unknown";
+			if (event.getClass().equals(ButtonInteractionEvent.class))
+				commandString = ((ButtonInteractionEvent) event).getCustomId();
+			if (event.getClass().equals(ChatInputInteractionEvent.class))
+				commandString = ((ChatInputInteractionEvent) event).getCommandName();
+			log.debug(String.format("%s : %s : %s",
+					event.getClass().getSimpleName(),
+					commandString,
+					event.getInteraction().getId().asString()));
+		});
 
 		Hooks.onErrorDropped(this::handleDroppedException);
 	}
