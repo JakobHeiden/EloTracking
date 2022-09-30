@@ -3,6 +3,7 @@ bot aufraeumen, refaktorn
 pipeline fixen
 game.name und game._id trennen, wegen umbenennen...?
 playerMatchResult evtl durch referenz auf RankingsEntry ersetzen
+fehler wenn kann keine perms fuer manage channels? vllt bei join einmal pruefen? oder wo sonst?
 
 DEV
 settings erweitern
