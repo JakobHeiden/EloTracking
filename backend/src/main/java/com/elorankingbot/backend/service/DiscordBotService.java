@@ -7,12 +7,14 @@ import com.elorankingbot.backend.model.Server;
 import com.google.common.collect.Iterables;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import lombok.Getter;
@@ -135,9 +137,28 @@ public class DiscordBotService {
 		return client.getMessageById(Snowflake.of(channelId), Snowflake.of(messageId));
 	}
 
-	// Channels
-	public Mono<PrivateChannel> getPrivateChannelByUserId(long userId) {
-		return client.getUserById(Snowflake.of(userId)).flatMap(User::getPrivateChannel);
+	public void sendDM(User user, ChatInputInteractionEvent event, String content) {
+		user.getPrivateChannel()
+				.flatMap(privateChannel -> privateChannel.createMessage(content))
+				.subscribe(messageIgnored -> {},
+						throwable -> event.createFollowup(dmFailedFollowupMessage(user.getTag())).subscribe());
+	}
+
+	public void sendDM(User user, ChatInputInteractionEvent event, EmbedCreateSpec content) {
+		user.getPrivateChannel()
+				.flatMap(privateChannel -> privateChannel.createMessage(content))
+				.subscribe(messageIgnored -> {},
+						throwable -> event.createFollowup(dmFailedFollowupMessage(user.getTag())).subscribe());
+	}
+
+	private String dmFailedFollowupMessage(String tag) {
+		return String.format("I was not able to inform %s. Most likely their DMs are closed.", tag);
+	}
+
+	public void sendDM(User user, String content) {
+		user.getPrivateChannel()
+				.flatMap(privateChannel -> privateChannel.createMessage(content))
+				.subscribe(messageIgnored -> {}, throwableIgnored -> {});
 	}
 
 	public Mono<Channel> getChannelById(long channelId) {

@@ -49,7 +49,6 @@ public class DevTools {
 	}
 
 	// Commands to deploy to production:
-	// SetRating
 	private void updateGuildCommands() {
 		log.warn("updating global commands...");
 		//applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();

@@ -144,7 +144,9 @@ def removeNotifications():
 		click(find(Pattern("1658499573390.png").similar(0.90)).left(30))
 
 def testPermissions():
-	type("/setpermission\n")
+	type("/setpermission")
+	sleep(0.5)
+	type(Key.ENTER)
 	click("1658753288770.png")
 	click(Pattern("1656941051735.png").similar(0.90))
 	type("\n")

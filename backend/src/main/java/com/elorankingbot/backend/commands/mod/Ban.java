@@ -96,7 +96,8 @@ public class Ban extends SlashCommand {
 		String mode = event.getOption("mode").get().getValue().get().asString();
 		switch (mode) {
 			case "permaban" -> {
-				permaban();
+				sendPermabanMessages();
+				player.setUnbanAtTimeSlot(-1);
 				queueService.removePlayerFromAllQueues(server, player);
 			}
 			case "duration" -> {
@@ -111,7 +112,10 @@ public class Ban extends SlashCommand {
 					return;
 				}
 				duration = maybeDuration.get();
-				durationBan();
+				sendDurationBanMessages();
+				player.setUnbanAtTimeSlot((timedTaskQueue.getCurrentIndex() + duration) % timedTaskQueue.getNumberOfTimeSlots());
+				timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
+						guildId, player.getUserId(), null);
 				queueService.removePlayerFromAllQueues(server, player);
 			}
 			case "unban" -> {
@@ -119,98 +123,44 @@ public class Ban extends SlashCommand {
 					event.reply("That player is not banned currently.").subscribe();
 					return;
 				}
-				unban();
+				sendUnbanMessages();
+				player.setUnbanAtTimeSlot(-2);
 			}
 		}
 		dbService.savePlayer(player);
 	}
 
-	private void permaban() {
+	private void sendPermabanMessages() {
 		if (player.isBanned()) {
-			playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
-					String.format("%s has updated your ban to be permanent, or until unbanned.%s",
-							event.getInteraction().getUser().getTag(), reasonGiven)).subscribe());
-
+			bot.sendDM(playerUser, event, String.format("%s has updated your ban to be permanent, or until unbanned.%s",
+							event.getInteraction().getUser().getTag(), reasonGiven));
 			event.reply(String.format("%s's ban is updated to be permanent, or until unbanned.%s",
 					playerUser.getTag(), reasonGiven)).subscribe();
 		} else {
-			playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
-					String.format("%s has banned you permanently, or until unbanned.%s",
-							event.getInteraction().getUser().getTag(), reasonGiven)).subscribe());
-
+			bot.sendDM(playerUser, event, String.format("%s has banned you permanently, or until unbanned.%s",
+							event.getInteraction().getUser().getTag(), reasonGiven));
 			event.reply(String.format("%s is banned permanently, or until unbanned.%s",
 					playerUser.getTag(), reasonGiven)).subscribe();
 		}
-
-		player.setUnbanAtTimeSlot(-1);
 	}
 
-	private void durationBan() {
+	private void sendDurationBanMessages() {
 		if (player.isBanned()) {
-			playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
-					String.format("%s has updated your ban to end after %s, from now.%s",
-							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven)).subscribe());
+			bot.sendDM(playerUser, event, String.format("%s has updated your ban to end after %s, from now.%s",
+							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven));
 			event.reply(String.format("%s's ban has been updated to end after %s, from now.%s",
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		} else {
-			playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
-					String.format("%s has banned you for %s.%s",
-							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven)).subscribe());
+			bot.sendDM(playerUser, event, String.format("%s has banned you for %s.%s",
+							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven));
 			event.reply(String.format("%s is banned for %s.%s",
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		}
-
-		player.setUnbanAtTimeSlot((timedTaskQueue.getCurrentIndex() + duration) % timedTaskQueue.getNumberOfTimeSlots());
-
-		timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
-				guildId, player.getUserId(), null);
 	}
 
-	private void unban() {
-		playerUser.getPrivateChannel().subscribe(channel -> channel.createMessage(
-				String.format("%s has lifted your ban.%s",
-						event.getInteraction().getUser().getTag(), reasonGiven)).subscribe());
+	private void sendUnbanMessages() {
+		bot.sendDM(playerUser, event, String.format("%s has lifted your ban.%s", event.getInteraction().getUser().getTag(), reasonGiven));
 		event.reply(String.format("%s has been unbanned.%s",
 				playerUser.getTag(), reasonGiven)).subscribe();
-
-		player.setUnbanAtTimeSlot(-2);
 	}
-
-	/*
-	private void deleteExistingOpenChallenges() {
-		dbService.findAllChallengesByGuildIdAndPlayerId(guildId, player.getUserId())
-				.forEach(challenge -> {
-					if (challenge.isAccepted()) return;
-
-					dbService.deleteChallenge(challenge);
-
-					boolean isChallengerBanned = challenge.getChallengerUserId() == player.getUserId();
-					bot.getChallengerMessage(challenge).subscribe(message ->
-							new MessageUpdater(message)
-									.makeAllNotBold()
-									.addLine(isChallengerBanned ?
-											"You have been banned. The challenge is canceled."
-											: "Your opponent has been banned. The challenge is canceled.")
-									.makeAllItalic()
-									.resend()
-									.withComponents(none)
-									.subscribe(msg -> timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
-											0,//game.getMessageCleanupTime(),
-											msg.getId().asLong(), challenge.getChallengerChannelId(), null)));
-					bot.getAcceptorMessage(challenge).subscribe(message ->
-							new MessageUpdater(message)
-									.makeAllNotBold()
-									.addLine(isChallengerBanned ?
-											"Your opponent has been banned. The challenge is canceled."
-											: "You have been banned. The challenge is canceled.")
-									.makeAllItalic()
-									.resend()
-									.withComponents(none)
-									.subscribe(msg -> timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.MESSAGE_DELETE,
-											0,//game.getMessageCleanupTime(),
-											msg.getId().asLong(), challenge.getAcceptorChannelId(), null)));
-				});
-	}
-
-	 */
 }
