@@ -104,9 +104,8 @@ public class TimedTaskService {
 		player.setUnbanAtTimeSlot(-2);
 		dbService.savePlayer(player);
 
-		bot.getPrivateChannelByUserId(userId).subscribe(privateChannel -> privateChannel
-				.createMessage(String.format("Your ban has run out after %s. You are no longer banned.",
-						DurationParser.minutesToString(duration))).subscribe());
+		bot.sendDM(bot.getUser(userId).block(), String.format("Your ban has run out after %s. You are no longer banned.",
+						DurationParser.minutesToString(duration)));
 	}
 
 	void warnMissingReports(UUID matchId) {

@@ -1,12 +1,12 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.model.*;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -117,13 +117,15 @@ public class MatchService {
 		dbService.addMatchResultToStats(matchResult);
 	}
 
-	// TODO processMatchResult und die updates in channels und messages evtl trennen
-	// TODO das ist ungluecklich, dass es 2 methoden gibt, die MatchResults prozessieren.
-	public EmbedCreateSpec processForcedMatchResult(MatchResult forcedMatchResult, List<User> users, String embedTitle) {
+	/* This differs from processMatchResult in the following ways:
+	- there is no Match, goes directly to MatchResult
+	- there is no matchChannel, players are informed in DMs
+	- event is supplied for the callback if sending DM fails */
+	public EmbedCreateSpec processForcedMatchResult(MatchResult forcedMatchResult, List<User> users, String embedTitle,
+													ChatInputInteractionEvent event) {
 		EmbedCreateSpec matchEmbed = EmbedBuilder.createCompletedMatchEmbed(embedTitle, forcedMatchResult);
 		for (User user : users) {
-			user.getPrivateChannel().subscribe(privateChannel -> privateChannel.createMessage(matchEmbed)
-					.onErrorResume(e -> Mono.empty()).subscribe());
+			bot.sendDM(user, event, matchEmbed);
 		}
 		Message resultChannelMessage = channelManager.postToResultChannel(forcedMatchResult);
 		dbService.saveMatchResultReference(new MatchResultReference(resultChannelMessage, forcedMatchResult.getId()));

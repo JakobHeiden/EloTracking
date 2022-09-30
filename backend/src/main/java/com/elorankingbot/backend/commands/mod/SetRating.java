@@ -116,8 +116,8 @@ public class SetRating extends SlashCommand {
 
 		Optional<ApplicationCommandInteractionOption> maybeReason = event.getOption("reason");
 		String reason = maybeReason.isPresent() ? " Reason given: " + maybeReason.get().getValue().get().asString() : "";
-		playerUser.getPrivateChannel().block().createMessage(String.format("Your rating for %s has been set to %s by %s.%s",
-				game.getName(), FormatTools.formatRating(newRating), activeUser.getTag(), reason)).subscribe();
+		bot.sendDM(playerUser, event, String.format("Your rating for %s has been set to %s by %s.%s",
+				game.getName(), FormatTools.formatRating(newRating), activeUser.getTag(), reason));
 
 		if (dbService.hasLeaderboardChanged(game, oldRating, newRating))
 			channelManager.refreshLeaderboard(game);
