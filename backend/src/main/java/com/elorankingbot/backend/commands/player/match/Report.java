@@ -28,7 +28,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 
 	public void execute() {
 		if (!activeUserIsInvolvedInMatch() || match.isDispute()) {
-			event.acknowledge().subscribe();
+			acknowledgeEvent();
 			return;
 		}
 		long timePassed = new Date().getTime() - match.getTimestamp().getTime();
@@ -39,6 +39,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			return;
 		}
 
+		acknowledgeEvent();
 		match.reportAndSetConflictData(activePlayerId, reportStatus);
 		Match.ReportIntegrity reportIntegrity = match.getReportIntegrity();
 		switch (reportIntegrity) {
@@ -65,7 +66,6 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 				matchService.processMatchResult(matchResult, match, resolveMessage);
 			}
 		}
-		event.acknowledge().subscribe();
 	}
 
 	private void processIncompleteReporting() {
