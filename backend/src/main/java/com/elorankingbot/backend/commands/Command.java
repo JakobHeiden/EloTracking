@@ -119,7 +119,7 @@ public abstract class Command {
 	protected abstract void execute() throws Exception;
 
 	protected void acknowledgeEvent() {
-		event.deferReply().subscribe();
+		event.deferReply().subscribe(ignored -> {}, this::handleExceptionCallback);
 	}
 
 	protected void handleExceptionCallback(Throwable throwable) {

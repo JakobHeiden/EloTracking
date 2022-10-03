@@ -67,7 +67,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 				: String.format("**%s has ruled this match a %s %s.**", moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString());
 		matchService.processMatchResult(matchResult, match, rulingMessage);
 		removeButtons();
-		event.acknowledge().subscribe();
+		acknowledgeEvent();
 	}
 
 	protected Mono<Message> postToDisputeChannel(String text) {
