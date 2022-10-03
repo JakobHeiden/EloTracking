@@ -26,7 +26,7 @@ public class SelectGame extends SelectMenuCommand {
 			event.getMessage().get().edit().withContent(Possible.of(Optional.of(
 					String.format("No rankings yet. Please create a ranking with `/%s`.",
 							CreateRanking.class.getSimpleName().toLowerCase())))).subscribe();
-			event.acknowledge().subscribe();
+			acknowledgeEvent();
 			return;
 		}
 
@@ -34,6 +34,6 @@ public class SelectGame extends SelectMenuCommand {
 		event.getMessage().get().edit()
 				.withEmbeds(gameSettingsEmbed(game))
 				.withComponents(createVariableMenu(game), exitAndEscapeButton()).subscribe();
-		event.acknowledge().subscribe();
+		acknowledgeEvent();
 	}
 }

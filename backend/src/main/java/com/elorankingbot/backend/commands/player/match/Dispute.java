@@ -15,7 +15,7 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 
 	public void execute() {
 		if (!activeUserIsInvolvedInMatch() || match.isDispute()) {
-			event.acknowledge().subscribe();
+			acknowledgeEvent();
 			return;
 		}
 
@@ -25,6 +25,6 @@ public class Dispute extends ButtonCommandRelatedToMatch {
 		matchChannel = (TextChannel) event.getInteraction().getChannel().block();
 		channelManager.moveToDisputes(server, matchChannel);
 		channelManager.createDisputeMessage(matchChannel, match, activeUser.getTag());
-		event.acknowledge().subscribe();
+		acknowledgeEvent();
 	}
 }

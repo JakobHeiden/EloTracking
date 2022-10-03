@@ -16,9 +16,4 @@ public abstract class ButtonCommand extends Command {
 		super(event, services);
 		this.event = event;
 	}
-
-	@Override
-	protected void acknowledgeEvent() {
-		event.deferEdit().subscribe();
-	}
 }
