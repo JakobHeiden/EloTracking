@@ -32,7 +32,7 @@ public class AllGuilds extends SlashCommand {
 			for (Server server : dbService.findAllServers()) {
 				Guild guild;
 				try {
-					guild = bot.getGuildById(server.getGuildId()).block();
+					guild = bot.getGuild(server).block();
 					guilds.put(guild.getMemberCount(), String.format("%s - %s:%s", guild.getMemberCount(), guild.getId().asString(), guild.getName()));
 				} catch (ClientException ignored) {
 				}
@@ -43,7 +43,7 @@ public class AllGuilds extends SlashCommand {
 		} catch (Exception e) {
 			e.printStackTrace();
 			event.reply(e.getMessage()).withEphemeral(true)
-					.doOnError(super::handleExceptionCallback).subscribe();
+					.doOnError(super::handleException).subscribe();
 		}
 	}
 }

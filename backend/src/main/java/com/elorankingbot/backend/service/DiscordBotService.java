@@ -4,19 +4,16 @@ import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;
-import com.google.common.collect.Iterables;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
+import discord4j.rest.util.Permission;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,7 +22,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -64,7 +60,21 @@ public class DiscordBotService {
 		ownerPrivateChannel.createMessage(sendToOwnerTimeStamp.format(new Date()) + ": " + text).subscribe();
 	}
 
-	// Server
+	// Guild
+	public Mono<Guild> getGuild(long guildId) {
+		return client.getGuildById(Snowflake.of(guildId));
+	}
+
+	public Mono<Guild> getGuild(Server server) {
+		return getGuild(server.getGuildId());
+	}
+
+	public List<Long> getAllGuildIds() {
+		return client.getGuilds()
+				.map(guild -> guild.getId().asLong())
+				.collectList().block();
+	}
+
 	public String getServerName(Server server) {
 		try {
 			return client.getGuildById(Snowflake.of(server.getGuildId())).block().getName();
@@ -77,48 +87,39 @@ public class DiscordBotService {
 		return client.getGuildById(Snowflake.of(player.getGuildId())).block().getName();
 	}
 
-	// Guild
-	public Mono<Guild> getGuildById(long guildId) {
-		return client.getGuildById(Snowflake.of(guildId));
-	}
-
-	public List<Long> getAllGuildIds() {
-		return client.getGuilds()
-				.map(guild -> guild.getId().asLong())
-				.collectList().block();
-	}
-
-	// Player, Ranks
+	// User
 	public Mono<User> getUser(long userId) {
 		return client.getUserById(Snowflake.of(userId));
 	}
 
-	public void updatePlayerRank(Game game, Player player) {
-		List<Integer> applicableRequiredRatings = new ArrayList<>(game.getRequiredRatingToRankId().keySet().stream()
-				.filter(requiredRating -> player.findGameStats(game).isPresent()
-						&& player.findGameStats(game).get().getRating() > requiredRating)
-				.toList());
-		if (applicableRequiredRatings.size() == 0) return;
-
-		Collections.sort(applicableRequiredRatings);
-		int relevantRequiredRating = Iterables.getLast(applicableRequiredRatings);
-		Snowflake rankSnowflake = Snowflake.of(game.getRequiredRatingToRankId().get(relevantRequiredRating));
-
-		Member member;
+	public Optional<Member> findMember(Player player) {
 		try {
-			member = client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block();
+			return Optional.of(client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block());
 		} catch (ClientException e) {
-			return;// TODO player loeschen etc
+			return Optional.empty();
 		}
-		Set<Snowflake> currentRankSnowflakes = member.getRoleIds().stream()
-				.filter(snowflake -> game.getRequiredRatingToRankId().containsValue(snowflake.asLong()))
-				.collect(Collectors.toSet());
-		if (!currentRankSnowflakes.contains(rankSnowflake)) {
-			member.addRole(rankSnowflake).subscribe();
-		}
-		currentRankSnowflakes.stream().filter(roleSnowflake -> !roleSnowflake.equals(rankSnowflake))
-				.forEach(roleIdSnowflake -> member.removeRole(roleIdSnowflake).subscribe());
 	}
+
+	// Roles
+	public boolean isBotAdmin(Server server) {
+		for (Role botRole : client.getSelfMember(Snowflake.of(server.getGuildId())).block().getRoles().collectList().block()) {
+			if (botRole.getPermissions().contains(Permission.ADMINISTRATOR)) return true;
+		}
+		return false;
+	}
+
+	public boolean isBotRoleHigherThanGivenRole(Role givenRole) {
+		for (Role botRole : client.getSelfMember(givenRole.getGuildId()).block().getRoles().collectList().block()) {
+			if (botRole.getRawPosition() > givenRole.getRawPosition()) return true;
+		}
+		return false;
+	}
+
+	public Role getBotIntegrationRole(Server server) {
+		return client.getSelfMember(Snowflake.of(server.getGuildId())).block().getRoles()
+				.filter(Role::isManaged).blockFirst();
+	}
+
 
 	public void removeAllRanks(Game game) {
 		Collection<Long> allRankIds = game.getRequiredRatingToRankId().values();
@@ -140,14 +141,16 @@ public class DiscordBotService {
 	public void sendDM(User user, ChatInputInteractionEvent event, String content) {
 		user.getPrivateChannel()
 				.flatMap(privateChannel -> privateChannel.createMessage(content))
-				.subscribe(messageIgnored -> {},
+				.subscribe(messageIgnored -> {
+						},
 						throwable -> event.createFollowup(dmFailedFollowupMessage(user.getTag())).subscribe());
 	}
 
 	public void sendDM(User user, ChatInputInteractionEvent event, EmbedCreateSpec content) {
 		user.getPrivateChannel()
 				.flatMap(privateChannel -> privateChannel.createMessage(content))
-				.subscribe(messageIgnored -> {},
+				.subscribe(messageIgnored -> {
+						},
 						throwable -> event.createFollowup(dmFailedFollowupMessage(user.getTag())).subscribe());
 	}
 
@@ -158,9 +161,12 @@ public class DiscordBotService {
 	public void sendDM(User user, String content) {
 		user.getPrivateChannel()
 				.flatMap(privateChannel -> privateChannel.createMessage(content))
-				.subscribe(messageIgnored -> {}, throwableIgnored -> {});
+				.subscribe(messageIgnored -> {
+				}, throwableIgnored -> {
+				});
 	}
 
+	// Channels
 	public Mono<Channel> getChannelById(long channelId) {
 		//return client.withRetrievalStrategy(EntityRetrievalStrategy.REST).getChannelById(Snowflake.of(channelId));
 		return client.getChannelById(Snowflake.of(channelId));

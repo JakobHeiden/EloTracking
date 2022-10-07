@@ -1,14 +1,20 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.commands.Command;
 import com.elorankingbot.backend.model.*;
+import com.google.common.collect.Iterables;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 public class MatchService {
@@ -17,6 +23,7 @@ public class MatchService {
 	private final DiscordBotService bot;
 	private final ChannelManager channelManager;
 	private final QueueService queueService;
+	private final Consumer<Object> NO_OP = object -> {};
 
 	public MatchService(Services services) {
 		this.dbService = services.dbService;
@@ -82,7 +89,7 @@ public class MatchService {
 		return matchResult;
 	}
 
-	public void processMatchResult(MatchResult matchResult, Match match, String embedTitle) {
+	public void processMatchResult(MatchResult matchResult, Match match, String embedTitle, Consumer<Throwable> manageRoleFailedCallback) {
 		Game game = match.getGame();
 		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
@@ -112,7 +119,7 @@ public class MatchService {
 		boolean leaderboardNeedsRefresh = dbService.updateRankingsEntries(matchResult);
 		if (leaderboardNeedsRefresh) channelManager.refreshLeaderboard(game);
 		for (Player player : match.getPlayers()) {
-			bot.updatePlayerRank(game, player);
+			updatePlayerRank(game, player, manageRoleFailedCallback);
 		}
 		dbService.addMatchResultToStats(matchResult);
 	}
@@ -122,7 +129,7 @@ public class MatchService {
 	- there is no matchChannel, players are informed in DMs
 	- event is supplied for the callback if sending DM fails */
 	public EmbedCreateSpec processForcedMatchResult(MatchResult forcedMatchResult, List<User> users, String embedTitle,
-													ChatInputInteractionEvent event) {
+													ChatInputInteractionEvent event, Consumer<Throwable> manageRoleFailedCallback) {
 		EmbedCreateSpec matchEmbed = EmbedBuilder.createCompletedMatchEmbed(embedTitle, forcedMatchResult);
 		for (User user : users) {
 			bot.sendDM(user, event, matchEmbed);
@@ -136,7 +143,7 @@ public class MatchService {
 			dbService.savePlayer(player);
 			queueService.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
-			bot.updatePlayerRank(game, player);
+			updatePlayerRank(game, player, manageRoleFailedCallback);
 		});
 		boolean leaderboardNeedsRefresh = dbService.updateRankingsEntries(forcedMatchResult);
 		if (leaderboardNeedsRefresh) channelManager.refreshLeaderboard(game);
@@ -156,5 +163,35 @@ public class MatchService {
 								throwable -> {});
 			}
 		}
+	}
+
+	public void updatePlayerRank(Game game, Player player, Consumer<Throwable> manageRoleFailedCallback) {
+		List<Integer> applicableRequiredRatings = new ArrayList<>(game.getRequiredRatingToRankId().keySet().stream()
+				.filter(requiredRating -> player.findGameStats(game).isPresent()
+						&& player.findGameStats(game).get().getRating() > requiredRating)
+				.toList());
+		if (applicableRequiredRatings.size() == 0) return;
+
+		Collections.sort(applicableRequiredRatings);
+		int relevantRequiredRating = Iterables.getLast(applicableRequiredRatings);
+		Snowflake rankSnowflake = Snowflake.of(game.getRequiredRatingToRankId().get(relevantRequiredRating));
+
+		Optional<Member> maybeMember = bot.findMember(player);
+		if (maybeMember.isEmpty()) return;
+		Member member = maybeMember.get();
+		Set<Snowflake> currentRankSnowflakes = member.getRoleIds().stream()
+				.filter(snowflake -> game.getRequiredRatingToRankId().containsValue(snowflake.asLong()))
+				.collect(Collectors.toSet());
+		if (!currentRankSnowflakes.contains(rankSnowflake)) {
+			member.addRole(rankSnowflake).subscribe(NO_OP, manageRoleFailedCallback);
+		}
+		currentRankSnowflakes.stream().filter(roleSnowflake -> !roleSnowflake.equals(rankSnowflake))
+				.forEach(roleIdSnowflake -> member.removeRole(roleIdSnowflake).subscribe(NO_OP, manageRoleFailedCallback));
+		// TODO! unter welchen umstaenden funktioniert es nicht? wie sind in diesem faellen die exceptions?
+		// wie parse ich die am besten? verallgemeinern?
+		// EventParser::handleException
+		// permissions fehlt: message=Missing Access, body=null
+		// role zu hoch: message=Missing Permissions, body=null
+
 	}
 }

@@ -11,11 +11,14 @@ import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskQueue;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Slf4j
 public abstract class Command {
@@ -37,6 +40,7 @@ public abstract class Command {
 	protected boolean userIsAdmin;
 
 	protected static final List none = new ArrayList<>();
+	private final Consumer<Object> NO_OP = object -> {};
 
 	protected Command(DeferrableInteractionEvent event, Services services) {
 		this.dbService = services.dbService;
@@ -119,10 +123,22 @@ public abstract class Command {
 	protected abstract void execute() throws Exception;
 
 	protected void acknowledgeEvent() {
-		event.deferReply().subscribe(ignored -> {}, this::handleExceptionCallback);
+		event.deferReply().subscribe(NO_OP, this::handleException);
 	}
 
-	protected void handleExceptionCallback(Throwable throwable) {
+	protected void handleException(Throwable throwable) {
 		eventParser.handleException(throwable, event, this.getClass().getSimpleName());
+	}
+
+	protected static Consumer<Throwable> manageRoleFailedCallback(DeferrableInteractionEvent event) {
+		return e -> {
+			System.out.println("manage");
+
+			event.createFollowup("").subscribe();
+		};
+	}
+
+	protected static Function<Role, Consumer<Throwable>> metaCallback(DeferrableInteractionEvent event) {
+		return role -> throwable -> event.createFollowup(role.getName()).subscribe();
 	}
 }

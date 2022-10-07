@@ -5,6 +5,7 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Role;
@@ -14,6 +15,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
@@ -79,7 +81,7 @@ public class AddRank extends SlashCommand {
 			return;
 		}
 		Role role = event.getOption("role").get().getValue().get().asRole().block();
-		if (role.isEveryone()) {
+		if (role.isEveryone() || role.isManaged()) {
 			event.reply("Cannot make @everyone a rank.").subscribe();
 			return;
 		}
@@ -99,9 +101,17 @@ public class AddRank extends SlashCommand {
 		game.getRequiredRatingToRankId().put(rating, role.getId().asLong());
 		dbService.saveServer(server);
 		for (Player player : dbService.findAllPlayersForServer(server)) {
-			bot.updatePlayerRank(game, player);
+			matchService.updatePlayerRank(game, player, manageRoleFailedCallback(event));
 		}
 		event.reply(String.format("%s will now automatically be assigned to any player of %s who reaches %s rating.",
 				role.getName(), game.getName(), rating)).subscribe();
+
+		if (!bot.isBotAdmin(server) && !bot.isBotRoleHigherThanGivenRole(role)) {
+			event.createFollowup(String.format("I currently hold no role that is higher than %s." +
+					" As a result I cannot assign %s to players." +
+					" Please move the %s role up in the hierarchy, or assign me a role that is above %s.",
+					role.getName(), role.getName(), bot.getBotIntegrationRole(server).getName(), role.getName()))
+					.block();
+		}
 	}
 }
