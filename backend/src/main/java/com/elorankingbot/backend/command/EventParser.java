@@ -177,9 +177,12 @@ public class EventParser {
 	public void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
 		String userErrorMessage = "Error message not set";
 		boolean isKnownException = false;
+		// TODO I'm not sure if this is a good approach. Discord error responses seem to be all over the place.
+		// Maybe it is better to not rely on Discord API behavior, but instead allocate userErrorMessages in the code that causes them.
 		if (throwable instanceof ClientException clientException) {
 			log.error("ClientException caused by request:\n" + clientException.getRequest());
-			if (clientException.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")) {
+			if (clientException.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")
+					&& clientException.getRequest().getBody() != null) {
 				if (clientException.getRequest().getBody().toString().startsWith("ChannelCreateRequest")) {
 					userErrorMessage = "Error: cannot create channel due to missing permission: Manage Channels";
 					isKnownException = true;

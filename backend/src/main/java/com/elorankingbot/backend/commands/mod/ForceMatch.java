@@ -36,7 +36,7 @@ public abstract class ForceMatch extends SlashCommand {
 		users = userOptions.stream().map(option -> option.getValue().get().asUser().block()).toList();
 		for (User user : users) {
 			if (user.isBot()) {
-				event.reply(String.format("%s is a bot and cannot be part of a match.", user.getTag())).doOnError(super::handleExceptionCallback).subscribe();
+				event.reply(String.format("%s is a bot and cannot be part of a match.", user.getTag())).doOnError(super::handleException).subscribe();
 				return;
 			}
 		}
@@ -51,8 +51,8 @@ public abstract class ForceMatch extends SlashCommand {
 		MatchResult matchResult = MatchService.generateMatchResult(match);
 		String resolveMessage = String.format(String.format("%s has force-resolved a match of %s.",
 				event.getInteraction().getUser().getTag(), game.getName()));
-		EmbedCreateSpec matchEmbed = matchService.processForcedMatchResult(matchResult, users, resolveMessage, event);
-		event.reply().withEmbeds(matchEmbed).doOnError(super::handleExceptionCallback).subscribe();
+		EmbedCreateSpec matchEmbed = matchService.processForcedMatchResult(matchResult, users, resolveMessage, event, manageRoleFailedCallback(event));
+		event.reply().withEmbeds(matchEmbed).doOnError(super::handleException).subscribe();
 	}
 
 	private List<List<Player>> makeTeams() {

@@ -72,6 +72,6 @@ public class DeleteRanks extends SlashCommand {
 		game.setRequiredRatingToRankId(new HashMap<>());
 		dbService.saveServer(server);
 		event.reply(String.format("Deleted all ranks for %s.", game.getName()))
-				.doOnError(super::handleExceptionCallback).subscribe();
+				.doOnError(super::handleException).subscribe();
 	}
 }

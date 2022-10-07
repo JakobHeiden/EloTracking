@@ -50,7 +50,7 @@ public class ChannelManager {
 		try {
 			return (TextChannel) bot.getChannelById(game.getResultChannelId()).block();
 		} catch (ClientException e) {
-			Guild guild = bot.getGuildById(game.getGuildId()).block();
+			Guild guild = bot.getGuild(game.getGuildId()).block();
 			TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
 					.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
 					.block();
@@ -74,7 +74,7 @@ public class ChannelManager {
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 				throw e;
 			}
-			Guild guild = bot.getGuildById(server.getGuildId()).block();
+			Guild guild = bot.getGuild(server).block();
 			Category matchCategory = guild.createCategory("elo matches")
 					.withPermissionOverwrites(excludePublic(server))
 					.block();
@@ -90,7 +90,7 @@ public class ChannelManager {
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
 		String channelName = createMatchChannelName(match.getTeams());
 		Category matchCategory = getOrCreateMatchCategory(server);
-		return bot.getGuildById(match.getGame().getGuildId()).block()
+		return bot.getGuild(match.getGame().getGuildId()).block()
 				.createTextChannel(channelName)
 				.withParentId(matchCategory.getId())
 				.withPermissionOverwrites(permissionOverwrites);
@@ -144,7 +144,7 @@ public class ChannelManager {
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 				throw e;
 			}
-			Guild guild = bot.getGuildById(server.getGuildId()).block();
+			Guild guild = bot.getGuild(server).block();
 			Category disputeCategory = guild.createCategory("elo disputes")
 					.withPermissionOverwrites(excludePublic(server))
 					.block();
@@ -183,7 +183,7 @@ public class ChannelManager {
 		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
 		Category disputeCategory = getOrCreateDisputeCategory(server);
-		return bot.getGuildById(match.getGame().getGuildId()).block()
+		return bot.getGuild(match.getGame().getGuildId()).block()
 				.createTextChannel(createMatchChannelName(match.getTeams()))
 				.withParentId(disputeCategory.getId())
 				.withPermissionOverwrites(permissionOverwrites);
@@ -191,7 +191,7 @@ public class ChannelManager {
 
 	// Leaderboard
 	private Message createLeaderboardChannelAndMessage(Game game) {
-		Guild guild = bot.getGuildById(game.getGuildId()).block();
+		Guild guild = bot.getGuild(game.getGuildId()).block();
 		TextChannel leaderboardChannel = guild.createTextChannel(String.format("%s Leaderboard", game.getName()))
 				.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
 				.block();
@@ -221,7 +221,7 @@ public class ChannelManager {
 		int index = 0;
 		while (true) {
 			if (index >= categoryIds.size()) {
-				Guild guild = bot.getGuildById(server.getGuildId()).block();
+				Guild guild = bot.getGuild(server).block();
 				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : index + 1))
 						.withPermissionOverwrites(excludePublic(server))
 						.block();
@@ -236,7 +236,7 @@ public class ChannelManager {
 						&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 					throw e;
 				}
-				Guild guild = bot.getGuildById(server.getGuildId()).block();
+				Guild guild = bot.getGuild(server).block();
 				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
 						.withPermissionOverwrites(excludePublic(server))
 						.block();

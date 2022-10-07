@@ -38,7 +38,7 @@ public class GuildInfo extends SlashCommand {
 	protected void execute() throws Exception {
 		try {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
-			Guild guild = bot.getGuildById(guildId).block();
+			Guild guild = bot.getGuild(guildId).block();
 			String reply = String.format("%s:%s:%s\n", guildId, guild.getName(), guild.getMemberCount());
 			List<ApplicationCommandData> guildCommands = discordCommandService.getAllGuildCommands(guildId).block();
 			for (ApplicationCommandData guildCommand : guildCommands) {
@@ -50,12 +50,12 @@ public class GuildInfo extends SlashCommand {
 					reply += "\nhttps://discord.gg/" + invite.getCode();
 				}
 			}
-			event.reply(reply).withEphemeral(true).doOnError(super::handleExceptionCallback).subscribe();
+			event.reply(reply).withEphemeral(true).doOnError(super::handleException).subscribe();
 		} catch (NumberFormatException e) {
 			event.reply("That's not a number").withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			event.reply(e.getMessage()).withEphemeral(true)
-					.doOnError(super::handleExceptionCallback).subscribe();
+					.doOnError(super::handleException).subscribe();
 		}
 	}
 }

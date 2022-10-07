@@ -8,10 +8,15 @@ import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Role;
 import discord4j.rest.service.ApplicationService;
+import discord4j.rest.util.Permission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 @Slf4j
@@ -59,7 +64,7 @@ public class DevTools {
 				server -> {
 					try {
 						log.info("deploying to " + bot.getServerName(server));
-						discordCommandService.deployCommand(server, SetRating.getRequest(server)).block();
+						//discordCommandService.deployCommand(server, SetRating.getRequest(server)).block();
 						//bot.deployCommand(server, ForceDraw.getRequest(server)).block();
 					} catch (Exception e) {
 						log.error(e.getMessage());

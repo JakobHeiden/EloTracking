@@ -57,7 +57,7 @@ public class Server {
 	}
 
 	public String getName(DiscordBotService bot) {// TODO umziehen nach bot
-		return String.format("%s:%s", guildId, bot.getGuildById(guildId).block().getName());
+		return String.format("%s:%s", guildId, bot.getGuild(guildId).block().getName());
 	}
 
 	public long getEveryoneId() {

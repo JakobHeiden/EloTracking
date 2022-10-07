@@ -63,7 +63,7 @@ public class CreateRanking extends SlashCommand {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfGame)) {
 			event.reply(FormatTools.illegalNameMessage())
-					.doOnError(super::handleExceptionCallback).subscribe();
+					.doOnError(super::handleException).subscribe();
 			return;
 		}
 		if (server.getGames().contains(new Game(server, nameOfGame, false))) {
@@ -94,7 +94,7 @@ public class CreateRanking extends SlashCommand {
 						game.getLeaderboardChannelId(),
 						didCreateCategories ? ", and channel categories for disputes and an archive" : "",
 						updatedCommands))
-				.doOnError(super::handleExceptionCallback).subscribe();
+				.doOnError(super::handleException).subscribe();
 		if (!testServerIds.contains(server.getGuildId())) {
 			bot.sendToOwner(String.format("Created ranking %s on %s : %s",
 					nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));
