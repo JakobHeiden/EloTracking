@@ -98,7 +98,7 @@ public class AddQueue extends SlashCommand {
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfQueue)) {
 			event.reply(FormatTools.illegalNameMessage())
-					.doOnError(super::handleException).subscribe();
+					.subscribe(NO_OP, super::handleException);
 			return;
 		}
 		if (nameOfQueue.length() > 32) {
