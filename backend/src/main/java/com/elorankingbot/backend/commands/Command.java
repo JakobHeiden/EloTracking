@@ -40,8 +40,8 @@ public abstract class Command {
 	protected boolean userIsAdmin;
 	protected boolean alreadySentManageRoleFailedFollowup = false;
 
-	protected static final List none = new ArrayList<>();
-	private final Consumer<Object> NO_OP = object -> {
+	protected static final List NONE = new ArrayList<>();
+	protected final Consumer<Object> NO_OP = object -> {
 	};
 
 	protected Command(DeferrableInteractionEvent event, Services services) {
@@ -125,7 +125,7 @@ public abstract class Command {
 	protected abstract void execute() throws Exception;
 
 	protected void acknowledgeEvent() {
-		// acknowledge() being deprecated is bullshit. The supposed replacement method don't do what's advertised
+		// acknowledge() being deprecated seems bullshit. The supposed replacement methods don't do what's advertised
 		event.acknowledge().subscribe(NO_OP, this::handleException);
 	}
 

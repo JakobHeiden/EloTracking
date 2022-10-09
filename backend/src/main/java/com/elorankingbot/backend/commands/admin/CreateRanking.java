@@ -71,6 +71,8 @@ public class CreateRanking extends SlashCommand {
 			return;
 		}
 
+		event.deferReply().subscribe();
+
 		boolean allowDraw = event.getOption("allowdraw").get().getValue().get().asString().equals("allow");
 		Game game = new Game(server, nameOfGame, allowDraw);// TODO duplikate verhindern
 		server.addGame(game);
@@ -83,7 +85,7 @@ public class CreateRanking extends SlashCommand {
 		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server);
 
 		boolean didCreateCategories = server.getDisputeCategoryId() == 0L;
-		event.reply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
+		event.editReply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
 								"<#%s> where I put the leaderboard%s." +
 								"\nHowever, there is no way yet for players to find a match. " +
 								"Use `/addqueue` to either add a queue the ranking." +
@@ -94,7 +96,7 @@ public class CreateRanking extends SlashCommand {
 						game.getLeaderboardChannelId(),
 						didCreateCategories ? ", and channel categories for disputes and an archive" : "",
 						updatedCommands))
-				.doOnError(super::handleException).subscribe();
+				.subscribe(NO_OP, super::handleException);
 		if (!testServerIds.contains(server.getGuildId())) {
 			bot.sendToOwner(String.format("Created ranking %s on %s : %s",
 					nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));
