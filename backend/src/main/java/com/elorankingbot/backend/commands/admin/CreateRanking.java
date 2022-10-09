@@ -63,7 +63,7 @@ public class CreateRanking extends SlashCommand {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfGame)) {
 			event.reply(FormatTools.illegalNameMessage())
-					.doOnError(super::handleException).subscribe();
+					.subscribe(NO_OP, super::handleException);
 			return;
 		}
 		if (server.getGames().contains(new Game(server, nameOfGame, false))) {
