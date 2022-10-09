@@ -39,7 +39,8 @@ public class AllGuilds extends SlashCommand {
 			}
 			List<Integer> sortedKeys = new ArrayList<>(guilds.keySet().stream().toList());
 			Collections.sort(sortedKeys);
-			event.reply(String.join("\n", sortedKeys.stream().map(guilds::get).toList())).withEphemeral(true).subscribe();
+			event.reply(String.format("Guilds in total: %s\n", bot.getAllGuildIds().size()) +
+					String.join("\n", sortedKeys.stream().map(guilds::get).toList())).withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			e.printStackTrace();
 			event.reply(e.getMessage()).withEphemeral(true)
