@@ -11,9 +11,6 @@ was mache ich mit den geloeschten cahnnels? das sollte eigentlich von der normal
 der fehler geht ja weg nach ner minute. das einfach so lassen? oder die ChannelDeleteEvents fangen?
 bot.clientGetMemberById abfangen wegen member left
 
-bot kann roles nicht managen die hoeher sind als seine rolle:
-- die fehler brauchen ne entsprechende meldung
-
 rating, konsistenz bei fehler: exceptions in ForceMatch fuehren zu inkonsistenzen, wahrscheinlich exception nachdem
 1 spieler gespeichert wird, aber bevor der 2...?
 
