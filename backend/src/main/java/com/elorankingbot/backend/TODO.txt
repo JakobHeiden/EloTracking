@@ -6,7 +6,7 @@ playerMatchResult evtl durch referenz auf RankingsEntry ersetzen
 fehler wenn kann keine perms fuer manage channels? vllt bei join einmal pruefen? oder wo sonst?
 
 DEV
-settings erweitern
+edit in settings ueberfuehren
 was mache ich mit den geloeschten cahnnels? das sollte eigentlich von der normalen exception handling bearbeitet werden.
 der fehler geht ja weg nach ner minute. das einfach so lassen? oder die ChannelDeleteEvents fangen?
 bot.clientGetMemberById abfangen wegen member left
