@@ -47,7 +47,7 @@ public class AutoResolveMatch {
 		// if ReportIntegrity != CONFLICT, the possible states of the reporting are greatly reduced
 		if (match.getPlayerIdToReportStatus().containsValue(CANCEL)) {
 			MatchResult canceledMatchResult = MatchService.generateCanceledMatchResult(match);
-			matchService.processMatchResult(canceledMatchResult, match, autoresolveMessage, throwable -> {});
+			matchService.processMatchResult(canceledMatchResult, match, autoresolveMessage, role -> throwable -> {});
 			return;
 		} else if (match.getPlayerIdToReportStatus().containsValue(DRAW)) {
 			match.getPlayers().forEach(player -> match.reportAndSetConflictData(player.getId(), DRAW));
@@ -77,7 +77,7 @@ public class AutoResolveMatch {
 			}
 		}
 		MatchResult matchResult = MatchService.generateMatchResult(match);
-		matchService.processMatchResult(matchResult, match, autoresolveMessage, throwable -> {});
+		matchService.processMatchResult(matchResult, match, autoresolveMessage, role -> throwable -> {});
 	}
 
 	private void processDispute() {

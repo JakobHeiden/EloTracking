@@ -21,7 +21,10 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -101,6 +104,10 @@ public class DiscordBotService {
 	}
 
 	// Roles
+	public Role getRole(Server server, long roleId) {
+		return client.getRoleById(Snowflake.of(server.getGuildId()), Snowflake.of(roleId)).block();
+	}
+
 	public boolean isBotAdmin(Server server) {
 		for (Role botRole : client.getSelfMember(Snowflake.of(server.getGuildId())).block().getRoles().collectList().block()) {
 			if (botRole.getPermissions().contains(Permission.ADMINISTRATOR)) return true;
@@ -116,10 +123,13 @@ public class DiscordBotService {
 	}
 
 	public Role getBotIntegrationRole(Server server) {
-		return client.getSelfMember(Snowflake.of(server.getGuildId())).block().getRoles()
-				.filter(Role::isManaged).blockFirst();
+		return getBotIntegrationRole(server.getGuildId());
 	}
 
+	public Role getBotIntegrationRole(long guildId) {
+		return client.getSelfMember(Snowflake.of(guildId)).block().getRoles()
+				.filter(Role::isManaged).blockFirst();
+	}
 
 	public void removeAllRanks(Game game) {
 		Collection<Long> allRankIds = game.getRequiredRatingToRankId().values();

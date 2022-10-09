@@ -51,7 +51,7 @@ public abstract class ForceMatch extends SlashCommand {
 		MatchResult matchResult = MatchService.generateMatchResult(match);
 		String resolveMessage = String.format(String.format("%s has force-resolved a match of %s.",
 				event.getInteraction().getUser().getTag(), game.getName()));
-		EmbedCreateSpec matchEmbed = matchService.processForcedMatchResult(matchResult, users, resolveMessage, event, manageRoleFailedCallback(event));
+		EmbedCreateSpec matchEmbed = matchService.processForcedMatchResult(matchResult, users, resolveMessage, event, manageRoleFailedCallbackFactory());
 		event.reply().withEmbeds(matchEmbed).doOnError(super::handleException).subscribe();
 	}
 
