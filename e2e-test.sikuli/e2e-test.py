@@ -268,7 +268,7 @@ def testSetRating():
 	gotoTestchannel()
 	command("/setrating\n@Ente2\nset\n999")
 	
-if exists("1659465294466.png", 0.1):
+if exists("1665319421164.png", 0.2):
 	isProductionBot = True
 else:
 	isProductionBot = False

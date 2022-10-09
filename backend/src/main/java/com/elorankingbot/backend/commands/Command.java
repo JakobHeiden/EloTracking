@@ -125,7 +125,8 @@ public abstract class Command {
 	protected abstract void execute() throws Exception;
 
 	protected void acknowledgeEvent() {
-		event.deferReply().subscribe(NO_OP, this::handleException);
+		// acknowledge() being deprecated is bullshit. The supposed replacement method don't do what's advertised
+		event.acknowledge().subscribe(NO_OP, this::handleException);
 	}
 
 	protected void handleException(Throwable throwable) {
