@@ -5,7 +5,6 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;
-import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Role;
@@ -15,7 +14,6 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
@@ -101,7 +99,7 @@ public class AddRank extends SlashCommand {
 		game.getRequiredRatingToRankId().put(rating, role.getId().asLong());
 		dbService.saveServer(server);
 		for (Player player : dbService.findAllPlayersForServer(server)) {
-			matchService.updatePlayerRank(game, player, manageRoleFailedCallback(event));
+			matchService.updatePlayerRank(game, player, manageRoleFailedCallbackFactory());
 		}
 		event.reply(String.format("%s will now automatically be assigned to any player of %s who reaches %s rating.",
 				role.getName(), game.getName(), rating)).subscribe();

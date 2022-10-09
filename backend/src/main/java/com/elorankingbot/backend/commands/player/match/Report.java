@@ -58,12 +58,12 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			}
 			case CANCEL -> {
 				MatchResult canceledMatchResult = MatchService.generateCanceledMatchResult(match);
-				matchService.processMatchResult(canceledMatchResult, match, "The match has been canceled.", manageRoleFailedCallback(event));
+				matchService.processMatchResult(canceledMatchResult, match, "The match has been canceled.", manageRoleFailedCallbackFactory());
 			}
 			case COMPLETE -> {
 				MatchResult matchResult = MatchService.generateMatchResult(match);
 				String resolveMessage = "The match has been resolved. Below are your new ratings and the rating changes.";
-				matchService.processMatchResult(matchResult, match, resolveMessage, manageRoleFailedCallback(event));
+				matchService.processMatchResult(matchResult, match, resolveMessage, manageRoleFailedCallbackFactory());
 			}
 		}
 	}

@@ -65,7 +65,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 				String.format("**%s has ruled this match a %s %s for team #%s.**",
 						moderatorTag, WIN.asNoun, WIN.asEmojiAsString(), winningTeamIndex + 1)
 				: String.format("**%s has ruled this match a %s %s.**", moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString());
-		matchService.processMatchResult(matchResult, match, rulingMessage, manageRoleFailedCallback(event));
+		matchService.processMatchResult(matchResult, match, rulingMessage, manageRoleFailedCallbackFactory());
 		removeButtons();
 		acknowledgeEvent();
 	}

@@ -38,9 +38,11 @@ public abstract class Command {
 	protected final User activeUser;
 	protected final long activeUserId;
 	protected boolean userIsAdmin;
+	protected boolean alreadySentManageRoleFailedFollowup = false;
 
 	protected static final List none = new ArrayList<>();
-	private final Consumer<Object> NO_OP = object -> {};
+	private final Consumer<Object> NO_OP = object -> {
+	};
 
 	protected Command(DeferrableInteractionEvent event, Services services) {
 		this.dbService = services.dbService;
@@ -130,15 +132,14 @@ public abstract class Command {
 		eventParser.handleException(throwable, event, this.getClass().getSimpleName());
 	}
 
-	protected static Consumer<Throwable> manageRoleFailedCallback(DeferrableInteractionEvent event) {
-		return e -> {
-			System.out.println("manage");
-
-			event.createFollowup("").subscribe();
+	protected Function<Role, Consumer<Throwable>> manageRoleFailedCallbackFactory() {
+		return role -> throwable -> {
+			if (!alreadySentManageRoleFailedFollowup) {
+				alreadySentManageRoleFailedFollowup = true;
+				event.createFollowup(String.format(
+						"I was unable to assign or remove @%s. Please check my permissions and that @%s is above @%s in the role hierarchy.",
+						role.getName(), bot.getBotIntegrationRole(event.getInteraction().getGuildId().get().asLong()).getName(), role.getName())).subscribe();
+			}
 		};
-	}
-
-	protected static Function<Role, Consumer<Throwable>> metaCallback(DeferrableInteractionEvent event) {
-		return role -> throwable -> event.createFollowup(role.getName()).subscribe();
 	}
 }

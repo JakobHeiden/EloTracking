@@ -1,22 +1,16 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.commands.mod.SetRating;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Role;
 import discord4j.rest.service.ApplicationService;
-import discord4j.rest.util.Permission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 @Component
 @Slf4j
