@@ -101,7 +101,7 @@ public class AddRank extends SlashCommand {
 		for (Player player : dbService.findAllPlayersForServer(server)) {
 			matchService.updatePlayerRank(game, player, manageRoleFailedCallbackFactory());
 		}
-		event.reply(String.format("%s will now automatically be assigned to any player of %s who reaches %s rating.",
+		event.reply(String.format("@%s will now automatically be assigned to any player of %s who reaches %s rating.",
 				role.getName(), game.getName(), rating)).subscribe();
 
 		if (!bot.isBotAdmin(server) && !bot.isBotRoleHigherThanGivenRole(role)) {
