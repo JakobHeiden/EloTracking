@@ -12,7 +12,6 @@ import static com.elorankingbot.backend.commands.admin.settings.SettingsComponen
 @AdminCommand
 public class Settings extends SlashCommand {
 
-
 	public Settings(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
 	}

@@ -2,7 +2,7 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionComponent;
@@ -33,12 +33,12 @@ public class ChannelManager {
 
 	private final DBService dbService;
 	private final DiscordBotService bot;
-	private final TimedTaskQueue timedTaskQueue;
+	private final TimedTaskScheduler timedTaskScheduler;
 
 	public ChannelManager(Services services) {
 		this.bot = services.bot;
 		this.dbService = services.dbService;
-		this.timedTaskQueue = services.timedTaskQueue;
+		this.timedTaskScheduler = services.timedTaskScheduler;
 	}
 
 	private TextChannelEditMono setParentCategory(Channel channel, long categoryId) {
@@ -255,7 +255,7 @@ public class ChannelManager {
 	public void moveToArchive(Server server, Channel channel) {
 		Category archiveCategory = getOrCreateArchiveCategory(server);
 		setParentCategory(channel, archiveCategory.getId().asLong()).subscribe();
-		timedTaskQueue.addTimedTask(CHANNEL_DELETE, 60, channel.getId().asLong(), 0L, null);
+		timedTaskScheduler.addTimedTask(CHANNEL_DELETE, 60, channel.getId().asLong(), 0L, null);
 		((TextChannel) channel).createMessage("**I have moved this channel to the archive. " +
 				"I will delete this channel in one hour.**").subscribe();
 	}

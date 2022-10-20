@@ -46,8 +46,8 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 			case INCOMPLETE -> {
 				processIncompleteReporting();
 				if (!match.isHasFirstReport()) {
-					timedTaskQueue.addTimedTask(MATCH_WARN_MISSING_REPORTS, 50, 0L, 0L, match.getId());// TODO
-					timedTaskQueue.addTimedTask(MATCH_AUTO_RESOLVE, 60, 0L, 0L, match.getId());
+					timedTaskScheduler.addTimedTask(MATCH_WARN_MISSING_REPORTS, 50, 0L, 0L, match.getId());// TODO
+					timedTaskScheduler.addTimedTask(MATCH_AUTO_RESOLVE, 60, 0L, 0L, match.getId());
 					match.setHasFirstReport(true);
 				}
 				dbService.saveMatch(match);

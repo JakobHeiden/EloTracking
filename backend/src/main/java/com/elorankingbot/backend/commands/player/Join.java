@@ -3,7 +3,7 @@ package com.elorankingbot.backend.commands.player;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.service.QueueService;
+import com.elorankingbot.backend.service.QueueScheduler;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
@@ -22,7 +22,7 @@ import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 @PlayerCommand
 public class Join extends SlashCommand {
 
-	private final QueueService queueService;
+	private final QueueScheduler queueScheduler;
 	private MatchFinderQueue queue;
 	private Game game;
 	private List<User> users;
@@ -30,7 +30,7 @@ public class Join extends SlashCommand {
 
 	public Join(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
-		this.queueService = services.queueService;
+		this.queueScheduler = services.queueScheduler;
 	}
 
 	public static ApplicationCommandRequest getRequest(Server server) {

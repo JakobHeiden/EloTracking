@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.command.EventParser;
+import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.command.annotations.OwnerCommand;
@@ -8,7 +8,7 @@ import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.*;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.entity.Role;
@@ -28,10 +28,10 @@ public abstract class Command {
 	protected final ChannelManager channelManager;
 	protected final DiscordCommandService discordCommandService;
 	protected final MatchService matchService;
-	protected final QueueService queueService;
-	protected final TimedTaskQueue timedTaskQueue;
+	protected final QueueScheduler queueScheduler;
+	protected final TimedTaskScheduler timedTaskScheduler;
 	protected final ApplicationPropertiesLoader props;
-	private final EventParser eventParser;
+	protected final ExceptionHandler exceptionHandler;
 	protected final DeferrableInteractionEvent event;
 	protected final long guildId;
 	protected final Server server;
@@ -41,8 +41,7 @@ public abstract class Command {
 	protected boolean alreadySentManageRoleFailedFollowup = false;
 
 	protected static final List NONE = new ArrayList<>();
-	protected final Consumer<Object> NO_OP = object -> {
-	};
+	protected final Consumer<Object> NO_OP = object -> {};
 
 	protected Command(DeferrableInteractionEvent event, Services services) {
 		this.dbService = services.dbService;
@@ -50,10 +49,10 @@ public abstract class Command {
 		this.channelManager = services.channelManager;
 		this.discordCommandService = services.discordCommandService;
 		this.matchService = services.matchService;
-		this.queueService = services.queueService;
-		this.timedTaskQueue = services.timedTaskQueue;
+		this.queueScheduler = services.queueScheduler;
+		this.timedTaskScheduler = services.timedTaskScheduler;
 		this.props = services.props;
-		this.eventParser = services.eventParser;
+		this.exceptionHandler = services.exceptionHandler;
 		this.event = event;
 		this.guildId = event.getInteraction().getGuildId().get().asLong();
 		this.server = dbService.getOrCreateServer(guildId);
@@ -126,11 +125,11 @@ public abstract class Command {
 
 	protected void acknowledgeEvent() {
 		// acknowledge() being deprecated seems bullshit. The supposed replacement methods don't do what's advertised
-		event.acknowledge().subscribe(NO_OP, this::handleException);
+		event.acknowledge().subscribe(NO_OP, this::forwardToExceptionHandler);
 	}
 
-	protected void handleException(Throwable throwable) {
-		eventParser.handleException(throwable, event, this.getClass().getSimpleName());
+	protected void forwardToExceptionHandler(Throwable throwable) {
+		exceptionHandler.handleUnexpectedCommandException(throwable, event, this.getClass().getSimpleName());
 	}
 
 	protected Function<Role, Consumer<Throwable>> manageRoleFailedCallbackFactory() {

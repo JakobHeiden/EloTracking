@@ -40,18 +40,14 @@ public class SetVariable extends Command {
 			userFeedback = String.format("\nError: %s -> %s: %s", variableName, value, maybeErrorMessage.get());
 		} else {
 			dbService.saveServer(server);
-			if (variableName.equals("Name")) {// TODO die ganze fallunterscheidung von Game nach hier. die deployCommands verallgemeinern
-				discordCommandService.deployCommand(server, Join.getRequest(server)).subscribe();
+			if (variableName.equals("Name")) {// TODO die ganze fallunterscheidung von Game nach hier
+				discordCommandService.deployCommand(server, Join.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 				channelManager.refreshLeaderboard(game);// TODO channel ggf umbenennen...
-				discordCommandService.deployCommand(server, AddQueue.getRequest(server)).subscribe(commandData ->
-						discordCommandService.setPermissionsForAdminCommand(server, AddQueue.class.getSimpleName().toLowerCase()));
-				discordCommandService.deployCommand(server, AddRank.getRequest(server)).subscribe(commandData ->
-						discordCommandService.setPermissionsForAdminCommand(server, AddRank.class.getSimpleName().toLowerCase()));
-				discordCommandService.deployCommand(server, DeleteRanks.getRequest(server)).subscribe(commandData ->
-						discordCommandService.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
-				discordCommandService.deployCommand(server, Reset.getRequest(server)).subscribe(commandData ->
-						discordCommandService.setPermissionsForAdminCommand(server, DeleteRanks.class.getSimpleName().toLowerCase()));
-				discordCommandService.deployCommand(server, DeleteRanking.getRequest(server)).subscribe();
+				discordCommandService.deployCommand(server, AddQueue.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+				discordCommandService.deployCommand(server, AddRank.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+				discordCommandService.deployCommand(server, DeleteRanks.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+				discordCommandService.deployCommand(server, Reset.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+				discordCommandService.deployCommand(server, DeleteRanking.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 			}
 			userFeedback = String.format("\n**Variable %s for ranking %s is now set to %s.**", variableName, gameName, value);
 		}
@@ -60,10 +56,5 @@ public class SetVariable extends Command {
 				.withEmbeds(gameSettingsEmbed(game))
 				.withComponents(createVariableMenu(game), exitAndEscapeButton()).subscribe();
 		acknowledgeEvent();
-	}
-
-	@Override
-	protected void acknowledgeEvent() {
-		event.deferEdit().subscribe();
 	}
 }

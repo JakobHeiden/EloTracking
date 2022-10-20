@@ -33,7 +33,7 @@ public class Leave extends SlashCommand {
 
 	protected void execute() {
 		Player player = dbService.getPlayerOrGenerateIfNotPresent(guildId, activeUser);
-		queueService.removePlayerFromAllQueues(server, player);
+		queueScheduler.removePlayerFromAllQueues(server, player);
 		event.reply("I removed you from all queues you were in, if any.").withEphemeral(true).subscribe();
 		// TODO auflisten, welche queues verlassen wurden
 	}

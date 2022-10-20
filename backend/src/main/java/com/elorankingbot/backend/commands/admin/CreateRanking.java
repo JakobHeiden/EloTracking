@@ -63,7 +63,7 @@ public class CreateRanking extends SlashCommand {
 		String nameOfGame = event.getOption("nameofranking").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfGame)) {
 			event.reply(FormatTools.illegalNameMessage())
-					.subscribe(NO_OP, super::handleException);
+					.subscribe(NO_OP, super::forwardToExceptionHandler);
 			return;
 		}
 		if (server.getGames().contains(new Game(server, nameOfGame, false))) {
@@ -82,7 +82,7 @@ public class CreateRanking extends SlashCommand {
 		channelManager.getOrCreateDisputeCategory(server);
 		channelManager.getOrCreateArchiveCategory(server);
 		dbService.saveServer(server);
-		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server);
+		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 
 		boolean didCreateCategories = server.getDisputeCategoryId() == 0L;
 		event.editReply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
@@ -96,7 +96,7 @@ public class CreateRanking extends SlashCommand {
 						game.getLeaderboardChannelId(),
 						didCreateCategories ? ", and channel categories for disputes and an archive" : "",
 						updatedCommands))
-				.subscribe(NO_OP, super::handleException);
+				.subscribe(NO_OP, super::forwardToExceptionHandler);
 		if (!testServerIds.contains(server.getGuildId())) {
 			bot.sendToOwner(String.format("Created ranking %s on %s : %s",
 					nameOfGame, guildId, event.getInteraction().getGuild().block().getName()));
