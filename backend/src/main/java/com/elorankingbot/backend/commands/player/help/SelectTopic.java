@@ -20,7 +20,7 @@ public class SelectTopic extends SelectMenuCommand {
 
 	protected void execute() throws Exception {
 		event.getMessage().get().edit().withEmbeds(createHelpEmbed(services, event.getValues().get(0)))
-				.doOnError(super::handleException)
+				.doOnError(super::forwardToExceptionHandler)
 				.subscribe();
 		event.deferEdit().subscribe();
 	}

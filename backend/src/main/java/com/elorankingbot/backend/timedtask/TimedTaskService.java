@@ -24,7 +24,7 @@ public class TimedTaskService {
 
 	private final DBService dbService;
 	private final DiscordBotService bot;
-	private final TimedTaskQueue queue;
+	private final TimedTaskScheduler queue;
 	private final GatewayDiscordClient client;
 
 	protected final List none = new ArrayList<>();
@@ -32,7 +32,7 @@ public class TimedTaskService {
 	public TimedTaskService(Services services) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
-		this.queue = services.timedTaskQueue;
+		this.queue = services.timedTaskScheduler;
 		this.client = services.client;
 	}
 

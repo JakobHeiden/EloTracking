@@ -24,14 +24,14 @@ public class MatchService {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final ChannelManager channelManager;
-	private final QueueService queueService;
+	private final QueueScheduler queueScheduler;
 	private final Consumer<Object> NO_OP = object -> {};
 
 	public MatchService(Services services) {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.channelManager = services.channelManager;
-		this.queueService = services.queueService;
+		this.queueScheduler = services.queueScheduler;
 	}
 
 	public void startMatch(Match match) {
@@ -115,7 +115,7 @@ public class MatchService {
 		}
 
 		matchResult.getPlayers().forEach(player -> {
-			queueService.updatePlayerInAllQueuesOfGame(game, player);
+			queueScheduler.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
 		});
 		boolean leaderboardNeedsRefresh = dbService.updateRankingsEntries(matchResult);
@@ -143,7 +143,7 @@ public class MatchService {
 		forcedMatchResult.getPlayers().forEach(player -> {
 			player.addMatchResult(forcedMatchResult);
 			dbService.savePlayer(player);
-			queueService.updatePlayerInAllQueuesOfGame(game, player);
+			queueScheduler.updatePlayerInAllQueuesOfGame(game, player);
 			updatePlayerMatches(game, player);
 			updatePlayerRank(game, player, manageRoleFailedCallback);
 		});

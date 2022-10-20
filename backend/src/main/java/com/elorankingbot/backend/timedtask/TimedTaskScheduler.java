@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.timedtask;
 
+import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.commands.timed.AutoResolveMatch;
 import com.elorankingbot.backend.commands.timed.DecayAcceptedChallenge;
 import com.elorankingbot.backend.commands.timed.DecayOpenChallenge;
@@ -10,7 +11,6 @@ import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import discord4j.rest.http.client.ClientException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,7 +20,7 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class TimedTaskQueue {
+public class TimedTaskScheduler {
 
 	@Getter
 	private final int numberOfTimeSlots;
@@ -30,20 +30,22 @@ public class TimedTaskQueue {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final TimedTaskService timedTaskService;
+	private final ExceptionHandler exceptionHandler;
 	private final TimeSlotDao timeSlotDao;
 	private final TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao;
-	private boolean doRunQueue;
+	private final boolean doRunSchedulers;
 
-	public TimedTaskQueue(Services services,
-						  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
+	public TimedTaskScheduler(Services services,
+							  TimeSlotDao timeSlotDao, TimedTaskQueueCurrentIndexDao timedTaskQueueCurrentIndexDao) {
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.timedTaskService = services.timedTaskService;
+		this.exceptionHandler = services.exceptionHandler;
 		this.timeSlotDao = timeSlotDao;
 		this.timedTaskQueueCurrentIndexDao = timedTaskQueueCurrentIndexDao;
 		this.numberOfTimeSlots = services.props.getNumberOfTimeSlots();
-		this.doRunQueue = services.props.isDoRunQueue();
+		this.doRunSchedulers = services.props.isDoRunSchedulers();
 
 		if (!timedTaskQueueCurrentIndexDao.existsById(1)) {
 			currentIndex = 0;
@@ -53,7 +55,7 @@ public class TimedTaskQueue {
 	}
 
 	public void addTimedTask(TimedTask.TimedTaskType type, int duration, long relationId, long otherId, Object value) {
-		if (!doRunQueue) return;
+		if (!doRunSchedulers) return;
 
 		int targetTimeSlotIndex = (currentIndex + duration) % numberOfTimeSlots;
 		log.debug(String.format("adding timed task for %s of type %s with timer %s to slot %s",
@@ -84,7 +86,7 @@ public class TimedTaskQueue {
 	@Scheduled(fixedRate = 60000)
 	public void tick() {
 		try {
-			if (!doRunQueue) return;
+			if (!doRunSchedulers) return;
 
 			log.debug("tick " + currentIndex);
 			if (currentIndex % (7 * 24 * 60) == 0) {// TODO wohl laenger
@@ -114,18 +116,8 @@ public class TimedTaskQueue {
 			if (currentIndex >= numberOfTimeSlots) currentIndex = 0;
 			timedTaskQueueCurrentIndexDao.save(new CurrentIndex(currentIndex));
 		} catch (Exception e) {
-			handleException(e);
+			exceptionHandler.handleException(e, this.getClass().getSimpleName() + "::tick");
 		}
-	}
-
-	private void handleException(Exception e) {
-		String errorReport = String.format("Error during tick:\n%s", e.getMessage());
-		log.error(errorReport);
-		bot.sendToOwner(errorReport);
-		if (e instanceof ClientException) {
-			log.error("ClientException caused by request:\n" + ((ClientException) e).getRequest());
-		}
-		e.printStackTrace();
 	}
 
 	public int getRemainingDuration(int index) {

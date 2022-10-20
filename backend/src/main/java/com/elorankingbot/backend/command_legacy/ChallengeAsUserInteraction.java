@@ -4,7 +4,7 @@ import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
@@ -13,13 +13,13 @@ public class ChallengeAsUserInteraction {
 	private final UserInteractionEvent event;
 	private final DBService service;
 	private final DiscordBotService bot;
-	private final TimedTaskQueue queue;
+	private final TimedTaskScheduler queue;
 
 	public ChallengeAsUserInteraction(UserInteractionEvent event, Services services) {
 		this.event = event;
 		this.service = services.dbService;
 		this.bot = services.bot;
-		this.queue = services.timedTaskQueue;
+		this.queue = services.timedTaskScheduler;
 	}
 
 	public static ApplicationCommandRequest getRequest() {

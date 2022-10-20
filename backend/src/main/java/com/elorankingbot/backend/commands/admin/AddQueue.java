@@ -98,7 +98,7 @@ public class AddQueue extends SlashCommand {
 		String nameOfQueue = event.getOption("nameofqueue").get().getValue().get().asString();
 		if (!FormatTools.isLegalDiscordName(nameOfQueue)) {
 			event.reply(FormatTools.illegalNameMessage())
-					.subscribe(NO_OP, super::handleException);
+					.subscribe(NO_OP, super::forwardToExceptionHandler);
 			return;
 		}
 		if (nameOfQueue.length() > 32) {
@@ -140,10 +140,10 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
 		game.addQueue(queue);
-		String updatedCommands = discordCommandService.updateGuildCommandsByQueue(server);
+		String updatedCommands = discordCommandService.updateGuildCommandsByQueue(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 		dbService.saveServer(server);
 
-		event.reply(String.format("Queue %s for ranking %s has been created. These commands have been updated: %s" +
+		event.reply(String.format("Queue %s for ranking %s has been created. I will update these commands: %s" +
 						"\nThis may take a few minutes to update on the server.",
 				queue.getName(), game.getName(), updatedCommands)).subscribe();
 	}

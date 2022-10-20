@@ -44,7 +44,7 @@ public class AllGuilds extends SlashCommand {
 		} catch (Exception e) {
 			e.printStackTrace();
 			event.reply(e.getMessage()).withEphemeral(true)
-					.subscribe(NO_OP, super::handleException);
+					.subscribe(NO_OP, super::forwardToExceptionHandler);
 		}
 	}
 }

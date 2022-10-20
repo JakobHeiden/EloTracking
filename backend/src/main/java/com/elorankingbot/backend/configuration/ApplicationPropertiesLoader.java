@@ -23,7 +23,7 @@ public class ApplicationPropertiesLoader {
 	private String testBotAcceptorId;
 	private boolean useDevBotToken;
 	private boolean doUpdateGuildCommands;
-	private boolean doRunQueue;
+	private boolean doRunSchedulers;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;
 	private String activityMessage;

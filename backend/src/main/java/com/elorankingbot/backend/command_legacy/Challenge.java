@@ -5,7 +5,7 @@ import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -43,7 +43,7 @@ public class Challenge extends SlashCommand {
 	}
 
 	public static void staticExecute(User acceptorUser, long guildId, Game game, ApplicationCommandInteractionEvent event,
-									 DBService service, DiscordBotService bot, TimedTaskQueue queue) {
+									 DBService service, DiscordBotService bot, TimedTaskScheduler queue) {
 		/*
 		User challengerUser = event.getInteraction().getUser();
 		long challengerId = challengerUser.getId().asLong();

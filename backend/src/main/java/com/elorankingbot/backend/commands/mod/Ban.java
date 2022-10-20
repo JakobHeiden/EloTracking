@@ -98,7 +98,7 @@ public class Ban extends SlashCommand {
 			case "permaban" -> {
 				sendPermabanMessages();
 				player.setUnbanAtTimeSlot(-1);
-				queueService.removePlayerFromAllQueues(server, player);
+				queueScheduler.removePlayerFromAllQueues(server, player);
 			}
 			case "duration" -> {
 				if (event.getOption("duration").isEmpty()) {
@@ -113,10 +113,10 @@ public class Ban extends SlashCommand {
 				}
 				duration = maybeDuration.get();
 				sendDurationBanMessages();
-				player.setUnbanAtTimeSlot((timedTaskQueue.getCurrentIndex() + duration) % timedTaskQueue.getNumberOfTimeSlots());
-				timedTaskQueue.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
+				player.setUnbanAtTimeSlot((timedTaskScheduler.getCurrentIndex() + duration) % timedTaskScheduler.getNumberOfTimeSlots());
+				timedTaskScheduler.addTimedTask(TimedTask.TimedTaskType.PLAYER_UNBAN, duration,
 						guildId, player.getUserId(), null);
-				queueService.removePlayerFromAllQueues(server, player);
+				queueScheduler.removePlayerFromAllQueues(server, player);
 			}
 			case "unban" -> {
 				if (!player.isBanned()) {

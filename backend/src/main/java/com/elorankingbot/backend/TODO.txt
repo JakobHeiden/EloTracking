@@ -1,18 +1,16 @@
-MatchResultReferences - timestamp, loeschen, wann? vllt alte match messages parsen zum identifizieren
-bot aufraeumen, refaktorn
-pipeline fixen
-game.name und game._id trennen, wegen umbenennen...?
-playerMatchResult evtl durch referenz auf RankingsEntry ersetzen
-fehler wenn kann keine perms fuer manage channels? vllt bei join einmal pruefen? oder wo sonst?
+WOHNUNG
+heizungen
+bildschirme
+tastatur
+bad armaturen
+bad fliesen
 
 DEV
-edit in settings ueberfuehren
-was mache ich mit den geloeschten cahnnels? das sollte eigentlich von der normalen exception handling bearbeitet werden.
-der fehler geht ja weg nach ner minute. das einfach so lassen? oder die ChannelDeleteEvents fangen?
-bot.clientGetMemberById abfangen wegen member left
+immer: fehler eliminieren!
+ein kanal/mehrere in settings einpflegen
+team queue
+um votes betteln
+supporter tier einbauen
 
-rating, konsistenz bei fehler: exceptions in ForceMatch fuehren zu inkonsistenzen, wahrscheinlich exception nachdem
-1 spieler gespeichert wird, aber bevor der 2...?
-
-SOCIAL
-wo kommt der link für vote hin?
+AddQueue max 25 spieler? oder kann ich vllt einfach ForceWin auslassen an der stelle? wo faellt es mir noch auf die fuesse?
+Command::roledingsfactory

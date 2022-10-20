@@ -4,7 +4,7 @@ import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import com.elorankingbot.backend.timedtask.TimedTaskQueue;
+import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.core.GatewayDiscordClient;
 
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public abstract class TimedCommand {
 
 	protected final DBService service;
 	protected final DiscordBotService bot;
-	protected final TimedTaskQueue queue;
+	protected final TimedTaskScheduler queue;
 	protected final GatewayDiscordClient client;
 
 	protected final ChallengeModel challenge;
@@ -26,7 +26,7 @@ public abstract class TimedCommand {
 	public TimedCommand(Services services, long relationId, int time) {
 		this.service = services.dbService;
 		this.bot = services.bot;
-		this.queue = services.timedTaskQueue;
+		this.queue = services.timedTaskScheduler;
 		this.client = services.client;
 
 		this.relationId = relationId;

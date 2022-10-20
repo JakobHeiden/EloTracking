@@ -103,7 +103,7 @@ public class PlayerInfo extends SlashCommand {
 				banString = String.format("**%s banned permanently, or until unbanned.**\n",
 						isSelfInfo ? "You are" : "This player is");
 			} else {
-				int stillBannedMinutes = timedTaskQueue.getRemainingDuration(targetPlayer.getUnbanAtTimeSlot());
+				int stillBannedMinutes = timedTaskScheduler.getRemainingDuration(targetPlayer.getUnbanAtTimeSlot());
 				banString = String.format("**%s still banned for %s.**\n",
 						isSelfInfo ? "You are" : "This player is",
 						DurationParser.minutesToString(stillBannedMinutes));

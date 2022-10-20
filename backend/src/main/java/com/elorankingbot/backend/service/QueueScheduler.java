@@ -1,7 +1,7 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.model.*;
-import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -12,16 +12,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class QueueService {
+public class QueueScheduler {
 
 	private final DBService dbService;
 	private final MatchService matchService;
-	private DiscordBotService bot;
+	private final ExceptionHandler exceptionHandler;
 
-	public QueueService(Services services) {
+	public QueueScheduler(Services services) {
 		this.dbService = services.dbService;
 		this.matchService = services.matchService;
-		this.bot = services.bot;
+		this.exceptionHandler = services.exceptionHandler;
 	}
 
 	@Scheduled(fixedRate = 3000)
@@ -44,18 +44,8 @@ public class QueueService {
 						} while (foundMatch);
 					});
 		} catch (Exception e) {
-			handleException(e);
+			exceptionHandler.handleException(e, this.getClass().getSimpleName() + "::generateAndStartMatches");
 		}
-	}
-
-	private void handleException(Exception e) {
-		String errorReport = String.format("Error during generateAndStartMatches:\n%s", e.getMessage());
-		log.error(errorReport);
-		bot.sendToOwner(errorReport);
-		if (e instanceof ClientException) {
-			log.error("ClientException caused by request:\n" + ((ClientException) e).getRequest());
-		}
-		e.printStackTrace();
 	}
 
 	public Optional<Match> generateMatchIfPossible(MatchFinderQueue queue) {

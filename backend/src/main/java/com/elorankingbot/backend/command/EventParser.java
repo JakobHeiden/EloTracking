@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.command;
 
+import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
@@ -13,13 +14,11 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
 import discord4j.discordjson.json.ApplicationCommandData;
-import discord4j.rest.http.client.ClientException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,14 +33,15 @@ public class EventParser {
 	private final Services services;
 	private final DBService dbService;
 	private final DiscordBotService bot;
+	private final ExceptionHandler exceptionHandler;
 	private final DiscordCommandService discordCommandService;
 	private final CommandClassScanner commandClassScanner;
-	private static final String supportServerInvite = "https://discord.com/invite/hCAJXasrhd";
 
 	public EventParser(Services services, CommandClassScanner commandClassScanner) {
 		this.services = services;
 		this.dbService = services.dbService;
 		this.bot = services.bot;
+		this.exceptionHandler = services.exceptionHandler;
 		this.discordCommandService = services.discordCommandService;
 		this.commandClassScanner = commandClassScanner;
 		GatewayDiscordClient client = services.client;
@@ -69,7 +69,7 @@ public class EventParser {
 					try {
 						new SetVariable(event, services).doExecute();
 					} catch (Exception e) {
-						handleException(e, event, SetVariable.class.getSimpleName());
+						exceptionHandler.handleUnexpectedCommandException(e, event, SetVariable.class.getSimpleName());
 					}
 				});
 
@@ -99,7 +99,7 @@ public class EventParser {
 					event.getInteraction().getId().asString()));
 		});
 
-		Hooks.onErrorDropped(this::handleDroppedException);
+		Hooks.onErrorDropped(throwable -> exceptionHandler.handleException(throwable, "Dropped Exception"));
 	}
 
 	@Transactional
@@ -108,7 +108,7 @@ public class EventParser {
 			Command command = createSlashCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			handleException(e, event, event.getCommandName());
+			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCommandName());
 		}
 	}
 
@@ -126,7 +126,7 @@ public class EventParser {
 			Command command = createButtonCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			handleException(e, event, event.getCustomId().split(":")[0]);
+			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCustomId().split(":")[0]);
 		}
 	}
 
@@ -144,7 +144,7 @@ public class EventParser {
 			Command command = createSelectMenuCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			handleException(e, event, event.getCustomId().split(":")[0]);
+			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCustomId().split(":")[0]);
 		}
 	}
 
@@ -162,7 +162,7 @@ public class EventParser {
 			Command command = createMessageCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			handleException(e, event, event.getCommandName().replace(" ", "").toLowerCase());
+			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCommandName().replace(" ", "").toLowerCase());
 		}
 	}
 
@@ -172,50 +172,6 @@ public class EventParser {
 		return (MessageCommand) Class.forName(commandFullClassName)
 				.getConstructor(MessageInteractionEvent.class, Services.class)
 				.newInstance(event, services);
-	}
-
-	public void handleException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
-		String userErrorMessage = "Error message not set";
-		boolean isKnownException = false;
-		// TODO I'm not sure if this is a good approach. Discord error responses seem to be all over the place.
-		// Maybe it is better to not rely on Discord API behavior, but instead allocate userErrorMessages in the code that causes them.
-		if (throwable instanceof ClientException clientException) {
-			log.error("ClientException caused by request:\n" + clientException.getRequest());
-			if (clientException.getErrorResponse().get().getFields().get("message").equals("Missing Permissions")
-					&& clientException.getRequest().getBody() != null) {
-				if (clientException.getRequest().getBody().toString().startsWith("ChannelCreateRequest")) {
-					userErrorMessage = "Error: cannot create channel due to missing permission: Manage Channels";
-					isKnownException = true;
-				}
-				if (clientException.getRequest().getBody().toString().startsWith("MessageCreateRequest")) {
-					userErrorMessage = "Error: cannot create message due to missing permission: Send Messages";
-					isKnownException = true;
-				}
-			}
-		}
-		if (!isKnownException) {
-			String guildName = event.getInteraction().getGuild().map(Guild::getName).onErrorReturn("unknown").block();
-			String ownerErrorMessage = String.format("Error executing %s on %s by %s:\n%s", commandName,
-					guildName, event.getInteraction().getUser().getTag(), throwable.getMessage());
-			bot.sendToOwner(ownerErrorMessage);
-			log.error(ownerErrorMessage);
-			throwable.printStackTrace();
-
-			userErrorMessage = "Error: " + throwable.getMessage()
-					+ "\nI sent a report to the developer."
-					+ "\nIf this error persists, please join the bot support server: "
-					+ supportServerInvite;
-		}
-		try {
-			event.reply(userErrorMessage).block();
-		} catch (ClientException e) {// this can happen if the event has already been replied to
-			event.createFollowup(userErrorMessage).subscribe();
-		}
-	}
-
-	private void handleDroppedException(Throwable throwable) {
-		throwable.printStackTrace();
-		bot.sendToOwner("Dropped Exception: " + throwable.getMessage());
 	}
 
 	private void logGlobalCommands() {
