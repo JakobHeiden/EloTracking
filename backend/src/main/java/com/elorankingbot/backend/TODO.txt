@@ -13,4 +13,3 @@ um votes betteln
 supporter tier einbauen
 
 AddQueue max 25 spieler? oder kann ich vllt einfach ForceWin auslassen an der stelle? wo faellt es mir noch auf die fuesse?
-Command::roledingsfactory

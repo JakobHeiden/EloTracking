@@ -160,7 +160,7 @@ def testDeleteAndCreateRankingAndQueue():
 	deleteQueue()
 	deleteRanking()
 	if exists("1658858301128.png"):
-		for x in range(15):
+		for x in range(10):
 			type(str(x + 1) + " ")
 			sleep(1)
 		type(Key.ENTER)
