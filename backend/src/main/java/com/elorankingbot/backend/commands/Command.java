@@ -64,7 +64,7 @@ public abstract class Command {
 		log.debug(String.format("execute %s by %s on %s",
 				this.getClass().getSimpleName(),
 				event.getInteraction().getUser().getTag(),
-				event.getInteraction().getGuild().block().getName()));
+				event.getInteraction().getGuildId().get().asString()));
 
 		// bypass permission check when admin role is not set or not present
 		if (this.getClass() == SetPermission.class) {

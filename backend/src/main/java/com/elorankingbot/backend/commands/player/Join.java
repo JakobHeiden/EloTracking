@@ -132,7 +132,6 @@ public class Join extends SlashCommand {
 							: String.format("The player %s has recently been assigned a match " +
 							"and cannot enter a queue for another %s seconds.", player.getTag(), newMatchJoinTimeout - secondsPassed))
 							.withEphemeral(true).subscribe();
-					return;
 				}
 			});
 			if (queue.hasPlayer(player)) {// TODO alle auflisten
