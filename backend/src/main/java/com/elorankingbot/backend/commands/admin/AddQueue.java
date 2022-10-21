@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.components.FormatTools;
@@ -92,6 +93,11 @@ public class AddQueue extends SlashCommand {
 		int numberOfTeams = (int) event.getOption("numberofteams").get().getValue().get().asLong();
 		if (numberOfTeams < 2) {
 			event.reply("Cannot create a queue with less than 2 teams per match").subscribe();
+			return;
+		}
+		if (numberOfTeams * playersPerTeam > 20) {
+			event.reply(String.format("Cannot create a queue with more than 20 players total. If you need this feature, " +
+					"head over to %s and tell the developer about it.", ExceptionHandler.supportServerInvite)).subscribe();
 			return;
 		}
 		Game game = server.getGame(event.getOption("ranking").get().getValue().get().asString());
