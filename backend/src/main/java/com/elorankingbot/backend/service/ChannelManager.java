@@ -7,6 +7,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.component.ActionComponent;
 import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.Category;
@@ -166,7 +167,7 @@ public class ChannelManager {
 				.subscribe();
 	}
 
-	public static ActionRow createDisputeActionRow(Match match) {
+	public static List<LayoutComponent> createDisputeActionRow(Match match) {
 		int numTeams = match.getTeams().size();
 		UUID matchId = match.getId();
 		List<ActionComponent> buttons = new ArrayList<>(numTeams);
@@ -175,7 +176,14 @@ public class ChannelManager {
 		}
 		if (match.getGame().isAllowDraw()) buttons.add(Buttons.ruleAsDraw(matchId));
 		buttons.add(Buttons.ruleAsCancel(matchId));
-		return ActionRow.of(buttons);
+
+		List<LayoutComponent> actionRows = new ArrayList<>();
+		while (buttons.size() > 5) {
+			actionRows.add(ActionRow.of(buttons.subList(0, 5)));
+			buttons = buttons.subList(5, buttons.size());
+		}
+		if (!buttons.isEmpty()) actionRows.add(ActionRow.of(buttons));
+		return actionRows;
 	}
 
 	public TextChannelCreateMono createDisputeChannel(Match match) {
