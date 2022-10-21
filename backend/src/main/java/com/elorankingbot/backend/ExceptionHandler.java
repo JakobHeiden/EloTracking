@@ -46,10 +46,10 @@ public class ExceptionHandler {
 		String ownerErrorMessage = String.format("Error: %s:\n%s", context, throwable.getMessage());
 		bot.sendToOwner(ownerErrorMessage);
 
-		log.error(ownerErrorMessage);
 		if (throwable instanceof ClientException) {
-			log.error("ClientException caused by request:\n" + ((ClientException) throwable).getRequest());
+			ownerErrorMessage += "\nClientException caused by request:\n" + ((ClientException) throwable).getRequest();
 		}
+		log.error(ownerErrorMessage);
 		throwable.printStackTrace();
 	}
 
