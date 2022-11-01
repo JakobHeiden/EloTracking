@@ -10,14 +10,14 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import java.util.List;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
-@Slf4j
+@CommonsLog
 public class CreateRanking extends SlashCommand {
 
 	private final List<Long> testServerIds;

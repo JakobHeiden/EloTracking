@@ -19,14 +19,14 @@ import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
 import discord4j.discordjson.json.ApplicationCommandData;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.List;
 
-@Slf4j
+@CommonsLog
 @Component
 public class EventParser {
 
@@ -49,7 +49,7 @@ public class EventParser {
 		client.on(ReadyEvent.class)
 				.subscribe(event -> {
 					User self = event.getSelf();
-					log.info("Logged in as {}#{}", self.getUsername(), self.getDiscriminator());
+					log.info(String.format("Logged in as %s", self.getTag()));
 					String activityMessage = services.props.getActivityMessage();
 					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
 					logGlobalCommands();

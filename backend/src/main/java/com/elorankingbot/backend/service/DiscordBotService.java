@@ -15,7 +15,7 @@ import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
 import discord4j.rest.util.Permission;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
+@CommonsLog
 @Service
 public class DiscordBotService {
 

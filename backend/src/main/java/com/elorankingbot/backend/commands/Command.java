@@ -13,14 +13,14 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-@Slf4j
+@CommonsLog
 public abstract class Command {
 
 	protected final DBService dbService;

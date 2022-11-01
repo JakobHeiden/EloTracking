@@ -11,13 +11,13 @@ import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import java.util.List;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
-@Slf4j
+@CommonsLog
 @AdminCommand
 public class AddRank extends SlashCommand {
 
