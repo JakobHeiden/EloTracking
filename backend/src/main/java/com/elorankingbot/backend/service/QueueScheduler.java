@@ -2,7 +2,7 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.model.*;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
+@CommonsLog
 public class QueueScheduler {
 
 	private final DBService dbService;
@@ -70,7 +70,7 @@ public class QueueScheduler {
 			double potentialLowestRating = potentialMatch.stream()
 					.mapToDouble(group -> group.getAverageRating() + group.getRatingElasticity(now, queue))
 					.min().getAsDouble();
-			log.debug(String.format("%.1f - %.1f = %.1f <? %s", potentialHighestRating, potentialLowestRating,
+			log.trace(String.format("%.1f - %.1f = %.1f <? %s", potentialHighestRating, potentialLowestRating,
 					potentialHighestRating - potentialLowestRating, queue.getMaxRatingSpread()));
 			if (potentialHighestRating - potentialLowestRating <= queue.getMaxRatingSpread())
 				return Optional.of(buildMatch(potentialMatch, queue));

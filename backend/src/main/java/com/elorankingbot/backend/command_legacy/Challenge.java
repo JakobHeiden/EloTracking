@@ -12,9 +12,9 @@ import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
-@Slf4j
+@CommonsLog
 public class Challenge extends SlashCommand {
 
 	public Challenge(ChatInputInteractionEvent event, Services services) {

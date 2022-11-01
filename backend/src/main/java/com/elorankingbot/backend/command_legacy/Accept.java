@@ -4,9 +4,9 @@ import com.elorankingbot.backend.commands.player.match.ButtonCommandRelatedToMat
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent;
 import discord4j.core.object.component.ActionRow;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
-@Slf4j
+@CommonsLog
 public class Accept extends ButtonCommandRelatedToMatch {
 
 	public Accept(ButtonInteractionEvent event, Services services) {

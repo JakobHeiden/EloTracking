@@ -6,12 +6,12 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.response.ResponseFunction;
 import io.netty.channel.unix.Errors;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.retry.Retry;
 
-@Slf4j
+@CommonsLog
 @Configuration
 public class GatewayDiscordClientConfiguration {
 

@@ -13,3 +13,6 @@ um votes betteln
 supporter tier einbauen
 ranks anzeigen
 
+
+logging
+marketplace

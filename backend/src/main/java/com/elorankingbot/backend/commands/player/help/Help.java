@@ -6,11 +6,11 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 
 import static com.elorankingbot.backend.commands.player.help.HelpComponents.*;
 
-@Slf4j
+@CommonsLog
 @PlayerCommand
 public class Help extends SlashCommand {
 

@@ -8,7 +8,7 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.reflect.ClassPath;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-@Slf4j
+@CommonsLog
 public class CommandClassScanner {
 
 	/*

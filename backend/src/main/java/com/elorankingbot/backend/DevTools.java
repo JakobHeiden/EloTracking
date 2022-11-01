@@ -9,11 +9,11 @@ import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.service.ApplicationService;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
+@CommonsLog
 public class DevTools {
 
 	private final DBService dbService;

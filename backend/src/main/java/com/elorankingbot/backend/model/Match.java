@@ -2,7 +2,7 @@ package com.elorankingbot.backend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import static com.elorankingbot.backend.model.Match.ReportIntegrity.INCOMPLETE;
 import static com.elorankingbot.backend.model.ReportStatus.*;
 
-@Slf4j
+@CommonsLog
 @Data
 @AllArgsConstructor(onConstructor=@__({@PersistenceConstructor}))
 @Document(collection = "match")
