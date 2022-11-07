@@ -13,7 +13,6 @@ public class RuleAsCancel extends RuleAsWinOrDraw {
 		super(event, services);
 	}
 
-	@Override
 	public void execute() {
 		boolean userIsAdmin = event.getInteraction().getMember().get()
 				.getRoleIds().stream().map(Snowflake::asLong).toList()
@@ -33,12 +32,12 @@ public class RuleAsCancel extends RuleAsWinOrDraw {
 			return;
 		}
 
+		acknowledgeEvent();
 		String reason = String.format("%s has ruled the match to be canceled.", moderatorTag);
 		MatchResult canceledMatchResult = MatchService.generateCanceledMatchResult(match);
 		matchService.processMatchResult(canceledMatchResult, match, reason, manageRoleFailedCallbackFactory());
 		removeButtons();
 		postToDisputeChannel("**" + reason + "**").block();
 		event.getInteraction().getChannel().subscribe(channel -> channelManager.moveToArchive(server, channel));
-		acknowledgeEvent();
 	}
 }
