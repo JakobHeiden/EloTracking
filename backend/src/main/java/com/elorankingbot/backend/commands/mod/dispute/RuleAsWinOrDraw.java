@@ -48,6 +48,7 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 			return;
 		}
 
+		acknowledgeEvent();
 		if (isRuleAsWin) {
 			for (int i = 0; i < match.getNumTeams(); i++) {
 				for (Player player : match.getTeams().get(i)) {
@@ -67,7 +68,6 @@ public abstract class RuleAsWinOrDraw extends ButtonCommand {
 				: String.format("**%s has ruled this match a %s %s.**", moderatorTag, DRAW.asNoun, DRAW.asEmojiAsString());
 		matchService.processMatchResult(matchResult, match, rulingMessage, manageRoleFailedCallbackFactory());
 		removeButtons();
-		acknowledgeEvent();
 	}
 
 	protected Mono<Message> postToDisputeChannel(String text) {

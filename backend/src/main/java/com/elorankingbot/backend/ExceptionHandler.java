@@ -8,6 +8,7 @@ import discord4j.rest.http.client.ClientException;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -41,7 +42,7 @@ public class ExceptionHandler {
 		event.reply(userErrorMessage).subscribe(NO_OP, throwable2 -> event.createFollowup(userErrorMessage).subscribe());
 	}
 
-	// this is also the entry point for exceptions occuring in QueueScheduler or TimedTaskScheduler
+	// this is also the entry point for exceptions occurring in QueueScheduler or TimedTaskScheduler
 	public void handleException(Throwable throwable, String context) {
 		String ownerErrorMessage = String.format("Error: %s:\n%s", context, throwable.getMessage());
 		bot.sendToOwner(ownerErrorMessage);
@@ -50,7 +51,7 @@ public class ExceptionHandler {
 			ownerErrorMessage += "\nClientException caused by request:\n" + ((ClientException) throwable).getRequest();
 		}
 		log.error(ownerErrorMessage);
-		throwable.printStackTrace();
+		throwable.printStackTrace(System.out);
 	}
 
 	// specific exception cases
