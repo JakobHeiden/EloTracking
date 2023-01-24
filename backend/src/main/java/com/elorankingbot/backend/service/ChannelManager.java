@@ -240,17 +240,17 @@ public class ChannelManager {
 			try {
 				archiveCategory = (Category) bot.getChannelById(categoryIds.get(index)).block();
 			} catch (ClientException e) {
-				if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
-						&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
+				if (e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
+					Guild guild = bot.getGuild(server).block();
+					archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
+							.withPermissionOverwrites(excludePublic(server))
+							.block();
+					categoryIds.set(index, archiveCategory.getId().asLong());
+					dbService.saveServer(server);
+					break;
+				} else {
 					throw e;
 				}
-				Guild guild = bot.getGuild(server).block();
-				archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
-						.withPermissionOverwrites(excludePublic(server))
-						.block();
-				categoryIds.set(index, archiveCategory.getId().asLong());
-				dbService.saveServer(server);
-				break;
 			}
 			if (archiveCategory.getChannels().count().block() < 47) {
 				break;
