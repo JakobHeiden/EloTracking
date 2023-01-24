@@ -18,7 +18,6 @@ logging
 marketplace
 
 MIGRIEREN:
-logging fixen
 flag einbauen isOld
 was ist mit commands? bei NewGuild event wohl in die db schauen, ggf commands neu setzen...
 temp server aufsetzen
@@ -30,6 +29,7 @@ top.gg
 discord discovery
 was verlier ich durch die verification?
 auf temp isOld setzen
+devbot neuen token machen
 warten bis alle relevanten server migriert sind
 alten bot wann abschalten?
 

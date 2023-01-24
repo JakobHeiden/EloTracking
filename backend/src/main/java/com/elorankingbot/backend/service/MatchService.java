@@ -110,7 +110,7 @@ public class MatchService {
 			player.addMatchResult(matchResult);
 			dbService.savePlayer(player);
 		});
-		if (matchResult.getAllPlayerMatchResults().get(0).getResultStatus().equals(ReportStatus.CANCEL)) {
+		if (matchResult.isCanceled()) {
 			return;
 		}
 
