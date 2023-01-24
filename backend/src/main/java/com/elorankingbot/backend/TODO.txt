@@ -1,5 +1,4 @@
 WOHNUNG
-heizungen
 bildschirme
 tastatur
 bad armaturen
@@ -8,6 +7,7 @@ bad fliesen
 DEV
 immer: fehler eliminieren!
 ein kanal/mehrere in settings einpflegen
+leaderboardlength setting
 team queue
 um votes betteln
 supporter tier einbauen
@@ -16,3 +16,23 @@ ranks anzeigen
 
 logging
 marketplace
+
+MIGRIEREN:
+logging fixen
+flag einbauen isOld
+was ist mit commands? bei NewGuild event wohl in die db schauen, ggf commands neu setzen...
+temp server aufsetzen
+auf temp server migrieren
+neue logins setzen
+neuen bot starten
+website anpassen
+top.gg
+discord discovery
+was verlier ich durch die verification?
+auf temp isOld setzen
+warten bis alle relevanten server migriert sind
+alten bot wann abschalten?
+
+
+USER:
+tayst - archive kaput
