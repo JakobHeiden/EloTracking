@@ -33,7 +33,7 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 				}
 				embedText.append(String.format("%s (%s)%s\n",
 						player.getTag(),
-						formatRating(player.getOrCreateGameStats(queue.getGame()).getRating()),
+						formatRating(player.getOrCreatePlayerGameStats(queue.getGame()).getRating()),
 						reportStatusIcon));
 			}
 			embedTexts.add(embedText.toString());
@@ -90,7 +90,7 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 						player.getTag(),
 						isCompletedMatch ?
 								formatRating(matchResult.getPlayerMatchResult(player.getId()).getNewRating())
-								: formatRating(player.getOrCreateGameStats(queue.getGame()).getRating()),
+								: formatRating(player.getOrCreatePlayerGameStats(queue.getGame()).getRating()),
 						isCompletedMatch ?
 								", " + matchResult.getPlayerMatchResult(player.getId()).getRatingChangeAsString()
 								: "",

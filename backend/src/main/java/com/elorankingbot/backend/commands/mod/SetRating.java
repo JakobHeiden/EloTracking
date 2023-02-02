@@ -103,7 +103,7 @@ public class SetRating extends SlashCommand {
 				: server.getGame(event.getOption("ranking").get().getValue().get().asString());
 		boolean isSetRating = event.getOption("mode").get().getValue().get().asString().equals("set");
 		double points = event.getOption("points").get().getValue().get().asDouble();
-		PlayerGameStats playerGameStats = player.getOrCreateGameStats(game);
+		PlayerGameStats playerGameStats = player.getOrCreatePlayerGameStats(game);
 		double oldRating = playerGameStats.getRating();
 		double newRating = isSetRating ? points : oldRating + points;
 		playerGameStats.setRating(newRating);

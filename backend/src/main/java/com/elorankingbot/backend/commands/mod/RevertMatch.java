@@ -12,11 +12,13 @@ import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.MessageInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.possible.Possible;
+import lombok.extern.apachecommons.CommonsLog;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
 @ModCommand
+@CommonsLog
 public class RevertMatch extends MessageCommand {
 
 	private MatchResult matchResult;
@@ -78,13 +80,18 @@ public class RevertMatch extends MessageCommand {
 	}
 
 	private void updatePlayers() {
+		log.debug("RevertMatch::updatePlayers: " + matchResult.getId());
 		matchResult.getAllPlayerMatchResults().forEach(playerMatchResult -> {
 			Player player = playerMatchResult.getPlayer();
-			PlayerGameStats playerGameStats = player.getOrCreateGameStats(matchResult.getGame());
+			PlayerGameStats playerGameStats = player.getOrCreatePlayerGameStats(matchResult.getGame());
+			log.debug(String.format("Player %s W%s L%s D%s C%s", player.getTag(),
+					playerGameStats.getWins(), playerGameStats.getLosses(), playerGameStats.getDraws(), playerGameStats.getCancels()));
 			double ratingChange = playerMatchResult.getNewRating() - playerMatchResult.getOldRating();
 			playerGameStats.setRating(playerGameStats.getRating() - ratingChange);
 			playerGameStats.subtractResultStatus(playerMatchResult.getResultStatus());
 			dbService.savePlayer(player);
+			log.debug(String.format("Player %s W%s L%s D%s C%s", player.getTag(),
+					playerGameStats.getWins(), playerGameStats.getLosses(), playerGameStats.getDraws(), playerGameStats.getCancels()));
 		});
 	}
 

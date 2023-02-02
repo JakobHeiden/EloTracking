@@ -47,10 +47,10 @@ public class MatchService {
 			List<Player> allOtherPlayers = match.getPlayers();
 			team.forEach(allOtherPlayers::remove);
 			double averageTeamRating = team.stream()
-					.mapToDouble(player -> player.getOrCreateGameStats(game).getRating())
+					.mapToDouble(player -> player.getOrCreatePlayerGameStats(game).getRating())
 					.average().getAsDouble();
 			double averageOtherRating = allOtherPlayers.stream()
-					.mapToDouble(player -> player.getOrCreateGameStats(game).getRating())
+					.mapToDouble(player -> player.getOrCreatePlayerGameStats(game).getRating())
 					.average().getAsDouble();
 			double numOtherTeams = match.getQueue().getNumTeams() - 1;
 			// TODO erwartungswert skaliert bei zb 3 spielern lediglich von 0 bis 2/3. sollte vllt wie im speziellen fall von 0 bis 1?
@@ -59,7 +59,7 @@ public class MatchService {
 			TeamMatchResult teamResult = new TeamMatchResult();
 			for (Player player : team) {
 				double actualResult = match.getReportStatus(player.getId()).value;
-				double oldRating = player.getOrCreateGameStats(game).getRating();
+				double oldRating = player.getOrCreatePlayerGameStats(game).getRating();
 				double newRating = oldRating + match.getQueue().getK() * (actualResult - expectedResult);
 				PlayerMatchResult playerMatchResult = new PlayerMatchResult(
 						player, player.getTag(),
@@ -79,7 +79,7 @@ public class MatchService {
 		for (List<Player> team : match.getTeams()) {
 			TeamMatchResult teamResult = new TeamMatchResult();
 			for (Player player : team) {
-				double oldRating = player.getOrCreateGameStats(game).getRating();
+				double oldRating = player.getOrCreatePlayerGameStats(game).getRating();
 				PlayerMatchResult playerMatchResult = new PlayerMatchResult(
 						player, player.getTag(),
 						ReportStatus.CANCEL,
@@ -169,8 +169,8 @@ public class MatchService {
 
 	public void updatePlayerRank(Game game, Player player, Function<Role, Consumer<Throwable>> manageRoleFailedCallback) {
 		List<Integer> applicableRequiredRatings = new ArrayList<>(game.getRequiredRatingToRankId().keySet().stream()
-				.filter(requiredRating -> player.findGameStats(game).isPresent()
-						&& player.findGameStats(game).get().getRating() > requiredRating)
+				.filter(requiredRating -> player.hasPlayerGameStats(game)
+						&& player.getOrCreatePlayerGameStats(game).getRating() > requiredRating)
 				.toList());
 		if (applicableRequiredRatings.size() == 0) return;
 

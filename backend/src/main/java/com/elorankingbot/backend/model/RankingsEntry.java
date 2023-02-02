@@ -29,7 +29,7 @@ public class RankingsEntry implements Comparable<RankingsEntry> {
 		this.id = UUID.randomUUID();
 		this.guildId = game.getGuildId();
 		this.gameName = game.getName();
-		PlayerGameStats playerGameStats = player.getOrCreateGameStats(game);
+		PlayerGameStats playerGameStats = player.getOrCreatePlayerGameStats(game);
 		this.rating = playerGameStats.getRating();
 		this.playerTag = player.getTag();
 		this.wins = playerGameStats.getWins();
