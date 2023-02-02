@@ -51,7 +51,7 @@ public class DBService {
 		log.debug(String.format("Resetting all player ratings for %s on %s", game.getName(), bot.getServerName(game.getServer())));
 		List<Player> players = playerDao.findAllByGuildId(game.getGuildId());
 		players.forEach(player -> {
-			PlayerGameStats gameStats = player.getOrCreateGameStats(game);
+			PlayerGameStats gameStats = player.getOrCreatePlayerGameStats(game);
 			gameStats.setRating(game.getInitialRating());
 			gameStats.setWins(0);
 			gameStats.setLosses(0);

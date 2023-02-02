@@ -113,7 +113,7 @@ public class PlayerInfo extends SlashCommand {
 	}
 
 	private List<Optional<MatchResult>> getMatchHistory(Game game) {
-		List<UUID> fullMatchHistory = targetPlayer.getOrCreateGameStats(game).getMatchHistory();
+		List<UUID> fullMatchHistory = targetPlayer.getOrCreatePlayerGameStats(game).getMatchHistory();
 		List<UUID> recentMatchHistory = fullMatchHistory.subList(Math.max(0, fullMatchHistory.size() - 20), fullMatchHistory.size());
 		return recentMatchHistory.stream().map(dbService::findMatchResult).toList();
 	}

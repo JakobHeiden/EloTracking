@@ -52,7 +52,7 @@ public class Player  {
         return unbanAtTimeSlot == PERMABANNED;
     }
 
-    public PlayerGameStats getOrCreateGameStats(Game game) {
+    public PlayerGameStats getOrCreatePlayerGameStats(Game game) {
         PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
         if (playerGameStats == null) {
             PlayerGameStats newPlayerGameStats = new PlayerGameStats(game.getInitialRating());
@@ -62,10 +62,9 @@ public class Player  {
         return playerGameStats;
     }
 
-    public Optional<PlayerGameStats> findGameStats(Game game) {
+    public boolean hasPlayerGameStats(Game game) {
         PlayerGameStats playerGameStats = gameNameToPlayerGameStats.get(game.getName());
-        if (playerGameStats == null) return Optional.empty();
-        else return Optional.of(playerGameStats);
+        return playerGameStats != null;
     }
 
     public void deleteGameStats(Game game) {
