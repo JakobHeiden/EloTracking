@@ -103,7 +103,6 @@ public class DiscordCommandService {
 				.doOnNext(commandData -> log.debug(String.format("deployed command %s:%s to %s",
 						commandData.name(), commandData.id(), bot.getServerName(server))))
 				.subscribe(NO_OP, updateCommandFailedCallbackFactory.apply(request.name(), true));
-
 	}
 
 	public void deleteCommand(Server server, String commandName, BiFunction<String, Boolean, Consumer<Throwable>> updateCommandFailedCallbackFactory) {

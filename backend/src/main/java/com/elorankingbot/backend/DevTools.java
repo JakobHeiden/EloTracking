@@ -1,6 +1,8 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.commands.mod.RevertMatch;
+import com.elorankingbot.backend.commands.owner.GuildInfo;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -11,6 +13,8 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.service.ApplicationService;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
+
+import java.util.function.Consumer;
 
 @Component
 @CommonsLog
@@ -57,13 +61,18 @@ public class DevTools {
 		dbService.findAllServers().forEach(
 				server -> {
 					try {
-						log.info("deploying to " + bot.getServerName(server));
-						//discordCommandService.deployCommand(server, SetRating.getRequest(server)).block();
-						//bot.deployCommand(server, ForceDraw.getRequest(server)).block();
+						if (props.getTestServerIds().contains(server.getGuildId())) {
+							discordCommandService.deployCommand(server, GuildInfo.getRequest(),
+									this::simplePrintThrowableCallback);
+						}
 					} catch (Exception e) {
 						log.error(e.getMessage());
 					}
 				}
 		);
+	}
+
+	private Consumer<Throwable> simplePrintThrowableCallback(String ignored, Boolean alsoIgnored) {
+		return System.out::println;
 	}
 }
