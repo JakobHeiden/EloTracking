@@ -25,6 +25,7 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 			return;
 		}
 
+		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
 		game = server.getGame(event.getCustomId().split(":")[1]);
 		deleteRatingsFromPlayers();
 		dbService.deleteAllRankingsEntries(game);
@@ -34,7 +35,6 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 		dbService.saveServer(server);
 		bot.deleteChannel(game.getLeaderboardChannelId());
 		bot.deleteChannel(game.getResultChannelId());
-		event.getInteraction().getMessage().get().edit().withComponents(none).subscribe();
 		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 		if (!game.getQueues().isEmpty()) {
 			updatedCommands += ", " + discordCommandService.updateGuildCommandsByQueue(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
