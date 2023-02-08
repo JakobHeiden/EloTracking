@@ -39,7 +39,28 @@ warten bis alle relevanten server migriert sind
 alten bot wann abschalten?
 
 
+
 DreadReapers:
+
+unranked bauen, in settings einpflegen
+
+/addscrims bauen:
+- infra
+- results, leaderboard wie in addqueue
+- /createpublic deployen
+
+/createpublic bauen:
+struktur: Scrim-objekt mit liste an spielern, applications, rejections
+- infra
+- embed bauen, mit request-join-button versehen
+- kanal aufmachen, visibility setzen, auch hier embed bauen und mit invite, kick versehen
+- request-join macht accept- und reject-buttons
+- reject: buttons entfernen, nachricht versenden, player blocken
+- accept: buttons entfernen
+- kick: aehnlich wie reject
+- invite: nachricht versenden, mit buttons accept, reject versehen, funktionalitaet teils wie oben...?
+
+
 Casual Game
  /scrims creates 2 channels
 1- #open-games

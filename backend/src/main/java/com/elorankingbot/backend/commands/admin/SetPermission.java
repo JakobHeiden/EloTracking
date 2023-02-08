@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.admin;
 
+import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
@@ -15,13 +16,11 @@ import java.util.Set;
 @AdminCommand
 public class SetPermission extends SlashCommand {
 
-	private Set<String> adminCommands, modCommands;
-	private Role adminRole, modRole;
+	private final CommandClassScanner commandClassScanner;
 
 	public SetPermission(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
-		this.adminCommands = services.commandClassScanner.getAdminCommandHelpEntries();
-		this.modCommands = services.commandClassScanner.getModCommandHelpEntries();
+		commandClassScanner = services.commandClassScanner;
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -61,25 +60,28 @@ public class SetPermission extends SlashCommand {
 	}
 
 	protected void execute() {
+		Role role = event.getOption("role").get().getValue().get().asRole().block();
+		if (role.isManaged()) {
+			event.reply("This role is managed by an integration and cannot be chosen for permissions. " +
+					"Usually this means that this role is a bot role. Please choose a different role.").subscribe();
+			return;
+		}
+
+		Set<String> adminCommands = commandClassScanner.getAdminCommandHelpEntries();
+		Set<String> modCommands = commandClassScanner.getModCommandHelpEntries();
 		String adminOrMod = event.getOption("adminormod").get().getValue().get().asString();
-		String nameOfRole = null;
 		if (adminOrMod.equals("admin")) {
-			adminRole = event.getOption("role").get().getValue().get().asRole()
-					.block();
-			server.setAdminRoleId(adminRole.getId().asLong());
+			server.setAdminRoleId(role.getId().asLong());
 			// adminCommands and modCommands is set up to work well with Help and does only include SlashCommands and MessageCommands currently...
 			// how do discord permissions work with ButtonCommands anyway?
 			adminCommands.forEach(commandName -> discordCommandService.setPermissionsForAdminCommand(server, commandName));
 			modCommands.forEach(commandName -> discordCommandService.setPermissionsForModCommand(server, commandName));
-			nameOfRole = adminRole.getName();
 		}
 		if (adminOrMod.equals("moderator")) {
-			modRole = event.getOption("role").get().getValue().get().asRole()
-					.block();
-			server.setModRoleId(modRole.getId().asLong());
+			server.setModRoleId(role.getId().asLong());
 			modCommands.forEach(commandName -> discordCommandService.setPermissionsForModCommand(server, commandName));
-			nameOfRole = modRole.getName();
 		}
+		String nameOfRole = role.getName();
 		dbService.saveServer(server);
 
 		event.reply(String.format("Linked %s permissions to %s. This may take a minute to update on the server.",
