@@ -53,6 +53,12 @@ public class MatchFinderQueue {
 		this.isBuildMatchFromTopPlayer = true;
 	}
 
+	// TOKEN
+	public void empty() {
+		this.groups = new ArrayList<>();
+		this.formingGroups = new ArrayList<>();
+	}
+
 	public void addGroup(Group group) {
 		groups.add(group);
 	}

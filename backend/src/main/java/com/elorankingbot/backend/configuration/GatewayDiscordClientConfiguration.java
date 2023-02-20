@@ -28,7 +28,6 @@ public class GatewayDiscordClientConfiguration {
 				.build()
 				.login()
 				.block();
-
 		return client;
 	}
 }

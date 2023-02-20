@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.ExceptionHandler;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
@@ -56,11 +57,21 @@ public class DiscordBotService {
 		sendToOwner("I am logged in and ready");
 	}
 
+	// TOKEN
+	public boolean isOld() {
+		return System.getenv("IS_OLD_BOT").equals("TRUE");
+	}
+
 	// Logging
 	public void sendToOwner(String text) {
 		if (text == null) text = "null";
 		if (text.equals("")) text = "empty String";
-		ownerPrivateChannel.createMessage(sendToOwnerTimeStamp.format(new Date()) + ": " + text).subscribe();
+		final String finalText = text;
+		ownerPrivateChannel.createMessage(sendToOwnerTimeStamp.format(new Date()) + ": " + text)
+					.subscribe(ExceptionHandler.NO_OP, throwable -> {
+						log.error("Error in sendToOwner: " + finalText);
+						log.error(throwable.getMessage());
+					});
 	}
 
 	// Guild
@@ -183,6 +194,10 @@ public class DiscordBotService {
 	}
 
 	public void deleteChannel(long channelId) {
+		if (channelId == 0L) {
+			log.warn("deleteChannel called with id 0");
+			return;
+		}
 		client.getChannelById(Snowflake.of(channelId))
 				.onErrorContinue(((throwable, o) -> log.info(String.format("Channel %s is already deleted.", channelId))))
 				.subscribe(channel -> channel.delete().subscribe());

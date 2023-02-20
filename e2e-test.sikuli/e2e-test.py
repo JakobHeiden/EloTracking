@@ -111,7 +111,7 @@ def switchToEnte():
 
 def gotoTestServer():
 	if not isProductionBot:
-		click("1658756254043.png")
+		click("DevBotTestIcon.png")
 	else:
 		click("1659467137082.png")
 
