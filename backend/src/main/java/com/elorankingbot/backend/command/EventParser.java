@@ -6,11 +6,11 @@ import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
-import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
@@ -20,11 +20,14 @@ import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
 import discord4j.discordjson.json.ApplicationCommandData;
 import lombok.extern.apachecommons.CommonsLog;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 @CommonsLog
 @Component
@@ -32,7 +35,6 @@ public class EventParser {
 
 	private final Services services;
 	private final DBService dbService;
-	private final DiscordBotService bot;
 	private final ExceptionHandler exceptionHandler;
 	private final DiscordCommandService discordCommandService;
 	private final CommandClassScanner commandClassScanner;
@@ -40,7 +42,6 @@ public class EventParser {
 	public EventParser(Services services, CommandClassScanner commandClassScanner) {
 		this.services = services;
 		this.dbService = services.dbService;
-		this.bot = services.bot;
 		this.exceptionHandler = services.exceptionHandler;
 		this.discordCommandService = services.discordCommandService;
 		this.commandClassScanner = commandClassScanner;
@@ -85,8 +86,6 @@ public class EventParser {
 					}
 				});
 
-		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
-
 		client.on(InteractionCreateEvent.class).subscribe(event -> {
 			String commandString = "unknown";
 			if (event.getClass().equals(ButtonInteractionEvent.class))
@@ -99,12 +98,45 @@ public class EventParser {
 					event.getInteraction().getId().asString()));
 		});
 
+		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
+
 		Hooks.onErrorDropped(throwable -> exceptionHandler.handleException(throwable, "Dropped Exception"));
+
+		// TOKEN
+		client.on(GuildCreateEvent.class).subscribe(guildCreateEvent -> {
+			if (services.bot.isOld()) return;
+
+			Server server = dbService.getOrCreateServer(guildCreateEvent.getGuild().getId().asLong());
+			log.debug(String.format("setting isOldBot=false on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
+			server.setOldBot(false);
+			dbService.saveServer(server);
+
+			log.debug(String.format("updating commands on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
+			services.discordCommandService.updateGuildCommandsByRanking(server, commandFailedCallbackFactory(server.getGuildId()));
+			services.discordCommandService.updateGuildCommandsByQueue(server, commandFailedCallbackFactory(server.getGuildId()));
+		});
+	}
+
+	private BiFunction<String, Boolean, Consumer<Throwable>> commandFailedCallbackFactory(long guildId) {
+		return (commandName, isDeploy) -> throwable -> log.error(String.format("failed to %s command %s on %s",
+				isDeploy ? "deploy" : "delete", commandName, guildId));
 	}
 
 	@Transactional
 	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
 		try {
+			// TOKEN
+			if (services.bot.isOld()) {
+				event.reply("This bot is being moved to a different account, since the developer has lost access to this one. " +
+						"Currently running matches can still be reported, but other than that, this account ceases function. " +
+						"To keep using the bot, the server owner or a user with Manage Server permissions needs to invite the new account using the following link:\n" +
+						"https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot\n" +
+						"All data and settings will be preserved across bot accounts.\n" +
+						"I have deleted all my channels and categories. These will regenerate once the bot is being used on the new account.\n" +
+						"If you have questions or problems, please visit " + ExceptionHandler.supportServerInvite + ", or contact Ente#1658.").subscribe();
+				return;
+			}
+
 			Command command = createSlashCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
@@ -123,6 +155,20 @@ public class EventParser {
 	@Transactional
 	void processButtonInteractionEvent(ButtonInteractionEvent event) {
 		try {
+			// TOKEN
+			if (services.bot.isOld()) {
+				event.reply("This bot is being moved to a different account, since the developer has lost access to this one. " +
+						"This account ceases function. " +
+						"To keep using the bot, the server owner or a user with Manage Server will permissions needs to invite the new account using the following link:\n" +
+						"https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot\n" +
+						"All data and settings will be preserved across bot accounts.\n" +
+						"I have deleted all my channels and categories. These will regenerate once the bot is being used on the new account.\n" +
+						"If you have questions or problems, please visit " + ExceptionHandler.supportServerInvite + ", or contact Ente#1658.\n" +
+						"**Results for this match cannot be reported anymore. After the bot has moved to its new account, " +
+						"a moderator can use /forcewin to resolve this match. Also this channel needs to be deleted manually.**").subscribe();
+				return;
+			}
+
 			Command command = createButtonCommand(event);
 			command.doExecute();
 		} catch (Exception e) {

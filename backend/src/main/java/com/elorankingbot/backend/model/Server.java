@@ -4,6 +4,7 @@ import com.elorankingbot.backend.service.DiscordBotService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,8 +15,10 @@ import java.util.Map;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@NoArgsConstructor
+//@NoArgsConstructor
 @Document(collection = "server")
+// TOKEN
+@CommonsLog
 public class Server {
 
 	@Id
@@ -27,13 +30,25 @@ public class Server {
 	private long disputeCategoryId, matchCategoryId;
 	private boolean isMarkedForDeletion;
 
-	public Server(long guildId) {
+	// TOKEN
+	private boolean isOldBot;
+
+	public Server(long guildId, boolean isOldBot) {
+		// TOKEN
+		log.debug("standard-konstruktor");
 		this.guildId = guildId;
 		this.isMarkedForDeletion = false;
 		this.gameNameToGame = new HashMap<>();
 		this.archiveCategoryIds = new ArrayList<>();
 		this.adminRoleId = 0L;
 		this.modRoleId = 0L;
+		// TOKEN
+		this.isOldBot = isOldBot;
+	}
+
+	// TOKEN
+	public Server() {
+		this.isOldBot = true;
 	}
 
 	public void addGame(Game game) {

@@ -18,7 +18,6 @@ public class DBService {
 
 	private final DiscordBotService bot;
 	private final ServerDao serverDao;
-	private final ChallengeDao challengeDao;
 	private final MatchResultDao matchResultDao;
 	private final MatchResultReferenceDao matchResultReferenceDao;
 	private final PlayerDao playerDao;
@@ -30,13 +29,12 @@ public class DBService {
 
 	@Autowired
 	public DBService(Services services,
-					 ServerDao serverDao, ChallengeDao challengeDao, MatchResultDao matchResultDao,
+					 ServerDao serverDao, MatchResultDao matchResultDao,
 					 MatchResultReferenceDao matchResultReferenceDao, PlayerDao playerDao,
 					 MatchDao matchDao, RankingsEntryDao rankingsEntryDao, BotStatsAccumulatorDao botStatsAccumulatorDao,
 					 BotStatsDao botStatsDao) {
 		this.bot = services.bot;
 		this.serverDao = serverDao;
-		this.challengeDao = challengeDao;
 		this.matchResultDao = matchResultDao;
 		this.matchResultReferenceDao = matchResultReferenceDao;
 		this.playerDao = playerDao;
@@ -72,7 +70,9 @@ public class DBService {
 			}
 			return server;
 		} else {
-			Server newServer = new Server(guildId);
+			// TOKEN
+			boolean isOldBot = System.getenv("IS_OLD_BOT").equals("TRUE");
+			Server newServer = new Server(guildId, isOldBot);
 			serverDao.save(newServer);
 			bot.sendToOwner("New server: " + guildId);
 			return newServer;
@@ -300,6 +300,9 @@ public class DBService {
 
 	// Statistics
 	public void addMatchResultToStats(MatchResult matchResult) {
+		// TOKEN
+		if (!bot.isOld()) return;
+
 		if (props.getTestServerIds().contains(matchResult.getServer().getGuildId())) {
 			return;
 		}

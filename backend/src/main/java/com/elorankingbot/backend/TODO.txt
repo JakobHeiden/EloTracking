@@ -12,79 +12,57 @@ team queue
 um votes betteln
 supporter tier einbauen
 ranks anzeigen
+concept: autoresolve
 
 
-marketplace - was habe ich hiermit gemeint?
+marketplace - was habe ich hiermit gemeint? vllt irgendein discordzeug
 {code=BASE_TYPE_MAX_LENGTH, message=Must be 2000 or fewer in length.}
 /allguilds anpassen
 
-MIGRIEREN:
-neuen server machen, einrichten
-beuen token
-flag einbauen isOld
-- user auf neuen bot, server schicken
-- was noch?
-was ist mit commands? bei NewGuild event wohl in die db schauen, ggf commands neu setzen...
-temp server aufsetzen
-auf temp server migrieren
-neue logins setzen
-neuen bot starten
+NICKS ANZEIGEN
+player updated mit nick
+konstruktor anpassen, auch fuer mongo
+update in resolveMatch einbauen
+in game flag bauen, im konstruktor default setzen
+
+
+ABLAUF:
+ankuendigen
+db sichern
+neues icon setzen
+auf neu pushen
+timedtasks saemtlich loeschen
+auf alt kopieren, starten
+gucken ob es funktioniert
+warten bis alle relevanten server migriert sind, dann abschalten
 website anpassen
+auf neuen discordserver umziehen
 top.gg
 discord discovery, bot und server
 was verlier ich durch die verification?
-auf temp isOld setzen
-devbot neuen token machen
-warten bis alle relevanten server migriert sind
-alten bot wann abschalten?
 
 
+schritt 1 : old queue abschalten DONE
 
-DreadReapers:
+schritt 2 : bei invite isOldBot false setzen DONE
 
-unranked bauen, in settings einpflegen
+scritt 3 : alter server kickt sich selbst DONE
 
-/addscrims bauen:
-- infra
-- results, leaderboard wie in addqueue
-- /createpublic deployen
+schritt 4 : neuer server befüllt commands DONE
 
-/createpublic bauen:
-struktur: Scrim-objekt mit liste an spielern, applications, rejections
-- infra
-- embed bauen, mit request-join-button versehen
-- kanal aufmachen, visibility setzen, auch hier embed bauen und mit invite, kick versehen
-- request-join macht accept- und reject-buttons
-- reject: buttons entfernen, nachricht versenden, player blocken
-- accept: buttons entfernen
-- kick: aehnlich wie reject
-- invite: nachricht versenden, mit buttons accept, reject versehen, funktionalitaet teils wie oben...?
+schritt 5 : globale commands deployen DONE
 
+schritt 6 : queue leeren DONE
 
-Casual Game
- /scrims creates 2 channels
-1- #open-games
-2- #games-archive
+schritt 7 : commmands machen link, ausser match, dispute DONE
 
-=>player can create an open-game by /create => bot DM series of questions asking about game details (for now i can only think of 2 questions)
-1-game type (1v1,2v2,ffa ...)
-2-game details (rules, settings, mods required ...)
+schritt 8 : access-probleme? channel, messages, ranks, was noch?
+channel loeschen DONE
+categories loeschen DONE
+nachricht bei match-buttons DONE
 
-=>bot posts embed message in #open-games (contain all  questions answers, name of creator, players joined ), the message has a button to request to join the game which will send a DM request to game creator to accept or refuse (then bot DM the player who wants to join of creator's choice)
+schritt 9 : timedtasks auf altem bot aus DONE
 
-=> bot will also  creates a private channel for creator + accepted players
-accepted players can leave the game by using a command (ex: /leave)
+schritt 10 : botstats DONE
 
--game creator can use a command (ex: /started) in the channel to mark game as ongoing which will make bot delete the game embed in #open-game and repost it without button in #games-archive
-
-=> creator can use a command to mark game as finished (ex: /finished) which will delete the channel after some time (time can be edited by a command)
-
-Notes:
--private channels created has names with numerical sequence (ex: #game-1  #game-2 ....)
-
--once a player is accepted to join its discord name will be added to embed msg in #open-games, same when the player leaves it is removed
-
--creator can delete the match (or kick someone) before using /started with a command
-[18:09]
-As for ranked just minor changes + reporting comboa feature:
-Only players particiapted can react with custom emojis at result embed which then the bot place those emojis nxt to their names (edited)
+schritt 11 : self kick DONE
