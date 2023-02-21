@@ -86,19 +86,23 @@ public class TimedTaskScheduler {
     @Scheduled(fixedRate = 60000)
     public void tick() {
         try {
-            if (!doRunSchedulers) return;
+            log.debug("tick");
             // TOKEN
             if (bot.isOld()) {
                 dbService.findAllServers().forEach(server -> {
+                    log.debug("check for leave : " + server.getGuildId());
                     if (!server.isOldBot()) {
+                        log.debug("server is new bot, leaving");
                         bot.getGuild(server).subscribe(guild -> {
                             log.info("Leaving server " + server.getGuildId() + ":" + guild.getName());
                             guild.leave().subscribe();
-                        }, ExceptionHandler.NO_OP);
+                        }, throwable -> log.error(throwable.getMessage()));
                     }
                 });
                 return;
             }
+
+            if (!doRunSchedulers) return;
 
             log.debug("tick " + currentIndex);
             if (currentIndex % (7 * 24 * 60) == 0) {// TODO wohl laenger
