@@ -91,7 +91,7 @@ public class TimedTaskScheduler {
             if (bot.isOld()) {
                 dbService.findAllServers().forEach(server -> {
                     log.debug("check for leave : " + server.getGuildId());
-                    if (!server.isOldBot()) {
+                    if (!server.isOldBot()) {// TODO! allGuilds holen, nur in der ueberschneidung leaven
                         log.debug("server is new bot, leaving");
                         bot.getGuild(server).subscribe(guild -> {
                             log.info("Leaving server " + server.getGuildId() + ":" + guild.getName());

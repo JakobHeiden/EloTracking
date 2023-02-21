@@ -13,6 +13,7 @@ um votes betteln
 supporter tier einbauen
 ranks anzeigen
 concept: autoresolve
+MatchService::getOrCreateDisputeCategory - was wenn die category frisch geloescht ist
 
 
 marketplace - was habe ich hiermit gemeint? vllt irgendein discordzeug

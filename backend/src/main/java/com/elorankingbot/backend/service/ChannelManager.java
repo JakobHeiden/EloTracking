@@ -20,6 +20,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
+import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import java.util.UUID;
 import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.CHANNEL_DELETE;
 
 @Component
+@CommonsLog
 public class ChannelManager {
 
 	private final DBService dbService;
@@ -69,9 +71,13 @@ public class ChannelManager {
 	// Match
 	public Category getOrCreateMatchCategory(Server server) {
 		try {
+			log.debug("getOrCreateMatchCategory " + server.getGuildId() + ":" + server.getMatchCategoryId());
 			return (Category) bot.getChannelById(server.getMatchCategoryId()).block();
 		} catch (ClientException e) {
+			log.debug(e);
+			log.debug(e.getErrorResponse().get().toString());
 			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
+					// this happens when the category is deleted recently
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 				throw e;
 			}
@@ -142,6 +148,7 @@ public class ChannelManager {
 			return (Category) bot.getChannelById(server.getDisputeCategoryId()).block();
 		} catch (ClientException e) {
 			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
+					// this happens when the category is deleted recently
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
 				throw e;
 			}
