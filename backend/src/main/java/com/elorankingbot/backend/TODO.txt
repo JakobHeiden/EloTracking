@@ -27,11 +27,10 @@ in game flag bauen, im konstruktor default setzen
 
 
 ABLAUF:
-ankuendigen
-db sichern
-neues icon setzen
-auf neu pushen
-timedtasks saemtlich loeschen
+ankuendigen DONE
+db sichern DONE
+auf neu pushen DONE
+timedtasks saemtlich loeschen DONE
 auf alt kopieren, starten
 gucken ob es funktioniert
 warten bis alle relevanten server migriert sind, dann abschalten
