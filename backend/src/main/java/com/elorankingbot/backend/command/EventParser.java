@@ -128,9 +128,10 @@ public class EventParser {
 			// TOKEN
 			if (services.bot.isOld()) {
 				event.reply("This bot is being moved to a different account, since the developer has lost access to this one. " +
-						"Currently running matches can still be reported, but other than that, this account ceases function. " +
+						"This account ceases function. " +
 						"To keep using the bot, the server owner or a user with Manage Server permissions needs to invite the new account using the following link:\n" +
 						"https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot\n" +
+						"This account will remove itself from your server automatically afer that." +
 						"All data and settings will be preserved across bot accounts.\n" +
 						"I have deleted all my channels and categories. These will regenerate once the bot is being used on the new account.\n" +
 						"If you have questions or problems, please visit " + ExceptionHandler.supportServerInvite + ", or contact Ente#1658.").subscribe();
@@ -161,6 +162,7 @@ public class EventParser {
 						"This account ceases function. " +
 						"To keep using the bot, the server owner or a user with Manage Server will permissions needs to invite the new account using the following link:\n" +
 						"https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot\n" +
+						"This account will remove itself from your server automatically afer that." +
 						"All data and settings will be preserved across bot accounts.\n" +
 						"I have deleted all my channels and categories. These will regenerate once the bot is being used on the new account.\n" +
 						"If you have questions or problems, please visit " + ExceptionHandler.supportServerInvite + ", or contact Ente#1658.\n" +
