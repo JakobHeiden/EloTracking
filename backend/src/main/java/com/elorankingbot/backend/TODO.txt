@@ -29,9 +29,9 @@ in game flag bauen, im konstruktor default setzen
 ABLAUF:
 ankuendigen DONE
 db sichern DONE
-auf neu pushen DONE
+auf neu und alt pushen DONE
 timedtasks saemtlich loeschen DONE
-auf alt kopieren, starten
+alt, neu starten DONE
 gucken ob es funktioniert
 warten bis alle relevanten server migriert sind, dann abschalten
 website anpassen
