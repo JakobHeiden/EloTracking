@@ -51,8 +51,10 @@ public class ChannelManager {
 	// Result
 	public TextChannel getOrCreateResultChannel(Game game) {
 		try {
+			log.debug("getOrCreateResultChannel: " + game.getName());
 			return (TextChannel) bot.getChannelById(game.getResultChannelId()).block();
 		} catch (ClientException e) {
+			log.error("exception in getOrCreateResultChannel: " + e);
 			Guild guild = bot.getGuild(game.getGuildId()).block();
 			TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
 					.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
@@ -64,7 +66,9 @@ public class ChannelManager {
 	}
 
 	public Message postToResultChannel(MatchResult matchResult) {
+		log.debug("postToResultChannel: " + matchResult.getId());
 		TextChannel resultChannel = getOrCreateResultChannel(matchResult.getGame());
+		log.debug("postToResultChannel id: " + resultChannel.getId().asString());
 		return resultChannel.createMessage(EmbedBuilder.createMatchResultEmbed(matchResult)).block();
 	}
 
@@ -74,8 +78,8 @@ public class ChannelManager {
 			log.debug("getOrCreateMatchCategory " + server.getGuildId() + ":" + server.getMatchCategoryId());
 			return (Category) bot.getChannelById(server.getMatchCategoryId()).block();
 		} catch (ClientException e) {
-			log.debug(e);
-			log.debug(e.getErrorResponse().get().toString());
+			log.error("Exception in getOrCreateMatchCategory: " + e);
+			log.error(e.getErrorResponse().get().toString());
 			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
 					// this happens when the category is deleted recently
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
@@ -92,6 +96,7 @@ public class ChannelManager {
 	}
 
 	public TextChannelCreateMono createMatchChannel(Match match) {
+		log.debug("createMatchChannel: " + match.getId());
 		Server server = match.getServer();
 		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
@@ -145,8 +150,11 @@ public class ChannelManager {
 	// Dispute
 	public Category getOrCreateDisputeCategory(Server server) {// TODO evtl Optional<Guild> mit als parameter, um den request zu sparen?
 		try {
+			log.debug("getOrCreateDisputeCategory " + server.getGuildId() + ":" + server.getMatchCategoryId());
 			return (Category) bot.getChannelById(server.getDisputeCategoryId()).block();
 		} catch (ClientException e) {
+			log.error("Exception in getOrCreateDisputeCategory: " + e);
+			log.error(e.getErrorResponse().get().toString());
 			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
 					// this happens when the category is deleted recently
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
@@ -206,6 +214,7 @@ public class ChannelManager {
 
 	// Leaderboard
 	private Message createLeaderboardChannelAndMessage(Game game) {
+		log.debug("createLeaderBoardChannelAndMessage: " + game.getName());
 		Guild guild = bot.getGuild(game.getGuildId()).block();
 		TextChannel leaderboardChannel = guild.createTextChannel(String.format("%s Leaderboard", game.getName()))
 				.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
@@ -219,8 +228,11 @@ public class ChannelManager {
 	public void refreshLeaderboard(Game game) {
 		Message leaderboardMessage;
 		try {
+			log.debug("refreshLeaderboard: " + game.getName());
 			leaderboardMessage = bot.getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
 		} catch (ClientException e) {
+			log.error("Eception in refreshLeaderboard: " + game.getName() + " : " + e);
+			log.error(e.getErrorResponse().get().toString());
 			leaderboardMessage = createLeaderboardChannelAndMessage(game);
 			dbService.saveServer(game.getServer());// TODO muss das?
 		}
@@ -231,6 +243,7 @@ public class ChannelManager {
 
 	// Archive
 	public Category getOrCreateArchiveCategory(Server server) {
+		log.debug("getOrCreateArchiveCategory " + server.getGuildId() + ":" + server.getMatchCategoryId());
 		List<Long> categoryIds = server.getArchiveCategoryIds();
 		Category archiveCategory;
 		int index = 0;
@@ -247,6 +260,8 @@ public class ChannelManager {
 			try {
 				archiveCategory = (Category) bot.getChannelById(categoryIds.get(index)).block();
 			} catch (ClientException e) {
+				log.error("Exception in getOrCreateArchiveCategory: " + e);
+				log.error(e.getErrorResponse().get().toString());
 				if (e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")) {
 					Guild guild = bot.getGuild(server).block();
 					archiveCategory = guild.createCategory(String.format("elo archive%s", index == 0 ? "" : " " + (index + 1)))
@@ -268,6 +283,7 @@ public class ChannelManager {
 	}
 
 	public void moveToArchive(Server server, Channel channel) {
+		log.debug("moveToArchive: " + channel.getId().asString());
 		Category archiveCategory = getOrCreateArchiveCategory(server);
 		setParentCategory(channel, archiveCategory.getId().asLong()).subscribe();
 		timedTaskScheduler.addTimedTask(CHANNEL_DELETE, 60, channel.getId().asLong(), 0L, null);
