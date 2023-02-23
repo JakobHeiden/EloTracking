@@ -63,13 +63,8 @@ public class DevTools {
         if (props.isDoUpdateGuildCommands()) updateGuildCommands();
 
         // TOKEN empty all queues
-        if (false) {
+        if (bot.isOld()) {
             dbService.findAllServers().forEach(server -> {
-                log.debug(String.format("Emptying queues for %s", server.getGuildId()));
-                server.getGames().stream().flatMap(game -> game.getQueues().stream())
-                        .forEach(MatchFinderQueue::empty);
-                dbService.saveServer(server);
-
                 log.debug("Deleting channels for " + server.getGuildId());
                 server.getGames().forEach(game -> {
                     bot.getChannelById(game.getLeaderboardChannelId()).subscribe(channel -> channel.delete().subscribe());

@@ -13,7 +13,7 @@ um votes betteln
 supporter tier einbauen
 ranks anzeigen
 concept: autoresolve
-MatchService::getOrCreateDisputeCategory - was wenn die category frisch geloescht ist
+MatchService::getOrCreateDisputeCategory - frisch geloeschte category failt irgendwie wieder
 
 
 marketplace - was habe ich hiermit gemeint? vllt irgendein discordzeug
@@ -66,3 +66,10 @@ schritt 9 : timedtasks auf altem bot aus DONE
 schritt 10 : botstats DONE
 
 schritt 11 : self kick DONE
+
+delete channels nochmal besser loggen und nochmal laufen lassen?
+botstats auf den neuen bot umbiegen
+isOldBot in botstats hinterlegen
+wie builde ich die .jar lokal?
+guildinfo, allguilds deployen
+exception catchen wenn der channel cache einen geloeschten channel vorspielt?
