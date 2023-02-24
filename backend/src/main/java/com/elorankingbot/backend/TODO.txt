@@ -35,7 +35,7 @@ timedtasks saemtlich loeschen DONE
 alt, neu starten DONE
 gucken ob es funktioniert
 warten bis alle relevanten server migriert sind, dann abschalten
-website anpassen
+website anpassen DONE
 auf neuen discordserver umziehen
 top.gg
 discord discovery, bot und server
@@ -67,9 +67,9 @@ schritt 10 : botstats DONE
 
 schritt 11 : self kick DONE
 
-delete channels nochmal besser loggen und nochmal laufen lassen?
 botstats auf den neuen bot umbiegen
 isOldBot in botstats hinterlegen
 wie builde ich die .jar lokal?
 guildinfo, allguilds deployen
 exception catchen wenn der channel cache einen geloeschten channel vorspielt?
+auf oldBot commands wieder loggen

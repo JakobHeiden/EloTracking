@@ -11,6 +11,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
@@ -189,8 +190,8 @@ public class DiscordBotService {
 
 	// Channels
 	public Mono<Channel> getChannelById(long channelId) {
-		//return client.withRetrievalStrategy(EntityRetrievalStrategy.REST).getChannelById(Snowflake.of(channelId));
-		return client.getChannelById(Snowflake.of(channelId));
+		return client.withRetrievalStrategy(EntityRetrievalStrategy.REST).getChannelById(Snowflake.of(channelId));
+		//return client.getChannelById(Snowflake.of(channelId));
 	}
 
 	public void deleteChannel(long channelId) {
