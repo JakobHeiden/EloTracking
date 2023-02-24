@@ -37,6 +37,7 @@ public class GuildInfo extends SlashCommand {
 
 	protected void execute() throws Exception {
 		try {
+			event.deferReply().subscribe();
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuild(guildId).block();
 			String reply = String.format("%s:%s:%s\n", guildId, guild.getName(), guild.getMemberCount());
@@ -44,17 +45,19 @@ public class GuildInfo extends SlashCommand {
 			for (ApplicationCommandData guildCommand : guildCommands) {
 				reply += guildCommand.name() + ", ";
 			}
+			/* The new bot account does not have permissions for invites. TODO maybe remove at some point
 			List<ExtendedInvite> invites = guild.getInvites().buffer().blockLast();
 			if (invites != null) {
 				for (ExtendedInvite invite : invites) {
 					reply += "\nhttps://discord.gg/" + invite.getCode();
 				}
 			}
-			event.reply(reply).withEphemeral(true).subscribe(NO_OP, super::forwardToExceptionHandler);
+			 */
+			event.createFollowup(reply).withEphemeral(true).subscribe(NO_OP, super::forwardToExceptionHandler);
 		} catch (NumberFormatException e) {
-			event.reply("That's not a number").withEphemeral(true).subscribe();
+			event.createFollowup("That's not a number").withEphemeral(true).subscribe();
 		} catch (Exception e) {
-			event.reply(e.getMessage()).withEphemeral(true)
+			event.createFollowup(e.getMessage()).withEphemeral(true)
 					.subscribe(NO_OP, super::forwardToExceptionHandler);
 		}
 	}
