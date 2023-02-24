@@ -107,13 +107,15 @@ public class EventParser {
 			if (services.bot.isOld()) return;
 
 			Server server = dbService.getOrCreateServer(guildCreateEvent.getGuild().getId().asLong());
-			log.debug(String.format("setting isOldBot=false on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
-			server.setOldBot(false);
-			dbService.saveServer(server);
+			if (server.isOldBot()) {
+				log.debug(String.format("setting isOldBot=false on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
+				server.setOldBot(false);
+				dbService.saveServer(server);
 
-			log.debug(String.format("updating commands on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
-			services.discordCommandService.updateGuildCommandsByRanking(server, commandFailedCallbackFactory(server.getGuildId()));
-			services.discordCommandService.updateGuildCommandsByQueue(server, commandFailedCallbackFactory(server.getGuildId()));
+				log.debug(String.format("updating commands on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
+				services.discordCommandService.updateGuildCommandsByRanking(server, commandFailedCallbackFactory(server.getGuildId()));
+				services.discordCommandService.updateGuildCommandsByQueue(server, commandFailedCallbackFactory(server.getGuildId()));
+			}
 		});
 	}
 
