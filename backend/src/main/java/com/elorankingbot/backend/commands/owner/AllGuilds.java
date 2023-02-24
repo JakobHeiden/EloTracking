@@ -28,6 +28,7 @@ public class AllGuilds extends SlashCommand {
 
 	protected void execute() throws Exception {
 		try {
+			event.deferReply().subscribe();
 			Map<Integer, String> guilds = new HashMap<>();
 			for (Server server : dbService.findAllServers()) {
 				Guild guild;
@@ -39,7 +40,7 @@ public class AllGuilds extends SlashCommand {
 			}
 			List<Integer> sortedKeys = new ArrayList<>(guilds.keySet().stream().toList());
 			Collections.sort(sortedKeys);
-			event.reply(String.format("Guilds in total: %s\n", bot.getAllGuildIds().size()) +
+			event.createFollowup(String.format("Guilds in total: %s\n", bot.getAllGuildIds().size()) +
 					String.join("\n", sortedKeys.stream().map(guilds::get).toList())).withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			e.printStackTrace();

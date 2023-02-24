@@ -73,3 +73,6 @@ wie builde ich die .jar lokal?
 guildinfo, allguilds deployen
 exception catchen wenn der channel cache einen geloeschten channel vorspielt?
 auf oldBot commands wieder loggen
+er deployt anscheinend commands wieder und wieder...
+was macht die entenwiese-id?
+irgendwas im cd ist deprecated
