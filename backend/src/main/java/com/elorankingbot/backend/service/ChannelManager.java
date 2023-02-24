@@ -57,7 +57,7 @@ public class ChannelManager {
 			log.error("exception in getOrCreateResultChannel: " + e);
 			Guild guild = bot.getGuild(game.getGuildId()).block();
 			TextChannel resultChannel = guild.createTextChannel(String.format("%s match results", game.getName()))
-					.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
+					.withPermissionOverwrites(onlyBotAndModAndAdminCanSend(game.getServer()))
 					.block();
 			game.setResultChannelId(resultChannel.getId().asLong());
 			dbService.saveServer(game.getServer());
@@ -293,14 +293,11 @@ public class ChannelManager {
 
 	// write permissions
 	private List<PermissionOverwrite> onlyBotCanSend(Server server) {
-		return List.of(PermissionOverwrite.forRole(
-						Snowflake.of(server.getEveryoneId()),
-						PermissionSet.none(),
-						PermissionSet.of(Permission.SEND_MESSAGES)),
-				PermissionOverwrite.forMember(
-						Snowflake.of(bot.getBotId()),
-						PermissionSet.of(Permission.SEND_MESSAGES),
-						PermissionSet.none()));
+		return List.of(denyEveryoneSend(server), allowBotSend());
+	}
+
+	private List<PermissionOverwrite> onlyBotAndModAndAdminCanSend(Server server) {
+		return List.of(denyEveryoneSend(server), allowBotSend(), allowAdminSend(server), allowModSend(server));
 	}
 
 	// view permissions
@@ -335,6 +332,32 @@ public class ChannelManager {
 	private PermissionOverwrite allowBotView() {
 		return PermissionOverwrite.forMember(Snowflake.of(bot.getBotId()),
 				PermissionSet.of(Permission.VIEW_CHANNEL),
+				PermissionSet.none());
+	}
+
+	private static PermissionOverwrite denyEveryoneSend(Server server) {
+		return PermissionOverwrite.forRole(
+				Snowflake.of(server.getEveryoneId()),
+				PermissionSet.none(),
+				PermissionSet.of(Permission.SEND_MESSAGES));
+	}
+
+	private PermissionOverwrite allowBotSend() {
+		return PermissionOverwrite.forMember(
+				Snowflake.of(bot.getBotId()),
+				PermissionSet.of(Permission.SEND_MESSAGES),
+				PermissionSet.none());
+	}
+
+	private PermissionOverwrite allowAdminSend(Server server) {
+		return PermissionOverwrite.forRole(Snowflake.of(server.getAdminRoleId()),
+				PermissionSet.of(Permission.SEND_MESSAGES),
+				PermissionSet.none());
+	}
+
+	private PermissionOverwrite allowModSend(Server server) {
+		return PermissionOverwrite.forRole(Snowflake.of(server.getModRoleId()),
+				PermissionSet.of(Permission.SEND_MESSAGES),
 				PermissionSet.none());
 	}
 }

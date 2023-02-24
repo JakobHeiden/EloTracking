@@ -86,9 +86,9 @@ public class TimedTaskScheduler {
     @Scheduled(fixedRate = 60000)
     public void tick() {
         try {
-            log.debug("tick");
             // TOKEN
             if (bot.isOld()) {
+                log.debug("tick");
                 dbService.findAllServers().forEach(server -> {
                     log.debug("check for leave : " + server.getGuildId());
                     if (!server.isOldBot()) {// TODO! allGuilds holen, nur in der ueberschneidung leaven
