@@ -79,4 +79,3 @@ fehlermeldung wenn der bot seine kanaele nicht sieht
 wie krieg ich den log vom bot als stream auf ubuntu?
 
 kuachi cups: revert match fehlt
-er deployt anscheinend commands wieder und wieder...
