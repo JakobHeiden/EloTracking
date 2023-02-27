@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.command;
 
-import com.elorankingbot.backend.ExceptionHandler;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
@@ -20,7 +20,6 @@ import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
 import discord4j.discordjson.json.ApplicationCommandData;
 import lombok.extern.apachecommons.CommonsLog;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;

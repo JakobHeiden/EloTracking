@@ -1,4 +1,4 @@
-package com.elorankingbot.backend;
+package com.elorankingbot.backend.logging;
 
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;

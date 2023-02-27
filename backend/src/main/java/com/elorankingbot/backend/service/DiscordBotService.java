@@ -1,7 +1,8 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.ExceptionHandler;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
+import com.elorankingbot.backend.logging.CustomExtendedEntityRetrievalStrategy;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;
@@ -15,7 +16,6 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.service.ApplicationService;
-import discord4j.rest.util.Permission;
 import lombok.Getter;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Service;
@@ -61,6 +61,10 @@ public class DiscordBotService {
 	// TOKEN
 	public boolean isOld() {
 		return System.getenv("IS_OLD_BOT").equals("TRUE");
+	}
+
+	public Snowflake getSnowflake() {
+		return Snowflake.of(botId);
 	}
 
 	// Logging
@@ -118,13 +122,6 @@ public class DiscordBotService {
 	// Roles
 	public Role getRole(Server server, long roleId) {
 		return client.getRoleById(Snowflake.of(server.getGuildId()), Snowflake.of(roleId)).block();
-	}
-
-	public boolean isBotAdmin(Server server) {
-		for (Role botRole : client.getSelfMember(Snowflake.of(server.getGuildId())).block().getRoles().collectList().block()) {
-			if (botRole.getPermissions().contains(Permission.ADMINISTRATOR)) return true;
-		}
-		return false;
 	}
 
 	public boolean isBotRoleHigherThanGivenRole(Role givenRole) {
@@ -190,6 +187,7 @@ public class DiscordBotService {
 
 	// Channels
 	public Mono<Channel> getChannelById(long channelId) {
+		// TODO this is a bandaid since the store will sometimes return pretend channels that have been deleted. remove when no longer needed
 		return client.withRetrievalStrategy(EntityRetrievalStrategy.REST).getChannelById(Snowflake.of(channelId));
 		//return client.getChannelById(Snowflake.of(channelId));
 	}

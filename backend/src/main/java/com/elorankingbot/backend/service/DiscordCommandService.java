@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.ExceptionHandler;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.commands.admin.*;
 import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
 import com.elorankingbot.backend.commands.mod.ForceDraw;

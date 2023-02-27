@@ -78,8 +78,8 @@ public class ChannelManager {
 			log.debug("getOrCreateMatchCategory " + server.getGuildId() + ":" + server.getMatchCategoryId());
 			return (Category) bot.getChannelById(server.getMatchCategoryId()).block();
 		} catch (ClientException e) {
-			log.error("Exception in getOrCreateMatchCategory: " + e);
-			log.error(e.getErrorResponse().get().toString());
+			log.warn("Exception in getOrCreateMatchCategory: " + e);
+			log.warn(e.getErrorResponse().get().toString());
 			if (!e.getErrorResponse().get().getFields().get("message").toString().equals("Unknown Channel")
 					// this happens when the category is deleted recently
 					&& !e.getErrorResponse().get().toString().contains("CHANNEL_PARENT_INVALID")) {
@@ -96,7 +96,7 @@ public class ChannelManager {
 	}
 
 	public TextChannelCreateMono createMatchChannel(Match match) {
-		log.debug("createMatchChannel: " + match.getId());
+		log.debug("createMatchChannel: " + match.getGameId() + ":" + match.getId());
 		Server server = match.getServer();
 		List<PermissionOverwrite> permissionOverwrites = excludePublic(server);
 		match.getPlayers().forEach(player -> permissionOverwrites.add(allowPlayerView(player)));
