@@ -14,6 +14,7 @@ supporter tier einbauen
 ranks anzeigen
 concept: autoresolve
 MatchService::getOrCreateDisputeCategory - frisch geloeschte category failt irgendwie wieder
+force resolve nicht revertbar
 
 
 marketplace - was habe ich hiermit gemeint? vllt irgendein discordzeug
@@ -67,6 +68,7 @@ schritt 10 : botstats DONE
 
 schritt 11 : self kick DONE
 
+permission error auf den genshin impact server...
 botstats auf den neuen bot umbiegen
 isOldBot in botstats hinterlegen
 wie builde ich die .jar lokal?
@@ -75,8 +77,4 @@ exception catchen wenn der channel cache einen geloeschten channel vorspielt?
 auf oldBot commands wieder loggen
 was macht die entenwiese-id?
 irgendwas im cd ist deprecated
-fehlermeldung wenn der bot seine kanaele nicht sieht
-
-revert match - schauen ob das neu deployt jetzt geht
-informieren dass es en problem mit send permissions ist
 

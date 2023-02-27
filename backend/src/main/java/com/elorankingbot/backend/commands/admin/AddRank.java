@@ -104,7 +104,7 @@ public class AddRank extends SlashCommand {
         }
         event.reply(String.format("@%s will now automatically be assigned to any player of %s who reaches %s rating.",
                 role.getName(), game.getName(), rating)).subscribe();
-        if (!bot.isBotAdmin(server) && !bot.isBotRoleHigherThanGivenRole(role)) {
+        if (!bot.isBotRoleHigherThanGivenRole(role)) {
             event.createFollowup(String.format("I currently hold no role that is higher than %s." +
                                     " As a result I cannot assign %s to players." +
                                     " Please move the %s role up in the hierarchy, or assign me a role that is above %s.",

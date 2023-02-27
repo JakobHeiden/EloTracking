@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.service;
 
-import com.elorankingbot.backend.ExceptionHandler;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.EventParser;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;

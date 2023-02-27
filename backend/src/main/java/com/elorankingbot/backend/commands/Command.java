@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.ExceptionHandler;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.command.annotations.OwnerCommand;

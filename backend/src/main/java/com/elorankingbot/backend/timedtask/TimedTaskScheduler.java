@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.timedtask;
 
-import com.elorankingbot.backend.ExceptionHandler;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.commands.timed.AutoResolveMatch;
 import com.elorankingbot.backend.commands.timed.DecayAcceptedChallenge;
 import com.elorankingbot.backend.commands.timed.DecayOpenChallenge;
