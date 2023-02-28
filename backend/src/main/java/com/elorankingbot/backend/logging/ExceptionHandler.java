@@ -31,7 +31,7 @@ public class ExceptionHandler {
 	}
 
 	private void handleCommandException(Throwable throwable, DeferrableInteractionEvent event, String commandName, String errorSpecificString) {
-		String guildString = event.getInteraction().getGuild().map(this::guildAsString).onErrorReturn("unknown").block();
+		String guildString = event.getInteraction().getGuild().map(bot::guildAsString).onErrorReturn("unknown").block();
 		String context = String.format("%s on %s by %s", commandName, guildString, event.getInteraction().getUser().getTag());
 		handleException(throwable, context);
 
@@ -52,10 +52,6 @@ public class ExceptionHandler {
 		}
 		log.error(ownerErrorMessage);
 		throwable.printStackTrace(System.out);
-	}
-
-	private String guildAsString(Guild guild) {
-		return guild.getId().asString() + ":" + guild.getName();
 	}
 
 	// specific exception cases
