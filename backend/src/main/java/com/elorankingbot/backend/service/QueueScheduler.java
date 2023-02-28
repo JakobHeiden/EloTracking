@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 public class QueueScheduler {
 
     private final DBService dbService;
+    private final DiscordBotService bot;
     private final MatchService matchService;
     private final ExceptionHandler exceptionHandler;
 
     public QueueScheduler(Services services) {
         this.dbService = services.dbService;
+        this.bot = services.bot;
         this.matchService = services.matchService;
         this.exceptionHandler = services.exceptionHandler;
     }
@@ -31,11 +33,11 @@ public class QueueScheduler {
             return;
         }
 
-        try {
-            dbService.findAllServers().stream()
-                    .flatMap(server -> server.getGames().stream())
-                    .flatMap(game -> game.getQueues().stream()).forEach(
-                            queue -> {
+        dbService.findAllServers().stream()
+                .flatMap(server -> server.getGames().stream())
+                .flatMap(game -> game.getQueues().stream()).forEach(
+                        queue -> {
+                            try {
                                 boolean foundMatch;
                                 do {
                                     Optional<Match> maybeMatch = generateMatchIfPossible(queue);
@@ -48,10 +50,13 @@ public class QueueScheduler {
                                         foundMatch = false;
                                     }
                                 } while (foundMatch);
-                            });
-        } catch (Exception e) {
-            exceptionHandler.handleException(e, this.getClass().getSimpleName() + "::generateAndStartMatches");
-        }
+                            } catch (Exception e) {
+                                String context = String.format("%s::generateAndStartMatches on %s:%s:%s",
+                                        this.getClass().getSimpleName(), bot.getServerName(queue.getServer()),
+                                        queue.getGame().getName(), queue.getName());
+                                exceptionHandler.handleException(e, context);
+                            }
+                        });
     }
 
     public Optional<Match> generateMatchIfPossible(MatchFinderQueue queue) {
