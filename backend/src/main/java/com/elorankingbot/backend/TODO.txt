@@ -41,6 +41,7 @@ auf neuen discordserver umziehen
 top.gg
 discord discovery, bot und server
 was verlier ich durch die verification?
+cache miss logging, hab im D4J-discord nachgefragt...
 
 
 schritt 1 : old queue abschalten DONE
@@ -75,6 +76,5 @@ wie builde ich die .jar lokal?
 guildinfo, allguilds deployen
 exception catchen wenn der channel cache einen geloeschten channel vorspielt?
 auf oldBot commands wieder loggen
-was macht die entenwiese-id?
-irgendwas im cd ist deprecated
 
+cache miss logging zuende - felt noch der output
