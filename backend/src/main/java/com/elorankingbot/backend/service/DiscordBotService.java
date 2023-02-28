@@ -2,7 +2,6 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.logging.CustomExtendedEntityRetrievalStrategy;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.Server;

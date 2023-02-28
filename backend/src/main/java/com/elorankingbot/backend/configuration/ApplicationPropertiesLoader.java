@@ -17,10 +17,7 @@ public class ApplicationPropertiesLoader {
 	private long ownerId;
 	private long ente2Id;
 	private long announcementChannelId;
-	private String baseUrl;
 	private int numberOfTimeSlots;
-	private String testBotChallengerId;
-	private String testBotAcceptorId;
 	private boolean useDevBotToken;
 	private boolean doUpdateGuildCommands;
 	private boolean doRunSchedulers;

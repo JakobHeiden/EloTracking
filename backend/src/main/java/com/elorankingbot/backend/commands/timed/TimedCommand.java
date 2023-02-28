@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.commands.timed;
 
-import com.elorankingbot.backend.model.ChallengeModel;
 import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
@@ -17,7 +16,6 @@ public abstract class TimedCommand {
 	protected final TimedTaskScheduler queue;
 	protected final GatewayDiscordClient client;
 
-	protected final ChallengeModel challenge;
 	protected final long relationId;
 	protected final int time;
 
@@ -31,10 +29,6 @@ public abstract class TimedCommand {
 
 		this.relationId = relationId;
 		this.time = time;
-		//Optional<ChallengeModel> maybeChallenge = service.findChallengeById(relationId);
-		//if (maybeChallenge.isPresent()) challenge = maybeChallenge.get();
-		//else
-		challenge = null;
 	}
 
 	public abstract void execute();
