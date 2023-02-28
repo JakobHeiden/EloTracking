@@ -18,7 +18,7 @@ public class ExceptionHandler {
 
 	private final DiscordBotService bot;
 
-	public static final String supportServerInvite = "https://discord.com/invite/hCAJXasrhd";
+	public static final String supportServerInvite = "https://discord.gg/n5mFYY272t";
 	public static final Consumer<Object> NO_OP = object -> {
 	};
 

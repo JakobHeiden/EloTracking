@@ -77,7 +77,7 @@ guildinfo, allguilds deployen
 exception catchen wenn der channel cache einen geloeschten channel vorspielt?
 auf oldBot commands wieder loggen
 
-neuen server anlegen
-community informieren
 links umbiegen: bot selbst, yt, website
 top gg neu anlegen
+
+channel delete umbiegen auf command
