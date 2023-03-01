@@ -41,7 +41,7 @@ auf neuen discordserver umziehen
 top.gg
 discord discovery, bot und server
 was verlier ich durch die verification?
-cache miss logging, hab im D4J-discord nachgefragt...
+sikuli auf deploy laufen
 
 
 schritt 1 : old queue abschalten DONE
@@ -76,8 +76,12 @@ wie builde ich die .jar lokal?
 guildinfo, allguilds deployen
 exception catchen wenn der channel cache einen geloeschten channel vorspielt?
 auf oldBot commands wieder loggen
+player tutorial hochladen
 
-links umbiegen: bot selbst, yt, website
+links umbiegen:
+bot selbst - noch testen, dann pushen
+, yt, DONE
+website
 top gg neu anlegen
 
 channel delete umbiegen auf command
