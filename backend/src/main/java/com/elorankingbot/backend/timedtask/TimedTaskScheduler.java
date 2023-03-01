@@ -108,8 +108,9 @@ public class TimedTaskScheduler {
             if (currentIndex % (7 * 24 * 60) == 0) {// TODO wohl laenger
                 List<Long> allGuildIds = bot.getAllGuildIds();
                 timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
-                timedTaskService.deleteServersMarkedForDeletion();
-                timedTaskService.markServersForDeletion(allGuildIds);
+                // TOKEN
+                //timedTaskService.deleteServersMarkedForDeletion();
+                //timedTaskService.markServersForDeletion(allGuildIds);
             }
             if (currentIndex % (24 * 60) == 0) {
                 dbService.persistBotStatsAndRestartAccumulator();
