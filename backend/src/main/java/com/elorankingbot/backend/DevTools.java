@@ -62,25 +62,6 @@ public class DevTools {
         this.serverDao = serverDao;
 
         if (props.isDoUpdateGuildCommands()) updateGuildCommands();
-
-        // TOKEN empty all queues
-        if (bot.isOld()) {
-            dbService.findAllServers().forEach(server -> {
-                log.debug("Deleting channels for " + server.getGuildId());
-                server.getGames().forEach(game -> {
-                    bot.getChannelById(game.getLeaderboardChannelId()).subscribe(channel -> channel.delete().subscribe());
-                    bot.getChannelById(game.getResultChannelId()).subscribe(channel -> channel.delete().subscribe());
-                });
-				bot.deleteChannel(server.getMatchCategoryId());
-				bot.deleteChannel(server.getDisputeCategoryId());
-                server.getArchiveCategoryIds().forEach(categoryId -> {
-					bot.getChannelById(categoryId).subscribe(category -> ((Category) category)
-							.getChannels().subscribe(channel ->
-									channel.delete().subscribe()));
-					bot.deleteChannel(categoryId);
-				});
-            });
-        }
     }
 
     // Commands to deploy to production:
