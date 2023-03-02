@@ -76,12 +76,7 @@ wie builde ich die .jar lokal?
 guildinfo, allguilds deployen
 exception catchen wenn der channel cache einen geloeschten channel vorspielt?
 auf oldBot commands wieder loggen
-player tutorial hochladen
 
-links umbiegen:
-bot selbst - noch testen, dann pushen
-, yt, DONE
-website
 top gg neu anlegen
 
 channel delete umbiegen auf command
