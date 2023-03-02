@@ -1,5 +1,7 @@
-package com.elorankingbot.backend.model;
+package com.elorankingbot.backend.logging;
 
+import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.model.Player;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.PersistenceConstructor;

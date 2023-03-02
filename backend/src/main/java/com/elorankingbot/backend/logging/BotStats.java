@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.model;
+package com.elorankingbot.backend.logging;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

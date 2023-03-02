@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.dao;
 
-import com.elorankingbot.backend.model.BotStats;
+import com.elorankingbot.backend.logging.BotStats;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Date;

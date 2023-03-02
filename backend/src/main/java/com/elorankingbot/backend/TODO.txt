@@ -37,11 +37,12 @@ alt, neu starten DONE
 gucken ob es funktioniert
 warten bis alle relevanten server migriert sind, dann abschalten
 website anpassen DONE
-auf neuen discordserver umziehen
-top.gg
-discord discovery, bot und server
-was verlier ich durch die verification?
+auf neuen discordserver umziehen DONE
+top.gg DONE
+discord discovery, bot und server braucht verification
+
 sikuli auf deploy laufen
+guildinfo... unsichtbaren - hab auf d4j nachgefragt wegen createFollowup.withEthereal
 
 
 schritt 1 : old queue abschalten DONE
@@ -69,12 +70,5 @@ schritt 10 : botstats DONE
 
 schritt 11 : self kick DONE
 
-permission error auf den genshin impact server...
 botstats auf den neuen bot umbiegen
 isOldBot in botstats hinterlegen
-wie builde ich die .jar lokal?
-guildinfo, allguilds deployen
-exception catchen wenn der channel cache einen geloeschten channel vorspielt?
-auf oldBot commands wieder loggen
-
-channel delete umbiegen auf command

@@ -2,6 +2,8 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
+import com.elorankingbot.backend.logging.BotStats;
+import com.elorankingbot.backend.logging.BotStatsAccumulator;
 import com.elorankingbot.backend.model.*;
 import discord4j.core.object.entity.User;
 import lombok.extern.apachecommons.CommonsLog;
@@ -300,9 +302,6 @@ public class DBService {
 
 	// Statistics
 	public void addMatchResultToStats(MatchResult matchResult) {
-		// TOKEN
-		if (!bot.isOld()) return;
-
 		if (props.getTestServerIds().contains(matchResult.getServer().getGuildId())) {
 			return;
 		}

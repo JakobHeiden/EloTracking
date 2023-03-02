@@ -36,8 +36,8 @@ public class GuildInfo extends SlashCommand {
 	}
 
 	protected void execute() throws Exception {
+		event.deferReply().subscribe();
 		try {
-			event.deferReply().subscribe();
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuild(guildId).block();
 			String reply = String.format("%s:%s:%s\n", guildId, guild.getName(), guild.getMemberCount());
