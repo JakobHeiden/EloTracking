@@ -17,7 +17,6 @@ MatchService::getOrCreateDisputeCategory - frisch geloeschte category failt irge
 force resolve nicht revertbar
 
 
-marketplace - was habe ich hiermit gemeint? vllt irgendein discordzeug
 {code=BASE_TYPE_MAX_LENGTH, message=Must be 2000 or fewer in length.}
 /allguilds anpassen
 
@@ -27,7 +26,15 @@ konstruktor anpassen, auch fuer mongo
 update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
 
+sikuli auf deploy laufen
+guildinfo... unsichtbaren - hab auf d4j nachgefragt wegen createFollowup.withEthereal
 
+
+
+
+
+
+---TRANSITION---
 ABLAUF:
 ankuendigen DONE
 db sichern DONE
@@ -40,9 +47,6 @@ website anpassen DONE
 auf neuen discordserver umziehen DONE
 top.gg DONE
 discord discovery, bot und server braucht verification
-
-sikuli auf deploy laufen
-guildinfo... unsichtbaren - hab auf d4j nachgefragt wegen createFollowup.withEthereal
 
 
 schritt 1 : old queue abschalten DONE
@@ -69,6 +73,3 @@ schritt 9 : timedtasks auf altem bot aus DONE
 schritt 10 : botstats DONE
 
 schritt 11 : self kick DONE
-
-botstats auf den neuen bot umbiegen
-isOldBot in botstats hinterlegen
