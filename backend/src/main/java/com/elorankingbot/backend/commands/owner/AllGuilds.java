@@ -27,8 +27,8 @@ public class AllGuilds extends SlashCommand {
 	}
 
 	protected void execute() throws Exception {
+		event.deferReply().subscribe();
 		try {
-			event.deferReply().subscribe();
 			Map<Integer, String> guilds = new HashMap<>();
 			for (Server server : dbService.findAllServers()) {
 				Guild guild;
@@ -44,7 +44,7 @@ public class AllGuilds extends SlashCommand {
 					String.join("\n", sortedKeys.stream().map(guilds::get).toList())).withEphemeral(true).subscribe();
 		} catch (Exception e) {
 			e.printStackTrace();
-			event.reply(e.getMessage()).withEphemeral(true)
+			event.createFollowup(e.getMessage()).withEphemeral(true)
 					.subscribe(NO_OP, super::forwardToExceptionHandler);
 		}
 	}
