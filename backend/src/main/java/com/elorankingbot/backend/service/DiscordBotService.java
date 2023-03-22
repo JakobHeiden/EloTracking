@@ -95,14 +95,16 @@ public class DiscordBotService {
 
     public String getServerName(Server server) {
         try {
-            return client.getGuildById(Snowflake.of(server.getGuildId())).block().getName();
+            return String.format("%s:%s",
+                    server.getGuildId(),
+                    client.getGuildById(Snowflake.of(server.getGuildId())).block().getName());
         } catch (ClientException e) {
-            return "unknown";
+            return server.getGuildId() + ":unknown, can't get Guild";
         }
     }
 
     public String getServerName(Player player) {
-        return client.getGuildById(Snowflake.of(player.getGuildId())).block().getName();
+        return getServerName(dbService.getOrCreateServer(player.getGuildId()));
     }
 
     // User

@@ -15,6 +15,7 @@ konstruktor anpassen, auch fuer mongo
 update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
 
+SetPermission pruefen ob der ausfuherende an die rolle kann
 sikuli auf deploy laufen
 was ist das problem mit den rank roles?
 ""Skyyy — 09/03/2023 23:59
