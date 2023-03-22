@@ -95,7 +95,10 @@ public class MatchService {
 		Game game = match.getGame();
 		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
-				.withContent(match.getAllMentions()).block();
+				// users have called for these mentions to be removed. if other users again call for them be implemented,
+				// make them a setting.
+				//.withContent(match.getAllMentions())
+				.block();
 		newMatchMessage.pin().subscribe();
 		bot.getMessage(match.getMessageId(), match.getChannelId())
 				.subscribe(oldMatchMessage -> oldMatchMessage.delete().subscribe());
