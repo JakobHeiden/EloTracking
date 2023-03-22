@@ -1,11 +1,3 @@
-WOHNUNG
-bildschirme
-tastatur
-bad armaturen
-bad fliesen
-
-DEV
-immer: fehler eliminieren!
 ein kanal/mehrere in settings einpflegen
 leaderboardlength setting
 team queue
@@ -13,12 +5,9 @@ um votes betteln
 supporter tier einbauen
 ranks anzeigen
 concept: autoresolve
-MatchService::getOrCreateDisputeCategory - frisch geloeschte category failt irgendwie wieder
 force resolve nicht revertbar
 
 
-{code=BASE_TYPE_MAX_LENGTH, message=Must be 2000 or fewer in length.}
-/allguilds anpassen
 
 NICKS ANZEIGEN
 player updated mit nick
@@ -27,49 +16,11 @@ update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
 
 sikuli auf deploy laufen
-guildinfo... unsichtbaren - hab auf d4j nachgefragt wegen createFollowup.withEthereal
+was ist das problem mit den rank roles?
+""Skyyy — 09/03/2023 23:59
+  Any idea how to fix the bot from only giving one player roles when a match ends?
+cause in a 3v3 only 1 of the 6 gets a role
+it specifically removed the roles??? -> bugs channel
 
-
-
-
-
-
----TRANSITION---
-ABLAUF:
-ankuendigen DONE
-db sichern DONE
-auf neu und alt pushen DONE
-timedtasks saemtlich loeschen DONE
-alt, neu starten DONE
-gucken ob es funktioniert
-warten bis alle relevanten server migriert sind, dann abschalten
-website anpassen DONE
-auf neuen discordserver umziehen DONE
-top.gg DONE
-discord discovery, bot und server braucht verification
-
-
-schritt 1 : old queue abschalten DONE
-
-schritt 2 : bei invite isOldBot false setzen DONE
-
-scritt 3 : alter server kickt sich selbst DONE
-
-schritt 4 : neuer server befüllt commands DONE
-
-schritt 5 : globale commands deployen DONE
-
-schritt 6 : queue leeren DONE
-
-schritt 7 : commmands machen link, ausser match, dispute DONE
-
-schritt 8 : access-probleme? channel, messages, ranks, was noch?
-channel loeschen DONE
-categories loeschen DONE
-nachricht bei match-buttons DONE
-
-schritt 9 : timedtasks auf altem bot aus DONE
-
-schritt 10 : botstats DONE
-
-schritt 11 : self kick DONE
+omyah — 10/03/2023 05:57
+When it moves a match to the archive category can you make it not tag both the players again? it's just extra tagging and it's a little annoying
