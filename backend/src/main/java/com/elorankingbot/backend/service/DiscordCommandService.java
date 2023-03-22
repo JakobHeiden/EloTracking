@@ -106,7 +106,7 @@ public class DiscordCommandService {
 	}
 
 	public void deleteCommand(Server server, String commandName, BiFunction<String, Boolean, Consumer<Throwable>> updateCommandFailedCallbackFactory) {
-		log.debug("deleting command " + commandName);
+		log.debug(String.format("deleting command %s on %s", commandName, bot.getServerName(server)));
 		getCommandIdByName(server.getGuildId(), commandName)
 				.flatMap(commandId -> applicationService.deleteGuildApplicationCommand(botId, server.getGuildId(), commandId))
 				.subscribe(NO_OP, updateCommandFailedCallbackFactory.apply(commandName, false));
