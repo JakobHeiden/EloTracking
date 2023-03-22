@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.commands.admin.AddQueue;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -36,6 +37,13 @@ public class Settings extends SlashCommand {
 		if (server.getGames().isEmpty()) {
 			event.reply(String.format("There are no rankings yet. Use `/%s` to create a ranking.",
 					CreateRanking.class.getSimpleName().toLowerCase())).subscribe();
+			return;
+		}
+		// this is for now necessary as there are game settings mixed with queue settings. possibly remove this at a later point.
+		// see SettingsComponents::gameSettingsEmbed
+		if (server.getQueues().isEmpty()) {
+			event.reply(String.format("There are no queues yet. Use `/%s` to add a queue to a ranking.",
+					AddQueue.class.getSimpleName().toLowerCase())).subscribe();
 			return;
 		}
 
