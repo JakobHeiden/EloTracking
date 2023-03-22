@@ -43,7 +43,7 @@ public class AllGuilds extends SlashCommand {
                 } catch (ClientException ignored) {// guilds that the server has lost access to end up here
                 }
             }
-            event.createFollowup(reply.append("Total number of guilds: " + numGuilds).toString()).subscribe();
+            event.createFollowup(reply.append("Total number of guilds: " + numGuilds).toString()).withEphemeral(true).subscribe();
         } catch (Exception e) {
             e.printStackTrace();
             event.createFollowup(e.getMessage()).subscribe(NO_OP, super::forwardToExceptionHandler);
