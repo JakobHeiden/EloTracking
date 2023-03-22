@@ -89,9 +89,10 @@ public class TimedTaskScheduler {
             // TOKEN
             if (bot.isOld()) {
                 log.debug("tick");
+                List<Long> allGuildIds = bot.getAllGuildIds();
                 dbService.findAllServers().forEach(server -> {
                     log.debug("check for leave : " + server.getGuildId());
-                    if (!server.isOldBot()) {// TODO! allGuilds holen, nur in der ueberschneidung leaven
+                    if (!server.isOldBot() && allGuildIds.contains(server.getGuildId())) {
                         log.debug("server is new bot, leaving");
                         bot.getGuild(server).subscribe(guild -> {
                             log.info("Leaving server " + server.getGuildId() + ":" + guild.getName());
