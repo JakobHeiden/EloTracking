@@ -14,6 +14,7 @@ player updated mit nick
 konstruktor anpassen, auch fuer mongo
 update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
+
 sikuli auf deploy laufen
 
 was ist das problem mit den rank roles?
@@ -21,3 +22,11 @@ was ist das problem mit den rank roles?
   Any idea how to fix the bot from only giving one player roles when a match ends?
 cause in a 3v3 only 1 of the 6 gets a role
 it specifically removed the roles??? -> bugs channel
+
+
+KarmaKredits — Today at 15:45
+I tried temp bans but didn't understand how to use another unit besides minutes for duration. It always defaulted to minutes.
+[15:45]
+A command to view the ban list would be helpful to, seemed like the account I was trying to ban was still able to queue
+[15:46]
+Also, does the bot DM the banned person when they are initially banned or when they try using a command?

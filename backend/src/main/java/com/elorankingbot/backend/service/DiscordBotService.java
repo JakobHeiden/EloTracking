@@ -108,16 +108,12 @@ public class DiscordBotService {
     }
 
     // User
-    public Mono<User> getUser(long userId) {
-        return client.getUserById(Snowflake.of(userId));
+    public User getUser(long userId) {
+        return client.getUserById(Snowflake.of(userId)).block();
     }
 
-    public Optional<Member> findMember(Player player) {
-        try {
-            return Optional.of(client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block());
-        } catch (ClientException e) {
-            return Optional.empty();
-        }
+    public Member getMember(Player player) {
+        return client.getMemberById(Snowflake.of(player.getGuildId()), Snowflake.of(player.getUserId())).block();
     }
 
     // Roles

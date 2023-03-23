@@ -96,7 +96,7 @@ public class MatchService {
 		TextChannel matchChannel = (TextChannel) bot.getChannelById(match.getChannelId()).block();// TODO was wenn der channel weg ist
 		Message newMatchMessage = matchChannel.createMessage(EmbedBuilder.createCompletedMatchEmbed(embedTitle, matchResult))
 				// users have called for these mentions to be removed. if other users again call for them be implemented,
-				// make them a setting.
+				// make them a setting:
 				//.withContent(match.getAllMentions())
 				.block();
 		newMatchMessage.pin().subscribe();
@@ -179,18 +179,16 @@ public class MatchService {
 
 		Collections.sort(applicableRequiredRatings);
 		int relevantRequiredRating = Iterables.getLast(applicableRequiredRatings);
-		Role rankRole = bot.getRole(game.getServer(), game.getRequiredRatingToRankId().get(relevantRequiredRating));
+		Role highestApplicableRankRole = bot.getRole(game.getServer(), game.getRequiredRatingToRankId().get(relevantRequiredRating));
 
-		Optional<Member> maybeMember = bot.findMember(player);
-		if (maybeMember.isEmpty()) return;
-		Member member = maybeMember.get();
+		Member member = bot.getMember(player);
 		List<Role> currentRankRoles = member.getRoles()
 				.filter(role -> game.getRequiredRatingToRankId().containsValue(role.getId().asLong()))
 				.collectList().block();
-		if (!currentRankRoles.contains(rankRole)) {
-			member.addRole(rankRole.getId()).subscribe(NO_OP, manageRoleFailedCallback.apply(rankRole));
+		if (!currentRankRoles.contains(highestApplicableRankRole)) {
+			member.addRole(highestApplicableRankRole.getId()).subscribe(NO_OP, manageRoleFailedCallback.apply(highestApplicableRankRole));
 		}
-		currentRankRoles.stream().filter(roleSnowflake -> !roleSnowflake.equals(rankRole.getId()))
+		currentRankRoles.stream().filter(role -> !role.equals(highestApplicableRankRole))
 				.forEach(role -> member.removeRole(role.getId()).subscribe(NO_OP, manageRoleFailedCallback.apply(role)));
 	}
 }
