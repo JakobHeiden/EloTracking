@@ -104,7 +104,7 @@ public class TimedTaskService {
 		player.setUnbanAtTimeSlot(-2);
 		dbService.savePlayer(player);
 
-		bot.sendDM(bot.getUser(userId).block(), String.format("Your ban has run out after %s. You are no longer banned.",
+		bot.sendDM(bot.getUser(userId), String.format("Your ban has run out after %s. You are no longer banned.",
 						DurationParser.minutesToString(duration)));
 	}
 
