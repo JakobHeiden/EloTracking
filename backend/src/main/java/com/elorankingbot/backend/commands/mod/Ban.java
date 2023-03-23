@@ -52,7 +52,7 @@ public class Ban extends SlashCommand {
 				.addOption(ApplicationCommandOptionData.builder()
 						.name("duration").description(
 								"How long, if applicable. Append any of m,h,d,w to get mins, hours, days, or weeks. Default is mins")
-						.type(ApplicationCommandOption.Type.INTEGER.getValue())
+						.type(ApplicationCommandOption.Type.STRING.getValue())
 						.required(false)
 						.build())
 				.addOption(ApplicationCommandOptionData.builder()
@@ -105,7 +105,7 @@ public class Ban extends SlashCommand {
 					event.reply("Please enter a duration.").subscribe();
 					return;
 				}
-				String durationString = event.getOption("duration").get().getValue().get().getRaw();
+				String durationString = event.getOption("duration").get().getValue().get().asString();
 				Optional<Integer> maybeDuration = DurationParser.parse(durationString);
 				if (maybeDuration.isEmpty()) {
 					event.reply("Please enter a valid duration. Examples: 90, 3h, 5d, 10w");
@@ -134,12 +134,12 @@ public class Ban extends SlashCommand {
 		if (player.isBanned()) {
 			bot.sendDM(playerUser, event, String.format("%s has updated your ban to be permanent, or until unbanned.%s",
 							event.getInteraction().getUser().getTag(), reasonGiven));
-			event.reply(String.format("%s's ban is updated to be permanent, or until unbanned.%s",
+			event.reply(String.format("%s's ban is updated to be permanent, or until unbanned. I informed them about it.%s",
 					playerUser.getTag(), reasonGiven)).subscribe();
 		} else {
 			bot.sendDM(playerUser, event, String.format("%s has banned you permanently, or until unbanned.%s",
 							event.getInteraction().getUser().getTag(), reasonGiven));
-			event.reply(String.format("%s is banned permanently, or until unbanned.%s",
+			event.reply(String.format("%s is banned permanently, or until unbanned. I informed them about it.%s",
 					playerUser.getTag(), reasonGiven)).subscribe();
 		}
 	}
@@ -148,19 +148,19 @@ public class Ban extends SlashCommand {
 		if (player.isBanned()) {
 			bot.sendDM(playerUser, event, String.format("%s has updated your ban to end after %s, from now.%s",
 							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven));
-			event.reply(String.format("%s's ban has been updated to end after %s, from now.%s",
+			event.reply(String.format("%s's ban has been updated to end after %s, from now. I informed them about it.%s",
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		} else {
 			bot.sendDM(playerUser, event, String.format("%s has banned you for %s.%s",
 							event.getInteraction().getUser().getTag(), minutesToString(duration), reasonGiven));
-			event.reply(String.format("%s is banned for %s.%s",
+			event.reply(String.format("%s is banned for %s. I informed them about it.%s",
 					playerUser.getTag(), minutesToString(duration), reasonGiven)).subscribe();
 		}
 	}
 
 	private void sendUnbanMessages() {
 		bot.sendDM(playerUser, event, String.format("%s has lifted your ban.%s", event.getInteraction().getUser().getTag(), reasonGiven));
-		event.reply(String.format("%s has been unbanned.%s",
+		event.reply(String.format("%s has been unbanned. I informed them about it.%s",
 				playerUser.getTag(), reasonGiven)).subscribe();
 	}
 }
