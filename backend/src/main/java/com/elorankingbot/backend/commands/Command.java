@@ -33,6 +33,7 @@ public abstract class Command {
 	protected final ApplicationPropertiesLoader props;
 	protected final ExceptionHandler exceptionHandler;
 	protected final DeferrableInteractionEvent event;
+	protected final Snowflake guildSnowflake;
 	protected final long guildId;
 	protected final Server server;
 	protected final User activeUser;
@@ -54,7 +55,8 @@ public abstract class Command {
 		this.props = services.props;
 		this.exceptionHandler = services.exceptionHandler;
 		this.event = event;
-		this.guildId = event.getInteraction().getGuildId().get().asLong();
+		this.guildSnowflake = event.getInteraction().getGuildId().get();
+		this.guildId = guildSnowflake.asLong();
 		this.server = dbService.getOrCreateServer(guildId);
 		this.activeUser = event.getInteraction().getUser();
 		this.activeUserId = activeUser.getId().asLong();
