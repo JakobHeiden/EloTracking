@@ -16,3 +16,5 @@ update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
 
 sikuli auf deploy laufen
+
+vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
