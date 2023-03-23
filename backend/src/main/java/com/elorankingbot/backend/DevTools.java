@@ -67,13 +67,13 @@ public class DevTools {
     // Commands to deploy to production:
     private void updateGuildCommands() {
         log.warn("updating global commands...");
+        applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
         /*
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Help.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Settings.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), CreateRanking.getRequest()).subscribe();
-        applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Leave.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), PlayerInfo.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), QueueStatus.getRequest()).subscribe();
@@ -82,16 +82,19 @@ public class DevTools {
         //applicationService.createGuildApplicationCommand(bot.getBotId(), 929504858585845810L, AllGuilds.getRequest()).subscribe();
         dbService.findAllServers().forEach(
                 server -> {
+                        /*
                     try {
 						if (props.getTestServerIds().contains(server.getGuildId())) {
 							discordCommandService.deployCommand(server, GuildInfo.getRequest(),
 									this::simplePrintThrowableCallback);
                             discordCommandService.deployCommand(server, AllGuilds.getRequest(),
                                     this::simplePrintThrowableCallback);
+
 						}
                     } catch (Exception e) {
                         log.error(e.getMessage());
                     }
+                         */
                 }
         );
     }
