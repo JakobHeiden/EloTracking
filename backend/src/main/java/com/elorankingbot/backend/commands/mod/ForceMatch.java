@@ -27,6 +27,7 @@ public abstract class ForceMatch extends SlashCommand {
 	}
 
 	protected void execute() {
+		event.deferReply().subscribe();
 		Game game = server.getGame(event.getOptions().get(0).getName());
 		boolean isSingularQueue = event.getOptions().get(0).getOptions().get(0).getType().equals(USER);
 		queue = isSingularQueue ? game.getQueues().stream().findAny().get()
@@ -52,7 +53,7 @@ public abstract class ForceMatch extends SlashCommand {
 		String resolveMessage = String.format(String.format("%s has force-resolved a match of %s.",
 				event.getInteraction().getUser().getTag(), game.getName()));
 		EmbedCreateSpec matchEmbed = matchService.processForcedMatchResult(matchResult, users, resolveMessage, event, manageRoleFailedCallbackFactory());
-		event.reply().withEmbeds(matchEmbed).subscribe(NO_OP, super::forwardToExceptionHandler);
+		event.createFollowup().withEmbeds(matchEmbed).subscribe(NO_OP, super::forwardToExceptionHandler);
 	}
 
 	private List<List<Player>> makeTeams() {

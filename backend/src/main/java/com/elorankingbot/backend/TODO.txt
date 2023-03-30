@@ -6,7 +6,8 @@ supporter tier einbauen
 ranks anzeigen
 concept: autoresolve
 force resolve nicht revertbar
-
+was ist mit den webhook errors?
+COmmand::acknoledgeEvent()nochmal anschauen
 
 
 NICKS ANZEIGEN
@@ -16,5 +17,12 @@ update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
 
 sikuli auf deploy laufen
+permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
 
 vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
+
+
+
+PATREON
+client ist created, was nun?
+tutorial oder so?
