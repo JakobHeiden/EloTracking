@@ -2,6 +2,7 @@ package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.patreon.PatreonButton;
 import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
@@ -238,7 +239,8 @@ public class ChannelManager {
 		}
 		leaderboardMessage.edit()
 				.withContent(Possible.of(Optional.empty()))
-				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game))).subscribe();
+				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)))
+				.subscribe();
 	}
 
 	// Archive
