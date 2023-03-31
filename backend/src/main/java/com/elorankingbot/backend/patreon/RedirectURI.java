@@ -23,7 +23,7 @@ public class RedirectURI {
     public String patreonRedirect(@RequestParam String code) {
         bot.sendToOwner("REDIRECT " + code);
         log.warn("REDIRECT " + code);
-        bot.sendToOwner(prototype.doStuff(code));
+        bot.sendToOwner(prototype.doStuff(code, bot));
         return "placeholder";
     }
 }
