@@ -55,8 +55,9 @@ public class GuildInfo extends SlashCommand {
 				}
 			}
 			 */
-			event.createFollowup(reply).withEphemeral(true)
+			event.createFollowup(reply)
 					.withComponents(ActionRow.of(PatreonButton.link("awake")))
+					.withEphemeral(true)
 					.subscribe(NO_OP, super::forwardToExceptionHandler);
 		} catch (NumberFormatException e) {
 			event.createFollowup("That's not a number").withEphemeral(true).subscribe();

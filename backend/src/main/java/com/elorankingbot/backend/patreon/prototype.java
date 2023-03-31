@@ -31,25 +31,15 @@ public class prototype {
             PatreonOAuth oauthClient = new PatreonOAuth(clientId, clientSecret, redirectUri);
 
 
-            //PatreonOAuth.TokensResponse tokens = oauthClient.getTokens(code);
-            Connection requestInfo = Jsoup.connect(PatreonAPI.BASE_URI + "/api/oauth2/token")
-                    .data("grant_type", "authorization_code").data("code", code)
-                    .data("client_id", clientId).data("client_secret", clientSecret)
-                    .data("redirect_uri", redirectUri).ignoreContentType(true);
-
-            String response = requestInfo.post().body().text();
-            bot.sendToOwner(response);
-            PatreonOAuth.TokensResponse tokens = (PatreonOAuth.TokensResponse)toObject(response, PatreonOAuth.TokensResponse.class);
-
-
-
+            PatreonOAuth.TokensResponse tokens = oauthClient.getTokens(code);
 
             //Store the refresh TokensResponse in your data store
             String accessToken = tokens.getAccessToken();
+            bot.sendToOwner(accessToken);
+            if (true) return accessToken;
 
             PatreonAPI apiClient = new PatreonAPI(accessToken);
-            JSONAPIDocument<User> userResponse = null;
-            userResponse = apiClient.fetchUser();
+            JSONAPIDocument<User> userResponse = apiClient.fetchUser();
 
             User user = userResponse.get();
             log.info(user.getFullName());
@@ -67,9 +57,5 @@ public class prototype {
 // You should save the user's PatreonOAuth.TokensResponse in your database
 // (for refreshing their Patreon data whenever you like),
 // along with any relevant user info or pledge info you want to store.
-    }
-
-    private static <E> E toObject(String str, Class<E> clazz) {
-        return gson.fromJson(str, clazz);
     }
 }
