@@ -24,5 +24,15 @@ vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand 
 
 
 PATREON
-client ist created, was nun?
-tutorial oder so?
+19:45:23: REDIRECT oL8xtyOCYE6n8R2Myf9fQxYJVhgkxs
+19:45:24: catch com.fasterxml.jackson.core.JsonParseException: Unexpected character ('<' (code 60)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+ at [Source: (sun.net.www.protocol.http.HttpURLConnection$HttpInputStream); line: 1, column: 2]
+19:47:32: REDIRECT ezzzz
+19:47:33: catch HTTP error fetching URL
+ letzteres wahrscheinlich 401, ersteres... was ist ersteres?
+
+ 2023-03-30 19:45:24.679 ERROR 1104 --- [http-nio-8080-exec-1] c.e.backend.patreon.prototype
+   : catch com.fasterxml.jackson.core.JsonParseException: Unexpected character ('<' (code 60)):
+   expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
+  at [Source: (sun.net.www.protocol.http.HttpURLConnection$HttpInputStream); line: 1, column: 2]
+
