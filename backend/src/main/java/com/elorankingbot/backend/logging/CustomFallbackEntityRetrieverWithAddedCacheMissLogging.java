@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.logging;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.automod.AutoModRule;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -23,7 +24,7 @@ public class CustomFallbackEntityRetrieverWithAddedCacheMissLogging implements E
     public Mono<Channel> getChannelById(Snowflake channelId) {
         return this.first.getChannelById(channelId)
                 .switchIfEmpty(this.fallback.getChannelById(channelId)
-                .doOnSubscribe(subscription -> log.warn("Cache miss for channel " + channelId.asString())));
+                        .doOnSubscribe(subscription -> log.warn("Cache miss for channel " + channelId.asString())));
     }
 
     public Mono<Guild> getGuildById(Snowflake guildId) {
@@ -101,5 +102,10 @@ public class CustomFallbackEntityRetrieverWithAddedCacheMissLogging implements E
     public Flux<GuildSticker> getGuildStickers(Snowflake guildId) {
         return this.first.getGuildStickers(guildId).switchIfEmpty(this.fallback.getGuildStickers(guildId)
                 .doOnSubscribe(subscription -> log.warn("Cache miss for getGuildStickers on " + guildId.asString())));
+    }
+
+    public Flux<AutoModRule> getGuildAutoModRules(Snowflake guildId) {
+        return this.first.getGuildAutoModRules(guildId).switchIfEmpty(this.fallback.getGuildAutoModRules(guildId)
+                .doOnSubscribe(subscription -> log.warn("Cache miss for getGuildAutoModRules on " + guildId.asString())));
     }
 }
