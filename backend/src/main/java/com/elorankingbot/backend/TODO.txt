@@ -7,9 +7,15 @@ ranks anzeigen
 concept: autoresolve
 force resolve nicht revertbar
 was ist mit den webhook errors?
+winrate im eladerboard anzeigen
+leaderbords in 1 kanal
+pruefen ob annotations fuer commands automatisch deployen sinn macht
 COmmand::acknoledgeEvent()nochmal anschauen
+embedbuilder aufraeumen/refaktoren... vllt sollten die matchmessages ausschliesslich vom MatchService verwaltet werden?
+    dann kann der EmbedBuilder vllt weg und der matchservice die embeds bauen.
 
 
+nicks updaten
 NICKS ANZEIGEN
 player updated mit nick
 konstruktor anpassen, auch fuer mongo
@@ -24,15 +30,13 @@ vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand 
 
 
 PATREON
-19:45:23: REDIRECT oL8xtyOCYE6n8R2Myf9fQxYJVhgkxs
-19:45:24: catch com.fasterxml.jackson.core.JsonParseException: Unexpected character ('<' (code 60)): expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
- at [Source: (sun.net.www.protocol.http.HttpURLConnection$HttpInputStream); line: 1, column: 2]
-19:47:32: REDIRECT ezzzz
-19:47:33: catch HTTP error fetching URL
- letzteres wahrscheinlich 401, ersteres... was ist ersteres?
-
- 2023-03-30 19:45:24.679 ERROR 1104 --- [http-nio-8080-exec-1] c.e.backend.patreon.prototype
-   : catch com.fasterxml.jackson.core.JsonParseException: Unexpected character ('<' (code 60)):
-   expected a valid value (JSON String, Number, Array, Object or token 'null', 'true' or 'false')
-  at [Source: (sun.net.www.protocol.http.HttpURLConnection$HttpInputStream); line: 1, column: 2]
-
+Patreon bauen
+link fuer supporter werden
+/patreon in leaderboard verlinken
+link fuer diesen server auf support tier setzen: in server flag setzen, link deaktivieren
+redirect entsprechendes feedback zeigen
+patreonzeugs model bauen: wieviel, welche server?
+das in /patreon anzeigen
+knopf fuer disen server nicht mehr supporten
+isSupportTier flag setzen
+wann updaten? monatsanfang?
