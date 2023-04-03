@@ -13,6 +13,9 @@ pruefen ob annotations fuer commands automatisch deployen sinn macht
 COmmand::acknoledgeEvent()nochmal anschauen
 embedbuilder aufraeumen/refaktoren... vllt sollten die matchmessages ausschliesslich vom MatchService verwaltet werden?
     dann kann der EmbedBuilder vllt weg und der matchservice die embeds bauen.
+concept: FAQ
+- channels umbenennen etc
+- DMs closed
 
 
 nicks updaten
