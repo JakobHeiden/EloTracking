@@ -2,11 +2,8 @@ package com.elorankingbot.backend.commands.owner;
 
 import com.elorankingbot.backend.command.annotations.OwnerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.patreon.PatreonButton;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
@@ -56,7 +53,6 @@ public class GuildInfo extends SlashCommand {
 			}
 			 */
 			event.createFollowup(reply)
-					.withComponents(ActionRow.of(PatreonButton.link("awake")))
 					.withEphemeral(true)
 					.subscribe(NO_OP, super::forwardToExceptionHandler);
 		} catch (NumberFormatException e) {

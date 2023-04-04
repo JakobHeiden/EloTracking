@@ -1,11 +1,11 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.components.FormatTools;
+import com.elorankingbot.backend.FormatTools;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
-import static com.elorankingbot.backend.components.FormatTools.formatRating;
+import static com.elorankingbot.backend.FormatTools.formatRating;
 
 @Data
 @AllArgsConstructor

@@ -6,7 +6,7 @@ import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.RankingsExcerpt;
-import com.elorankingbot.backend.service.EmbedBuilder;
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;

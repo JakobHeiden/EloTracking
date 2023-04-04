@@ -1,7 +1,6 @@
-package com.elorankingbot.backend.service;
+package com.elorankingbot.backend.components;
 
-import com.elorankingbot.backend.components.Emojis;
-import com.elorankingbot.backend.components.FormatTools;
+import com.elorankingbot.backend.FormatTools;
 import com.elorankingbot.backend.model.*;
 import com.google.common.base.Strings;
 import discord4j.core.object.entity.User;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.elorankingbot.backend.components.FormatTools.formatRating;
+import static com.elorankingbot.backend.FormatTools.formatRating;
 
 public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch sortieren und nicht nach technischem detail?
 
@@ -73,6 +72,7 @@ public class EmbedBuilder {// TODO macht die klasse sinn? vllt eher thematisch s
 	}
 
 	// TODO this really needs to be two separate methods that make use of common private methods
+	// TODO no usages? what's up here?
 	private static EmbedCreateSpec createMatchEmbedOrCompletedMatchEmbed(String title, Match match, MatchResult matchResult, String tagToHighlight) {
 		MatchFinderQueue queue = match.getQueue();
 		boolean isCompletedMatch = matchResult != null;

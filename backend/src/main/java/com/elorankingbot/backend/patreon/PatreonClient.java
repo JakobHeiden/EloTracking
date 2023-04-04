@@ -1,6 +1,8 @@
 package com.elorankingbot.backend.patreon;
 
+import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.service.DiscordBotService;
+import com.elorankingbot.backend.service.Services;
 import com.github.jasminb.jsonapi.JSONAPIDocument;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,33 +12,37 @@ import com.patreon.resources.User;
 import com.patreon.resources.Pledge;
 
 import lombok.extern.apachecommons.CommonsLog;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
+import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.List;
 
 @CommonsLog
-public class prototype {
+@Component
+public class PatreonClient {
 
-    private static final Gson gson = (new GsonBuilder()).serializeNulls().enableComplexMapKeySerialization().create();
+    private PatreonOAuth oauthClient;
+    private final boolean isDev;
+    private final DiscordBotService bot;
 
-    public static String doStuff(String code, DiscordBotService bot) {
+    public PatreonClient(Services services) {
+            String clientId = services.props.getPatreon().getClientId();
+            String clientSecret = services.props.getPatreon().getClientSecret();
+            String redirectUri = services.props.getPatreon().getRedirectUri();
+            oauthClient = new PatreonOAuth(clientId, clientSecret, redirectUri);
+            isDev = services.props.isUseDevBotToken();
+            bot = services.bot;
+    }
+
+    public void doStuff(String code) {
+        if (!isDev) {
+            bot.sendToOwner(code);
+            return;
+        }
+
         try {
-            log.info("doStuff");
-            String clientId = "9dkSNb9DssBnmdlFGv9oiVnEUHTAt5qohN3eT6EvZ4-PFSRMkcOx2dYMNzriLjr4";
-            String clientSecret = "xHRqmhMGuwLSnIkPVCaDMfm4SDjPjQqehA07HVUqzwMvANg1Qsbok1R5VKpwMtnG";
-            String redirectUri = "http://45.77.53.94:8080/patreon-redirect";
-
-            PatreonOAuth oauthClient = new PatreonOAuth(clientId, clientSecret, redirectUri);
-
-
             PatreonOAuth.TokensResponse tokens = oauthClient.getTokens(code);
-
             //Store the refresh TokensResponse in your data store
             String accessToken = tokens.getAccessToken();
-            bot.sendToOwner(accessToken);
-            if (true) return accessToken;
 
             PatreonAPI apiClient = new PatreonAPI(accessToken);
             JSONAPIDocument<User> userResponse = apiClient.fetchUser();
@@ -49,10 +55,8 @@ public class prototype {
                 Pledge pledge = pledges.get(0);
                 log.info(pledge.getAmountCents());
             }
-            return String.valueOf(pledges.size());
         } catch (Exception e) {
             log.error("catch " + e.getMessage());
-            return "catch " + e.getMessage();
         }
 // You should save the user's PatreonOAuth.TokensResponse in your database
 // (for refreshing their Patreon data whenever you like),

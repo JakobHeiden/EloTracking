@@ -3,7 +3,7 @@ package com.elorankingbot.backend.commands.player.match;
 import com.elorankingbot.backend.model.Match;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.ReportStatus;
-import com.elorankingbot.backend.service.EmbedBuilder;
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
@@ -71,6 +71,7 @@ public abstract class Report extends ButtonCommandRelatedToMatch {
 	private void processIncompleteReporting() {
 		String title = "Not all players have reported yet. " +
 				"Please report the result of the match, if you haven't already.";
+		// TODO maybe this needs to get through MatchService instead of editing the message directly
 		bot.getMessage(match.getMessageId(), match.getChannelId()).subscribe(message -> message
 				.edit().withEmbeds(EmbedBuilder.createMatchEmbed(title, match))
 				.subscribe());

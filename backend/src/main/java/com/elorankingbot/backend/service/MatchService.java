@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.service;
 
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.model.*;
 import com.google.common.collect.Iterables;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 

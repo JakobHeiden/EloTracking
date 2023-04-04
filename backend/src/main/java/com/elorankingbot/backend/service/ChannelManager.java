@@ -1,8 +1,9 @@
 package com.elorankingbot.backend.service;
 
 import com.elorankingbot.backend.components.Buttons;
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.patreon.PatreonButton;
+import com.elorankingbot.backend.patreon.Components;
 import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
@@ -38,11 +39,15 @@ public class ChannelManager {
 	private final DBService dbService;
 	private final DiscordBotService bot;
 	private final TimedTaskScheduler timedTaskScheduler;
+	private final long patreonCommandId;
+	private final Services services;
 
 	public ChannelManager(Services services) {
 		this.bot = services.bot;
 		this.dbService = services.dbService;
 		this.timedTaskScheduler = services.timedTaskScheduler;
+		this.patreonCommandId = services.props.getPatreon().getCommandId();
+		this.services = services;
 	}
 
 	private TextChannelEditMono setParentCategory(Channel channel, long categoryId) {
@@ -232,14 +237,19 @@ public class ChannelManager {
 			log.debug("refreshLeaderboard: " + game.getName());
 			leaderboardMessage = bot.getMessage(game.getLeaderboardMessageId(), game.getLeaderboardChannelId()).block();
 		} catch (ClientException e) {
-			log.error("Eception in refreshLeaderboard: " + game.getName() + " : " + e);
+			log.error("Exception in refreshLeaderboard: " + game.getName() + " : " + e);
 			log.error(e.getErrorResponse().get().toString());
 			leaderboardMessage = createLeaderboardChannelAndMessage(game);
 			dbService.saveServer(game.getServer());// TODO muss das?
 		}
+		List<EmbedCreateSpec> embeds = new ArrayList<>();
+		embeds.add(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)));
+		if (services.props.getTestServerIds().contains(game.getGuildId())) {
+			embeds.add(Components.begForPatreonEmbed(patreonCommandId));
+		}
 		leaderboardMessage.edit()
 				.withContent(Possible.of(Optional.empty()))
-				.withEmbeds(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)))
+				.withEmbeds(embeds)
 				.subscribe();
 	}
 

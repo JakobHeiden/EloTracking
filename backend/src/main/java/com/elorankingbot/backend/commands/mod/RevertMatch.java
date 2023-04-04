@@ -7,7 +7,7 @@ import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.MatchResultReference;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.PlayerGameStats;
-import com.elorankingbot.backend.service.EmbedBuilder;
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.MessageInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;

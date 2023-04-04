@@ -9,6 +9,7 @@ import com.elorankingbot.backend.commands.mod.RevertMatch;
 import com.elorankingbot.backend.commands.owner.AllGuilds;
 import com.elorankingbot.backend.commands.owner.GuildInfo;
 import com.elorankingbot.backend.commands.player.Leave;
+import com.elorankingbot.backend.commands.player.Patreon;
 import com.elorankingbot.backend.commands.player.PlayerInfo;
 import com.elorankingbot.backend.commands.player.QueueStatus;
 import com.elorankingbot.backend.commands.player.help.Help;
@@ -67,7 +68,7 @@ public class DevTools {
     // Commands to deploy to production:
     private void updateGuildCommands() {
         log.warn("updating global commands...");
-        applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Ban.getRequest()).subscribe();
+        applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Patreon.getRequest()).subscribe();
         /*
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
