@@ -1,21 +1,21 @@
 ein kanal/mehrere in settings einpflegen
 leaderboardlength setting
 team queue
-um votes betteln
-supporter tier einbauen
 ranks anzeigen
 concept: autoresolve
 force resolve nicht revertbar
 was ist mit den webhook errors?
 winrate im eladerboard anzeigen
 leaderbords in 1 kanal
-pruefen ob annotations fuer commands automatisch deployen sinn macht
+pruefen ob annotations fuer commands automatisch deployen sinn macht. ggf PatreonCommandId von discord holen und nicht als prop
 COmmand::acknoledgeEvent()nochmal anschauen
 embedbuilder aufraeumen/refaktoren... vllt sollten die matchmessages ausschliesslich vom MatchService verwaltet werden?
     dann kann der EmbedBuilder vllt weg und der matchservice die embeds bauen.
 concept: FAQ
 - channels umbenennen etc
 - DMs closed
+
+alle versionen hochziehen
 
 
 nicks updaten
@@ -33,8 +33,8 @@ vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand 
 
 
 PATREON
-Patreon bauen
-link fuer supporter werden
+in Patreon anzeigen wenn man supported und wieviel
+testaccount?
 /patreon in leaderboard verlinken
 link fuer diesen server auf support tier setzen: in server flag setzen, link deaktivieren
 redirect entsprechendes feedback zeigen

@@ -14,6 +14,18 @@ import java.util.List;
 @ConfigurationProperties(prefix = "elorankingbot")
 public class ApplicationPropertiesLoader {
 
+	@Getter
+	@Setter
+	public static class Patreon {
+
+		private long commandId;
+		private String clientId;
+		private String clientSecret;
+		private String redirectUri;
+		private String url;
+	}
+
+	private Patreon patreon;
 	private long ownerId;
 	private long ente2Id;
 	private long announcementChannelId;

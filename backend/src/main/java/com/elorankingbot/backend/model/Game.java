@@ -1,6 +1,6 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.components.FormatTools;
+import com.elorankingbot.backend.FormatTools;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

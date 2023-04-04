@@ -13,17 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 @Component
 public class RedirectURI {
 
-    private final DiscordBotService bot;
+    private final PatreonClient patreonClient;
 
-    public RedirectURI(Services services) {
-        this.bot = services.bot;
+    public RedirectURI(PatreonClient patreonClient) {
+        this.patreonClient = patreonClient;
     }
 
     @GetMapping("/patreon-redirect")
     public String patreonRedirect(@RequestParam String code) {
-        bot.sendToOwner("REDIRECT " + code);
-        log.warn("REDIRECT " + code);
-        bot.sendToOwner(prototype.doStuff(code, bot));
+        System.out.println(code);
+        patreonClient.doStuff(code);
         return "placeholder";
     }
+
+
+
 }

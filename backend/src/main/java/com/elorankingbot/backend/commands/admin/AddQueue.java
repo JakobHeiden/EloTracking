@@ -3,7 +3,7 @@ package com.elorankingbot.backend.commands.admin;
 import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.components.FormatTools;
+import com.elorankingbot.backend.FormatTools;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;

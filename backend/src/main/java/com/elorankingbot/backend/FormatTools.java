@@ -1,4 +1,4 @@
-package com.elorankingbot.backend.components;
+package com.elorankingbot.backend;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
