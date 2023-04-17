@@ -121,8 +121,8 @@ public class Game {
                 } catch (NumberFormatException e) {
                     return Optional.of("Please enter an Integer.");
                 }
-                if (newK <= 0) {
-                    return Optional.of("Please enter a value larger than 0.");
+                if (newK < 0) {
+                    return Optional.of("Please enter a positive number.");
                 }
                 getQueues().forEach(queue -> queue.setK(newK));
                 return Optional.empty();

@@ -5,6 +5,8 @@ import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.logging.BotStats;
 import com.elorankingbot.backend.logging.BotStatsAccumulator;
 import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.patreon.Patron;
+import com.elorankingbot.backend.patreon.PatronDao;
 import discord4j.core.object.entity.User;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,7 @@ public class DBService {
 	private final RankingsEntryDao rankingsEntryDao;
 	private final BotStatsAccumulatorDao botStatsAccumulatorDao;
 	private final BotStatsDao botStatsDao;
+	private final PatronDao patronDao;
 	private final ApplicationPropertiesLoader props;
 
 	@Autowired
@@ -34,7 +37,7 @@ public class DBService {
 					 ServerDao serverDao, MatchResultDao matchResultDao,
 					 MatchResultReferenceDao matchResultReferenceDao, PlayerDao playerDao,
 					 MatchDao matchDao, RankingsEntryDao rankingsEntryDao, BotStatsAccumulatorDao botStatsAccumulatorDao,
-					 BotStatsDao botStatsDao) {
+					 BotStatsDao botStatsDao, PatronDao patronDao) {
 		this.bot = services.bot;
 		this.serverDao = serverDao;
 		this.matchResultDao = matchResultDao;
@@ -44,6 +47,7 @@ public class DBService {
 		this.rankingsEntryDao = rankingsEntryDao;
 		this.botStatsAccumulatorDao = botStatsAccumulatorDao;
 		this.botStatsDao = botStatsDao;
+		this.patronDao = patronDao;
 		this.props = services.props;
 	}
 
@@ -324,4 +328,11 @@ public class DBService {
 		}
 	}
 
+    public void savePatron(Patron patron) {
+		patronDao.save(patron);
+    }
+
+	public Optional<Patron> findPatron(long userId) {
+		return patronDao.findById(userId);
+	}
 }

@@ -4,6 +4,7 @@ import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.model.*;
 import com.elorankingbot.backend.patreon.Components;
+import com.elorankingbot.backend.patreon.PatreonClient;
 import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
@@ -243,10 +244,10 @@ public class ChannelManager {
 			dbService.saveServer(game.getServer());// TODO muss das?
 		}
 		List<EmbedCreateSpec> embeds = new ArrayList<>();
-		embeds.add(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)));
-		if (services.props.getTestServerIds().contains(game.getGuildId())) {
+		if (game.getServer().getPatreonTier() == PatreonClient.PatreonTier.FREE) {
 			embeds.add(Components.begForPatreonEmbed(patreonCommandId));
 		}
+		embeds.add(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)));
 		leaderboardMessage.edit()
 				.withContent(Possible.of(Optional.empty()))
 				.withEmbeds(embeds)

@@ -19,10 +19,8 @@ public class ApplicationPropertiesLoader {
 	public static class Patreon {
 
 		private long commandId;
-		private String clientId;
-		private String clientSecret;
-		private String redirectUri;
-		private String url;
+		private String redirectUri, campaignUrl, campaignId;
+		private int supporterMinPledgeInDollars;
 	}
 
 	private Patreon patreon;

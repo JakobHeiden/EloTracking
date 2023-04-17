@@ -1,65 +1,121 @@
 package com.elorankingbot.backend.patreon;
 
-import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
+import com.elorankingbot.backend.commands.Patreon;
+import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.patreon.model.PatreonDataGsonModel;
+import com.elorankingbot.backend.service.ChannelManager;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
-import com.github.jasminb.jsonapi.JSONAPIDocument;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.patreon.PatreonAPI;
-import com.patreon.PatreonOAuth;
-import com.patreon.resources.User;
-import com.patreon.resources.Pledge;
-
+import lombok.Getter;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @CommonsLog
 @Component
 public class PatreonClient {
 
-    private PatreonOAuth oauthClient;
-    private final boolean isDev;
-    private final DiscordBotService bot;
-
-    public PatreonClient(Services services) {
-            String clientId = services.props.getPatreon().getClientId();
-            String clientSecret = services.props.getPatreon().getClientSecret();
-            String redirectUri = services.props.getPatreon().getRedirectUri();
-            oauthClient = new PatreonOAuth(clientId, clientSecret, redirectUri);
-            isDev = services.props.isUseDevBotToken();
-            bot = services.bot;
+    public enum PatreonTier {
+        FREE, SUPPORTER
     }
 
-    public void doStuff(String code) {
-        if (!isDev) {
-            bot.sendToOwner(code);
-            return;
+    private String clientId, clientSecret, redirectUri;
+    private final DBService dbService;
+    private final DiscordBotService bot;
+    private final ChannelManager channelManager;
+    @Getter
+    private final int supporterMinPledgeInDollars;
+    private final WebClient webClient;
+    private final Gson gson;
+    private static final String requestAccessTokenUrlTemplate = "https://www.patreon.com/api/oauth2/token" +
+            "?code=%s" +
+            "&grant_type=authorization_code" +
+            "&client_id=%s" +
+            "&client_secret=%s" +
+            "&redirect_uri=%s";
+
+    public PatreonClient(Services services, WebClient webClient) {
+        this.clientId = System.getenv("PATREON_CLIENT_ID");
+        this.clientSecret = System.getenv("PATREON_CLIENT_SECRET");
+        this.redirectUri = services.props.getPatreon().getRedirectUri();
+        this.supporterMinPledgeInDollars = services.props.getPatreon().getSupporterMinPledgeInDollars();
+        this.dbService = services.dbService;
+        this.bot = services.bot;
+        this.channelManager = services.channelManager;
+        this.webClient = webClient;
+        this.gson = new Gson();
+    }
+
+    public String processRedirect(String code, String state) {
+        long userId = Long.parseLong(state.split("-")[0]);
+        long guildId = Long.parseLong(state.split("-")[1]);
+        Patron patron = new Patron(userId, requestAccessToken(code));
+        Server server = dbService.getOrCreateServer(guildId);
+        int pledgedInCents = processUpdateToPatron(patron, server);
+
+        String userTag = bot.getUser(patron.getUserId()).getTag();
+        return "You have successfully linked your Patreon account to your Discord account, " + userTag + "!<br>"
+                + String.format(Patreon.currentPledgeSummaryTemplate,
+                centsAsDollars(pledgedInCents), "<br>",
+                centsAsDollars(calculateTotalPledgedCents(server)), "<br>",
+                calculatePatreonTier(server).name())
+                + "<br>Run /patreon any time you update your pledge." +
+                "<br>You can close this window now.";
+    }
+
+    public int processUpdateToPatron(Patron patron, Server server) {
+        int pledgeInCents = requestPledgeInCents(patron.getAccessToken());
+        patron.setPledgeInCents(pledgeInCents);
+        dbService.savePatron(patron);
+        server.getPatronIds().add(patron.getUserId());
+        dbService.saveServer(server);
+
+        server.getGames().forEach(channelManager::refreshLeaderboard);
+
+        return pledgeInCents;
+    }
+
+    private String requestAccessToken(String code) {
+        return webClient.post()
+                .uri(String.format(requestAccessTokenUrlTemplate, code, clientId, clientSecret, redirectUri))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .retrieve()
+                .bodyToMono(String.class)
+                .block()
+                .split("\"access_token\": \"")[1].split("\",")[0];
+    }
+
+    private int requestPledgeInCents(String accessToken) {
+        String patreonUrl = "https://www.patreon.com/api/oauth2/v2/identity?include=memberships&fields[member]=currently_entitled_amount_cents";
+        String responseBody = webClient.get()
+                .uri(patreonUrl)
+                .header("Authorization", "Bearer " + accessToken)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+        PatreonDataGsonModel test = gson.fromJson(responseBody, PatreonDataGsonModel.class);
+        return test.getPledgedCents();
+    }
+
+    public PatreonTier calculatePatreonTier(Server server) {
+        if (calculateTotalPledgedCents(server) < supporterMinPledgeInDollars) return PatreonTier.FREE;
+        else return PatreonTier.SUPPORTER;
+    }
+
+    public int calculateTotalPledgedCents(Server server) {
+        int totalPledgedCents = 0;
+        for (long patronId : server.getPatronIds()) {
+            Patron patron = dbService.findPatron(patronId).get();
+            totalPledgedCents += patron.getPledgeInCents();
         }
+        return totalPledgedCents;
+    }
 
-        try {
-            PatreonOAuth.TokensResponse tokens = oauthClient.getTokens(code);
-            //Store the refresh TokensResponse in your data store
-            String accessToken = tokens.getAccessToken();
-
-            PatreonAPI apiClient = new PatreonAPI(accessToken);
-            JSONAPIDocument<User> userResponse = apiClient.fetchUser();
-
-            User user = userResponse.get();
-            log.info(user.getFullName());
-            List<Pledge> pledges = user.getPledges();
-            log.info("numPledges = " + pledges.size());
-            if (pledges != null && pledges.size() > 0) {
-                Pledge pledge = pledges.get(0);
-                log.info(pledge.getAmountCents());
-            }
-        } catch (Exception e) {
-            log.error("catch " + e.getMessage());
-        }
-// You should save the user's PatreonOAuth.TokensResponse in your database
-// (for refreshing their Patreon data whenever you like),
-// along with any relevant user info or pledge info you want to store.
+    public String centsAsDollars(int cents) {
+        return cents % 100 == 0 ?
+                String.valueOf(cents / 100) :
+                String.format("%.2f", cents / 100.0) + "$";
     }
 }
