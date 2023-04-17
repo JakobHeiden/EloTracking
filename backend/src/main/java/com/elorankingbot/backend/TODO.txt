@@ -14,9 +14,16 @@ embedbuilder aufraeumen/refaktoren... vllt sollten die matchmessages ausschliess
 concept: FAQ
 - channels umbenennen etc
 - DMs closed
+automatisch queues leaven nach einer weile
+verification
+secrets pruefen
+"i want to boot inactives" - player delete, inactive flag...?
+logback warnung checken
 
+event.reply / event.createFollowup evtl verallgemeinern
 alle versionen hochziehen
-
+Edit in Settings ueberfuehren
+match names vllt kuerzer
 
 nicks updaten
 NICKS ANZEIGEN
@@ -27,19 +34,9 @@ in game flag bauen, im konstruktor default setzen
 
 sikuli auf deploy laufen
 permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
-
 vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
 
 
 
-PATREON
-in Patreon anzeigen wenn man supported und wieviel
-testaccount?
-/patreon in leaderboard verlinken
-link fuer diesen server auf support tier setzen: in server flag setzen, link deaktivieren
-redirect entsprechendes feedback zeigen
-patreonzeugs model bauen: wieviel, welche server?
-das in /patreon anzeigen
-knopf fuer disen server nicht mehr supporten
-isSupportTier flag setzen
-wann updaten? monatsanfang?
+db anpasssen: lokal, dann auf deploy...!
+war es das, kann ich releasen? oder erst die updates aus dread nachziehen?

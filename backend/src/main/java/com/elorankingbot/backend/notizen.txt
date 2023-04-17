@@ -1,0 +1,11 @@
+Match : wird mit playern konstruiert
+MatchService::generateMatchResult : averageRatings kommen von player, etc - hier werden die resultate mit dem objekt generiert
+MatchService::processMatchResult :
+- MatchResult wird zum player addiert, player persistiert
+- player in queues werden geupdatet
+- player in matches werden geupdatet
+- player ranks werden geupdatet
+
+die gesamte match pipeline sollte auf ids laufen. der scheiss mit updatePlayerInQueue etc ist kotzhaesslich. oder?
+- in der queue sollten aber vllt player liegen, damit er nicht alle 3s alle player aus der db zieht. oder?
+- das auf jeden fall mal anschauen. entweder umbauen, oder die einzelnen udpates buendeln

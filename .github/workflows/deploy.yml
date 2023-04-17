@@ -6,6 +6,7 @@ on:
     branches:
       - master
       - transition
+      - patreon
 
 jobs:
   build-backend:

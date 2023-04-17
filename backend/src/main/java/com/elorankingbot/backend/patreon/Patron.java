@@ -15,8 +15,11 @@ public class Patron {
     @Id
     @EqualsAndHashCode.Include
     private long userId;
+    private String accessToken;
+    private int pledgeInCents;
 
-    public Patron(long userId) {
+    public Patron(long userId, String accessToken) {
         this.userId = userId;
+        this.accessToken = accessToken;
     }
 }

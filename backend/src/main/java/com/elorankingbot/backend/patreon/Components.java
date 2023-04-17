@@ -1,10 +1,7 @@
 package com.elorankingbot.backend.patreon;
 
-import com.elorankingbot.backend.commands.player.Patreon;
-import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
-import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.commands.Patreon;
 import discord4j.core.spec.EmbedCreateSpec;
-import org.springframework.stereotype.Component;
 
 public class Components {
 
