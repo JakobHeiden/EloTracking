@@ -28,11 +28,6 @@ public class QueueScheduler {
 
     @Scheduled(fixedRate = 3000)
     public void generateAndStartMatches() {
-        // TOKEN
-        if (System.getenv("IS_OLD_BOT").equals("TRUE")) {
-            return;
-        }
-
         dbService.findAllServers().stream()
                 .flatMap(server -> server.getGames().stream())
                 .flatMap(game -> game.getQueues().stream()).forEach(

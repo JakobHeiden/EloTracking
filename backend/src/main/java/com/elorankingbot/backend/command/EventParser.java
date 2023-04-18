@@ -36,8 +36,6 @@ public class EventParser {
 
 	private final Services services;
 	private final DBService dbService;
-	// TOKEN
-	private final DiscordBotService bot;
 	private final ExceptionHandler exceptionHandler;
 	private final DiscordCommandService discordCommandService;
 	private final CommandClassScanner commandClassScanner;
@@ -45,8 +43,6 @@ public class EventParser {
 	public EventParser(Services services, CommandClassScanner commandClassScanner) {
 		this.services = services;
 		this.dbService = services.dbService;
-		// TOKEN
-		this.bot = services.bot;
 		this.exceptionHandler = services.exceptionHandler;
 		this.discordCommandService = services.discordCommandService;
 		this.commandClassScanner = commandClassScanner;
@@ -106,22 +102,6 @@ public class EventParser {
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
 
 		Hooks.onErrorDropped(throwable -> exceptionHandler.handleException(throwable, "Dropped Exception"));
-
-		// TOKEN
-		client.on(GuildCreateEvent.class).subscribe(guildCreateEvent -> {
-			if (bot.isOld()) return;
-
-			Server server = dbService.getOrCreateServer(guildCreateEvent.getGuild().getId().asLong());
-			if (server.isOldBot()) {
-				log.debug(String.format("setting isOldBot=false on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
-				server.setOldBot(false);
-				dbService.saveServer(server);
-
-				log.debug(String.format("updating commands on %s:%s", server.getGuildId(), guildCreateEvent.getGuild().getName()));
-				services.discordCommandService.updateGuildCommandsByRanking(server, commandFailedCallbackFactory(server.getGuildId()));
-				services.discordCommandService.updateGuildCommandsByQueue(server, commandFailedCallbackFactory(server.getGuildId()));
-			}
-		});
 	}
 
 	private BiFunction<String, Boolean, Consumer<Throwable>> commandFailedCallbackFactory(long guildId) {
@@ -132,34 +112,6 @@ public class EventParser {
 	@Transactional
 	void createAndExecuteSlashCommand(ChatInputInteractionEvent event) {
 		try {
-			// TOKEN
-			if (services.bot.isOld()) {
-				Server server = dbService.getOrCreateServer(event.getInteraction().getGuildId().get().asLong());
-				bot.sendToOwner(event.getCommandName() + " : " + server.getGuildId());
-				log.debug("Deleting channels for " + server.getGuildId());
-				server.getGames().forEach(game -> {
-					bot.getChannelById(game.getLeaderboardChannelId()).subscribe(channel -> channel.delete().subscribe());
-					bot.getChannelById(game.getResultChannelId()).subscribe(channel -> channel.delete().subscribe());
-				});
-				bot.deleteChannel(server.getMatchCategoryId());
-				bot.deleteChannel(server.getDisputeCategoryId());
-				server.getArchiveCategoryIds().forEach(categoryId -> {
-					bot.getChannelById(categoryId).subscribe(category -> ((Category) category)
-							.getChannels().subscribe(channel ->
-									channel.delete().subscribe()));
-					bot.deleteChannel(categoryId);
-				});
-				event.reply("This bot is being moved to a different account, since the developer has lost access to this one. " +
-						"This account ceases function. " +
-						"To keep using the bot, the server owner or a user with Manage Server permissions needs to invite the new account using the following link:\n" +
-						"https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot\n" +
-						"This account will remove itself from your server automatically after that. " +
-						"All data and settings will be preserved across bot accounts.\n" +
-						"I have deleted all my channels and categories. These will regenerate once the bot is being used on the new account.\n" +
-						"If you have questions or problems, please visit " + ExceptionHandler.supportServerInvite + ", or contact Ente#1658.").subscribe();
-				return;
-			}
-
 			Command command = createSlashCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
@@ -178,21 +130,6 @@ public class EventParser {
 	@Transactional
 	void processButtonInteractionEvent(ButtonInteractionEvent event) {
 		try {
-			// TOKEN
-			if (services.bot.isOld()) {
-				event.reply("This bot is being moved to a different account, since the developer has lost access to this one. " +
-						"This account ceases function. " +
-						"To keep using the bot, the server owner or a user with Manage Server will permissions needs to invite the new account using the following link:\n" +
-						"https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot\n" +
-						"This account will remove itself from your server automatically after that. " +
-						"All data and settings will be preserved across bot accounts.\n" +
-						"I have deleted all my channels and categories. These will regenerate once the bot is being used on the new account.\n" +
-						"If you have questions or problems, please visit " + ExceptionHandler.supportServerInvite + ", or contact Ente#1658.\n" +
-						"**Results for this match cannot be reported anymore. After the bot has moved to its new account, " +
-						"a moderator can use /forcewin to resolve this match. Also this channel needs to be deleted manually.**").subscribe();
-				return;
-			}
-
 			Command command = createButtonCommand(event);
 			command.doExecute();
 		} catch (Exception e) {

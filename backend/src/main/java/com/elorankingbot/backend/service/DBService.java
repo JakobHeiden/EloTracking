@@ -76,9 +76,7 @@ public class DBService {
 			}
 			return server;
 		} else {
-			// TOKEN
-			boolean isOldBot = System.getenv("IS_OLD_BOT").equals("TRUE");
-			Server newServer = new Server(guildId, isOldBot);
+			Server newServer = new Server(guildId);
 			serverDao.save(newServer);
 			bot.sendToOwner("New server: " + guildId);
 			return newServer;

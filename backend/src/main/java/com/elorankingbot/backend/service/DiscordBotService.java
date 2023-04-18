@@ -57,11 +57,6 @@ public class DiscordBotService {
         sendToOwner("I am logged in and ready");
     }
 
-    // TOKEN
-    public boolean isOld() {
-        return System.getenv("IS_OLD_BOT").equals("TRUE");
-    }
-
     public Snowflake getSnowflake() {
         return Snowflake.of(botId);
     }
