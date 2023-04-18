@@ -1,11 +1,9 @@
 package com.elorankingbot.backend.model;
 
 import com.elorankingbot.backend.patreon.PatreonClient;
-import com.elorankingbot.backend.patreon.Patron;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,8 +14,6 @@ import java.util.*;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @AllArgsConstructor(onConstructor=@__({@PersistenceConstructor}))
 @Document(collection = "server")
-// TOKEN
-@CommonsLog
 public class Server {
 
     @Id
@@ -31,12 +27,7 @@ public class Server {
     private Set<Long> patronIds;
     private PatreonClient.PatreonTier patreonTier;
 
-    // TOKEN
-    private boolean isOldBot;
-
-    public Server(long guildId, boolean isOldBot) {
-        // TOKEN
-        log.debug("standard-konstruktor");
+    public Server(long guildId) {
         this.guildId = guildId;
         this.isMarkedForDeletion = false;
         this.gameNameToGame = new HashMap<>();
@@ -45,13 +36,6 @@ public class Server {
         this.patreonTier = PatreonClient.PatreonTier.FREE;
         this.adminRoleId = 0L;
         this.modRoleId = 0L;
-        // TOKEN
-        this.isOldBot = isOldBot;
-    }
-
-    // TOKEN
-    public Server() {
-        this.isOldBot = true;
     }
 
     public void addGame(Game game) {

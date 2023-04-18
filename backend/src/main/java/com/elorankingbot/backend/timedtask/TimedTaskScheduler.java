@@ -86,32 +86,14 @@ public class TimedTaskScheduler {
     @Scheduled(fixedRate = 60000)
     public void tick() {
         try {
-            // TOKEN
-            if (bot.isOld()) {
-                log.debug("tick");
-                List<Long> allGuildIds = bot.getAllGuildIds();
-                dbService.findAllServers().forEach(server -> {
-                    log.debug("check for leave : " + server.getGuildId());
-                    if (!server.isOldBot() && allGuildIds.contains(server.getGuildId())) {
-                        log.debug("server is new bot, leaving");
-                        bot.getGuild(server).subscribe(guild -> {
-                            log.info("Leaving server " + server.getGuildId() + ":" + guild.getName());
-                            guild.leave().subscribe();
-                        }, throwable -> log.error(throwable.getMessage()));
-                    }
-                });
-                return;
-            }
-
             if (!doRunSchedulers) return;
 
             log.debug("tick " + currentIndex);
             if (currentIndex % (7 * 24 * 60) == 0) {// TODO wohl laenger
                 List<Long> allGuildIds = bot.getAllGuildIds();
                 timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
-                // TOKEN
-                //timedTaskService.deleteServersMarkedForDeletion();
-                //timedTaskService.markServersForDeletion(allGuildIds);
+                timedTaskService.deleteServersMarkedForDeletion();
+                timedTaskService.markServersForDeletion(allGuildIds);
             }
             if (currentIndex % (24 * 60) == 0) {
                 dbService.persistBotStatsAndRestartAccumulator();
