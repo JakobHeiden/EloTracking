@@ -7,7 +7,9 @@ import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.PlayerGameStats;
 import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -15,8 +17,11 @@ import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.core.object.entity.Role;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @ModCommand
 public class SetRating extends SlashCommand {
@@ -107,9 +112,15 @@ public class SetRating extends SlashCommand {
 		double oldRating = playerGameStats.getRating();
 		double newRating = isSetRating ? points : oldRating + points;
 		playerGameStats.setRating(newRating);
+
+		queueScheduler.updatePlayerInAllQueuesOfGame(game, player);
+		matchService.updatePlayerMatches(game, player);
+		matchService.updatePlayerRank(game, player, manageRoleFailedCallbackFactory());
 		dbService.savePlayer(player);
-		if (dbService.hasLeaderboardChanged(game, oldRating, newRating))
-			dbService.updateRankingsEntry(game, player, newRating);
+		dbService.updateRankingsEntry(game, player, newRating);
+		if (dbService.hasLeaderboardChanged(game, oldRating, newRating)) {
+			channelManager.refreshLeaderboard(game);
+		}
 
 		event.reply(String.format("%s's %srating is now set to %s.", player.getTag(),
 				isSingularGame ? "" : game.getName() + " ", FormatTools.formatRating(newRating))).subscribe();
@@ -118,8 +129,5 @@ public class SetRating extends SlashCommand {
 		String reason = maybeReason.isPresent() ? " Reason given: " + maybeReason.get().getValue().get().asString() : "";
 		bot.sendDM(playerUser, event, String.format("Your rating for %s has been set to %s by %s.%s",
 				game.getName(), FormatTools.formatRating(newRating), activeUser.getTag(), reason));
-
-		if (dbService.hasLeaderboardChanged(game, oldRating, newRating))
-			channelManager.refreshLeaderboard(game);
 	}
 }
