@@ -54,16 +54,15 @@ public class AddQueue extends SlashCommand {
 						.type(STRING.getValue())
 						.required(true).build())
 				.addOption(ApplicationCommandOptionData.builder()
-						.name("queuetype").description("Currently the bot only supports solo queue")//"Only if a team queue: " +
-						//"is this a solo queue, or a premade team only queue?")//, or a mixed queue
+						.name("queuetype").description("Is this a solo queue, or a premade team queue?")//, or a mixed queue
 						.type(STRING.getValue())
 						.addChoice(ApplicationCommandOptionChoiceData.builder()
 								.name("solo queue").value("solo").build())
-						//.addChoice(ApplicationCommandOptionChoiceData.builder()
-						//		.name("premade only").value("premade").build())
+						.addChoice(ApplicationCommandOptionChoiceData.builder()
+								.name("premade queue").value("premade").build())
 						//.addChoice(ApplicationCommandOptionChoiceData.builder()
 						//		.name("mixed queue").value("mixed").build())
-						.required(true).build())// false
+						.required(true).build())
 				//.addOption(ApplicationCommandOptionData.builder()
 				//		.name("maxpremade").description("Only if a mixed queue: what is the maximum premade team size?")
 				//		.type(INTEGER.getValue())
@@ -80,7 +79,7 @@ public class AddQueue extends SlashCommand {
 				"`Required:` `playersperteam` The number of players on a team for the queue.\n" +
 				"`Required:` `numberofteams` The number of teams in a match.\n" +
 				"`Required:` `nameofqueue` The name of the new queue.\n" +
-				"`Required:` `queuetype` Currently there is only solo queue.\n" +
+				"`Required:` `queuetype` Whether this is a solo or a team queue.\n" +
 				"For more information on queues, see `/help:` `Concept: Rankings and Queues`.";
 	}
 
