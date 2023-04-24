@@ -1,7 +1,6 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
-import com.elorankingbot.backend.commands.Patreon;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -53,7 +52,6 @@ public class DevTools {
     // Commands to deploy to production:
     private void updateGuildCommands() {
         log.warn("updating global commands...");
-        applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), Patreon.getRequest()).subscribe();
         /*
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), RevertMatch.getRequest()).subscribe();
         applicationService.createGlobalApplicationCommand(client.getSelfId().asLong(), SetPermission.getRequest()).subscribe();
@@ -69,6 +67,8 @@ public class DevTools {
         dbService.findAllServers().forEach(
                 server -> {
                         /*
+                    discordCommandService.deployCommand(server, AddQueue.getRequest(server),
+                            this::simplePrintThrowableCallback);
                     try {
 						if (props.getTestServerIds().contains(server.getGuildId())) {
 							discordCommandService.deployCommand(server, GuildInfo.getRequest(),
