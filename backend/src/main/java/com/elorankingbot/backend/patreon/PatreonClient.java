@@ -56,6 +56,7 @@ public class PatreonClient {
         int pledgedInCents = processUpdateToPatron(patron, server);
 
         String userTag = bot.getUser(patron.getUserId()).getTag();
+        bot.sendToOwner(String.format("New pledge by %s : %s", userTag, pledgedInCents));
         return "You have successfully linked your Patreon account to your Discord account, " + userTag + "!<br>"
                 + String.format(Patreon.currentPledgeSummaryTemplate,
                 centsAsDollars(pledgedInCents), "<br>",
