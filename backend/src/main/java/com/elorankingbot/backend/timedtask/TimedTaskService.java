@@ -42,6 +42,7 @@ public class TimedTaskService {
 				.forEach(server -> {
 					server.setMarkedForDeletion(true);
 					dbService.saveServer(server);
+					log.info("marking for deletion: " + server.getGuildId());
 				});
 	}
 
@@ -52,6 +53,7 @@ public class TimedTaskService {
 				.forEach(server -> {
 					server.setMarkedForDeletion(false);
 					dbService.saveServer(server);
+					log.info(String.format("unmarking for deletion %s", server.getGuildId()));
 				});
 	}
 
