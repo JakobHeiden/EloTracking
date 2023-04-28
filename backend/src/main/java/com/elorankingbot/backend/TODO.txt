@@ -32,11 +32,9 @@ konstruktor anpassen, auch fuer mongo
 update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
 
-sikuli auf deploy laufen
 permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
 vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
 
 
-
-db anpasssen: lokal, dann auf deploy...!
-war es das, kann ich releasen? oder erst die updates aus dread nachziehen?
+MERGE
+app.props ist falsch. durch die commits in dread gehen und schauen was noch evtl falsch ist. dann merge zurueck und neu denke ich
