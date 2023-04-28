@@ -1,6 +1,5 @@
 ein kanal/mehrere in settings einpflegen
 leaderboardlength setting
-team queue
 ranks anzeigen
 concept: autoresolve
 force resolve nicht revertbar
@@ -34,7 +33,3 @@ in game flag bauen, im konstruktor default setzen
 
 permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
 vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
-
-
-MERGE
-app.props ist falsch. durch die commits in dread gehen und schauen was noch evtl falsch ist. dann merge zurueck und neu denke ich

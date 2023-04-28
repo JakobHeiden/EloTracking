@@ -95,11 +95,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>com.patreon</groupId>
-			<artifactId>patreon</artifactId>
-			<version>0.4.2</version>
-		</dependency>
-		<dependency>
 			<groupId>com.github.jasminb</groupId>
 			<artifactId>jsonapi-converter</artifactId>
 			<version>0.12</version>
