@@ -157,14 +157,6 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.xmlunit:xmlunit-core:2.9.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.10.1" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-configuration-processor:3.0.5" level="project" />
-    <orderEntry type="library" name="Maven: com.patreon:patreon:0.4.2" level="project" />
-    <orderEntry type="library" name="Maven: org.json:json:20140107" level="project" />
-    <orderEntry type="library" name="Maven: org.jsoup:jsoup:1.10.3" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpclient:4.5.14" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.16" level="project" />
-    <orderEntry type="library" name="Maven: commons-codec:commons-codec:1.15" level="project" />
-    <orderEntry type="library" name="Maven: org.slf4j:slf4j-reload4j:2.0.7" level="project" />
-    <orderEntry type="library" name="Maven: ch.qos.reload4j:reload4j:1.2.22" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:6.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:6.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context-support:6.0.7" level="project" />
