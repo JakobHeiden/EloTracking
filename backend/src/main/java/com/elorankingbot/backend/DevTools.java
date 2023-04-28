@@ -1,6 +1,7 @@
 package com.elorankingbot.backend;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.commands.admin.AddQueue;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.dao.*;
 import com.elorankingbot.backend.service.DBService;
@@ -66,9 +67,9 @@ public class DevTools {
         //applicationService.createGuildApplicationCommand(bot.getBotId(), 929504858585845810L, AllGuilds.getRequest()).subscribe();
         dbService.findAllServers().forEach(
                 server -> {
-                        /*
                     discordCommandService.deployCommand(server, AddQueue.getRequest(server),
                             this::simplePrintThrowableCallback);
+                        /*
                     try {
 						if (props.getTestServerIds().contains(server.getGuildId())) {
 							discordCommandService.deployCommand(server, GuildInfo.getRequest(),
