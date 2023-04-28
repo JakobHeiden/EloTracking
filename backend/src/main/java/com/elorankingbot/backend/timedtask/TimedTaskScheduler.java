@@ -89,7 +89,7 @@ public class TimedTaskScheduler {
             if (!doRunSchedulers) return;
 
             log.debug("tick " + currentIndex);
-            if (currentIndex % (7 * 24 * 60) == 0) {// TODO wohl laenger
+            if (currentIndex % (24 * 60) == 0) {// TODO wohl laenger
                 List<Long> allGuildIds = bot.getAllGuildIds();
                 timedTaskService.unmarkServersForDeletionIfAgainPresent(allGuildIds);
                 timedTaskService.deleteServersMarkedForDeletion();
