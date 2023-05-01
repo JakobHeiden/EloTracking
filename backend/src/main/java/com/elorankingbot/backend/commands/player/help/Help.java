@@ -4,6 +4,7 @@ import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -16,13 +17,13 @@ import static com.elorankingbot.backend.commands.player.help.HelpComponents.*;
 @GlobalCommand
 public class Help extends SlashCommand {
 
-	private final Services services;
+	private final DiscordBotService bot;
 	private final CommandClassScanner commandClassScanner;
 
 	public Help(ChatInputInteractionEvent event, Services services) {
 		super(event, services);
-		this.services = services;
-		this.commandClassScanner = services.commandClassScanner;
+		bot = services.bot;
+		commandClassScanner = services.commandClassScanner;
 	}
 
 	public static ApplicationCommandRequest getRequest() {
@@ -44,7 +45,7 @@ public class Help extends SlashCommand {
 
 	protected void execute() throws Exception {
 		String initialTopic = "General Help";
-		event.reply().withEmbeds(createHelpEmbed(services, initialTopic))
+		event.reply().withEmbeds(createHelpEmbed(bot, commandClassScanner, initialTopic))
 				.withComponents(
 						createConceptsActionRow(),
 						createPlayerCommandsActionRow(commandClassScanner),

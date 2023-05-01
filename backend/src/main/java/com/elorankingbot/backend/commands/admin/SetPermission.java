@@ -84,14 +84,9 @@ public class SetPermission extends SlashCommand {
         Set<String> modCommands = commandClassScanner.getModCommandHelpEntries();
         if (adminOrMod.equals("admin")) {
             server.setAdminRoleId(role.getId().asLong());
-            // adminCommands and modCommands is set up to work well with Help and does only include SlashCommands and MessageCommands currently...
-            // how do discord permissions work with ButtonCommands anyway?
-            adminCommands.forEach(commandName -> discordCommandService.setPermissionsForAdminCommand(server, commandName));
-            modCommands.forEach(commandName -> discordCommandService.setPermissionsForModCommand(server, commandName));
         }
         if (adminOrMod.equals("moderator")) {
             server.setModRoleId(role.getId().asLong());
-            modCommands.forEach(commandName -> discordCommandService.setPermissionsForModCommand(server, commandName));
         }
         String nameOfRole = role.getName();
         dbService.saveServer(server);

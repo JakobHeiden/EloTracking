@@ -17,6 +17,7 @@ import discord4j.core.object.entity.User;
 import lombok.extern.apachecommons.CommonsLog;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,8 +42,6 @@ public abstract class Command {
 	protected final long activeUserId;
 	protected boolean userIsAdmin;
 	protected boolean alreadySentManageRoleFailedFollowup = false;
-
-	protected static final List NONE = new ArrayList<>();
 	protected final Consumer<Object> NO_OP = object -> {};
 
 	protected Command(DeferrableInteractionEvent event, Services services) {
@@ -63,11 +62,11 @@ public abstract class Command {
 		this.activeUserId = activeUser.getId().asLong();
 	}
 
+	protected abstract void execute() throws Exception;
+
 	public void doExecute() throws Exception {
-		log.debug(String.format("execute %s by %s on %s",
-				this.getClass().getSimpleName(),
-				event.getInteraction().getUser().getTag(),
-				event.getInteraction().getGuildId().get().asString()));
+		Date start = new Date();
+		logExecutionStart();
 
 		// bypass permission check when admin role is not set or not present
 		if (this.getClass() == SetPermission.class) {
@@ -119,13 +118,30 @@ public abstract class Command {
 
 		execute();
 
-		log.trace(String.format("Done executing %s by %s on %s",
-				this.getClass().getSimpleName(),
-				event.getInteraction().getUser().getTag(),
-				event.getInteraction().getGuild().block().getName()));
+		int duration = (int) (new Date().getTime() - start.getTime());
+		logExecutionFinish(duration);
 	}
 
-	protected abstract void execute() throws Exception;
+	private void logExecutionStart() {
+		log.debug(String.format("execute %s by %s on %s",
+				this.getClass().getSimpleName(),
+				event.getInteraction().getUser().getTag(),
+				event.getInteraction().getGuildId().get().asString()));
+	}
+
+	private void logExecutionFinish(int duration) {
+		String executionSummary = String.format("%s by %s on %s in %s",
+				this.getClass().getSimpleName(),
+				event.getInteraction().getUser().getTag(),
+				bot.getServerIdAndName(server),
+				duration);
+		if (duration < 3000) {
+			log.trace("Done executing " + executionSummary);
+		} else {
+			log.warn("Slow command: " + executionSummary);
+			bot.sendToOwner("Slow command: " + executionSummary);
+		}
+	}
 
 	protected void acknowledgeEvent() {
 		// acknowledge() being deprecated seems bullshit. The supposed replacement methods don't do what's advertised

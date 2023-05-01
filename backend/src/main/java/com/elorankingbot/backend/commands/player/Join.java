@@ -93,6 +93,8 @@ public class Join extends SlashCommand {
 	}
 
 	protected void execute() {
+		event.deferReply().withEphemeral(true).subscribe();
+
 		game = server.getGame(event.getOptions().get(0).getName());
 		boolean isSingularQueue;
 		var gameOptions = event.getOptions().get(0).getOptions();
@@ -113,7 +115,7 @@ public class Join extends SlashCommand {
 		}
 		for (User user : users) {
 			if (user.isBot()) {
-				event.reply("Bots cannot be added to the queue.").withEphemeral(true).subscribe();
+				event.createFollowup("Bots cannot be added to the queue.").withEphemeral(true).subscribe();
 				return;
 			}
 		}
@@ -128,7 +130,7 @@ public class Join extends SlashCommand {
 			for (Match match : dbService.findAllMatchesByPlayer(player)) {
 				long secondsPassed = (new Date().getTime() - match.getTimestamp().getTime()) / 1000;
 				if (secondsPassed < newMatchJoinTimeout) {
-					event.reply((queue.getQueueType() == SOLO) ?
+					event.createFollowup((queue.getQueueType() == SOLO) ?
 							String.format("You have recently been assigned a match. " +
 									"Please wait another %s seconds before joining a queue again.", newMatchJoinTimeout - secondsPassed)
 							: String.format("The player %s has recently been assigned a match " +
@@ -138,13 +140,13 @@ public class Join extends SlashCommand {
 				}
 			}
 			if (queue.hasPlayer(player)) {// TODO alle auflisten
-				event.reply(String.format("The player %s is already in this queue an cannot be added a second time.",
+				event.createFollowup(String.format("The player %s is already in this queue an cannot be added a second time.",
 								player.getTag()))// TODO unterscheiden nach active player
 						.withEphemeral(true).subscribe();
 				return;
 			}
 			if (player.isBanned()) {// TODO alle player auflisten
-				event.reply(String.format("The player %s is currently banned and cannot join a queue.", player.getTag()))
+				event.createFollowup(String.format("The player %s is currently banned and cannot join a queue.", player.getTag()))
 						.withEphemeral(true).subscribe();// TODO unterscheiden nach active player
 				return;
 			}
@@ -154,7 +156,7 @@ public class Join extends SlashCommand {
 
 		queue.addGroup(group);
 		dbService.saveServer(server);
-		event.reply(String.format("Queue %s joined. Once the match starts, " +
+		event.createFollowup(String.format("Queue %s joined. Once the match starts, " +
 						"I will create a channel for the match, and ping all participants.", queue.getFullName()))
 				.withEphemeral(true).subscribe();
 	}
