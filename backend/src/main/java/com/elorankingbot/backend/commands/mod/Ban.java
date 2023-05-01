@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.mod;
 
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import static com.elorankingbot.backend.timedtask.DurationParser.minutesToString;
 
 @ModCommand
+@GlobalCommand
 public class Ban extends SlashCommand {
 
 	private User playerUser;

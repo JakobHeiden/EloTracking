@@ -3,12 +3,10 @@ package com.elorankingbot.backend.logging;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.DeferrableInteractionEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.rest.http.client.ClientException;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 

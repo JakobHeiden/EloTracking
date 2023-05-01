@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.patreon;
 
-import com.elorankingbot.backend.commands.Patreon;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import org.springframework.stereotype.Component;

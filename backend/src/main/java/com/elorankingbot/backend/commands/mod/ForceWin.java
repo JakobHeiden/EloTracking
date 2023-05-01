@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.mod;
 
 import com.elorankingbot.backend.command.annotations.ModCommand;
+import com.elorankingbot.backend.command.annotations.QueueCommand;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.ReportStatus;
@@ -16,6 +17,7 @@ import java.util.List;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 @ModCommand
+@QueueCommand
 public class ForceWin extends ForceMatch {
 
 	public ForceWin(ChatInputInteractionEvent event, Services services) {

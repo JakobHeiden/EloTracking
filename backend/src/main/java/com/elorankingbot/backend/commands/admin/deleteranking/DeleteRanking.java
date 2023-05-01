@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.admin.deleteranking;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.RankingCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.components.Buttons;
 import com.elorankingbot.backend.model.Server;
@@ -17,6 +18,7 @@ import java.util.List;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
+@RankingCommand
 public class DeleteRanking extends SlashCommand {
 
 	private String gameName;

@@ -2,12 +2,6 @@ package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.Command;
-import com.elorankingbot.backend.commands.admin.AddQueue;
-import com.elorankingbot.backend.commands.admin.AddRank;
-import com.elorankingbot.backend.commands.admin.DeleteRanks;
-import com.elorankingbot.backend.commands.admin.Reset;
-import com.elorankingbot.backend.commands.admin.deleteranking.DeleteRanking;
-import com.elorankingbot.backend.commands.player.Join;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent;
@@ -41,13 +35,8 @@ public class SetVariable extends Command {
 		} else {
 			dbService.saveServer(server);
 			if (variableName.equals("Name")) {// TODO die ganze fallunterscheidung von Game nach hier
-				discordCommandService.deployCommand(server, Join.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+				discordCommandManager.updateRankingCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 				channelManager.refreshLeaderboard(game);// TODO channel ggf umbenennen...
-				discordCommandService.deployCommand(server, AddQueue.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
-				discordCommandService.deployCommand(server, AddRank.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
-				discordCommandService.deployCommand(server, DeleteRanks.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
-				discordCommandService.deployCommand(server, Reset.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
-				discordCommandService.deployCommand(server, DeleteRanking.getRequest(server), exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 			}
 			userFeedback = String.format("\n**Variable %s for ranking %s is now set to %s.**", variableName, gameName, value);
 		}

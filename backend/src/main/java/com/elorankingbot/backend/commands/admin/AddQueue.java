@@ -1,9 +1,10 @@
 package com.elorankingbot.backend.commands.admin;
 
-import com.elorankingbot.backend.logging.ExceptionHandler;
-import com.elorankingbot.backend.command.annotations.AdminCommand;
-import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.FormatTools;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.RankingCommand;
+import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
@@ -19,6 +20,7 @@ import static discord4j.core.object.command.ApplicationCommandOption.Type.INTEGE
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
+@RankingCommand
 public class AddQueue extends SlashCommand {
 
 	public AddQueue(ChatInputInteractionEvent event, Services services) {
@@ -145,7 +147,7 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
 		game.addQueue(queue);
-		String updatedCommands = discordCommandService.updateGuildCommandsByQueue(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+		String updatedCommands = discordCommandManager.updateQueueCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. I will update these commands: %s" +

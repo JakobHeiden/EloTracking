@@ -1,15 +1,14 @@
 package com.elorankingbot.backend.commands.mod;
 
-import com.elorankingbot.backend.command.annotations.ModCommand;
-import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.FormatTools;
+import com.elorankingbot.backend.command.annotations.ModCommand;
+import com.elorankingbot.backend.command.annotations.RankingCommand;
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.PlayerGameStats;
 import com.elorankingbot.backend.model.Server;
-import com.elorankingbot.backend.service.MatchService;
 import com.elorankingbot.backend.service.Services;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandOption;
@@ -17,13 +16,11 @@ import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.core.object.entity.Role;
 
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @ModCommand
+@RankingCommand
 public class SetRating extends SlashCommand {
 
 	public SetRating(ChatInputInteractionEvent event, Services services) {

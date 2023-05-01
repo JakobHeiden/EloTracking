@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.player;
 
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Player;
@@ -8,6 +9,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
 @PlayerCommand
+@GlobalCommand
 public class Leave extends SlashCommand {
 
 	public Leave(ChatInputInteractionEvent event, Services services) {

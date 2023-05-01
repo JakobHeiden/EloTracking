@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands;
 
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.patreon.PatreonClient;
 import com.elorankingbot.backend.patreon.Patron;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @PlayerCommand
+@GlobalCommand
 public class Patreon extends SlashCommand {
 
     private final String patreonCampaignUrl;

@@ -29,7 +29,6 @@ public class ApplicationPropertiesLoader {
 	private long announcementChannelId;
 	private int numberOfTimeSlots;
 	private boolean useDevBotToken;
-	private boolean doUpdateGuildCommands;
 	private boolean doRunSchedulers;
 	@Value("${spring.data.mongodb.database}")
 	private String springDataMongodbDatabase;

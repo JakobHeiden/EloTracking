@@ -1,8 +1,9 @@
 package com.elorankingbot.backend.commands.admin;
 
-import com.elorankingbot.backend.command.annotations.AdminCommand;
-import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.FormatTools;
+import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
+import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -17,6 +18,7 @@ import java.util.List;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
+@GlobalCommand
 @CommonsLog
 public class CreateRanking extends SlashCommand {
 
@@ -82,7 +84,8 @@ public class CreateRanking extends SlashCommand {
 		channelManager.getOrCreateDisputeCategory(server);
 		channelManager.getOrCreateArchiveCategory(server);
 		dbService.saveServer(server);
-		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+
+		String updatedCommands = discordCommandManager.updateRankingCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 
 		boolean didCreateCategories = server.getDisputeCategoryId() == 0L;
 		event.editReply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +

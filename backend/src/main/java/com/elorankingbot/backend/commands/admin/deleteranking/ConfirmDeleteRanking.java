@@ -35,9 +35,9 @@ public class ConfirmDeleteRanking extends ButtonCommand {
 		dbService.saveServer(server);
 		bot.deleteChannel(game.getLeaderboardChannelId());
 		bot.deleteChannel(game.getResultChannelId());
-		String updatedCommands = discordCommandService.updateGuildCommandsByRanking(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+		String updatedCommands = discordCommandManager.updateRankingCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 		if (!game.getQueues().isEmpty()) {
-			updatedCommands += ", " + discordCommandService.updateGuildCommandsByQueue(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+			updatedCommands += ", " + discordCommandManager.updateQueueCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 		}
 
 		event.reply(String.format("Ranking %s deleted. These commands have been updated or deleted: %s" +

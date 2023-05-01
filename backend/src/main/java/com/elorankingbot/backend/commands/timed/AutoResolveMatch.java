@@ -1,7 +1,9 @@
 package com.elorankingbot.backend.commands.timed;
 
 import com.elorankingbot.backend.components.EmbedBuilder;
-import com.elorankingbot.backend.model.*;
+import com.elorankingbot.backend.model.Match;
+import com.elorankingbot.backend.model.MatchResult;
+import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.object.entity.channel.TextChannel;
