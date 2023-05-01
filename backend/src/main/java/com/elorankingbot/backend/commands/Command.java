@@ -27,7 +27,6 @@ public abstract class Command {
 	protected final DBService dbService;
 	protected final DiscordBotService bot;
 	protected final ChannelManager channelManager;
-	protected final DiscordCommandService discordCommandService;
 	protected final DiscordCommandManager discordCommandManager;
 	protected final MatchService matchService;
 	protected final QueueScheduler queueScheduler;
@@ -50,7 +49,6 @@ public abstract class Command {
 		this.dbService = services.dbService;
 		this.bot = services.bot;
 		this.channelManager = services.channelManager;
-		this.discordCommandService = services.discordCommandService;
 		this.discordCommandManager = services.discordCommandManager;
 		this.matchService = services.matchService;
 		this.queueScheduler = services.queueScheduler;

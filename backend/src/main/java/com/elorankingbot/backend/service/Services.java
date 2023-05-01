@@ -22,7 +22,6 @@ public class Services {
 	public final DBService dbService;
 	public final DiscordBotService bot;
 	public final ChannelManager channelManager;
-	public final DiscordCommandService discordCommandService;
 	public final DiscordCommandManager discordCommandManager;
 	public final MatchService matchService;
 	public final TimedTaskScheduler timedTaskScheduler;
@@ -33,7 +32,7 @@ public class Services {
 
     public Services(ApplicationPropertiesLoader props,
 					@Lazy DBService dbService, @Lazy DiscordBotService bot, @Lazy ChannelManager channelManager,
-					@Lazy DiscordCommandService discordCommandService, @Lazy DiscordCommandManager discordCommandManager,
+					@Lazy DiscordCommandManager discordCommandManager,
 					@Lazy MatchService matchService, @Lazy GatewayDiscordClient client, @Lazy PatreonClient patreonClient,
 					@Lazy TimedTaskScheduler timedTaskScheduler, @Lazy TimedTaskService timedTaskService, @Lazy QueueScheduler queueScheduler,
 					@Lazy CommandClassScanner commandClassScanner, @Lazy EventParser eventParser, @Lazy ExceptionHandler exceptionHandler) {
@@ -41,7 +40,6 @@ public class Services {
 		this.dbService = dbService;
 		this.bot = bot;
 		this.channelManager = channelManager;
-		this.discordCommandService = discordCommandService;
 		this.discordCommandManager = discordCommandManager;
 		this.matchService = matchService;
 		this.client = client;

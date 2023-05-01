@@ -5,11 +5,8 @@ import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Guild;
-import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
-
-import java.util.List;
 
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
@@ -40,10 +37,6 @@ public class GuildInfo extends SlashCommand {
 			long guildId = Long.parseLong(event.getOption("guildid").get().getValue().get().asString());
 			Guild guild = bot.getGuild(guildId).block();
 			String reply = String.format("%s:%s:%s\n", guildId, guild.getName(), guild.getMemberCount());
-			List<ApplicationCommandData> guildCommands = discordCommandService.getAllGuildCommands(guildId).block();
-			for (ApplicationCommandData guildCommand : guildCommands) {
-				reply += guildCommand.name() + ", ";
-			}
 			/* The new bot account does not have permissions for invites. TODO maybe remove at some point
 			List<ExtendedInvite> invites = guild.getInvites().buffer().blockLast();
 			if (invites != null) {

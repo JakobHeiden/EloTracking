@@ -87,7 +87,7 @@ public class DiscordBotService {
                 .collectList().block();
     }
 
-    public String getServerName(Server server) {
+    public String getServerIdAndName(Server server) {
         try {
             return String.format("%s:%s",
                     server.getGuildId(),
@@ -97,8 +97,8 @@ public class DiscordBotService {
         }
     }
 
-    public String getServerName(Player player) {
-        return getServerName(dbService.getOrCreateServer(player.getGuildId()));
+    public String getServerIdAndName(Player player) {
+        return getServerIdAndName(dbService.getOrCreateServer(player.getGuildId()));
     }
 
     // User

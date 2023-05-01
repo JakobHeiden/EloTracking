@@ -95,19 +95,19 @@ public class CommandClassScanner {
     private void gatherCommandClassNamesForDiscordCommands() {
         globalCommandClassNames = allMyClasses.stream()
                 .filter(clazz -> clazz.isAnnotationPresent(GlobalCommand.class))
-                .map(Class::getSimpleName)
+                .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
         adminCommandHelpEntries.forEach(className -> log.trace("global command " + className));
 
         rankingCommandClassNames = allMyClasses.stream()
                 .filter(clazz -> clazz.isAnnotationPresent(RankingCommand.class))
-                .map(Class::getSimpleName)
+                .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
         adminCommandHelpEntries.forEach(className -> log.trace("ranking command " + className));
 
         queueCommandClassNames = allMyClasses.stream()
                 .filter(clazz -> clazz.isAnnotationPresent(QueueCommand.class))
-                .map(Class::getSimpleName)
+                .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
         adminCommandHelpEntries.forEach(className -> log.trace("queue command " + className));
     }

@@ -47,7 +47,7 @@ public class QueueScheduler {
                                 } while (foundMatch);
                             } catch (Exception e) {
                                 String context = String.format("%s::generateAndStartMatches on %s:%s:%s",
-                                        this.getClass().getSimpleName(), bot.getServerName(queue.getServer()),
+                                        this.getClass().getSimpleName(), bot.getServerIdAndName(queue.getServer()),
                                         queue.getGame().getName(), queue.getName());
                                 exceptionHandler.handleException(e, context);
                             }
