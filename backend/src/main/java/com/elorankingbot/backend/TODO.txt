@@ -17,7 +17,6 @@ automatisch queues leaven nach einer weile
 verification
 secrets pruefen
 "i want to boot inactives" - player delete, inactive flag...?
-logback warnung checken
 
 event.reply / event.createFollowup evtl verallgemeinern
 alle versionen hochziehen
