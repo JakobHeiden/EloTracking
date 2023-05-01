@@ -3,7 +3,6 @@ package com.elorankingbot.backend.commands.player.help;
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.service.DiscordBotService;
-import com.elorankingbot.backend.service.Services;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.SelectMenu;
 import discord4j.core.spec.EmbedCreateFields;
@@ -14,9 +13,7 @@ import java.util.List;
 
 public class HelpComponents {
 
-	static EmbedCreateSpec createHelpEmbed(Services services, String topic) throws Exception {
-		DiscordBotService bot = services.bot;
-		CommandClassScanner commandClassScanner = services.commandClassScanner;
+	static EmbedCreateSpec createHelpEmbed(DiscordBotService bot, CommandClassScanner commandClassScanner, String topic) throws Exception {
 		String embedTitle = null;
 		String embedText = "";
 		switch (topic) {
