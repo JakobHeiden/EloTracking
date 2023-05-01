@@ -52,7 +52,7 @@ public class DBService {
 	}
 
 	public void resetAllPlayerRatings(Game game) {
-		log.debug(String.format("Resetting all player ratings for %s on %s", game.getName(), bot.getServerName(game.getServer())));
+		log.debug(String.format("Resetting all player ratings for %s on %s", game.getName(), bot.getServerIdAndName(game.getServer())));
 		List<Player> players = playerDao.findAllByGuildId(game.getGuildId());
 		players.forEach(player -> {
 			PlayerGameStats gameStats = player.getOrCreatePlayerGameStats(game);
@@ -84,7 +84,7 @@ public class DBService {
 	}
 
 	public void saveServer(Server server) {
-		log.debug(String.format("Saving server %s", bot.getServerName(server)));
+		log.debug(String.format("Saving server %s", bot.getServerIdAndName(server)));
 		serverDao.save(server);
 	}
 
@@ -112,7 +112,7 @@ public class DBService {
 	public void saveMatch(Match match) {
 		log.debug(String.format("Saving match %s on %s: %s",
 				match.getId(),
-				bot.getServerName(match.getServer()),
+				bot.getServerIdAndName(match.getServer()),
 				match.getPlayers().stream().map(Player::getTag).collect(Collectors.joining(","))));
 		matchDao.save(match);
 	}
@@ -120,13 +120,13 @@ public class DBService {
 	public void deleteMatch(Match match) {
 		log.debug(String.format("Deleting match %s on %s: %s",
 				match.getId(),
-				bot.getServerName(match.getServer()),
+				bot.getServerIdAndName(match.getServer()),
 				match.getPlayers().stream().map(Player::getTag).collect(Collectors.joining(","))));
 		matchDao.delete(match);
 	}
 
 	public void deleteAllMatches(Game game) {
-		log.debug(String.format("Deleting all match for %s on %s", game.getName(), bot.getServerName(game.getServer())));
+		log.debug(String.format("Deleting all match for %s on %s", game.getName(), bot.getServerIdAndName(game.getServer())));
 		matchDao.deleteAllByServerAndGameId(game.getServer(), game.getName());
 	}
 
@@ -145,7 +145,7 @@ public class DBService {
 		log.debug(String.format("saving match result %s for %s on %s",
 				matchResult.getId(),
 				matchResult.getGame().getName(),
-				bot.getServerName(matchResult.getServer())));
+				bot.getServerIdAndName(matchResult.getServer())));
 		matchResultDao.save(matchResult);
 	}
 
@@ -156,7 +156,7 @@ public class DBService {
 	public void deleteAllMatchResults(Game game) {
 		log.debug(String.format("Deleting all match results for %s on %s",
 				game.getName(),
-				bot.getServerName(game.getServer())));
+				bot.getServerIdAndName(game.getServer())));
 		matchResultDao.deleteAllByServerAndGameName(game.getServer(), game.getName());
 	}
 
@@ -178,14 +178,14 @@ public class DBService {
 
 	// Player
 	public void savePlayer(Player player) {
-		log.debug(String.format("saving player %s on %s", player.getTag(), bot.getServerName(player)));
+		log.debug(String.format("saving player %s on %s", player.getTag(), bot.getServerIdAndName(player)));
 		playerDao.save(player);
 	}
 
 	public void saveAllPlayers(List<Player> players) {
 		log.debug(String.format("Saving players %s on %s",
 				String.join(",", players.stream().map(Player::getTag).toList()),
-				players.isEmpty() ? "unknown" : bot.getServerName(players.get(0))));
+				players.isEmpty() ? "unknown" : bot.getServerIdAndName(players.get(0))));
 		playerDao.saveAll(players);
 	}
 

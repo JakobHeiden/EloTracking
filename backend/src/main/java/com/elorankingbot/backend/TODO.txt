@@ -14,8 +14,6 @@ concept: FAQ
 - channels umbenennen etc
 - DMs closed
 automatisch queues leaven nach einer weile
-verification
-secrets pruefen
 "i want to boot inactives" - player delete, inactive flag...?
 
 event.reply / event.createFollowup evtl verallgemeinern

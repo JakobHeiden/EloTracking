@@ -1,12 +1,10 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.*;
-import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
 import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
-import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
@@ -17,13 +15,11 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
-import discord4j.discordjson.json.ApplicationCommandData;
 import lombok.extern.apachecommons.CommonsLog;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Hooks;
 
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -34,14 +30,12 @@ public class EventParser {
 	private final Services services;
 	private final DBService dbService;
 	private final ExceptionHandler exceptionHandler;
-	private final DiscordCommandService discordCommandService;
 	private final CommandClassScanner commandClassScanner;
 
 	public EventParser(Services services, CommandClassScanner commandClassScanner) {
 		this.services = services;
 		this.dbService = services.dbService;
 		this.exceptionHandler = services.exceptionHandler;
-		this.discordCommandService = services.discordCommandService;
 		this.commandClassScanner = commandClassScanner;
 		GatewayDiscordClient client = services.client;
 
@@ -51,7 +45,6 @@ public class EventParser {
 					log.info(String.format("Logged in as %s", self.getTag()));
 					String activityMessage = services.props.getActivityMessage();
 					client.updatePresence(ClientPresence.of(Status.ONLINE, ClientActivity.playing(activityMessage))).subscribe();
-					logGlobalCommands();
 				});
 
 		client.on(ChatInputInteractionEvent.class)
@@ -79,8 +72,8 @@ public class EventParser {
 				.subscribe(event -> {
 					Server server = dbService.getOrCreateServer(event.getGuildId().asLong());
 					if (server.getAdminRoleId() == event.getRoleId().asLong()) {
-						long everyoneRoleId = server.getGuildId();
-						discordCommandService.setCommandPermissionForRole(server, SetPermission.class.getSimpleName().toLowerCase(), everyoneRoleId);
+						server.setAdminRoleId(0L);
+						dbService.saveServer(server);
 					}
 				});
 
@@ -176,10 +169,5 @@ public class EventParser {
 		return (MessageCommand) Class.forName(commandFullClassName)
 				.getConstructor(MessageInteractionEvent.class, Services.class)
 				.newInstance(event, services);
-	}
-
-	private void logGlobalCommands() {
-		List<ApplicationCommandData> globalCommands = discordCommandService.getGlobalCommands().block();
-		log.info("Global Commands: " + String.join(", ", globalCommands.stream().map(ApplicationCommandData::name).toList()));
 	}
 }
