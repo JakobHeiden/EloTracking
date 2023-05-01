@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.QueueCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Server;
@@ -15,6 +16,7 @@ import java.util.List;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
+@QueueCommand
 public class DeleteQueue extends SlashCommand {
 
 	public DeleteQueue(ChatInputInteractionEvent event, Services services) {
@@ -54,7 +56,7 @@ public class DeleteQueue extends SlashCommand {
 		Game game = server.getGame(queueFullName.split(" ")[0]);
 		game.deleteQueue(queueFullName.split(" ")[1]);
 		dbService.saveServer(server);
-		String updatedCommands = discordCommandService.updateGuildCommandsByQueue(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+		String updatedCommands = discordCommandManager.updateQueueCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
 
 		event.reply(String.format("Deleted queue %s. Updated or deleted these commands: %s" +
 						"\nThis may take a few minutes to deploy on the server.",

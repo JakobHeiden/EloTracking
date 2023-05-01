@@ -9,8 +9,6 @@ import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.http.client.ClientException;
 
-import java.util.*;
-
 @OwnerCommand
 public class AllGuilds extends SlashCommand {
 

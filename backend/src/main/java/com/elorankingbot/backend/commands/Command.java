@@ -1,11 +1,12 @@
 package com.elorankingbot.backend.commands;
 
-import com.elorankingbot.backend.logging.ExceptionHandler;
+import com.elorankingbot.backend.command.DiscordCommandManager;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.command.annotations.OwnerCommand;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.*;
 import com.elorankingbot.backend.timedtask.TimedTaskScheduler;
@@ -27,6 +28,7 @@ public abstract class Command {
 	protected final DiscordBotService bot;
 	protected final ChannelManager channelManager;
 	protected final DiscordCommandService discordCommandService;
+	protected final DiscordCommandManager discordCommandManager;
 	protected final MatchService matchService;
 	protected final QueueScheduler queueScheduler;
 	protected final TimedTaskScheduler timedTaskScheduler;
@@ -49,6 +51,7 @@ public abstract class Command {
 		this.bot = services.bot;
 		this.channelManager = services.channelManager;
 		this.discordCommandService = services.discordCommandService;
+		this.discordCommandManager = services.discordCommandManager;
 		this.matchService = services.matchService;
 		this.queueScheduler = services.queueScheduler;
 		this.timedTaskScheduler = services.timedTaskScheduler;

@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.AddQueue;
 import com.elorankingbot.backend.commands.admin.CreateRanking;
@@ -11,6 +12,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import static com.elorankingbot.backend.commands.admin.settings.SettingsComponents.*;
 
 @AdminCommand
+@GlobalCommand
 public class Settings extends SlashCommand {
 
 	public Settings(ChatInputInteractionEvent event, Services services) {

@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.RankingCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.Server;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.STRING;
 
 @AdminCommand
+@RankingCommand
 public class DeleteRanks extends SlashCommand {
 
 	public DeleteRanks(ChatInputInteractionEvent event, Services services) {

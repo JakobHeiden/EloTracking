@@ -1,6 +1,7 @@
 package com.elorankingbot.backend.commands.player.help;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
@@ -12,6 +13,7 @@ import static com.elorankingbot.backend.commands.player.help.HelpComponents.*;
 
 @CommonsLog
 @PlayerCommand
+@GlobalCommand
 public class Help extends SlashCommand {
 
 	private final Services services;

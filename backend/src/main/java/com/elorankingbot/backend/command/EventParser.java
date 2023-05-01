@@ -1,22 +1,19 @@
 package com.elorankingbot.backend.command;
 
-import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.commands.*;
 import com.elorankingbot.backend.commands.admin.SetPermission;
 import com.elorankingbot.backend.commands.admin.settings.SetVariable;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
-import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.DiscordCommandService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.presence.ClientActivity;
 import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.presence.Status;
@@ -182,7 +179,7 @@ public class EventParser {
 	}
 
 	private void logGlobalCommands() {
-		List<ApplicationCommandData> globalCommands = discordCommandService.getAllGlobalCommands().block();
+		List<ApplicationCommandData> globalCommands = discordCommandService.getGlobalCommands().block();
 		log.info("Global Commands: " + String.join(", ", globalCommands.stream().map(ApplicationCommandData::name).toList()));
 	}
 }

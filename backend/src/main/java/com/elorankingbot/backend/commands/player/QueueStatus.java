@@ -1,5 +1,6 @@
 package com.elorankingbot.backend.commands.player;
 
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.commands.admin.AddQueue;
@@ -13,6 +14,7 @@ import discord4j.discordjson.json.ApplicationCommandRequest;
 import java.util.List;
 
 @PlayerCommand
+@GlobalCommand
 public class QueueStatus extends SlashCommand {
 
 	public QueueStatus(ChatInputInteractionEvent event, Services services) {

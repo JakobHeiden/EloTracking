@@ -2,9 +2,9 @@ package com.elorankingbot.backend.commands.admin;
 
 import com.elorankingbot.backend.command.CommandClassScanner;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.service.Services;
-import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandOption;
 import discord4j.core.object.entity.Member;
@@ -14,11 +14,11 @@ import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import lombok.extern.apachecommons.CommonsLog;
 
 import java.util.Set;
 
 @AdminCommand
+@GlobalCommand
 public class SetPermission extends SlashCommand {
 
     private final CommandClassScanner commandClassScanner;

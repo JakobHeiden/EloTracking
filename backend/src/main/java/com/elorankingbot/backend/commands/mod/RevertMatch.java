@@ -1,13 +1,14 @@
 package com.elorankingbot.backend.commands.mod;
 
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.ModCommand;
 import com.elorankingbot.backend.commands.MessageCommand;
 import com.elorankingbot.backend.commands.player.help.HelpComponents;
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.MatchResultReference;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.PlayerGameStats;
-import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.MessageInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 @ModCommand
+@GlobalCommand
 @CommonsLog
 public class RevertMatch extends MessageCommand {
 

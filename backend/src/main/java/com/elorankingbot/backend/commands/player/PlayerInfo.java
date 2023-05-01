@@ -1,12 +1,13 @@
 package com.elorankingbot.backend.commands.player;
 
+import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.model.Game;
 import com.elorankingbot.backend.model.MatchResult;
 import com.elorankingbot.backend.model.Player;
 import com.elorankingbot.backend.model.RankingsExcerpt;
-import com.elorankingbot.backend.components.EmbedBuilder;
 import com.elorankingbot.backend.service.Services;
 import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.USER;
 
 @PlayerCommand
+@GlobalCommand
 public class PlayerInfo extends SlashCommand {
 
 	private Player targetPlayer;

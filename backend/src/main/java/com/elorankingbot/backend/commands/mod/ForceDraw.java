@@ -13,6 +13,9 @@ import java.util.List;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 @ModCommand
+// Concerning command deployment, this is a special case dependent on isAllowDraw
+// as such it is not annotated as @QueueCommand
+// see DiscordCommandManager::updateQueueCommands
 public class ForceDraw extends ForceMatch {
 
 

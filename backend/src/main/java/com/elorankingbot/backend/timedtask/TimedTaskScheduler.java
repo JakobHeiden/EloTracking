@@ -1,11 +1,11 @@
 package com.elorankingbot.backend.timedtask;
 
-import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.commands.timed.AutoResolveMatch;
 import com.elorankingbot.backend.commands.timed.DecayAcceptedChallenge;
 import com.elorankingbot.backend.commands.timed.DecayOpenChallenge;
 import com.elorankingbot.backend.dao.TimeSlotDao;
 import com.elorankingbot.backend.dao.TimedTaskQueueCurrentIndexDao;
+import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.CurrentIndex;
 import com.elorankingbot.backend.model.TimeSlot;
 import com.elorankingbot.backend.service.DBService;
