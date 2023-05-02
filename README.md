@@ -6,8 +6,6 @@ To run the bot, you need the following:
 - for development, put the ids of your test servers in applications.properties, elorankingbot.test-server-ids
 - not sure if ente2-id or announcement-channel-id are still used
 - use Maven to build the project: mvn -B package -DskipTests --file backend/pom.xml
-- run the bot once with elorankingbot.do-update-guild-commands=true to register global commands
-- set to false again for day-to-day operation
 - get the bot invite link from the discord developer portal and invite it to your server
 - run the bot with java -XX:MaxRAM=200m --add-opens java.base/java.lang=ALL-UNNAMED -jar -Dserver.port= elotracking.jar
 - some of the exceptions sent to the owner are false positives, for example the webhook errors don't make apparent sense to me
