@@ -1,7 +1,6 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.*;
-import com.elorankingbot.backend.commands.admin.settings.SetVariable;
 import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.DBService;
@@ -57,13 +56,7 @@ public class EventParser {
 				.subscribe(this::processSelectMenuInteractionEvent);
 
 		client.on(ModalSubmitInteractionEvent.class)
-				.subscribe(event -> {
-					try {
-						new SetVariable(event, services).doExecute();
-					} catch (Exception e) {
-						exceptionHandler.handleUnexpectedCommandException(e, event, SetVariable.class.getSimpleName());
-					}
-				});
+				.subscribe(this::processModalSubmitInteractionEvent);
 
 		client.on(MessageInteractionEvent.class)
 				.subscribe(this::processMessageInteractionEvent);
@@ -76,18 +69,6 @@ public class EventParser {
 						dbService.saveServer(server);
 					}
 				});
-
-		client.on(InteractionCreateEvent.class).subscribe(event -> {
-			String commandString = "unknown";
-			if (event.getClass().equals(ButtonInteractionEvent.class))
-				commandString = ((ButtonInteractionEvent) event).getCustomId();
-			if (event.getClass().equals(ChatInputInteractionEvent.class))
-				commandString = ((ChatInputInteractionEvent) event).getCommandName();
-			log.debug(String.format("%s : %s : %s",
-					event.getClass().getSimpleName(),
-					commandString,
-					event.getInteraction().getId().asString()));
-		});
 
 		client.on(Event.class).subscribe(event -> log.trace(event.getClass().getSimpleName()));
 
@@ -168,6 +149,24 @@ public class EventParser {
 		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
 		return (MessageCommand) Class.forName(commandFullClassName)
 				.getConstructor(MessageInteractionEvent.class, Services.class)
+				.newInstance(event, services);
+	}
+
+	@Transactional
+	void processModalSubmitInteractionEvent(ModalSubmitInteractionEvent event) {
+		try {
+			Command command = createModalSubmitCommand(event);
+			command.doExecute();
+		} catch (Exception e) {
+			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCustomId().split(":")[0]);
+		}
+	}
+
+	private ModalSubmitCommand createModalSubmitCommand(ModalSubmitInteractionEvent event) throws Exception {
+		String commandFullClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
+		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
+		return (ModalSubmitCommand) Class.forName(commandFullClassName)
+				.getConstructor(ModalSubmitInteractionEvent.class, Services.class)
 				.newInstance(event, services);
 	}
 }

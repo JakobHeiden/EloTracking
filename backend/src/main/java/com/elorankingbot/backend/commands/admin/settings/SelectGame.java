@@ -2,38 +2,37 @@ package com.elorankingbot.backend.commands.admin.settings;
 
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.commands.SelectMenuCommand;
-import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.model.Game;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent;
-import discord4j.discordjson.possible.Possible;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.SelectMenu;
 
-import java.util.Optional;
-
-import static com.elorankingbot.backend.commands.admin.settings.SettingsComponents.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @AdminCommand
 public class SelectGame extends SelectMenuCommand {
 
-	private Game game;
+	public static String customId = SelectGame.class.getSimpleName().toLowerCase();
 
 	public SelectGame(SelectMenuInteractionEvent event, Services services) {
 		super(event, services);
 	}
 
-	protected void execute() {
-		if (event.getValues().get(0).equals("-norankingsyet")) {// - is not allowed in game name
-			event.getMessage().get().edit().withContent(Possible.of(Optional.of(
-					String.format("No rankings yet. Please create a ranking with `/%s`.",
-							CreateRanking.class.getSimpleName().toLowerCase())))).subscribe();
-			acknowledgeEvent();
-			return;
-		}
+	static ActionRow menu(Server server) {
+		List<SelectMenu.Option> rankingsOptions = new ArrayList<>();
+		server.getGames().forEach(game -> rankingsOptions.add(SelectMenu.Option.of(game.getName(), game.getName())));
+		return ActionRow.of(SelectMenu.of(customId, rankingsOptions)
+				.withPlaceholder("Select a ranking to edit"));
+	}
 
-		game = server.getGame(event.getValues().get(0));
+	protected void execute() {
+		Game game = server.getGame(event.getValues().get(0));
 		event.getMessage().get().edit()
-				.withEmbeds(gameSettingsEmbed(game))
-				.withComponents(createVariableMenu(game), exitAndEscapeButton()).subscribe();
+				.withEmbeds(Settings.gameSettingsEmbed(game))
+				.withComponents(SelectGameVariableOrQueue.menu(game), ActionRow.of(Exit.button(), EscapeToMainMenu.button())).subscribe();
 		acknowledgeEvent();
 	}
 }

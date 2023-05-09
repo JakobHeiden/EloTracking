@@ -147,7 +147,7 @@ public class AddQueue extends SlashCommand {
 		MatchFinderQueue queue = new MatchFinderQueue(game, nameOfQueue, numberOfTeams, playersPerTeam,
 				queueType, maxPremadeSize);
 		game.addQueue(queue);
-		String updatedCommands = discordCommandManager.updateQueueCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+		String updatedCommands = discordCommandManager.updateQueueCommands(server, exceptionHandler.updateCommandFailedCallbackFactory(event));
 		dbService.saveServer(server);
 
 		event.reply(String.format("Queue %s for ranking %s has been created. I will update these commands: %s" +

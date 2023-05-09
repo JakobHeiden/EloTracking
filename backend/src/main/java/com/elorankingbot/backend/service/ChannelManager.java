@@ -41,18 +41,24 @@ public class ChannelManager {
 	private final DiscordBotService bot;
 	private final TimedTaskScheduler timedTaskScheduler;
 	private final long patreonCommandId;
-	private final Services services;
+
+	public static final String leaderboardChannelNameTemplate = "%s Leaderboard";
 
 	public ChannelManager(Services services) {
 		this.bot = services.bot;
 		this.dbService = services.dbService;
 		this.timedTaskScheduler = services.timedTaskScheduler;
 		this.patreonCommandId = services.props.getPatreon().getCommandId();
-		this.services = services;
 	}
 
 	private TextChannelEditMono setParentCategory(Channel channel, long categoryId) {
 		return ((TextChannel) channel).edit().withParentId(Possible.of(Optional.of(Snowflake.of(categoryId))));
+	}
+
+	public void updateLeaderbordChannelName(Game game) {
+		bot.getChannelById(game.getLeaderboardChannelId()).subscribe(
+				channel -> ((TextChannel) channel).edit().withName(
+						String.format(leaderboardChannelNameTemplate, game.getName())).subscribe());
 	}
 
 	// Result
@@ -223,7 +229,7 @@ public class ChannelManager {
 	private Message createLeaderboardChannelAndMessage(Game game) {
 		log.debug("createLeaderBoardChannelAndMessage: " + game.getName());
 		Guild guild = bot.getGuild(game.getGuildId()).block();
-		TextChannel leaderboardChannel = guild.createTextChannel(String.format("%s Leaderboard", game.getName()))
+		TextChannel leaderboardChannel = guild.createTextChannel(String.format(leaderboardChannelNameTemplate, game.getName()))
 				.withPermissionOverwrites(onlyBotCanSend(game.getServer()))
 				.block();
 		Message leaderboardMessage = leaderboardChannel.createMessage("creating leaderboard...").block();

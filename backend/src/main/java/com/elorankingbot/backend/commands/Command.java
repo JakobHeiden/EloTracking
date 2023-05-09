@@ -139,7 +139,7 @@ public abstract class Command {
 			log.trace("Done executing " + executionSummary);
 		} else {
 			log.warn("Slow command: " + executionSummary);
-			bot.sendToOwner("Slow command: " + executionSummary);
+			//bot.sendToOwner("Slow command: " + executionSummary);
 		}
 	}
 

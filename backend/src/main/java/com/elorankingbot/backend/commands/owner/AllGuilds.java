@@ -16,7 +16,7 @@ public class AllGuilds extends SlashCommand {
         super(event, services);
     }
 
-    public static ApplicationCommandRequest getRequest() {
+    public static ApplicationCommandRequest getRequest(Server server) {
         return ApplicationCommandRequest.builder()
                 .name(AllGuilds.class.getSimpleName().toLowerCase())
                 .description(AllGuilds.class.getSimpleName())

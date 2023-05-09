@@ -57,15 +57,15 @@ public class HelpComponents {
 						"share a rating and a leaderboard, while 1v1 would be separate.";
 			}
 			case "Concept: Matchmaking, Rating Spread, Rating Elasticity" -> {
-				embedText = "Queues have a setting called `maxratingspread`. This defines the maximum rating distance " +
+				embedText = "Queues have a setting called `max-rating-spread`. This defines the maximum rating distance " +
 						"between the strongest player and the weakest player in a match.\n" +
-						"There is also another setting called `ratingelasticity`, given in ratings points per minute, " +
+						"There is also another setting called `rating-elasticity`, given in ratings points per minute, " +
 						"which defines how fast (if at all) the matchmaker will consider matches that violate " +
-						"`maxratingspread`.\n" +
-						"Use `/edit` to change these settings. \n" +
-						"The default for `maxratingspread` is NO_LIMIT, which turns the feature off.\n" +
-						"The default for `ratingelasticity` is 100 points per minute.\n" +
-						"`ratingelasticity` is applied in fractions, not only each full minute.\n";
+						"`max-rating-spread`.\n" +
+						"Use `/settings` to change these settings. \n" +
+						"The default for `max-rating-spread` is NO_LIMIT, which turns the feature off.\n" +
+						"The default for `rating-elasticity` is 100 points per minute.\n" +
+						"`rating-elasticity` is applied in fractions, not only each full minute.\n";
 			}
 			default -> {
 				String commandName = topic;

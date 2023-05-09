@@ -21,7 +21,7 @@ public class MatchFinderQueue {
 	}
 
 	@Id
-	private final String name;
+	private String name;
 	private List<Group> groups;
 	private List<Group> formingGroups;// TODO was ist es und kann es weg? vllt was mit team q?
 	@DBRef(lazy = true)
@@ -91,10 +91,6 @@ public class MatchFinderQueue {
 		}
 	}
 
-	public boolean isSoloQueue() {
-		return queueType == QueueType.SOLO;
-	}
-
 	public String getDescription() {
 		if (numTeams == 2) {
 			if (numPlayersPerTeam == 1) return "Join this 1v1 queue";
@@ -121,6 +117,10 @@ public class MatchFinderQueue {
 				};
 			}
 		}
+	}
+
+	public String getMaxRatingSpreadAsString() {
+		return maxRatingSpread == NO_LIMIT ? "no limit" : String.valueOf(maxRatingSpread);
 	}
 
 	public Server getServer() {
