@@ -37,12 +37,12 @@ public abstract class ForceMatch extends SlashCommand {
 		users = userOptions.stream().map(option -> option.getValue().get().asUser().block()).toList();
 		for (User user : users) {
 			if (user.isBot()) {
-				event.reply(String.format("%s is a bot and cannot be part of a match.", user.getTag())).subscribe(NO_OP, super::forwardToExceptionHandler);
+				event.createFollowup(String.format("%s is a bot and cannot be part of a match.", user.getTag())).subscribe(NO_OP, super::forwardToExceptionHandler);
 				return;
 			}
 		}
 		if (users.size() > new HashSet<>(users).size()) {
-			event.reply("A user cannot be in a match more than once.").subscribe();
+			event.createFollowup("A user cannot be in a match more than once.").subscribe();
 			return;
 		}
 
