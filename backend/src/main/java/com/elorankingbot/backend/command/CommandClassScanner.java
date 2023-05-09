@@ -34,7 +34,7 @@ public class CommandClassScanner {
     @Getter
     // these are also used for setting permissions, which is currently out of order
     private Set<String> adminCommandHelpEntries, modCommandHelpEntries, playerCommandHelpEntries,
-            globalCommandClassNames, rankingCommandClassNames, queueCommandClassNames;
+            globalCommandClassNames, ownerCommandClassNames, rankingCommandClassNames, queueCommandClassNames;
     private Set<Class> allMyClasses;
 
     public CommandClassScanner() throws IOException {
@@ -97,19 +97,25 @@ public class CommandClassScanner {
                 .filter(clazz -> clazz.isAnnotationPresent(GlobalCommand.class))
                 .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
-        adminCommandHelpEntries.forEach(className -> log.trace("global command " + className));
+        globalCommandClassNames.forEach(className -> log.trace("global command " + className));
+
+        ownerCommandClassNames = allMyClasses.stream()
+                .filter(clazz -> clazz.isAnnotationPresent(OwnerCommand.class))
+                .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
+                .collect(Collectors.toSet());
+        ownerCommandClassNames.forEach(className -> log.trace("owner command " + className));
 
         rankingCommandClassNames = allMyClasses.stream()
                 .filter(clazz -> clazz.isAnnotationPresent(RankingCommand.class))
                 .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
-        adminCommandHelpEntries.forEach(className -> log.trace("ranking command " + className));
+        rankingCommandClassNames.forEach(className -> log.trace("ranking command " + className));
 
         queueCommandClassNames = allMyClasses.stream()
                 .filter(clazz -> clazz.isAnnotationPresent(QueueCommand.class))
                 .map(clazz -> clazz.getSimpleName().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
-        adminCommandHelpEntries.forEach(className -> log.trace("queue command " + className));
+        queueCommandClassNames.forEach(className -> log.trace("queue command " + className));
     }
 
     private boolean superclassImpliesHelpEntry(Class clazz) {

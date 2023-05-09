@@ -53,8 +53,12 @@ public class ExceptionHandler {
 	}
 
 	// specific exception cases
-	public BiFunction<String, Boolean, Consumer<Throwable>> createUpdateCommandFailedCallbackFactory(DeferrableInteractionEvent event) {
+	public BiFunction<String, Boolean, Consumer<Throwable>> updateCommandFailedCallbackFactory(DeferrableInteractionEvent event) {
 		return (commandName, isDeploy) -> throwable -> handleCommandException(throwable, event, commandName,
 				String.format("Unable to %s command %s", isDeploy ? "deploy" : "delete", commandName));
+	}
+
+	public BiFunction<String, Boolean, Consumer<Throwable>> updateCommandFailedCallbackFactory() {
+		return (commandName, isDeploy) -> throwable -> handleException(throwable, commandName);
 	}
 }

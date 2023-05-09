@@ -1,4 +1,5 @@
 ein kanal/mehrere in settings einpflegen
+e2e auf deploy einrichten
 leaderboardlength setting
 ranks anzeigen
 concept: autoresolve
@@ -17,8 +18,6 @@ automatisch queues leaven nach einer weile
 "i want to boot inactives" - player delete, inactive flag...?
 
 event.reply / event.createFollowup evtl verallgemeinern
-alle versionen hochziehen
-Edit in Settings ueberfuehren
 match names vllt kuerzer
 
 nicks updaten
@@ -30,3 +29,12 @@ in game flag bauen, im konstruktor default setzen
 
 permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
 vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
+
+welche settings noch?
+alle versionen hochziehen
+
+top.gg
+der bot hat keinen access auf nachrichten, die er in kanaele schreibt, die er nicht sehen kann. was bedeutet das? aknn ich das umgehen? kann ich eine fehlermeldung geben...?
+
+
+fehler?

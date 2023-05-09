@@ -1,6 +1,5 @@
 package com.elorankingbot.backend.model;
 
-import com.elorankingbot.backend.FormatTools;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @NoArgsConstructor
 @Data
@@ -70,67 +68,6 @@ public class Game {
 
     public long getGuildId() {
         return server.getGuildId();
-    }
-
-    public String getVariable(String variableName) {
-        switch (variableName) {
-            case "Name" -> {
-                return name;
-            }
-            case "Initial Rating" -> {
-                return String.valueOf(initialRating);
-            }
-            case "K" -> {
-                return String.valueOf(getQueues().stream().findAny().get().getK());
-            }
-            default -> {
-                return "error";
-            }
-        }
-    }
-
-    public Optional<String> setVariable(String variableName, String value) {
-        switch (variableName) {
-            case "Name" -> {
-                if (!FormatTools.isLegalDiscordName(value)) {
-                    return Optional.of(FormatTools.illegalNameMessage());
-                }
-                server.getGameNameToGame().remove(name);
-                name = value;
-                server.getGameNameToGame().put(name, this);
-                queueNameToQueue.keySet().forEach(queueName -> {
-                    MatchFinderQueue queue = queueNameToQueue.get(queueName);
-                    queue.setGame(this);
-                    queueNameToQueue.put(queueName, queue);
-                });
-                return Optional.empty();
-            }
-            case "Initial Rating" -> {
-                try {
-                    initialRating = Integer.parseInt(value);
-                } catch (NumberFormatException e) {
-                    // TODO different message for numbers that are too big
-                    return Optional.of("Please enter an Integer.");
-                }
-                return Optional.empty();
-            }
-            case "K" -> {
-                int newK;
-                try {
-                    newK = Integer.parseInt(value);
-                } catch (NumberFormatException e) {
-                    return Optional.of("Please enter an Integer.");
-                }
-                if (newK < 0) {
-                    return Optional.of("Please enter a positive number.");
-                }
-                getQueues().forEach(queue -> queue.setK(newK));
-                return Optional.empty();
-            }
-            default -> {
-                return Optional.of("error");
-            }
-        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.elorankingbot.backend.commands.owner;
 
 import com.elorankingbot.backend.command.annotations.OwnerCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
+import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.Guild;
@@ -17,7 +18,7 @@ public class GuildInfo extends SlashCommand {
 		super(event, services);
 	}
 
-	public static ApplicationCommandRequest getRequest() {
+	public static ApplicationCommandRequest getRequest(Server server) {
 		return ApplicationCommandRequest.builder()
 				.name(GuildInfo.class.getSimpleName().toLowerCase())
 				.description("GuildInfo")

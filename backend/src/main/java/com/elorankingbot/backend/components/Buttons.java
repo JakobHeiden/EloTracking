@@ -2,8 +2,6 @@ package com.elorankingbot.backend.components;
 
 import com.elorankingbot.backend.commands.admin.deleteranking.AbortDeleteRanking;
 import com.elorankingbot.backend.commands.admin.deleteranking.ConfirmDeleteRanking;
-import com.elorankingbot.backend.commands.admin.settings.Escape;
-import com.elorankingbot.backend.commands.admin.settings.Exit;
 import discord4j.core.object.component.Button;
 
 import java.util.UUID;
@@ -76,13 +74,6 @@ public class Buttons {// TODO string ersetzen duch klassennamen
 	}
 
 	// Settings
-	public static Button exit() {
-		return Button.secondary(Exit.class.getSimpleName().toLowerCase(),
-				Emojis.crossMark, "Close settings menu");
-	}
 
-	public static Button escape() {
-		return Button.secondary(Escape.class.getSimpleName().toLowerCase(),
-				Emojis.redoArrow, "Back to main menu");
-	}
+
 }

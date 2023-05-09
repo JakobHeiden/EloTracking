@@ -56,7 +56,7 @@ public class DeleteQueue extends SlashCommand {
 		Game game = server.getGame(queueFullName.split(" ")[0]);
 		game.deleteQueue(queueFullName.split(" ")[1]);
 		dbService.saveServer(server);
-		String updatedCommands = discordCommandManager.updateQueueCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+		String updatedCommands = discordCommandManager.updateQueueCommands(server, exceptionHandler.updateCommandFailedCallbackFactory(event));
 
 		event.reply(String.format("Deleted queue %s. Updated or deleted these commands: %s" +
 						"\nThis may take a few minutes to deploy on the server.",

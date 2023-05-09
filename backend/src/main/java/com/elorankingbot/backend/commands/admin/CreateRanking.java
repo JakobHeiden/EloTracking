@@ -85,7 +85,7 @@ public class CreateRanking extends SlashCommand {
 		channelManager.getOrCreateArchiveCategory(server);
 		dbService.saveServer(server);
 
-		String updatedCommands = discordCommandManager.updateRankingCommands(server, exceptionHandler.createUpdateCommandFailedCallbackFactory(event));
+		String updatedCommands = discordCommandManager.updateGameCommands(server, exceptionHandler.updateCommandFailedCallbackFactory(event));
 
 		boolean didCreateCategories = server.getDisputeCategoryId() == 0L;
 		event.editReply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +

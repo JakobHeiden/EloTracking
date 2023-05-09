@@ -1,8 +1,10 @@
 package com.elorankingbot.backend.command;
 
 import com.elorankingbot.backend.commands.mod.ForceDraw;
+import com.elorankingbot.backend.configuration.ApplicationPropertiesLoader;
 import com.elorankingbot.backend.logging.ExceptionHandler;
 import com.elorankingbot.backend.model.Server;
+import com.elorankingbot.backend.service.DBService;
 import com.elorankingbot.backend.service.DiscordBotService;
 import com.elorankingbot.backend.service.Services;
 import discord4j.discordjson.json.ApplicationCommandData;
@@ -23,32 +25,40 @@ import java.util.stream.Collectors;
 @CommonsLog
 public class DiscordCommandManager {
 
+    private final DBService dbService;
     private final DiscordBotService bot;
     private final CommandClassScanner commandClassScanner;
     private final ExceptionHandler exceptionHandler;
     private final ApplicationService applicationService;
     private final List<ApplicationCommandData> currentGlobalCommands;
-    private final Set<String> necessaryGlobalCommandsNames;
+    private final Set<String> neededGlobalCommandsNames, neededOwnerCommands, allNeededGuildCommandNames;
     private final long botId;
     private final Consumer<Object> NO_OP = object -> {
     };
 
     public DiscordCommandManager(Services services) {
+        dbService = services.dbService;
         bot = services.bot;
         commandClassScanner = services.commandClassScanner;
         exceptionHandler = services.exceptionHandler;
         applicationService = services.client.rest().getApplicationService();
-        necessaryGlobalCommandsNames = commandClassScanner.getGlobalCommandClassNames();
+        neededGlobalCommandsNames = commandClassScanner.getGlobalCommandClassNames();
+        neededOwnerCommands = commandClassScanner.getOwnerCommandClassNames();
+        allNeededGuildCommandNames = neededOwnerCommands;
+        allNeededGuildCommandNames.addAll(commandClassScanner.getRankingCommandClassNames());
+        allNeededGuildCommandNames.addAll(commandClassScanner.getQueueCommandClassNames());
         botId = services.client.getSelfId().asLong();
         currentGlobalCommands = applicationService.getGlobalApplicationCommands(botId).collectList().block();
 
         deleteSuperfluousGlobalCommands();
         deployNeededGlobalCommands();
+        deleteSuperfluousGuildCommands(services.props);
+        deployNeededOwnerCommands(services.props);
     }
 
     private void deleteSuperfluousGlobalCommands() {
         currentGlobalCommands.stream()
-                .filter(command -> !necessaryGlobalCommandsNames.contains(command.name().toLowerCase().replace(" ", "")))
+                .filter(command -> !neededGlobalCommandsNames.contains(command.name().toLowerCase().replace(" ", "")))
                 .forEach(command -> deleteGlobalCommand(command.name(), command.id().asLong()));
     }
 
@@ -56,12 +66,31 @@ public class DiscordCommandManager {
         Set<String> currentGlobalCommandsNames = currentGlobalCommands.stream()
                 .map(applicationCommandData -> applicationCommandData.name().toLowerCase().replace(" ", ""))
                 .collect(Collectors.toSet());
-        necessaryGlobalCommandsNames.stream()
+        neededGlobalCommandsNames.stream()
                 .filter(necessaryCommandName -> !currentGlobalCommandsNames.contains(necessaryCommandName))
                 .forEach(this::deployGlobalCommand);
     }
 
-    public String updateRankingCommands(Server server, BiFunction<String, Boolean, Consumer<Throwable>> updateCommandFailedCallbackFactory) {
+    private void deleteSuperfluousGuildCommands(ApplicationPropertiesLoader props) {
+        props.getTestServerIds().forEach(testServerId ->
+                applicationService.getGuildApplicationCommands(botId, testServerId).subscribe(applicationCommandData -> {
+                    if (!allNeededGuildCommandNames.contains(applicationCommandData.name()))
+                        applicationService.deleteGuildApplicationCommand(botId, testServerId, applicationCommandData.id().asLong()).subscribe();
+                }));
+    }
+
+    private void deployNeededOwnerCommands(ApplicationPropertiesLoader props) {
+        props.getTestServerIds().forEach(testServerId ->
+                applicationService.getGuildApplicationCommands(botId, testServerId).map(ApplicationCommandData::name)
+                        .collectList().subscribe(deployedCommandNames ->
+                                neededOwnerCommands.forEach(necessaryCommandName -> {
+                                    if (!deployedCommandNames.contains(necessaryCommandName)) {
+                                        deployGuildCommand(dbService.getOrCreateServer(testServerId), necessaryCommandName,
+                                                exceptionHandler.updateCommandFailedCallbackFactory());
+                                    }})));
+    }
+
+    public String updateGameCommands(Server server, BiFunction<String, Boolean, Consumer<Throwable>> updateCommandFailedCallbackFactory) {
         Set<String> updatedCommandNames = new HashSet<>();
         if (server.getGames().isEmpty()) {
             commandClassScanner.getRankingCommandClassNames().forEach(
@@ -135,7 +164,6 @@ public class DiscordCommandManager {
 
     private ApplicationCommandRequest getRequestByCommandName(String commandName, Server server) {
         String fullCommandClassName = commandClassScanner.getFullClassName(commandName);
-        System.out.println(fullCommandClassName);
         ApplicationCommandRequest request = null;
         try {
             request = (ApplicationCommandRequest) Class.forName(fullCommandClassName)
