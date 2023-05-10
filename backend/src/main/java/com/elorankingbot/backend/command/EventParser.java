@@ -86,7 +86,7 @@ public class EventParser {
 			Command command = createSlashCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCommandName());
+			exceptionHandler.handleUnspecifiedCommandException(e, event, event.getCommandName());
 		}
 	}
 
@@ -104,7 +104,7 @@ public class EventParser {
 			Command command = createButtonCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCustomId().split(":")[0]);
+			exceptionHandler.handleUnspecifiedCommandException(e, event, event.getCustomId().split(":")[0]);
 		}
 	}
 
@@ -122,7 +122,7 @@ public class EventParser {
 			Command command = createSelectMenuCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCustomId().split(":")[0]);
+			exceptionHandler.handleUnspecifiedCommandException(e, event, event.getCustomId().split(":")[0]);
 		}
 	}
 
@@ -140,7 +140,7 @@ public class EventParser {
 			Command command = createMessageCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCommandName().replace(" ", "").toLowerCase());
+			exceptionHandler.handleUnspecifiedCommandException(e, event, event.getCommandName().replace(" ", "").toLowerCase());
 		}
 	}
 
@@ -158,7 +158,7 @@ public class EventParser {
 			Command command = createModalSubmitCommand(event);
 			command.doExecute();
 		} catch (Exception e) {
-			exceptionHandler.handleUnexpectedCommandException(e, event, event.getCustomId().split(":")[0]);
+			exceptionHandler.handleUnspecifiedCommandException(e, event, event.getCustomId().split(":")[0]);
 		}
 	}
 

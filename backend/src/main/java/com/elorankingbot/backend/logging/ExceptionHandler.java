@@ -24,16 +24,20 @@ public class ExceptionHandler {
 		this.bot = services.bot;
 	}
 
-	public void handleUnexpectedCommandException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
-		handleCommandException(throwable, event, commandName, "Unexpected Error");
+	public void handleUnspecifiedCommandException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
+		handleCommandException(throwable, event, commandName, "Unspecified Error");
 	}
 
-	private void handleCommandException(Throwable throwable, DeferrableInteractionEvent event, String commandName, String errorSpecificString) {
+	public void handleAsyncException(Throwable throwable, DeferrableInteractionEvent event, String commandName) {
+		handleCommandException(throwable, event, commandName, "Asynchronous Error");
+	}
+
+	private void handleCommandException(Throwable throwable, DeferrableInteractionEvent event, String commandName, String errorDescription) {
 		String guildString = event.getInteraction().getGuild().map(bot::guildAsString).onErrorReturn("unknown").block();
 		String context = String.format("%s on %s by %s", commandName, guildString, event.getInteraction().getUser().getTag());
 		handleException(throwable, context);
 
-		String userErrorMessage = errorSpecificString + ": " + throwable.getMessage()
+		String userErrorMessage = errorDescription + ": " + throwable.getMessage()
 				+ "\nI sent a report to the developer."
 				+ "\nIf this error persists, please join the bot support server: "
 				+ supportServerInvite;
