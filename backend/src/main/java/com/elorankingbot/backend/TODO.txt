@@ -1,3 +1,4 @@
+app discovery braucht https - lohnt evtl irgendwann wenn mehr traffic kommt, da der traffic primaer von anderswo kommt.
 ein kanal/mehrere in settings einpflegen
 e2e auf deploy einrichten
 leaderboardlength setting
@@ -16,6 +17,7 @@ concept: FAQ
 - DMs closed
 automatisch queues leaven nach einer weile
 "i want to boot inactives" - player delete, inactive flag...?
+der bot hat keinen access auf nachrichten, die er in kanaele schreibt, die er nicht sehen kann. was bedeutet das? aknn ich das umgehen? kann ich eine fehlermeldung geben...?
 
 event.reply / event.createFollowup evtl verallgemeinern
 match names vllt kuerzer
@@ -32,9 +34,3 @@ vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand 
 
 welche settings noch?
 alle versionen hochziehen
-
-top.gg
-der bot hat keinen access auf nachrichten, die er in kanaele schreibt, die er nicht sehen kann. was bedeutet das? aknn ich das umgehen? kann ich eine fehlermeldung geben...?
-
-
-fehler?

@@ -149,7 +149,7 @@ public abstract class Command {
 	}
 
 	protected void forwardToExceptionHandler(Throwable throwable) {
-		exceptionHandler.handleUnexpectedCommandException(throwable, event, this.getClass().getSimpleName());
+		exceptionHandler.handleUnspecifiedCommandException(throwable, event, this.getClass().getSimpleName());
 	}
 
 	protected Function<Role, Consumer<Throwable>> manageRoleFailedCallbackFactory() {
