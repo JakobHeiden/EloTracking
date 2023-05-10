@@ -44,7 +44,7 @@ public class DiscordCommandManager {
         applicationService = services.client.rest().getApplicationService();
         neededGlobalCommandsNames = commandClassScanner.getGlobalCommandClassNames();
         neededOwnerCommands = commandClassScanner.getOwnerCommandClassNames();
-        allNeededGuildCommandNames = neededOwnerCommands;
+        allNeededGuildCommandNames = new HashSet<>(neededOwnerCommands);
         allNeededGuildCommandNames.addAll(commandClassScanner.getRankingCommandClassNames());
         allNeededGuildCommandNames.addAll(commandClassScanner.getQueueCommandClassNames());
         botId = services.client.getSelfId().asLong();
