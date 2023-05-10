@@ -4,7 +4,6 @@ import com.elorankingbot.backend.command.annotations.PlayerCommand;
 import com.elorankingbot.backend.command.annotations.QueueCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
 import com.elorankingbot.backend.model.*;
-import com.elorankingbot.backend.service.QueueScheduler;
 import com.elorankingbot.backend.service.Services;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.User;
@@ -14,8 +13,8 @@ import discord4j.discordjson.json.ImmutableApplicationCommandOptionData;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.PREMADE;
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.SOLO;
