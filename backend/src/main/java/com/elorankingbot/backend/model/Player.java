@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,6 +28,7 @@ public class Player  {
     private long userId;
     private long guildId;
     private String tag;
+    private Date lastJoinedQueueAt;
     private int unbanAtTimeSlot;
     private Map<String, PlayerGameStats> gameNameToPlayerGameStats;
 
@@ -35,6 +37,7 @@ public class Player  {
         this.userId = userId;
         this.guildId = guildId;
         this.tag = tag;
+        this.lastJoinedQueueAt = null;
         this.unbanAtTimeSlot = NOT_BANNED;
         this.gameNameToPlayerGameStats = new HashMap<>();
     }

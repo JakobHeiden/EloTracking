@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public class DurationParser {
 
-	public static Optional<Integer> parse(String string) {// TODO 3d12h ermoeglichen
+	public static Optional<Integer> parse(String string) {
 		string = string.replace(" ", "");
 		if (parseForInt(string).isPresent()) {
 			if (parseForInt(string).get() <= 0) return Optional.empty();

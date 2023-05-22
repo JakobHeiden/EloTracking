@@ -121,7 +121,10 @@ public class QueueScheduler {
         server.getGames().stream()
                 .flatMap(game -> game.getQueueNameToQueue().values().stream())
                 .forEach(queue -> queue.removeGroupsContainingPlayer(player));
-        dbService.saveServer(server);// TODO nur wenn noetig...
+        dbService.saveServer(server);
+
+        player.setLastJoinedQueueAt(null);
+        dbService.savePlayer(player);
     }
 
     public void updatePlayerInAllQueuesOfGame(Game game, Player player) {

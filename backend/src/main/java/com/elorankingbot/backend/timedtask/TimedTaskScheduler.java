@@ -80,6 +80,7 @@ public class TimedTaskScheduler {
             case MESSAGE_DELETE -> timedTaskService.deleteMessage(id, otherId);
             case CHANNEL_DELETE -> timedTaskService.deleteChannel(id);
             case PLAYER_UNBAN -> timedTaskService.unbanPlayer(id, otherId, duration);
+            case LEAVE_QUEUES -> timedTaskService.leaveQueues(id, otherId, duration, task.value());
         }
     }
 
