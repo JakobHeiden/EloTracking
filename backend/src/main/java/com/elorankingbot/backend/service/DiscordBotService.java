@@ -168,8 +168,8 @@ public class DiscordBotService {
         return String.format("I was not able to inform %s. Most likely their DMs are closed.", tag);
     }
 
-    public void sendDM(User user, String content) {
-        user.getPrivateChannel()
+    public void sendDM(long userId, String content) {
+        getUser(userId).getPrivateChannel()
                 .flatMap(privateChannel -> privateChannel.createMessage(content))
                 .subscribe(messageIgnored -> {
                 }, throwableIgnored -> {

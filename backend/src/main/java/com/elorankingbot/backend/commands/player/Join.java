@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.PREMADE;
 import static com.elorankingbot.backend.model.MatchFinderQueue.QueueType.SOLO;
+import static com.elorankingbot.backend.timedtask.TimedTask.TimedTaskType.LEAVE_QUEUES;
 import static discord4j.core.object.command.ApplicationCommandOption.Type.*;
 
 @PlayerCommand
@@ -152,6 +153,12 @@ public class Join extends SlashCommand {
         // TODO group queue
 
         queue.addGroup(group);
+        Date now = new Date();
+        for (Player player : group.getPlayers()) {
+            timedTaskScheduler.addTimedTask(LEAVE_QUEUES, 180, player.getUserId(), guildId, now);
+            player.setLastJoinedQueueAt(now);
+            dbService.savePlayer(player);
+        }
         dbService.saveServer(server);
         event.createFollowup(String.format("Queue %s joined. Once the match starts, " +
                         "I will create a channel for the match, and ping all participants.", queue.getFullName()))

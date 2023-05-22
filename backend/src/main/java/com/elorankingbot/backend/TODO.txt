@@ -1,13 +1,9 @@
 app discovery braucht https - lohnt evtl irgendwann wenn mehr traffic kommt, da der traffic primaer von anderswo kommt.
-ein kanal/mehrere in settings einpflegen
 e2e auf deploy einrichten
-leaderboardlength setting
 ranks anzeigen
 concept: autoresolve
 force resolve nicht revertbar
-was ist mit den webhook errors?
 winrate im eladerboard anzeigen
-leaderbords in 1 kanal
 pruefen ob annotations fuer commands automatisch deployen sinn macht. ggf PatreonCommandId von discord holen und nicht als prop
 COmmand::acknoledgeEvent()nochmal anschauen
 embedbuilder aufraeumen/refaktoren... vllt sollten die matchmessages ausschliesslich vom MatchService verwaltet werden?
@@ -15,22 +11,22 @@ embedbuilder aufraeumen/refaktoren... vllt sollten die matchmessages ausschliess
 concept: FAQ
 - channels umbenennen etc
 - DMs closed
-automatisch queues leaven nach einer weile
 "i want to boot inactives" - player delete, inactive flag...?
 der bot hat keinen access auf nachrichten, die er in kanaele schreibt, die er nicht sehen kann. was bedeutet das? aknn ich das umgehen? kann ich eine fehlermeldung geben...?
 
 event.reply / event.createFollowup evtl verallgemeinern
 match names vllt kuerzer
 
-nicks updaten
+permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
+redundant permissions f[r den bot auf seinen channels setzen
+
+welche settings noch?
+ein kanal/mehrere in settings einpflegen
+leaderboardlength setting
+
 NICKS ANZEIGEN
+nicks updaten
 player updated mit nick
 konstruktor anpassen, auch fuer mongo
 update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
-
-permissions in match channel von der category uebernehmen? vllt nur fuer view? oder fuer alles? vor-, nachteile?
-vllt redundant permissions f[r den bot auf seinen channels setzen? falls jemand den channel invist etc
-
-welche settings noch?
-alle versionen hochziehen

@@ -19,7 +19,7 @@ public class Leave extends SlashCommand {
 	public static ApplicationCommandRequest getRequest() {
 		return ApplicationCommandRequest.builder()
 				.name("leave")
-				.description("Leave all matchmaking queues")// TODO option fuer nur eine leaven
+				.description("Leave all matchmaking queues")
 				.defaultPermission(true)
 				.build();
 	}
@@ -37,6 +37,5 @@ public class Leave extends SlashCommand {
 		Player player = dbService.getPlayerOrGenerateIfNotPresent(guildId, activeUser);
 		queueScheduler.removePlayerFromAllQueues(server, player);
 		event.reply("I removed you from all queues you were in, if any.").withEphemeral(true).subscribe();
-		// TODO auflisten, welche queues verlassen wurden
 	}
 }
