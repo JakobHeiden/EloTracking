@@ -110,7 +110,7 @@ public class Ban extends SlashCommand {
 				String durationString = event.getOption("duration").get().getValue().get().asString();
 				Optional<Integer> maybeDuration = DurationParser.parse(durationString);
 				if (maybeDuration.isEmpty()) {
-					event.reply("Please enter a valid duration. Examples: 90, 3h, 5d, 10w");
+					event.reply("Please enter a valid duration. Examples: 90, 3h, 5d, 10w").subscribe();
 					return;
 				}
 				duration = maybeDuration.get();

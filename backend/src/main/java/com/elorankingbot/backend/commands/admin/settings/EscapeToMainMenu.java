@@ -22,8 +22,8 @@ public class EscapeToMainMenu extends ButtonCommand {
 	public void execute() {
 		Server server = dbService.getOrCreateServer(event.getInteraction().getGuildId().get().asLong());
 		event.getMessage().get().edit()
-				.withEmbeds(Settings.allGamesSettingsEmbeds(server))
-				.withComponents(SelectGame.menu(server), ActionRow.of(Exit.button())).subscribe();
+				.withEmbeds(Settings.serverSettingsEmbed(server))
+				.withComponents(SelectServerVariableOrGame.menu(server), ActionRow.of(Exit.button())).subscribe();
 		acknowledgeEvent();
 	}
 }

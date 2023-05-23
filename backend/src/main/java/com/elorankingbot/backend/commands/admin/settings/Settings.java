@@ -3,18 +3,16 @@ package com.elorankingbot.backend.commands.admin.settings;
 import com.elorankingbot.backend.command.annotations.AdminCommand;
 import com.elorankingbot.backend.command.annotations.GlobalCommand;
 import com.elorankingbot.backend.commands.SlashCommand;
-import com.elorankingbot.backend.commands.admin.CreateRanking;
 import com.elorankingbot.backend.model.Game;
-import com.elorankingbot.backend.model.MatchFinderQueue;
 import com.elorankingbot.backend.model.Server;
 import com.elorankingbot.backend.service.Services;
+import com.elorankingbot.backend.timedtask.DurationParser;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.spec.EmbedCreateFields;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @AdminCommand
@@ -34,7 +32,7 @@ public class Settings extends SlashCommand {
 	}
 
 	public static String getShortDescription() {
-		return "Open the settings menu for the rankings on the server.";
+		return "Open the settings menu for the server.";
 	}
 
 	public static String getLongDescription() {
@@ -42,33 +40,21 @@ public class Settings extends SlashCommand {
 	}
 
 	protected void execute() {
-		if (server.getGames().isEmpty()) {
-			event.reply(String.format("There are no rankings yet. Use `/%s` to create a ranking.",
-					CreateRanking.class.getSimpleName().toLowerCase())).subscribe();
-			return;
-		}
-
 		event.reply("Welcome to the settings menu.")
-				.withEmbeds(allGamesSettingsEmbeds(server))
-				.withComponents(SelectGame.menu(server), ActionRow.of(Exit.button())).subscribe();
+				.withEmbeds(serverSettingsEmbed(server))
+				.withComponents(SelectServerVariableOrGame.menu(server), ActionRow.of(Exit.button())).subscribe();
 	}
 
-	// TODO!
-	//  zeugs aus Edit reinziehen. testen. was noch einpflegen?
-
-	static List<EmbedCreateSpec> allGamesSettingsEmbeds(Server server) {
-		return server.getGames().stream().map(Settings::gameSettingsEmbed).toList();
-	}
-
-	static EmbedCreateSpec gameSettingsEmbed(Game game) {
-		String queuesAsString = game.getQueues().stream().map(MatchFinderQueue::getName)
+	static EmbedCreateSpec serverSettingsEmbed(Server server) {
+		String gamesAsString = server.getGames().stream().map(Game::getName)
 				.collect(Collectors.joining(", "));
-		if (queuesAsString.equals("")) queuesAsString = "No queues";
+		if (gamesAsString.equals("")) gamesAsString = "No rankings";
+		String autoLeaveQueuesAsString = server.getAutoLeaveQueuesAfter() == Server.NEVER ? "never"
+				: DurationParser.minutesToString(server.getAutoLeaveQueuesAfter());
 		return EmbedCreateSpec.builder()
-				.title(game.getName())
-				.addField(EmbedCreateFields.Field.of("Name", game.getName(), true))
-				.addField(EmbedCreateFields.Field.of("Initial rating", String.valueOf(game.getInitialRating()), true))
-				.addField(EmbedCreateFields.Field.of("Queues", queuesAsString, true))
+				.title("Server settings and rankings")
+				.addField(EmbedCreateFields.Field.of(AutoLeaveModal.variableName, autoLeaveQueuesAsString, false))
+				.addField(EmbedCreateFields.Field.of("Rankings", gamesAsString, false))
 				.build();
 	}
 }

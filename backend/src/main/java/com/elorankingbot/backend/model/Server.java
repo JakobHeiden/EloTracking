@@ -1,18 +1,17 @@
 package com.elorankingbot.backend.model;
 
 import com.elorankingbot.backend.patreon.PatreonClient;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.*;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@AllArgsConstructor(onConstructor=@__({@PersistenceConstructor}))
+@NoArgsConstructor
 @Document(collection = "server")
 public class Server {
 
@@ -24,12 +23,16 @@ public class Server {
     private List<Long> archiveCategoryIds;
     private long disputeCategoryId, matchCategoryId;
     private boolean isMarkedForDeletion;
+    private int autoLeaveQueuesAfter;
     private Set<Long> patronIds;
     private PatreonClient.PatreonTier patreonTier;
+
+    public static final int NEVER = 0;
 
     public Server(long guildId) {
         this.guildId = guildId;
         this.isMarkedForDeletion = false;
+        this.autoLeaveQueuesAfter = NEVER;
         this.gameNameToGame = new HashMap<>();
         this.archiveCategoryIds = new ArrayList<>();
         this.patronIds = new HashSet<>();

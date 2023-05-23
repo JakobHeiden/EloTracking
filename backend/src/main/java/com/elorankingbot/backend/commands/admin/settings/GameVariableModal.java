@@ -81,7 +81,7 @@ public class GameVariableModal extends ModalSubmitCommand {
 		}
 		event.getMessage().get().edit()
 				.withContent(Possible.of(Optional.of(event.getMessage().get().getContent() + userFeedback)))
-				.withEmbeds(Settings.gameSettingsEmbed(game))
+				.withEmbeds(SelectServerVariableOrGame.gameSettingsEmbed(game))
 				.withComponents(SelectGameVariableOrQueue.menu(game), ActionRow.of(Exit.button(), EscapeToMainMenu.button())).subscribe();
 		acknowledgeEvent();
 	}
