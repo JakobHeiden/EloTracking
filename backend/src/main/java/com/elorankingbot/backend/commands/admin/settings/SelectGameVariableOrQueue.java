@@ -57,10 +57,10 @@ public class SelectGameVariableOrQueue extends SelectMenuCommand {
 	static EmbedCreateSpec queueSettingsEmbed(MatchFinderQueue queue) {
 		return EmbedCreateSpec.builder()
 				.title(queue.getGame().getName() + " - " + queue.getName())
-				.addField(EmbedCreateFields.Field.of("Name", queue.getName(), true))
-				.addField(EmbedCreateFields.Field.of("K", String.valueOf(queue.getK()), true))
-				.addField(EmbedCreateFields.Field.of("max-rating-spread", queue.getMaxRatingSpreadAsString(), true))
-				.addField(EmbedCreateFields.Field.of("rating-elasticity", String.valueOf(queue.getRatingElasticity()), true))
+				.addField(EmbedCreateFields.Field.of("Name", queue.getName(), false))
+				.addField(EmbedCreateFields.Field.of("K", String.valueOf(queue.getK()), false))
+				.addField(EmbedCreateFields.Field.of("max-rating-spread", queue.getMaxRatingSpreadAsString(), false))
+				.addField(EmbedCreateFields.Field.of("rating-elasticity", String.valueOf(queue.getRatingElasticity()), false))
 				.build();
 	}
 }

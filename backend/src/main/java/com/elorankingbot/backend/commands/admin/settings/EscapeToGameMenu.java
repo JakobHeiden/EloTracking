@@ -17,14 +17,15 @@ public class EscapeToGameMenu extends ButtonCommand {
     }
 
     static Button button(Game game) {
-        return Button.secondary(customId + ":" + game.getName(), Emojis.redoArrow, "Back to rankings menu");
+        return Button.secondary(customId + ":" + game.getName(), Emojis.redoArrow,
+                String.format("Back to %s menu", game.getName()));
     }
 
     public void execute() {
         Game game = server.getGame(event.getCustomId().split(":")[1]);
         event.getMessage().get().edit()
-                .withEmbeds(Settings.gameSettingsEmbed(game))
-				.withComponents(SelectGameVariableOrQueue.menu(game), ActionRow.of(Exit.button())).subscribe();
+                .withEmbeds(SelectServerVariableOrGame.gameSettingsEmbed(game))
+                .withComponents(SelectGameVariableOrQueue.menu(game), ActionRow.of(Exit.button(), EscapeToMainMenu.button())).subscribe();
         acknowledgeEvent();
     }
 }

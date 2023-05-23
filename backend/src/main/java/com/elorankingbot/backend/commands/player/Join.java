@@ -155,7 +155,9 @@ public class Join extends SlashCommand {
         queue.addGroup(group);
         Date now = new Date();
         for (Player player : group.getPlayers()) {
-            timedTaskScheduler.addTimedTask(LEAVE_QUEUES, 180, player.getUserId(), guildId, now);
+            if (server.getAutoLeaveQueuesAfter() == Server.NEVER) break;
+
+            timedTaskScheduler.addTimedTask(LEAVE_QUEUES, server.getAutoLeaveQueuesAfter(), player.getUserId(), guildId, now);
             player.setLastJoinedQueueAt(now);
             dbService.savePlayer(player);
         }

@@ -9,7 +9,7 @@ public class DurationParser {
 	public static Optional<Integer> parse(String string) {
 		string = string.replace(" ", "");
 		if (parseForInt(string).isPresent()) {
-			if (parseForInt(string).get() <= 0) return Optional.empty();
+			if (parseForInt(string).get() < 0) return Optional.empty();
 			else return parseForInt(string);
 		}
 
@@ -19,7 +19,7 @@ public class DurationParser {
 		if (parseForInt(intString).isEmpty()) return Optional.empty();
 
 		int number = parseForInt(intString).get();
-		if (number <= 0) return Optional.empty();
+		if (number < 0) return Optional.empty();
 
 		switch (timeUnitSTring) {
 			case "m":
