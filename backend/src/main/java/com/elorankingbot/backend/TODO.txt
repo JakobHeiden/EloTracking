@@ -22,7 +22,6 @@ redundant permissions f[r den bot auf seinen channels setzen
 
 welche settings noch?
 ein kanal/mehrere in settings einpflegen
-leaderboardlength setting
 
 NICKS ANZEIGEN
 nicks updaten
@@ -30,3 +29,8 @@ player updated mit nick
 konstruktor anpassen, auch fuer mongo
 update in resolveMatch einbauen
 in game flag bauen, im konstruktor default setzen
+
+
+event ids loggen...?
+leaderboardlength setting
+setpermission wording
