@@ -93,8 +93,8 @@ public abstract class Command {
 		}
 		if (this.getClass().isAnnotationPresent(AdminCommand.class)) {
 			if (server.getAdminRoleId() == 0L) {
-				event.reply("This command requires Admin permissions. The Admin role is not currently set. " +
-						"Please use /setpermissions.").subscribe();
+				event.reply("This command requires you to have the Admin role. The Admin role is not currently set. " +
+						"Please use /setpermissions to set it to a role you have access to.").subscribe();
 				return;
 			}
 			if (!userIsAdmin) {
@@ -139,7 +139,6 @@ public abstract class Command {
 			log.trace("Done executing " + executionSummary);
 		} else {
 			log.warn("Slow command: " + executionSummary);
-			//bot.sendToOwner("Slow command: " + executionSummary);
 		}
 	}
 
