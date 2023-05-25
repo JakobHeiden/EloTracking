@@ -127,7 +127,7 @@ public class EventParser {
 	}
 
 	private SelectMenuCommand createSelectMenuCommand(SelectMenuInteractionEvent event) throws Exception {
-		String commandFullClassName = commandClassScanner.getFullClassName(event.getCustomId());
+		String commandFullClassName = commandClassScanner.getFullClassName(event.getCustomId().split(":")[0]);
 		if (commandFullClassName == null) throw new RuntimeException("Unknown Command");
 		return (SelectMenuCommand) Class.forName(commandFullClassName)
 				.getConstructor(SelectMenuInteractionEvent.class, Services.class)
