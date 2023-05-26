@@ -51,7 +51,6 @@ public class CommandClassScanner {
                 .filter(classInfo -> classInfo.getPackageName().contains("com.elorankingbot.backend.commands"))
                 // for some reason GitHub needs this
                 .filter(classInfo -> !classInfo.getPackageName().contains("target.classes"))
-                // for some reason Heroku needs this
                 .map(classInfo -> {
                     try {
                         return Class.forName(classInfo.getName().replace("BOOT-INF.classes.", ""));
