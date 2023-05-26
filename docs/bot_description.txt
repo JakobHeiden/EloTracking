@@ -17,6 +17,16 @@ Watch the basic setup tutorial at https://www.youtube.com/watch?v=rq8kD-mQujI
 
 Watch the player tutorial at https://www.youtube.com/watch?v=u6VzIFM8md8
 
+The bot needs the following permissions:
+- Manage Channels
+- Manage Roles
+- Manage Emoji and Stickers
+- Send Messages
+- Manage Messages
+- Embed Links
+- Attach Files
+- Use External Emoji
+
 1072967745613860931
 https://discord.com/oauth2/authorize?client_id=1072967745613860931&permissions=1342498832&scope=bot
 http://www.elorankingbot.com/

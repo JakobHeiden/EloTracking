@@ -33,4 +33,3 @@ in game flag bauen, im konstruktor default setzen
 
 event ids loggen...?
 leaderboardlength setting
-setpermission wording
