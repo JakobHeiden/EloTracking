@@ -1,0 +1,88 @@
+{
+  "groups": [
+    {
+      "name": "elorankingbot",
+      "type": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.patreon",
+      "type": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "sourceMethod": "getPatreon()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "elorankingbot.activity-message",
+      "type": "java.lang.String",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.announcement-channel-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.do-run-schedulers",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.ente2-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.number-of-time-slots",
+      "type": "java.lang.Integer",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.owner-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.patreon.campaign-id",
+      "type": "java.lang.String",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+    },
+    {
+      "name": "elorankingbot.patreon.campaign-url",
+      "type": "java.lang.String",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+    },
+    {
+      "name": "elorankingbot.patreon.command-id",
+      "type": "java.lang.Long",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+    },
+    {
+      "name": "elorankingbot.patreon.redirect-uri",
+      "type": "java.lang.String",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+    },
+    {
+      "name": "elorankingbot.patreon.supporter-min-pledge-in-dollars",
+      "type": "java.lang.Integer",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+    },
+    {
+      "name": "elorankingbot.spring-data-mongodb-database",
+      "type": "java.lang.String",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.test-server-ids",
+      "type": "java.util.List<java.lang.Long>",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    },
+    {
+      "name": "elorankingbot.use-dev-bot-token",
+      "type": "java.lang.Boolean",
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+    }
+  ],
+  "hints": []
+}
