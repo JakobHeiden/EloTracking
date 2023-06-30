@@ -1,18 +1,9 @@
 .idea/
 log.txt
-error.txt
 heapdump*
-
-/bin/
-
-/archive/*
-/backend/archive/*
 
 *~
 *.swp
 *.gz
 
-/out/
-
-/backend/src/main/java/com/elorankingbot/backend/TODO.txt
-/backend/src/main/java/com/elorankingbot/backend/DevTools.java
+/target/
