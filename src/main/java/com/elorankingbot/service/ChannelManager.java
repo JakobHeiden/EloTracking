@@ -55,7 +55,7 @@ public class ChannelManager {
 		return ((TextChannel) channel).edit().withParentId(Possible.of(Optional.of(Snowflake.of(categoryId))));
 	}
 
-	public void updateLeaderbordChannelName(Game game) {
+	public void updateLeaderboardChannelName(Game game) {
 		bot.getChannelById(game.getLeaderboardChannelId()).subscribe(
 				channel -> ((TextChannel) channel).edit().withName(
 						String.format(leaderboardChannelNameTemplate, game.getName())).subscribe());
@@ -247,7 +247,7 @@ public class ChannelManager {
 			log.error("Exception in refreshLeaderboard: " + game.getName() + " : " + e);
 			log.error(e.getErrorResponse().get().toString());
 			leaderboardMessage = createLeaderboardChannelAndMessage(game);
-			dbService.saveServer(game.getServer());// TODO muss das?
+			dbService.saveServer(game.getServer());// TODO is this necessary?
 		}
 		List<EmbedCreateSpec> embeds = new ArrayList<>();
 		if (game.getServer().getPatreonTier() == PatreonClient.PatreonTier.FREE) {
