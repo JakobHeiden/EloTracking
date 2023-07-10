@@ -119,7 +119,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>EloRankingBot</finalName>
+		<finalName>elotracking</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
