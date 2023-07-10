@@ -75,7 +75,7 @@ public class GameVariableModal extends ModalSubmitCommand {
 			if (variableName.equals("Name")) {
 				discordCommandManager.updateGameCommands(server, exceptionHandler.updateCommandFailedCallbackFactory(event));
 				channelManager.refreshLeaderboard(game);
-				channelManager.updateLeaderbordChannelName(game);
+				channelManager.updateLeaderboardChannelName(game);
 			}
 			userFeedback = String.format("\n**Variable %s for ranking %s is now set to %s.**", variableName, gameName, value);
 		}

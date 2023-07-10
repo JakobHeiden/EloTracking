@@ -35,3 +35,9 @@ event ids loggen...?
 leaderboardlength setting
 .jar umbenennen
 brauche ich die dockerfile eigentlich noch? wofuer?
+
+game name und id trennen:
+- member id einfuehren, zur id machen? oder evtl name als id behalten und displayName oder so einfuehren
+- wie krieg ich das in die db? mongoshell?
+- bei game creation id auf name setzen, mit ausweichfunktion falls id schon belegt
+- was noch?
