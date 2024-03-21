@@ -41,6 +41,11 @@ public class MatchService {
 	}
 
 	public static MatchResult generateMatchResult(Match match) {
+		// dirty hack, see function below this one
+		long guildId = match.getServer().getGuildId();
+		if (guildId == 1219688711327842314L || guildId == 1184851085781897318L)
+			return dirtyHack_generateMatchResultAlternativeVersion(match);
+
 		MatchResult matchResult = new MatchResult(match);
 		Game game = match.getQueue().getGame();
 		for (List<Player> team : match.getTeams()) {
@@ -58,6 +63,37 @@ public class MatchService {
 
 			TeamMatchResult teamResult = new TeamMatchResult();
 			for (Player player : team) {
+				double actualResult = match.getReportStatus(player.getId()).value;
+				double oldRating = player.getOrCreatePlayerGameStats(game).getRating();
+				double newRating = oldRating + match.getQueue().getK() * (actualResult - expectedResult);
+				PlayerMatchResult playerMatchResult = new PlayerMatchResult(
+						player, player.getTag(),
+						ReportStatus.valueOf(match.getReportStatus(player.getId()).name()),
+						oldRating, newRating);
+				teamResult.add(playerMatchResult);
+			}
+
+			matchResult.addTeamMatchResult(teamResult);
+		}
+		return matchResult;
+	}
+
+	// This is a special case I built for valkyriesky_, id 263899611511390211. This is a dirty hack obvs. Please contact them when you change or remove this...
+	private static MatchResult dirtyHack_generateMatchResultAlternativeVersion(Match match) {
+		MatchResult matchResult = new MatchResult(match);
+		Game game = match.getQueue().getGame();
+		for (List<Player> team : match.getTeams()) {
+			List<Player> allOtherPlayers = match.getPlayers();
+			team.forEach(allOtherPlayers::remove);
+			double averageOtherRating = allOtherPlayers.stream()
+					.mapToDouble(player -> player.getOrCreatePlayerGameStats(game).getRating())
+					.average().getAsDouble();
+			double numOtherTeams = match.getQueue().getNumTeams() - 1;
+
+			TeamMatchResult teamResult = new TeamMatchResult();
+			for (Player player : team) {
+				// this function differs in that the expected result is calculated using each player's own individual rating, instead of team avg
+				double expectedResult = 1 / (numOtherTeams + Math.pow(10, (averageOtherRating - player.getOrCreatePlayerGameStats(game).getRating()) / 400));
 				double actualResult = match.getReportStatus(player.getId()).value;
 				double oldRating = player.getOrCreatePlayerGameStats(game).getRating();
 				double newRating = oldRating + match.getQueue().getK() * (actualResult - expectedResult);
