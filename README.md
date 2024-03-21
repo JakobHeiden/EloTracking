@@ -1,4 +1,5 @@
 To run the bot, you need the following:
+- JRE 17
 - a discord bot token. put in Environment variable DISCORD_BOT_TOKEN
 - for development, a development discord bot token. put in Environment variable DEV_BOT_TOKEN
 - a mongodb database. put the connection string in applications.properties, spring.data.mongodb.uri
