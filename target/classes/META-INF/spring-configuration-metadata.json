@@ -21,27 +21,32 @@
     {
       "name": "elorankingbot.announcement-channel-id",
       "type": "java.lang.Long",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "defaultValue": 0
     },
     {
       "name": "elorankingbot.do-run-schedulers",
       "type": "java.lang.Boolean",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "defaultValue": false
     },
     {
       "name": "elorankingbot.ente2-id",
       "type": "java.lang.Long",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "defaultValue": 0
     },
     {
       "name": "elorankingbot.number-of-time-slots",
       "type": "java.lang.Integer",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "defaultValue": 0
     },
     {
       "name": "elorankingbot.owner-id",
       "type": "java.lang.Long",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "defaultValue": 0
     },
     {
       "name": "elorankingbot.patreon.campaign-id",
@@ -56,7 +61,8 @@
     {
       "name": "elorankingbot.patreon.command-id",
       "type": "java.lang.Long",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon",
+      "defaultValue": 0
     },
     {
       "name": "elorankingbot.patreon.redirect-uri",
@@ -66,7 +72,8 @@
     {
       "name": "elorankingbot.patreon.supporter-min-pledge-in-dollars",
       "type": "java.lang.Integer",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader$Patreon",
+      "defaultValue": 0
     },
     {
       "name": "elorankingbot.spring-data-mongodb-database",
@@ -81,7 +88,8 @@
     {
       "name": "elorankingbot.use-dev-bot-token",
       "type": "java.lang.Boolean",
-      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader"
+      "sourceType": "com.elorankingbot.configuration.ApplicationPropertiesLoader",
+      "defaultValue": false
     }
   ],
   "hints": []

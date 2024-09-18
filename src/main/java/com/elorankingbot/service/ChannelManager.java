@@ -250,9 +250,9 @@ public class ChannelManager {
 			dbService.saveServer(game.getServer());// TODO is this necessary?
 		}
 		List<EmbedCreateSpec> embeds = new ArrayList<>();
-		if (game.getServer().getPatreonTier() == PatreonClient.PatreonTier.FREE) {
+		/**if (game.getServer().getPatreonTier() == PatreonClient.PatreonTier.FREE) {
 			embeds.add(Components.begForPatreonEmbed(patreonCommandId));
-		}
+		}*/
 		embeds.add(EmbedBuilder.createRankingsEmbed(dbService.getLeaderboard(game)));
 		leaderboardMessage.edit()
 				.withContent(Possible.of(Optional.empty()))
