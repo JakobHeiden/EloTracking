@@ -88,11 +88,12 @@ public class CreateRanking extends SlashCommand {
 		String updatedCommands = discordCommandManager.updateGameCommands(server, exceptionHandler.updateCommandFailedCallbackFactory(event));
 
 		boolean didCreateCategories = server.getDisputeCategoryId() == 0L;
-		event.editReply(String.format("Ranking %s has been created. I also created <#%s> where I will post all match results%s" +
-								"<#%s> where I put the leaderboard%s." +
+		event.editReply(String.format("Ranking %s has been created." +
+								"**Match Results**: <#%s> where I will post all match results%s" +
+								"**Leaderboard**: <#%s> where I put the leaderboard%s." +
 								"\nHowever, there is no way yet for players to find a match. " +
 								"Use `/addqueue` to either add a queue the ranking." +
-								"\nThese commands have been updated: %s",
+								"\nThese commands have been updated: %s",	
 						nameOfGame,
 						game.getResultChannelId(),
 						didCreateCategories ? ", " : " and ",
