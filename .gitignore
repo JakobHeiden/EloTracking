@@ -6,4 +6,4 @@ heapdump*
 *.swp
 *.gz
 
-/target/
+target/
